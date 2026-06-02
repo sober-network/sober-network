@@ -1,0 +1,60 @@
+// Shared auth page layout — used via @include in each auth component scss
+@mixin auth-page {
+  :host {
+    display: block;
+  }
+
+  .auth-page {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 48px 16px;
+    min-height: calc(100vh - 128px);
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 440px;
+
+    mat-card-header {
+      padding-bottom: 8px;
+    }
+
+    mat-card-title {
+      font-size: 1.5rem;
+    }
+
+    mat-card-content {
+      padding-top: 16px;
+    }
+
+    mat-card-actions {
+      display: flex;
+      align-items: center;
+      padding: 8px 8px 16px;
+
+      .spacer { flex: 1; }
+    }
+  }
+
+  .submit-btn {
+    margin-top: 8px;
+    height: 44px;
+
+    mat-spinner {
+      display: inline-block;
+    }
+  }
+
+  .auth-error {
+    color: var(--mat-sys-error, #b00020);
+    font-size: 0.875rem;
+    margin: 4px 0 8px;
+  }
+
+  .auth-info {
+    color: var(--mat-sys-primary, #1976d2);
+    font-size: 0.875rem;
+    margin: 4px 0 8px;
+  }
+}

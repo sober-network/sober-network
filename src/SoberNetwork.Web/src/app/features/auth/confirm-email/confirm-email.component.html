@@ -1,0 +1,28 @@
+<div class="auth-page">
+  <mat-card class="auth-card">
+    <mat-card-header>
+      <mat-card-title>Email Confirmation</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div *ngIf="loading" style="text-align:center;padding:32px">
+        <mat-spinner diameter="40" style="margin:0 auto"></mat-spinner>
+        <p style="margin-top:16px;opacity:0.65">Confirming your email…</p>
+      </div>
+
+      <div *ngIf="success" class="auth-info">
+        <mat-icon style="vertical-align:middle">check_circle</mat-icon>
+        Your email has been confirmed. You can now <a routerLink="/auth/login">sign in</a>.
+      </div>
+
+      <div *ngIf="error" class="auth-error">
+        <mat-icon style="vertical-align:middle">error</mat-icon>
+        {{ error }}
+      </div>
+    </mat-card-content>
+
+    <mat-card-actions *ngIf="!loading">
+      <a mat-button routerLink="/auth/login">Go to sign in</a>
+    </mat-card-actions>
+  </mat-card>
+</div>

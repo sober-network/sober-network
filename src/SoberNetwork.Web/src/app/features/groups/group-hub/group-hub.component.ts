@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { catchError, finalize, forkJoin, map, of } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
@@ -34,6 +34,7 @@ export class GroupHubComponent implements OnInit {
   private readonly groupService = inject(GroupService);
   private readonly dialog = inject(MatDialog);
   private readonly log = inject(ClientLogService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   slug = '';
   group: GroupResponse | null = null;
@@ -85,8 +86,9 @@ export class GroupHubComponent implements OnInit {
       ),
     }).pipe(
       finalize(() => {
-        this.log.info('GroupHub.loadGroup: finalize', { slug: this.slug });
         this.loading = false;
+        this.cdr.detectChanges();
+        this.log.info('GroupHub.loadGroup: finalize', { slug: this.slug });
       })
     ).subscribe({
       next: result => {

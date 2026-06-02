@@ -25,12 +25,5 @@
     <SpaProxyLaunchCommand>npm start</SpaProxyLaunchCommand>
   </PropertyGroup>
 
-  <!-- Start Docker Compose (Postgres) automatically on Debug builds -->
-  <Target Name="StartDockerCompose" BeforeTargets="Build" Condition="'$(Configuration)' == 'Debug'">
-    <Exec Command="docker compose up -d"
-          WorkingDirectory="$(MSBuildProjectDirectory)\..\.."
-          ContinueOnError="true"
-          IgnoreExitCode="true" />
-  </Target>
 
 </Project>

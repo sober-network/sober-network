@@ -1,0 +1,21 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.log
+
+# Angular
+src/SoberNetwork.Web/node_modules/
+src/SoberNetwork.Web/dist/
+src/SoberNetwork.Web/.angular/
+
+# Environment files (never commit secrets)
+**/appsettings.Development.json
+**/.env
+**/.env.local
+
+# OS
+.DS_Store
+Thumbs.db

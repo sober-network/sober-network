@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SoberNetwork.Api/SoberNetwork.Api.csproj" />
+    <Project Path="src/SoberNetwork.Core/SoberNetwork.Core.csproj" />
+    <Project Path="src/SoberNetwork.Infrastructure/SoberNetwork.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SoberNetwork.Api.Tests/SoberNetwork.Api.Tests.csproj" />
+    <Project Path="tests/SoberNetwork.Core.Tests/SoberNetwork.Core.Tests.csproj" />
+  </Folder>
+</Solution>

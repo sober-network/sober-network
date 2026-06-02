@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.SpaProxy" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -18,6 +19,18 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>6b343441-65f8-4b50-87e0-02dc6831bce2</UserSecretsId>
+    <!-- SPA proxy: starts ng serve automatically when running in Development -->
+    <SpaRoot>..\SoberNetwork.Web\</SpaRoot>
+    <SpaProxyServerUrl>http://localhost:4200</SpaProxyServerUrl>
+    <SpaProxyLaunchCommand>npm start</SpaProxyLaunchCommand>
   </PropertyGroup>
+
+  <!-- Start Docker Compose (Postgres) automatically on Debug builds -->
+  <Target Name="StartDockerCompose" BeforeTargets="Build" Condition="'$(Configuration)' == 'Debug'">
+    <Exec Command="docker compose up -d"
+          WorkingDirectory="$(MSBuildProjectDirectory)\..\.."
+          ContinueOnError="true"
+          IgnoreExitCode="true" />
+  </Target>
 
 </Project>

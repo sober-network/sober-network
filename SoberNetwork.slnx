@@ -1,4 +1,7 @@
 <Solution>
+  <Startup>
+    <Project Path="src/SoberNetwork.Api/SoberNetwork.Api.csproj" />
+  </Startup>
   <Folder Name="/src/">
     <Project Path="src/SoberNetwork.Api/SoberNetwork.Api.csproj" />
     <Project Path="src/SoberNetwork.Core/SoberNetwork.Core.csproj" />

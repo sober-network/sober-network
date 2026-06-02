@@ -161,11 +161,17 @@ app.MapControllers();
 app.MapFallbackToFile("index.html");
 
 // Auto-apply pending EF Core migrations on startup.
-// Safe to run on every start — EF checks which migrations are already applied.
-using (var scope = app.Services.CreateScope())
+// Wrapped in try/catch so a transient DB connectivity issue doesn't crash the process.
+try
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
+}
+catch (Exception ex)
+{
+    var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();
+    startupLogger.LogError(ex, "Database migration failed on startup — the app will start but DB may be unavailable.");
 }
 
 app.Run();

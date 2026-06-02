@@ -1,0 +1,50 @@
+.sn-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .brand-name {
+    display: none;
+
+    @media (min-width: 480px) {
+      display: inline;
+    }
+  }
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+
+  .active-link {
+    font-weight: 600;
+    opacity: 1;
+  }
+}
+
+.user-menu-header {
+  padding: 12px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+
+  .user-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .user-email {
+    font-size: 0.8rem;
+    opacity: 0.65;
+  }
+}

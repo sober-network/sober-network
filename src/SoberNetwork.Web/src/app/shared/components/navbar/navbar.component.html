@@ -1,0 +1,62 @@
+<mat-toolbar color="primary" class="sn-navbar">
+  <!-- Brand -->
+  <a routerLink="/" class="brand" mat-button>
+    <mat-icon>self_improvement</mat-icon>
+    <span class="brand-name">Sober Network</span>
+  </a>
+
+  <span class="spacer"></span>
+
+  <ng-container *ngIf="currentUser$ | async as user; else guestNav">
+    <!-- Group switcher -->
+    <button mat-button [matMenuTriggerFor]="groupMenu" *ngIf="myGroups.length > 0">
+      <mat-icon>groups</mat-icon>
+      My Groups
+      <mat-icon>arrow_drop_down</mat-icon>
+    </button>
+    <mat-menu #groupMenu="matMenu">
+      <button mat-menu-item *ngFor="let g of myGroups" (click)="navigateToGroup(g.slug)">
+        <mat-icon>group</mat-icon>
+        {{ g.name }}
+      </button>
+    </mat-menu>
+
+    <!-- Dashboard -->
+    <a mat-button routerLink="/dashboard" routerLinkActive="active-link">
+      <mat-icon>dashboard</mat-icon>
+      Dashboard
+    </a>
+
+    <!-- Admin link -->
+    <a mat-button routerLink="/admin" routerLinkActive="active-link" *ngIf="user.isSuperAdmin">
+      <mat-icon>admin_panel_settings</mat-icon>
+      Admin
+    </a>
+
+    <!-- User menu -->
+    <button mat-icon-button [matMenuTriggerFor]="userMenu" aria-label="User menu">
+      <mat-icon>account_circle</mat-icon>
+    </button>
+    <mat-menu #userMenu="matMenu">
+      <div class="user-menu-header">
+        <span class="user-name">{{ user.displayName }}</span>
+        <span class="user-email">{{ user.email }}</span>
+      </div>
+      <mat-divider></mat-divider>
+      <a mat-menu-item routerLink="/profile">
+        <mat-icon>person</mat-icon>
+        My Profile
+      </a>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        Sign Out
+      </button>
+    </mat-menu>
+  </ng-container>
+
+  <ng-template #guestNav>
+    <a mat-button routerLink="/auth/login">Sign In</a>
+    <a mat-raised-button color="accent" routerLink="/auth/register">Join</a>
+  </ng-template>
+</mat-toolbar>

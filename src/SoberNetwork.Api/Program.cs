@@ -1,6 +1,7 @@
 using System.Text;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -113,6 +114,13 @@ builder.Services.AddAuthorizationBuilder()
 
 var app = builder.Build();
 
+// Handle forwarded headers from Fly.io's TLS-terminating proxy
+// so X-Forwarded-Proto is respected and HttpContext.Request.IsHttps is correct
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseHsts();
@@ -127,11 +135,29 @@ app.Use(async (ctx, next) =>
     await next();
 });
 
-app.UseHttpsRedirection();
+// Only redirect to HTTPS locally — in production Fly.io handles TLS termination at the edge
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseCors("ApiCors");
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Health check for Fly.io — unauthenticated by design; returns 200 to confirm liveness
+// AllowAnonymous: this endpoint has no user data and must be reachable before auth is established
+app.MapGet("/health", () => Results.Ok(new { status = "healthy" }))
+   .AllowAnonymous();
+
+// Serve Angular SPA from wwwroot (populated by Dockerfile during build)
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.MapControllers();
+
+// SPA fallback — any route not matched by the API or static files serves index.html
+// so Angular's client-side router handles navigation
+app.MapFallbackToFile("index.html");
 
 app.Run();

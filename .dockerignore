@@ -1,0 +1,22 @@
+**/.git
+**/.gitignore
+**/.vs
+**/.vscode
+**/.idea
+**/bin
+**/obj
+**/node_modules
+**/.env
+**/secrets.json
+**/appsettings.Development.json
+
+# Test projects — not needed in the runtime image
+src/SoberNetwork.Api.Tests/
+src/SoberNetwork.Core.Tests/
+
+# Angular build artifacts (rebuilt inside Docker)
+src/SoberNetwork.Web/dist/
+
+# Documentation — not needed in image
+docs/
+README.md

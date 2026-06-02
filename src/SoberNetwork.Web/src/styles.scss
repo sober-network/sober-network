@@ -1,1 +1,60 @@
-/* You can add global styles to this file, and also import other style files */
+// Sober Network — Angular Material M3 theme
+// Warm/recovery-friendly palette: calm blue primary, warm amber tertiary,
+// soft cream surfaces. Every color choice reflects T5 — welcoming to those
+// who still suffer.
+@use '@angular/material' as mat;
+
+html {
+  height: 100%;
+
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,    // calm blue — serenity
+        tertiary: mat.$orange-palette,  // warm amber — hope
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+
+  // Override M3 surface tokens with warm cream tones.
+  // This gives every card, dialog, and panel a soft, inviting feel
+  // rather than the clinical white of default Material.
+  --mat-sys-background:                  #FAF7F4;
+  --mat-sys-surface:                     #FAF7F4;
+  --mat-sys-surface-dim:                 #EDE8E4;
+  --mat-sys-surface-bright:              #FAF7F4;
+  --mat-sys-surface-container-lowest:    #FFFFFF;
+  --mat-sys-surface-container-low:       #F5F0EC;
+  --mat-sys-surface-container:           #EFE9E5;
+  --mat-sys-surface-container-high:      #E9E3DE;
+  --mat-sys-surface-container-highest:   #E3DDD8;
+
+  scroll-behavior: smooth;
+}
+
+body {
+  color-scheme: light;
+  background-color: var(--mat-sys-background);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+  margin: 0;
+  height: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+// Utility: full-width form fields
+.full-width {
+  width: 100%;
+}
+
+// Utility: centered page container
+.page-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}

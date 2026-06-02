@@ -1,0 +1,161 @@
+:host {
+  display: block;
+}
+
+.members-page {
+  display: grid;
+  gap: 24px;
+}
+
+.page-header h1 {
+  margin: 4px 0 8px;
+  font-size: clamp(2rem, 4vw, 2.5rem);
+}
+
+.eyebrow {
+  margin: 12px 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  color: var(--mat-sys-primary);
+  font-weight: 600;
+}
+
+.page-copy {
+  margin: 0;
+  opacity: 0.78;
+  line-height: 1.6;
+}
+
+.feedback-card {
+  border-left: 4px solid #b3261e;
+}
+
+.loading-state,
+.empty-card mat-card-content {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.loading-state {
+  padding: 48px 0;
+  opacity: 0.78;
+}
+
+.empty-card mat-card-content {
+  padding: 40px 24px;
+
+  mat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 48px;
+    color: var(--mat-sys-primary);
+  }
+
+  h2,
+  p {
+    margin: 0;
+  }
+}
+
+.members-list {
+  display: grid;
+  gap: 16px;
+}
+
+.member-card mat-card-content {
+  display: grid;
+  gap: 20px;
+}
+
+.member-main {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  h2,
+  p {
+    margin: 0;
+  }
+}
+
+.member-meta {
+  opacity: 0.72;
+  margin-top: 6px;
+}
+
+.chip-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: start;
+}
+
+.role-chip,
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.role-member {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.role-admin {
+  background: rgba(103, 80, 164, 0.16);
+  color: #5b3f96;
+}
+
+.status-active {
+  background: rgba(27, 94, 32, 0.12);
+  color: #1b5e20;
+}
+
+.status-probationary {
+  background: rgba(245, 124, 0, 0.14);
+  color: #e65100;
+}
+
+.status-suspended {
+  background: rgba(183, 28, 28, 0.12);
+  color: #b71c1c;
+}
+
+.status-banned {
+  background: rgba(74, 20, 20, 0.16);
+  color: #4a1414;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.detail-label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.62;
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: start;
+}
+
+.danger-button {
+  border-color: rgba(179, 38, 30, 0.4);
+  color: #b3261e;
+}

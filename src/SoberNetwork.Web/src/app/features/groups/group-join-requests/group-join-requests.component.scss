@@ -1,0 +1,108 @@
+:host {
+  display: block;
+}
+
+.requests-page {
+  display: grid;
+  gap: 24px;
+}
+
+.page-header h1 {
+  margin: 4px 0 8px;
+  font-size: clamp(2rem, 4vw, 2.5rem);
+}
+
+.eyebrow {
+  margin: 12px 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  color: var(--mat-sys-primary);
+  font-weight: 600;
+}
+
+.page-copy {
+  margin: 0;
+  opacity: 0.78;
+  line-height: 1.6;
+}
+
+.feedback-card {
+  border-left: 4px solid #b3261e;
+}
+
+.loading-state,
+.empty-card mat-card-content {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.loading-state {
+  padding: 48px 0;
+  opacity: 0.78;
+}
+
+.empty-card mat-card-content {
+  padding: 40px 24px;
+
+  mat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 48px;
+    color: var(--mat-sys-primary);
+  }
+
+  h2,
+  p {
+    margin: 0;
+  }
+}
+
+.request-list {
+  display: grid;
+  gap: 16px;
+}
+
+.request-card mat-card-content {
+  display: grid;
+  gap: 16px;
+}
+
+.request-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  h2,
+  p,
+  span {
+    margin: 0;
+  }
+
+  p,
+  span {
+    opacity: 0.72;
+  }
+}
+
+.request-message {
+  margin: 0;
+  line-height: 1.6;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.request-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.approve-button {
+  background: #1b5e20;
+  color: #fff;
+}

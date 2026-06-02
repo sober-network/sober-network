@@ -1,0 +1,69 @@
+:host {
+  display: block;
+}
+
+.settings-page {
+  display: grid;
+  gap: 24px;
+}
+
+.page-header h1 {
+  margin: 4px 0 8px;
+  font-size: clamp(2rem, 4vw, 2.5rem);
+}
+
+.eyebrow {
+  margin: 12px 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  color: var(--mat-sys-primary);
+  font-weight: 600;
+}
+
+.page-copy {
+  margin: 0;
+  opacity: 0.78;
+  line-height: 1.6;
+}
+
+.feedback-card {
+  border-left: 4px solid #b3261e;
+}
+
+.loading-state {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 48px 0;
+  opacity: 0.78;
+}
+
+.settings-form {
+  display: grid;
+  gap: 16px;
+}
+
+.toggle-list {
+  display: grid;
+  gap: 10px;
+}
+
+.success-message {
+  margin: 0;
+  color: #1b5e20;
+}
+
+.danger-card {
+  border: 1px solid rgba(179, 38, 30, 0.25);
+}
+
+.danger-card p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.danger-button {
+  border-color: rgba(179, 38, 30, 0.45);
+  color: #b3261e;
+}

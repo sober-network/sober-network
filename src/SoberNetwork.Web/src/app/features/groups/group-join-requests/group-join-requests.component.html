@@ -1,0 +1,66 @@
+<section class="page-container requests-page">
+  <div class="page-header">
+    <div>
+      <button mat-button type="button" [routerLink]="['/groups', slug]">
+        <mat-icon>arrow_back</mat-icon>
+        Back to Group
+      </button>
+      <p class="eyebrow">Join requests</p>
+      <h1>{{ groupName }}</h1>
+      <p class="page-copy">Review the folks waiting at the door and respond with care.</p>
+    </div>
+  </div>
+
+  <mat-card class="feedback-card" *ngIf="error">
+    <mat-card-content>{{ error }}</mat-card-content>
+  </mat-card>
+
+  <div class="loading-state" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading pending requests…</p>
+  </div>
+
+  <ng-container *ngIf="!loading">
+    <mat-card class="empty-card" *ngIf="requests.length === 0">
+      <mat-card-content>
+        <mat-icon>mark_email_read</mat-icon>
+        <h2>No pending requests</h2>
+        <p>When someone asks to join, their request will appear here.</p>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="request-list" *ngIf="requests.length > 0">
+      <mat-card class="request-card" *ngFor="let request of requests; trackBy: trackByUserId">
+        <mat-card-content>
+          <div class="request-header">
+            <div>
+              <h2>{{ request.displayName }}</h2>
+              <p>{{ request.email }}</p>
+            </div>
+            <span>Requested {{ request.requestedAt | date:'medium' }}</span>
+          </div>
+
+          <p class="request-message" *ngIf="request.message">“{{ request.message }}”</p>
+
+          <div class="request-actions">
+            <button mat-raised-button class="approve-button" type="button" [disabled]="actionUserId === request.userId" (click)="approve(request)">
+              Approve
+            </button>
+            <button mat-stroked-button color="warn" type="button" [disabled]="actionUserId === request.userId" (click)="confirmReject(request)">
+              Reject
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <mat-paginator
+      *ngIf="totalCount > pageSize"
+      [length]="totalCount"
+      [pageIndex]="pageIndex"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[5, 10, 25, 50]"
+      (page)="onPageChange($event)"
+    ></mat-paginator>
+  </ng-container>
+</section>

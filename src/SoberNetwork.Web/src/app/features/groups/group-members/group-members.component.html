@@ -1,0 +1,87 @@
+<section class="page-container members-page">
+  <div class="page-header">
+    <div>
+      <button mat-button type="button" [routerLink]="['/groups', slug]">
+        <mat-icon>arrow_back</mat-icon>
+        Back to Group
+      </button>
+      <p class="eyebrow">Members</p>
+      <h1>{{ groupName }}</h1>
+      <p class="page-copy">Here is the current circle — roles, status, and a few helpful details for staying connected.</p>
+    </div>
+  </div>
+
+  <mat-card class="feedback-card" *ngIf="error">
+    <mat-card-content>{{ error }}</mat-card-content>
+  </mat-card>
+
+  <div class="loading-state" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading the member list…</p>
+  </div>
+
+  <ng-container *ngIf="!loading">
+    <mat-card class="empty-card" *ngIf="members.length === 0">
+      <mat-card-content>
+        <mat-icon>group_off</mat-icon>
+        <h2>No members found</h2>
+        <p>This group does not have any visible members on this page yet.</p>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="members-list" *ngIf="members.length > 0">
+      <mat-card class="member-card" *ngFor="let member of members; trackBy: trackByUserId">
+        <mat-card-content>
+          <div class="member-main">
+            <div>
+              <h2>{{ member.displayName }}</h2>
+              <p class="member-meta">Joined {{ member.joinedAt | date:'mediumDate' }}</p>
+            </div>
+
+            <div class="chip-row">
+              <span class="role-chip" [ngClass]="roleClass(member)">{{ member.role }}</span>
+              <span class="status-chip" [ngClass]="statusClass(member.status)">{{ member.status }}</span>
+            </div>
+          </div>
+
+          <div class="detail-grid">
+            <div>
+              <span class="detail-label">Sobriety date</span>
+              <div>{{ member.sobrietyDate ? (member.sobrietyDate | date:'mediumDate') : '—' }}</div>
+            </div>
+            <div>
+              <span class="detail-label">Joined</span>
+              <div>{{ member.joinedAt | date:'medium' }}</div>
+            </div>
+          </div>
+
+          <div class="admin-actions" *ngIf="isAdmin && !isSelf(member)">
+            <button mat-stroked-button type="button" [disabled]="actionUserId === member.userId" (click)="toggleRole(member)">
+              {{ member.role === 'GroupAdmin' ? 'Make Member' : 'Make Group Admin' }}
+            </button>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Status</mat-label>
+              <mat-select [value]="member.status" [disabled]="actionUserId === member.userId" (selectionChange)="updateStatus(member, $event.value)">
+                <mat-option *ngFor="let status of membershipStatuses" [value]="status">{{ status }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <button mat-stroked-button class="danger-button" type="button" [disabled]="actionUserId === member.userId" (click)="confirmRemove(member)">
+              Remove Member
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <mat-paginator
+      *ngIf="totalCount > pageSize"
+      [length]="totalCount"
+      [pageIndex]="pageIndex"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[5, 10, 25, 50]"
+      (page)="onPageChange($event)"
+    ></mat-paginator>
+  </ng-container>
+</section>

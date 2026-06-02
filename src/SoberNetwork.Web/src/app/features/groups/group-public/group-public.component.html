@@ -1,0 +1,89 @@
+<section class="page-container group-public-page">
+  <div class="loading-state" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Opening the group page…</p>
+  </div>
+
+  <mat-card class="state-card" *ngIf="notFound && !loading">
+    <mat-card-content>
+      <mat-icon>search_off</mat-icon>
+      <h1>Group not found</h1>
+      <p>We could not find a group with this link. It may have moved or no longer be available.</p>
+      <a mat-button color="primary" routerLink="/">Back home</a>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="state-card" *ngIf="error && !loading && !notFound">
+    <mat-card-content>{{ error }}</mat-card-content>
+  </mat-card>
+
+  <mat-card class="group-card" *ngIf="group && !loading">
+    <mat-card-content>
+      <p class="eyebrow">Group page</p>
+      <h1>{{ group.name }}</h1>
+      <p class="description">{{ group.description || 'A caring place to stay connected between meetings.' }}</p>
+
+      <div class="meta-row">
+        <div class="member-count">
+          <mat-icon>groups</mat-icon>
+          {{ group.memberCount }} member{{ group.memberCount === 1 ? '' : 's' }}
+        </div>
+
+        <div class="badge-list">
+          <span class="badge">{{ group.isPublic ? 'Public group' : 'Private group' }}</span>
+          <span class="badge">{{ group.requiresApproval ? 'Approval needed' : 'Open to join' }}</span>
+        </div>
+      </div>
+
+      <div class="action-row" *ngIf="auth.isLoggedIn; else guestActions">
+        <ng-container *ngIf="!joinRequested; else requestSent">
+          <button mat-raised-button color="primary" type="button" (click)="openJoinDialog()">
+            <mat-icon>person_add</mat-icon>
+            Request to Join
+          </button>
+        </ng-container>
+
+        <ng-template #requestSent>
+          <div class="success-banner">
+            <mat-icon>favorite</mat-icon>
+            <span>Your request has been sent. Hang tight — someone will be with you soon.</span>
+          </div>
+        </ng-template>
+      </div>
+
+      <ng-template #guestActions>
+        <div class="guest-actions">
+          <a mat-raised-button color="primary" routerLink="/auth/login">Sign In to Join</a>
+          <a mat-stroked-button routerLink="/auth/register">Create Account</a>
+        </div>
+      </ng-template>
+    </mat-card-content>
+  </mat-card>
+</section>
+
+<ng-template #joinDialog let-dialogRef="dialogRef">
+  <h2 mat-dialog-title>Request to join {{ group?.name }}</h2>
+
+  <mat-dialog-content>
+    <p class="dialog-copy">If you would like, leave a short note for the group admin.</p>
+
+    <form [formGroup]="joinForm" novalidate>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Message (optional)</mat-label>
+        <textarea matInput formControlName="message" rows="4" maxlength="500"></textarea>
+        <mat-hint align="end">{{ joinForm.controls.message.value?.length ?? 0 }}/500</mat-hint>
+      </mat-form-field>
+
+      <p class="form-error" *ngIf="joinError">{{ joinError }}</p>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="dialogRef.close()">Cancel</button>
+    <button mat-raised-button color="primary" type="button" [disabled]="joining" (click)="submitJoin(dialogRef)">
+      <mat-icon *ngIf="!joining">send</mat-icon>
+      <mat-spinner *ngIf="joining" diameter="20"></mat-spinner>
+      <span>{{ joining ? 'Sending…' : 'Send Request' }}</span>
+    </button>
+  </mat-dialog-actions>
+</ng-template>

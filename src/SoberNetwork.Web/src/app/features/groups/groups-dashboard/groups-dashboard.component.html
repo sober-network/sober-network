@@ -1,0 +1,104 @@
+<section class="page-container dashboard-page">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Your groups</p>
+      <h1>Stay close to your people</h1>
+      <p class="page-copy">Every group here is a place to check in, stay connected, and keep walking together.</p>
+    </div>
+
+    <button mat-raised-button color="primary" type="button" (click)="openCreateGroupDialog()">
+      <mat-icon>add</mat-icon>
+      Create Group
+    </button>
+  </div>
+
+  <mat-card class="feedback-card" *ngIf="error">
+    <mat-card-content>{{ error }}</mat-card-content>
+  </mat-card>
+
+  <div class="loading-state" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Gathering your groups…</p>
+  </div>
+
+  <ng-container *ngIf="!loading">
+    <mat-card class="empty-card" *ngIf="groups.length === 0">
+      <mat-card-content>
+        <mat-icon>groups</mat-icon>
+        <h2>You do not have any groups yet</h2>
+        <p>Join or create a group to get started.</p>
+        <button mat-raised-button color="primary" type="button" (click)="openCreateGroupDialog()">
+          <mat-icon>add_circle</mat-icon>
+          Create Group
+        </button>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="groups-grid" *ngIf="groups.length > 0">
+      <mat-card class="group-card" *ngFor="let group of groups; trackBy: trackBySlug">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>groups</mat-icon>
+          <mat-card-title>{{ group.name }}</mat-card-title>
+          <mat-card-subtitle>{{ group.memberCount }} member{{ group.memberCount === 1 ? '' : 's' }}</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <p class="description">{{ descriptionPreview(group) }}</p>
+        </mat-card-content>
+
+        <mat-card-actions>
+          <a mat-button color="primary" [routerLink]="['/groups', group.slug]">Go to Group</a>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </ng-container>
+</section>
+
+<ng-template #createGroupDialog let-dialogRef="dialogRef">
+  <h2 mat-dialog-title>Create a new group</h2>
+
+  <mat-dialog-content>
+    <p class="dialog-copy">Start a welcoming home for your people. You can adjust these details anytime.</p>
+
+    <form [formGroup]="createForm" class="dialog-form" novalidate>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" maxlength="80" />
+        <mat-hint align="end">{{ createForm.controls.name.value?.length ?? 0 }}/80</mat-hint>
+        <mat-error *ngIf="createForm.controls.name.hasError('required')">Name is required.</mat-error>
+        <mat-error *ngIf="createForm.controls.name.hasError('minlength')">Name must be at least 2 characters.</mat-error>
+        <mat-error *ngIf="createForm.controls.name.hasError('maxlength')">Name must be 80 characters or less.</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Slug</mat-label>
+        <input matInput formControlName="slug" maxlength="80" (input)="markSlugEdited()" />
+        <mat-hint>Lowercase letters, numbers, and hyphens only.</mat-hint>
+        <mat-error *ngIf="createForm.controls.slug.hasError('required')">Slug is required.</mat-error>
+        <mat-error *ngIf="createForm.controls.slug.hasError('pattern')">Use lowercase letters, numbers, and hyphens only.</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" rows="4" maxlength="500"></textarea>
+        <mat-hint align="end">{{ createForm.controls.description.value?.length ?? 0 }}/500</mat-hint>
+      </mat-form-field>
+
+      <div class="toggle-list">
+        <mat-slide-toggle formControlName="isPublic">Public group page</mat-slide-toggle>
+        <mat-slide-toggle formControlName="requiresApproval">Approve new members before they join</mat-slide-toggle>
+      </div>
+
+      <p class="form-error" *ngIf="createError">{{ createError }}</p>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="dialogRef.close()">Cancel</button>
+    <button mat-raised-button color="primary" type="button" [disabled]="creating" (click)="submitCreate(dialogRef)">
+      <mat-icon *ngIf="!creating">group_add</mat-icon>
+      <mat-spinner *ngIf="creating" diameter="20"></mat-spinner>
+      <span>{{ creating ? 'Creating…' : 'Create Group' }}</span>
+    </button>
+  </mat-dialog-actions>
+</ng-template>

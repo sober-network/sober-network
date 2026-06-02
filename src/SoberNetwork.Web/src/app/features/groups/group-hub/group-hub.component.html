@@ -1,0 +1,79 @@
+<section class="page-container hub-page">
+  <div class="loading-state" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Opening your group space…</p>
+  </div>
+
+  <mat-card class="feedback-card" *ngIf="error && !loading">
+    <mat-card-content>{{ error }}</mat-card-content>
+  </mat-card>
+
+  <ng-container *ngIf="group && !loading">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Group hub</p>
+        <h1>{{ group.name }}</h1>
+        <p class="description">{{ group.description || 'A steady place to connect, support one another, and keep the circle strong.' }}</p>
+      </div>
+
+      <mat-chip-set>
+        <mat-chip>
+          <mat-icon matChipAvatar>groups</mat-icon>
+          {{ group.memberCount }} member{{ group.memberCount === 1 ? '' : 's' }}
+        </mat-chip>
+      </mat-chip-set>
+    </header>
+
+    <section class="quick-links">
+      <mat-card class="nav-card">
+        <a class="card-link" [routerLink]="['/groups', group.slug, 'members']">
+          <mat-icon>group</mat-icon>
+          <h2>Members</h2>
+          <p>See who is here and how everyone is doing.</p>
+        </a>
+      </mat-card>
+
+      <mat-card class="nav-card">
+        <a class="card-link" [routerLink]="['/groups', group.slug, 'phone-list']">
+          <mat-icon>contact_phone</mat-icon>
+          <h2>Phone List</h2>
+          <p>Reach out when someone needs a hand.</p>
+        </a>
+      </mat-card>
+
+      <mat-card class="nav-card" *ngIf="isAdmin">
+        <a class="card-link" [routerLink]="['/groups', group.slug, 'join-requests']">
+          <mat-icon>how_to_reg</mat-icon>
+          <h2>Join Requests</h2>
+          <p>Welcome new folks and keep the group door tended.</p>
+        </a>
+      </mat-card>
+
+      <mat-card class="nav-card" *ngIf="isAdmin">
+        <a class="card-link" [routerLink]="['/groups', group.slug, 'settings']">
+          <mat-icon>settings</mat-icon>
+          <h2>Settings</h2>
+          <p>Adjust the basics and keep things running smoothly.</p>
+        </a>
+      </mat-card>
+    </section>
+
+    <mat-card class="bulletin-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>campaign</mat-icon>
+        <mat-card-title>Bulletin Board</mat-card-title>
+        <mat-card-subtitle>Posts &amp; announcements coming soon</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>We are making room for shared updates, reminders, and encouragement from trusted servants.</p>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="footer-actions">
+      <button mat-stroked-button color="warn" type="button" [disabled]="leaving" (click)="confirmLeave()">
+        <mat-icon>logout</mat-icon>
+        {{ leaving ? 'Leaving…' : 'Leave Group' }}
+      </button>
+    </div>
+  </ng-container>
+</section>

@@ -1,0 +1,16 @@
+namespace SoberNetwork.Core.Entities;
+
+public class Group
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Name { get; set; } = string.Empty;
+    public string Slug { get; set; } = string.Empty;   // e.g. "earlybird" → earlybird.sobernetwork.group
+    public string? Description { get; set; }
+    public string? MeetingSchedule { get; set; }
+    public string? ZoomLink { get; set; }
+    public string? TimeZone { get; set; }
+    public bool IsActive { get; set; } = true;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public ICollection<GroupMembership> Memberships { get; set; } = [];
+}

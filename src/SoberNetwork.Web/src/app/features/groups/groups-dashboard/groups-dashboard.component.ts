@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -39,6 +40,7 @@ export class GroupsDashboardComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly fb = inject(FormBuilder);
   private readonly log = inject(ClientLogService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   @ViewChild('createGroupDialog') private createGroupDialog?: TemplateRef<unknown>;
 
@@ -148,8 +150,9 @@ export class GroupsDashboardComponent implements OnInit {
 
     this.groupService.getMyGroups().pipe(
       finalize(() => {
-        this.log.info('GroupsDashboard.loadGroups: finalize', { loading: false });
         this.loading = false;
+        this.cdr.detectChanges();
+        this.log.info('GroupsDashboard.loadGroups: finalize', { loading: false });
       })
     ).subscribe({
       next: groups => {

@@ -89,6 +89,7 @@ builder.Services.AddHsts(options =>
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IAuditService, AuditService>();
 
 // Resend email service
 builder.Services.AddOptions();

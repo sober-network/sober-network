@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -14,7 +15,8 @@ public class TokenService(IConfiguration config) : ITokenService
         ?? throw new InvalidOperationException("Jwt:Secret is not configured.");
     private readonly string _issuer = config["Jwt:Issuer"] ?? "sober-network";
     private readonly string _audience = config["Jwt:Audience"] ?? "sober-network";
-    private readonly int _expiryHours = int.Parse(config["Jwt:ExpiryHours"] ?? "12");
+    private readonly int _expiryHours = int.Parse(config["Jwt:ExpiryHours"] ?? "1");
+    private readonly int _refreshExpiryDays = int.Parse(config["Jwt:RefreshExpiryDays"] ?? "30");
 
     public string GenerateToken(ApplicationUser user)
     {
@@ -41,4 +43,19 @@ public class TokenService(IConfiguration config) : ITokenService
     }
 
     public DateTime GetExpiry() => DateTime.UtcNow.AddHours(_expiryHours);
+
+    public (string token, string hash) GenerateRefreshToken()
+    {
+        var bytes = RandomNumberGenerator.GetBytes(64);
+        var token = Convert.ToBase64String(bytes);
+        return (token, HashToken(token));
+    }
+
+    public string HashToken(string token)
+    {
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
+        return Convert.ToBase64String(bytes);
+    }
+
+    public DateTime GetRefreshExpiry() => DateTime.UtcNow.AddDays(_refreshExpiryDays);
 }

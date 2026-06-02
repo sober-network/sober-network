@@ -1,3 +1,4 @@
+using SoberNetwork.Core.DTOs;
 using SoberNetwork.Core.DTOs.Groups;
 using SoberNetwork.Core.Enums;
 
@@ -44,12 +45,14 @@ public interface IGroupService
     /// <summary>
     /// Returns active members of the group. Caller must be an active member (T4, T12).
     /// </summary>
-    Task<(IReadOnlyList<MemberResponse>? Members, string? Error)> GetMembersAsync(string slug, string userId);
+    Task<(PagedResponse<MemberResponse>? Members, string? Error)> GetMembersAsync(
+        string slug, string userId, int page = 1, int pageSize = 25);
 
     /// <summary>
     /// Returns pending join requests. Caller must be a GroupAdmin.
     /// </summary>
-    Task<(IReadOnlyList<JoinRequestResponse>? Requests, string? Error)> GetJoinRequestsAsync(string slug, string userId);
+    Task<(PagedResponse<JoinRequestResponse>? Requests, string? Error)> GetJoinRequestsAsync(
+        string slug, string userId, int page = 1, int pageSize = 25);
 
     // ── Membership mutations ───────────────────────────────────────────────────
 
@@ -73,6 +76,17 @@ public interface IGroupService
     /// Last-admin guard: cannot remove the last GroupAdmin (T2, T9).
     /// </summary>
     Task<(bool Success, string? Error)> RemoveMemberAsync(string slug, string targetUserId, string adminUserId);
+
+    /// <summary>
+    /// Allows a member to voluntarily leave a group.
+    /// Last-admin guard: cannot leave if you are the only admin (T2, T9).
+    /// </summary>
+    Task<(bool Success, string? Error)> LeaveGroupAsync(string slug, string userId);
+
+    /// <summary>
+    /// Clears the probationary flag for a member. Caller must be a GroupAdmin.
+    /// </summary>
+    Task<(bool Success, string? Error)> ClearProbationaryStatusAsync(string slug, string targetUserId, string adminUserId);
 
     /// <summary>
     /// Changes a member's role. Caller must be a GroupAdmin.

@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using SoberNetwork.Core.DTOs;
 using SoberNetwork.Core.DTOs.Groups;
 using SoberNetwork.Core.Entities;
 using SoberNetwork.Core.Enums;
@@ -7,11 +9,16 @@ using SoberNetwork.Infrastructure.Data;
 
 namespace SoberNetwork.Infrastructure.Services;
 
-public class GroupService(AppDbContext db) : IGroupService
+public class GroupService(
+    AppDbContext db,
+    IAuditService audit,
+    IEmailService email,
+    IConfiguration config) : IGroupService
 {
+    private string AppBaseUrl => config["App:BaseUrl"] ?? "https://app.sobernetwork.group";
+
     // ── Helpers ────────────────────────────────────────────────────────────────
 
-    /// <summary>Returns the active membership row for a user in a group, or null.</summary>
     private Task<GroupMembership?> GetActiveMembershipAsync(Guid groupId, string userId) =>
         db.GroupMemberships.FirstOrDefaultAsync(m =>
             m.GroupId == groupId &&
@@ -19,7 +26,6 @@ public class GroupService(AppDbContext db) : IGroupService
             m.Status == MemberStatus.Active &&
             m.DeletedAt == null);
 
-    /// <summary>Counts active GroupAdmins in a group.</summary>
     private Task<int> CountAdminsAsync(Guid groupId) =>
         db.GroupMemberships.CountAsync(m =>
             m.GroupId == groupId &&
@@ -28,18 +34,8 @@ public class GroupService(AppDbContext db) : IGroupService
             m.DeletedAt == null);
 
     private static GroupResponse ToGroupResponse(Group g, string userRole, int memberCount) => new(
-        g.Id,
-        g.Name,
-        g.Slug,
-        g.Description,
-        g.MeetingSchedule,
-        g.ZoomLink,
-        g.TimeZone,
-        g.IsActive,
-        memberCount,
-        userRole,
-        g.CreatedAt
-    );
+        g.Id, g.Name, g.Slug, g.Description, g.MeetingSchedule,
+        g.ZoomLink, g.TimeZone, g.IsActive, memberCount, userRole, g.CreatedAt);
 
     private static MemberResponse ToMemberResponse(GroupMembership m) => new(
         m.UserId,
@@ -48,11 +44,10 @@ public class GroupService(AppDbContext db) : IGroupService
         m.Status.ToString(),
         m.IsProbationary,
         m.JoinedAt,
-        m.ApprovedAt
-    );
+        m.ApprovedAt);
 
-    private async Task<int> GetMemberCountAsync(Guid groupId) =>
-        await db.GroupMemberships.CountAsync(m =>
+    private Task<int> GetMemberCountAsync(Guid groupId) =>
+        db.GroupMemberships.CountAsync(m =>
             m.GroupId == groupId &&
             m.Status == MemberStatus.Active &&
             m.DeletedAt == null);
@@ -143,6 +138,9 @@ public class GroupService(AppDbContext db) : IGroupService
         db.GroupMemberships.Add(membership);
         await db.SaveChangesAsync();
 
+        await audit.LogAsync(SecurityEventType.GroupCreated, creatorUserId,
+            $"Created group slug={request.Slug}");
+
         return (ToGroupResponse(group, GroupRole.GroupAdmin.ToString(), 1), null);
     }
 
@@ -164,6 +162,8 @@ public class GroupService(AppDbContext db) : IGroupService
         group.UpdatedAt = DateTime.UtcNow;
 
         await db.SaveChangesAsync();
+        await audit.LogAsync(SecurityEventType.GroupUpdated, userId, $"Updated group slug={slug}");
+
         var count = await GetMemberCountAsync(group.Id);
         return (ToGroupResponse(group, membership.Role.ToString(), count), null);
     }
@@ -182,13 +182,15 @@ public class GroupService(AppDbContext db) : IGroupService
         group.IsActive = false;
         group.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
+
+        await audit.LogAsync(SecurityEventType.GroupDeleted, userId, $"Soft-deleted group slug={slug}");
         return (true, null);
     }
 
     // ── Member queries ─────────────────────────────────────────────────────────
 
-    public async Task<(IReadOnlyList<MemberResponse>? Members, string? Error)> GetMembersAsync(
-        string slug, string userId)
+    public async Task<(PagedResponse<MemberResponse>? Members, string? Error)> GetMembersAsync(
+        string slug, string userId, int page = 1, int pageSize = 25)
     {
         var group = await db.Groups.FirstOrDefaultAsync(g =>
             g.Slug == slug && g.DeletedAt == null);
@@ -197,20 +199,26 @@ public class GroupService(AppDbContext db) : IGroupService
         var callerMembership = await GetActiveMembershipAsync(group.Id, userId);
         if (callerMembership == null) return (null, "You are not a member of this group.");
 
-        var members = await db.GroupMemberships
+        var query = db.GroupMemberships
             .Include(m => m.User)
             .Where(m =>
                 m.GroupId == group.Id &&
                 m.Status == MemberStatus.Active &&
                 m.DeletedAt == null)
+            .OrderBy(m => m.JoinedAt);
+
+        var total = await query.CountAsync();
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(m => ToMemberResponse(m))
             .ToListAsync();
 
-        return (members, null);
+        return (new PagedResponse<MemberResponse>(items, page, pageSize, total), null);
     }
 
-    public async Task<(IReadOnlyList<JoinRequestResponse>? Requests, string? Error)> GetJoinRequestsAsync(
-        string slug, string userId)
+    public async Task<(PagedResponse<JoinRequestResponse>? Requests, string? Error)> GetJoinRequestsAsync(
+        string slug, string userId, int page = 1, int pageSize = 25)
     {
         var group = await db.Groups.FirstOrDefaultAsync(g =>
             g.Slug == slug && g.DeletedAt == null);
@@ -220,19 +228,22 @@ public class GroupService(AppDbContext db) : IGroupService
         if (callerMembership == null || callerMembership.Role != GroupRole.GroupAdmin)
             return (null, "You do not have permission to view join requests.");
 
-        var requests = await db.GroupMemberships
+        var query = db.GroupMemberships
             .Include(m => m.User)
             .Where(m =>
                 m.GroupId == group.Id &&
                 m.Status == MemberStatus.PendingApproval &&
                 m.DeletedAt == null)
-            .Select(m => new JoinRequestResponse(
-                m.UserId,
-                m.User!.DisplayName,
-                m.JoinedAt))
+            .OrderBy(m => m.JoinedAt);
+
+        var total = await query.CountAsync();
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(m => new JoinRequestResponse(m.UserId, m.User!.DisplayName, m.JoinedAt))
             .ToListAsync();
 
-        return (requests, null);
+        return (new PagedResponse<JoinRequestResponse>(items, page, pageSize, total), null);
     }
 
     // ── Membership mutations ───────────────────────────────────────────────────
@@ -268,6 +279,29 @@ public class GroupService(AppDbContext db) : IGroupService
 
         db.GroupMemberships.Add(membership);
         await db.SaveChangesAsync();
+
+        await audit.LogAsync(SecurityEventType.GroupJoinRequested, userId,
+            $"Requested to join group slug={slug}");
+
+        // Notify all current admins of the new join request (fire-and-forget — don't fail the request)
+        var applicant = await db.Users.FindAsync(userId);
+        var admins = await db.GroupMemberships
+            .Include(m => m.User)
+            .Where(m =>
+                m.GroupId == group.Id &&
+                m.Role == GroupRole.GroupAdmin &&
+                m.Status == MemberStatus.Active &&
+                m.DeletedAt == null)
+            .Select(m => m.User!)
+            .ToListAsync();
+
+        var approvalLink = $"{AppBaseUrl}/groups/{slug}/join-requests";
+        foreach (var admin in admins.Where(a => a.Email != null))
+        {
+            try { await email.SendGroupJoinRequestAsync(admin.Email!, applicant?.DisplayName ?? "A user", group.Name, approvalLink); }
+            catch { /* email failure must not block the join request */ }
+        }
+
         return (true, null);
     }
 
@@ -282,8 +316,20 @@ public class GroupService(AppDbContext db) : IGroupService
 
         membership.Status = MemberStatus.Active;
         membership.ApprovedAt = DateTime.UtcNow;
+        membership.ApprovedByUserId = adminUserId;
         membership.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
+
+        await audit.LogAsync(SecurityEventType.GroupMemberApproved, adminUserId,
+            $"Approved userId={targetUserId} in group slug={slug}");
+
+        var member = await db.Users.FindAsync(targetUserId);
+        if (member?.Email != null)
+        {
+            try { await email.SendGroupJoinApprovedAsync(member.Email, member.DisplayName, group!.Name); }
+            catch { /* email failure must not roll back approval */ }
+        }
+
         return (true, null);
     }
 
@@ -299,6 +345,17 @@ public class GroupService(AppDbContext db) : IGroupService
         membership.DeletedAt = DateTime.UtcNow;
         membership.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
+
+        await audit.LogAsync(SecurityEventType.GroupMemberRejected, adminUserId,
+            $"Rejected userId={targetUserId} in group slug={slug}");
+
+        var member = await db.Users.FindAsync(targetUserId);
+        if (member?.Email != null)
+        {
+            try { await email.SendGroupJoinRejectedAsync(member.Email, member.DisplayName, group!.Name); }
+            catch { }
+        }
+
         return (true, null);
     }
 
@@ -308,13 +365,58 @@ public class GroupService(AppDbContext db) : IGroupService
         var (group, membership, error) = await GetAdminAndTarget(slug, targetUserId, adminUserId);
         if (error != null) return (false, error);
 
-        // Last-admin guard (T2, T9 — the group must always have a trusted servant)
+        // Last-admin guard (T2, T9)
         if (membership!.Role == GroupRole.GroupAdmin && await CountAdminsAsync(group!.Id) <= 1)
             return (false, "Cannot remove the last group admin. Assign another admin first.");
 
         membership.DeletedAt = DateTime.UtcNow;
         membership.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
+
+        await audit.LogAsync(SecurityEventType.GroupMemberRemoved, adminUserId,
+            $"Removed userId={targetUserId} from group slug={slug}");
+
+        return (true, null);
+    }
+
+    public async Task<(bool Success, string? Error)> LeaveGroupAsync(string slug, string userId)
+    {
+        var group = await db.Groups.FirstOrDefaultAsync(g =>
+            g.Slug == slug && g.DeletedAt == null);
+        if (group == null) return (false, "Group not found.");
+
+        var membership = await GetActiveMembershipAsync(group.Id, userId);
+        if (membership == null) return (false, "You are not a member of this group.");
+
+        // Last-admin guard — a group cannot be left without a leader (T2, T9)
+        if (membership.Role == GroupRole.GroupAdmin && await CountAdminsAsync(group.Id) <= 1)
+            return (false, "You are the only admin. Assign another admin before leaving.");
+
+        membership.DeletedAt = DateTime.UtcNow;
+        membership.UpdatedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+
+        await audit.LogAsync(SecurityEventType.GroupMemberLeft, userId,
+            $"Left group slug={slug}");
+
+        return (true, null);
+    }
+
+    public async Task<(bool Success, string? Error)> ClearProbationaryStatusAsync(
+        string slug, string targetUserId, string adminUserId)
+    {
+        var (group, membership, error) = await GetAdminAndTarget(slug, targetUserId, adminUserId);
+        if (error != null) return (false, error);
+
+        if (!membership!.IsProbationary) return (true, null);  // idempotent
+
+        membership.IsProbationary = false;
+        membership.UpdatedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+
+        await audit.LogAsync(SecurityEventType.GroupProbationCleared, adminUserId,
+            $"Cleared probation for userId={targetUserId} in group slug={slug}");
+
         return (true, null);
     }
 
@@ -335,6 +437,10 @@ public class GroupService(AppDbContext db) : IGroupService
         membership.Role = newRole;
         membership.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
+
+        await audit.LogAsync(SecurityEventType.GroupRoleChanged, adminUserId,
+            $"Changed userId={targetUserId} to role={newRole} in group slug={slug}");
+
         return (true, null);
     }
 
@@ -355,15 +461,15 @@ public class GroupService(AppDbContext db) : IGroupService
         membership.Status = newStatus;
         membership.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
+
+        await audit.LogAsync(SecurityEventType.GroupMemberStatusChanged, adminUserId,
+            $"Changed userId={targetUserId} to status={newStatus} in group slug={slug}");
+
         return (true, null);
     }
 
     // ── Private helpers ────────────────────────────────────────────────────────
 
-    /// <summary>
-    /// Validates that the caller is an admin in the group and the target membership exists.
-    /// Returns (group, targetMembership, errorMessage).
-    /// </summary>
     private async Task<(Group? Group, GroupMembership? Membership, string? Error)> GetAdminAndTarget(
         string slug, string targetUserId, string adminUserId)
     {

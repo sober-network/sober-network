@@ -6,4 +6,5 @@ public interface IEmailService
     Task SendPasswordResetAsync(string toEmail, string displayName, string resetLink);
     Task SendGroupJoinApprovedAsync(string toEmail, string displayName, string groupName);
     Task SendGroupJoinRequestAsync(string adminEmail, string applicantName, string groupName, string approvalLink);
+    Task SendGroupJoinRejectedAsync(string toEmail, string displayName, string groupName);
 }

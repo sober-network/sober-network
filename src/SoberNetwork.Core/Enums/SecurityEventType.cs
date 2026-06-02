@@ -19,5 +19,20 @@ public enum SecurityEventType
     // Token lifecycle
     TokenRefreshed,
     TokenRevoked,
-    Logout
+    Logout,
+
+    // Group lifecycle
+    GroupCreated,
+    GroupUpdated,
+    GroupDeleted,
+
+    // Membership lifecycle
+    GroupJoinRequested,
+    GroupMemberApproved,
+    GroupMemberRejected,
+    GroupMemberRemoved,
+    GroupMemberLeft,
+    GroupRoleChanged,
+    GroupMemberStatusChanged,
+    GroupProbationCleared
 }

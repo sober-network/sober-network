@@ -16,6 +16,7 @@ namespace SoberNetwork.Api.Controllers;
 public class GroupsController(IGroupService groupService) : ControllerBase
 {
     private string UserId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+    private bool IsSuperAdmin => User.FindFirstValue("isSuperAdmin") == "true";
 
     // ── Group endpoints ────────────────────────────────────────────────────────
 
@@ -24,6 +25,18 @@ public class GroupsController(IGroupService groupService) : ControllerBase
     public async Task<IActionResult> GetMyGroups()
     {
         var groups = await groupService.GetUserGroupsAsync(UserId);
+        return Ok(groups);
+    }
+
+    /// <summary>
+    /// Returns all groups on the platform. SuperAdmin only.
+    /// [AllowAnonymous] not applicable — this is superadmin-gated, not public.
+    /// </summary>
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAllGroups()
+    {
+        if (!IsSuperAdmin) return Forbid();
+        var groups = await groupService.GetAllGroupsAsync();
         return Ok(groups);
     }
 
@@ -71,11 +84,26 @@ public class GroupsController(IGroupService groupService) : ControllerBase
 
     /// <summary>Returns the active member list. Caller must be an active member.</summary>
     [HttpGet("{slug}/members")]
-    public async Task<IActionResult> GetMembers(string slug)
+    public async Task<IActionResult> GetMembers(
+        string slug,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 25)
     {
-        var (members, error) = await groupService.GetMembersAsync(slug, UserId);
+        if (page < 1 || pageSize is < 1 or > 100)
+            return BadRequest(new { error = "page must be >= 1; pageSize must be 1–100." });
+
+        var (members, error) = await groupService.GetMembersAsync(slug, UserId, page, pageSize);
         if (error != null) return error.Contains("not a member") ? Forbid() : NotFound();
         return Ok(members);
+    }
+
+    /// <summary>Allows the current user to voluntarily leave a group.</summary>
+    [HttpDelete("{slug}/members/me")]
+    public async Task<IActionResult> LeaveGroup(string slug)
+    {
+        var (success, error) = await groupService.LeaveGroupAsync(slug, UserId);
+        if (!success) return error!.Contains("only admin") ? Conflict(new { error }) : NotFound();
+        return NoContent();
     }
 
     /// <summary>Submits a join request for the current user. Idempotent.</summary>
@@ -89,9 +117,15 @@ public class GroupsController(IGroupService groupService) : ControllerBase
 
     /// <summary>Returns pending join requests. Caller must be a GroupAdmin.</summary>
     [HttpGet("{slug}/join-requests")]
-    public async Task<IActionResult> GetJoinRequests(string slug)
+    public async Task<IActionResult> GetJoinRequests(
+        string slug,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 25)
     {
-        var (requests, error) = await groupService.GetJoinRequestsAsync(slug, UserId);
+        if (page < 1 || pageSize is < 1 or > 100)
+            return BadRequest(new { error = "page must be >= 1; pageSize must be 1–100." });
+
+        var (requests, error) = await groupService.GetJoinRequestsAsync(slug, UserId, page, pageSize);
         if (error != null) return error.Contains("permission") ? Forbid() : NotFound();
         return Ok(requests);
     }
@@ -145,5 +179,14 @@ public class GroupsController(IGroupService groupService) : ControllerBase
         var (success, error) = await groupService.ChangeMemberStatusAsync(slug, userId, UserId, request.NewStatus);
         if (!success) return error!.Contains("permission") ? Forbid() : BadRequest(new { error });
         return Ok(new { message = "Status updated." });
+    }
+
+    /// <summary>Clears the probationary flag for a member. Caller must be a GroupAdmin.</summary>
+    [HttpPatch("{slug}/members/{userId}/probation")]
+    public async Task<IActionResult> ClearProbation(string slug, string userId)
+    {
+        var (success, error) = await groupService.ClearProbationaryStatusAsync(slug, userId, UserId);
+        if (!success) return error!.Contains("permission") ? Forbid() : BadRequest(new { error });
+        return Ok(new { message = "Probationary status cleared." });
     }
 }

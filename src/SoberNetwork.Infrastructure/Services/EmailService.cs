@@ -69,6 +69,19 @@ public class EmailService(
         );
     }
 
+    public async Task SendGroupJoinRejectedAsync(string toEmail, string displayName, string groupName)
+    {
+        await SendAsync(
+            to: toEmail,
+            subject: $"Your request to join {groupName}",
+            html: $"""
+                <h2>Membership Request Update</h2>
+                <p>Hi {displayName}, your request to join <strong>{groupName}</strong> on Sober Network was not approved at this time.</p>
+                <p>If you have questions, please contact the group administrator directly.</p>
+                """
+        );
+    }
+
     private async Task SendAsync(string to, string subject, string html)
     {
         try

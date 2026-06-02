@@ -70,7 +70,13 @@
     <mat-spinner diameter="36"></mat-spinner>
   </div>
 
-  <div *ngIf="!loadingGroups && groups.length === 0" class="groups-empty">
+  <div *ngIf="!loadingGroups && !auth.isLoggedIn" class="groups-empty">
+    <mat-icon>lock</mat-icon>
+    <p>Sign in to see your home groups.</p>
+    <a mat-button color="primary" routerLink="/auth/login">Sign In</a>
+  </div>
+
+  <div *ngIf="!loadingGroups && auth.isLoggedIn && groups.length === 0" class="groups-empty">
     <mat-icon>group_off</mat-icon>
     <p>No groups yet — be the first to start one.</p>
     <a mat-button color="primary" routerLink="/auth/register">Get started</a>

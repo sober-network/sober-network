@@ -45,8 +45,12 @@ export class LandingComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.groupService.getAllGroups(1, 12).subscribe({
-      next: r => { this.groups = r.items; this.loadingGroups = false; },
+    if (!this.auth.isLoggedIn) {
+      this.loadingGroups = false;
+      return;
+    }
+    this.groupService.getMyGroups().subscribe({
+      next: groups => { this.groups = groups; this.loadingGroups = false; },
       error: () => { this.loadingGroups = false; },
     });
   }

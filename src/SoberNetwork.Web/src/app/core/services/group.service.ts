@@ -18,7 +18,7 @@ export class GroupService {
   // ── Group CRUD ──────────────────────────────────────────────────────────────
 
   getMyGroups(): Observable<GroupResponse[]> {
-    return this.http.get<GroupResponse[]>(`${this.base}/my`);
+    return this.http.get<GroupResponse[]>(this.base);
   }
 
   getAllGroups(page = 1, pageSize = 20): Observable<PagedResponse<GroupResponse>> {

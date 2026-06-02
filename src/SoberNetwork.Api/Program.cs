@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Resend;
 using SoberNetwork.Core.Entities;
 using SoberNetwork.Core.Interfaces;
 using SoberNetwork.Infrastructure.Data;
@@ -27,8 +28,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
         options.Lockout.AllowedForNewUsers = true;
         options.Lockout.MaxFailedAccessAttempts = 5;
         options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
-        // TODO: enable once email service is wired up
-        // options.SignIn.RequireConfirmedEmail = true;
+        options.SignIn.RequireConfirmedEmail = true;
     })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
@@ -88,6 +88,16 @@ builder.Services.AddHsts(options =>
 });
 
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+// Resend email service
+builder.Services.AddOptions();
+builder.Services.AddHttpClient<ResendClient>();
+builder.Services.Configure<ResendClientOptions>(o =>
+    o.ApiToken = builder.Configuration["Resend:ApiKey"]
+        ?? throw new InvalidOperationException("Resend:ApiKey is not configured."));
+builder.Services.AddTransient<IResend, ResendClient>();
+
 builder.Services.AddControllers();
 
 var app = builder.Build();

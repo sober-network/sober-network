@@ -14,6 +14,7 @@ public class AuthController(
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
     ITokenService tokenService,
+    IEmailService emailService,
     ILogger<AuthController> logger) : ControllerBase
 {
     [HttpPost("register")]
@@ -31,14 +32,40 @@ public class AuthController(
 
         if (!result.Succeeded)
         {
-            // Log detail internally, return generic message to prevent user enumeration
             logger.LogWarning("Registration failed for {Email}: {Errors}",
                 request.Email, string.Join(", ", result.Errors.Select(e => e.Description)));
             return BadRequest("Unable to complete registration. Check your details and try again.");
         }
 
-        logger.LogInformation("New user registered: {UserId}", user.Id);
-        return Ok(BuildResponse(user));
+        // Send email confirmation
+        var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+        var confirmationLink = Url.Action(
+            nameof(ConfirmEmail), "Auth",
+            new { userId = user.Id, token },
+            Request.Scheme)!;
+
+        await emailService.SendEmailConfirmationAsync(user.Email!, user.DisplayName, confirmationLink);
+
+        logger.LogInformation("New user registered, confirmation email sent: {UserId}", user.Id);
+        return Ok("Registration successful. Please check your email to confirm your account.");
+    }
+
+    [HttpGet("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        if (user is null)
+            return BadRequest("Invalid confirmation link.");
+
+        var result = await userManager.ConfirmEmailAsync(user, token);
+        if (!result.Succeeded)
+        {
+            logger.LogWarning("Email confirmation failed for {UserId}", userId);
+            return BadRequest("Email confirmation failed. The link may have expired.");
+        }
+
+        logger.LogInformation("Email confirmed for {UserId}", userId);
+        return Ok("Email confirmed. You can now log in.");
     }
 
     [HttpPost("login")]
@@ -57,7 +84,7 @@ public class AuthController(
         if (result.IsLockedOut)
         {
             logger.LogWarning("Locked out account login attempt: {UserId}", user.Id);
-            return Unauthorized("Invalid credentials.");   // don't reveal lockout status
+            return Unauthorized("Invalid credentials.");
         }
 
         if (!result.Succeeded)

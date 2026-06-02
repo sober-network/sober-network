@@ -108,24 +108,35 @@ public class AuthController(
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
+        logger.LogInformation("Login attempt: {Email} from {IP}", request.Email, Ip());
+
         var user = await userManager.FindByEmailAsync(request.Email);
 
         if (user is null)
         {
+            logger.LogWarning("Login failed — email not found: {Email}", request.Email);
             await auditService.LogAsync(SecurityEventType.LoginFailed, details: "Unknown email", ipAddress: Ip(), userAgent: Ua());
             return Unauthorized("Invalid credentials.");
+        }
+
+        if (!user.EmailConfirmed)
+        {
+            logger.LogWarning("Login failed — email not confirmed: {UserId}", user.Id);
+            return Unauthorized("Please confirm your email address before signing in.");
         }
 
         var result = await signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
 
         if (result.IsLockedOut)
         {
+            logger.LogWarning("Login failed — account locked out: {UserId}", user.Id);
             await auditService.LogAsync(SecurityEventType.Lockout, user.Id, ipAddress: Ip(), userAgent: Ua());
             return Unauthorized("Invalid credentials.");
         }
 
         if (!result.Succeeded)
         {
+            logger.LogWarning("Login failed — wrong password: {UserId}", user.Id);
             await auditService.LogAsync(SecurityEventType.LoginFailed, user.Id, ipAddress: Ip(), userAgent: Ua());
             return Unauthorized("Invalid credentials.");
         }
@@ -135,7 +146,7 @@ public class AuthController(
         await userManager.UpdateAsync(user);
         await auditService.LogAsync(SecurityEventType.LoginSuccess, user.Id, ipAddress: Ip(), userAgent: Ua());
 
-        logger.LogInformation("Successful login: {UserId}", user.Id);
+        logger.LogInformation("Login succeeded: {UserId}", user.Id);
         return Ok(await BuildResponseAsync(user));
     }
 

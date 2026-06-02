@@ -1,0 +1,169 @@
+<div class="admin-page container">
+  <div class="page-header">
+    <mat-icon>admin_panel_settings</mat-icon>
+    <h1>Platform Administration</h1>
+  </div>
+
+  @if (loading) {
+    <div class="loading-center">
+      <mat-spinner diameter="48" />
+      <p>Loading platform data…</p>
+    </div>
+  } @else {
+    <!-- Stats row -->
+    <div class="stats-row">
+      <mat-card class="stat-card">
+        <mat-icon>groups</mat-icon>
+        <div class="stat-value">{{ totalGroups }}</div>
+        <div class="stat-label">Total Groups</div>
+      </mat-card>
+      <mat-card class="stat-card">
+        <mat-icon>people</mat-icon>
+        <div class="stat-value">{{ totalUsers }}</div>
+        <div class="stat-label">Total Users</div>
+      </mat-card>
+      <mat-card class="stat-card">
+        <mat-icon>verified_user</mat-icon>
+        <div class="stat-value">{{ confirmedUsers }}</div>
+        <div class="stat-label">Email Confirmed</div>
+      </mat-card>
+      <mat-card class="stat-card accent">
+        <mat-icon>shield</mat-icon>
+        <div class="stat-value">{{ superAdmins }}</div>
+        <div class="stat-label">Super Admins</div>
+      </mat-card>
+    </div>
+
+    <!-- Tabs: Users / Groups -->
+    <mat-tab-group animationDuration="200ms">
+
+      <!-- ─── Users tab ─────────────────────────── -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>people</mat-icon>&nbsp;Users&nbsp;<span class="tab-badge">{{ totalUsers }}</span>
+        </ng-template>
+
+        <div class="tab-content">
+          <table mat-table [dataSource]="members" class="full-width-table">
+
+            <ng-container matColumnDef="displayName">
+              <th mat-header-cell *matHeaderCellDef>Name</th>
+              <td mat-cell *matCellDef="let m">
+                <a [routerLink]="['/profile', m.userId]">{{ m.displayName }}</a>
+                @if (m.isSuperAdmin) {
+                  <mat-chip color="primary" highlighted class="admin-chip">Admin</mat-chip>
+                }
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="email">
+              <th mat-header-cell *matHeaderCellDef>Email</th>
+              <td mat-cell *matCellDef="let m">{{ m.email }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="emailConfirmed">
+              <th mat-header-cell *matHeaderCellDef>Verified</th>
+              <td mat-cell *matCellDef="let m">
+                <mat-icon [class.text-success]="m.emailConfirmed" [class.text-muted]="!m.emailConfirmed">
+                  {{ m.emailConfirmed ? 'check_circle' : 'radio_button_unchecked' }}
+                </mat-icon>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="groupCount">
+              <th mat-header-cell *matHeaderCellDef>Groups</th>
+              <td mat-cell *matCellDef="let m">{{ m.groupCount }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="createdAt">
+              <th mat-header-cell *matHeaderCellDef>Joined</th>
+              <td mat-cell *matCellDef="let m">{{ m.createdAt | date:'mediumDate' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let m">
+                <button mat-icon-button color="warn"
+                        [disabled]="m.isSuperAdmin"
+                        [matTooltip]="m.isSuperAdmin ? 'Cannot delete super admin' : 'Delete user'"
+                        (click)="deleteMember(m)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="memberColumns; sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: memberColumns;"></tr>
+          </table>
+        </div>
+      </mat-tab>
+
+      <!-- ─── Groups tab ────────────────────────── -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>groups</mat-icon>&nbsp;Groups&nbsp;<span class="tab-badge">{{ totalGroups }}</span>
+        </ng-template>
+
+        <div class="tab-content">
+          <table mat-table [dataSource]="groups" class="full-width-table">
+
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>Name</th>
+              <td mat-cell *matCellDef="let g">
+                <a [routerLink]="['/groups', g.slug]">{{ g.name }}</a>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="slug">
+              <th mat-header-cell *matHeaderCellDef>Slug</th>
+              <td mat-cell *matCellDef="let g"><code>{{ g.slug }}</code></td>
+            </ng-container>
+
+            <ng-container matColumnDef="memberCount">
+              <th mat-header-cell *matHeaderCellDef>Members</th>
+              <td mat-cell *matCellDef="let g">{{ g.memberCount }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="isPublic">
+              <th mat-header-cell *matHeaderCellDef>Public</th>
+              <td mat-cell *matCellDef="let g">
+                <mat-icon [class.text-success]="g.isPublic" [class.text-muted]="!g.isPublic">
+                  {{ g.isPublic ? 'public' : 'lock' }}
+                </mat-icon>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="requiresApproval">
+              <th mat-header-cell *matHeaderCellDef>Approval</th>
+              <td mat-cell *matCellDef="let g">
+                <mat-icon [class.text-warn]="g.requiresApproval">
+                  {{ g.requiresApproval ? 'how_to_reg' : 'person_add' }}
+                </mat-icon>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="createdAt">
+              <th mat-header-cell *matHeaderCellDef>Created</th>
+              <td mat-cell *matCellDef="let g">{{ g.createdAt | date:'mediumDate' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let g">
+                <button mat-icon-button color="warn"
+                        matTooltip="Delete group"
+                        (click)="deleteGroup(g)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="groupColumns; sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: groupColumns;"></tr>
+          </table>
+        </div>
+      </mat-tab>
+
+    </mat-tab-group>
+  }
+</div>

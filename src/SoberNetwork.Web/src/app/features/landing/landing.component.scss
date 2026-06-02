@@ -1,0 +1,211 @@
+:host { display: block; }
+
+// ── Hero ──────────────────────────────────────────────────────────────────────
+.hero {
+  background: linear-gradient(135deg, var(--mat-sys-primary, #5c6bc0) 0%, var(--mat-sys-tertiary, #e65100) 100%);
+  color: #fff;
+  padding: 64px 24px 56px;
+
+  .hero-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+
+    @media (min-width: 680px) {
+      flex-direction: row;
+      align-items: center;
+    }
+  }
+
+  .hero-text {
+    flex: 1;
+
+    .hero-title {
+      font-size: 2.4rem;
+      font-weight: 700;
+      margin: 0 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .hero-icon {
+        font-size: 2.4rem;
+        width: 2.4rem;
+        height: 2.4rem;
+        color: rgba(255,255,255,0.9);
+      }
+    }
+
+    .hero-tagline {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      opacity: 0.9;
+      margin: 0 0 28px;
+      max-width: 520px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+  }
+
+  .hero-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    @media (min-width: 680px) {
+      width: 200px;
+    }
+
+    .hero-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      font-weight: 500;
+
+      mat-icon { color: rgba(255,255,255,0.9); }
+    }
+  }
+}
+
+// ── Newcomer CTA ──────────────────────────────────────────────────────────────
+.newcomer-section {
+  padding: 0 16px;
+  margin-top: -32px;
+  display: flex;
+  justify-content: center;
+
+  .newcomer-card {
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+
+    mat-card-content {
+      padding: 32px 24px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .newcomer-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      color: var(--mat-sys-tertiary, #e65100);
+    }
+
+    h2 { margin: 0; font-size: 1.5rem; }
+    p  { margin: 0; opacity: 0.75; line-height: 1.6; }
+  }
+}
+
+// ── Groups ────────────────────────────────────────────────────────────────────
+.groups-section {
+  padding-top: 56px;
+  padding-bottom: 48px;
+
+  .groups-loading,
+  .groups-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 40px 0;
+    opacity: 0.6;
+
+    mat-icon { font-size: 48px; width: 48px; height: 48px; }
+  }
+
+  .groups-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+  }
+
+  .group-card {
+    .group-desc {
+      font-size: 0.875rem;
+      opacity: 0.7;
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    mat-card-actions {
+      display: flex;
+      align-items: center;
+      .spacer { flex: 1; }
+    }
+
+    .approval-chip {
+      font-size: 0.75rem;
+      height: 26px;
+      mat-icon { font-size: 14px; }
+    }
+  }
+}
+
+// ── Traditions ────────────────────────────────────────────────────────────────
+.traditions-section {
+  padding-bottom: 64px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  padding-top: 48px;
+
+  .section-subtitle {
+    opacity: 0.6;
+    max-width: 560px;
+    margin: -8px 0 28px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .traditions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  .tradition-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 16px;
+    background: rgba(0,0,0,0.03);
+    border-radius: 8px;
+
+    .tradition-num {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--mat-sys-primary, #5c6bc0);
+      min-width: 24px;
+      line-height: 1.4;
+    }
+
+    .tradition-text {
+      margin: 0;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      opacity: 0.8;
+    }
+  }
+}
+
+.section-title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin: 0 0 8px;
+}

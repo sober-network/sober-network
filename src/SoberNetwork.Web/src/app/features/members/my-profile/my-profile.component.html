@@ -1,0 +1,197 @@
+<div class="page-container profile-page">
+  <div *ngIf="loading" class="loading-center">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <ng-container *ngIf="!loading">
+    <!-- Header -->
+    <div class="profile-header">
+      <mat-icon class="avatar-icon">account_circle</mat-icon>
+      <div>
+        <h1>{{ profile?.displayName }}</h1>
+        <p class="email-line">{{ profile?.email }}</p>
+        <div class="days-sober-badge" *ngIf="daysSober !== null">
+          <mat-icon>self_improvement</mat-icon>
+          <span><strong>{{ daysSober }}</strong> days sober</span>
+        </div>
+      </div>
+    </div>
+
+    <mat-accordion multi>
+
+      <!-- ── Profile ───────────────────────────────────────────────────────── -->
+      <mat-expansion-panel expanded>
+        <mat-expansion-panel-header>
+          <mat-panel-title><mat-icon>person</mat-icon> Profile</mat-panel-title>
+        </mat-expansion-panel-header>
+        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Display Name</mat-label>
+            <input matInput formControlName="displayName" />
+            <mat-error *ngIf="profileForm.get('displayName')?.hasError('required')">Required</mat-error>
+            <mat-error *ngIf="profileForm.get('displayName')?.hasError('minlength')">At least 2 characters</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Time Zone</mat-label>
+            <input matInput formControlName="timeZone" placeholder="e.g. America/New_York" />
+            <mat-hint>Optional — used to display meeting times in your local time</mat-hint>
+          </mat-form-field>
+          <div class="panel-actions">
+            <button mat-raised-button color="primary" type="submit" [disabled]="savingProfile">
+              <mat-spinner diameter="18" *ngIf="savingProfile"></mat-spinner>
+              <span *ngIf="!savingProfile">Save Profile</span>
+            </button>
+          </div>
+        </form>
+      </mat-expansion-panel>
+
+      <!-- ── Sobriety ──────────────────────────────────────────────────────── -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title><mat-icon>self_improvement</mat-icon> Sobriety</mat-panel-title>
+        </mat-expansion-panel-header>
+        <form [formGroup]="sobrietyForm" (ngSubmit)="saveSobriety()" novalidate>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Sobriety Date</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="sobrietyDate" />
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-hint>Your anniversary date — leave blank to not track</mat-hint>
+          </mat-form-field>
+          <div class="toggle-row">
+            <mat-slide-toggle formControlName="isSobrietyDatePublic" color="primary">
+              Show my sobriety date to group members
+            </mat-slide-toggle>
+          </div>
+          <div class="toggle-row">
+            <mat-slide-toggle formControlName="isDaysSoberPublic" color="primary">
+              Show days sober count to group members
+            </mat-slide-toggle>
+          </div>
+          <div class="panel-actions">
+            <button mat-raised-button color="primary" type="submit" [disabled]="savingSobriety">
+              <mat-spinner diameter="18" *ngIf="savingSobriety"></mat-spinner>
+              <span *ngIf="!savingSobriety">Save Sobriety Settings</span>
+            </button>
+          </div>
+        </form>
+      </mat-expansion-panel>
+
+      <!-- ── Phone ────────────────────────────────────────────────────────── -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title><mat-icon>phone</mat-icon> Phone Number</mat-panel-title>
+        </mat-expansion-panel-header>
+        <p class="hint-text">Your phone number is never shown publicly. You control visibility per group from the group's Phone List page.</p>
+        <form [formGroup]="phoneForm" (ngSubmit)="savePhone()" novalidate>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Phone Number</mat-label>
+            <input matInput formControlName="phoneNumber" type="tel" autocomplete="tel" />
+            <mat-hint>Leave blank to remove</mat-hint>
+          </mat-form-field>
+          <div class="panel-actions">
+            <button mat-raised-button color="primary" type="submit" [disabled]="savingPhone">
+              <mat-spinner diameter="18" *ngIf="savingPhone"></mat-spinner>
+              <span *ngIf="!savingPhone">Save Phone</span>
+            </button>
+          </div>
+        </form>
+      </mat-expansion-panel>
+
+      <!-- ── Change Password ───────────────────────────────────────────────── -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title><mat-icon>lock</mat-icon> Change Password</mat-panel-title>
+        </mat-expansion-panel-header>
+        <form [formGroup]="passwordForm" (ngSubmit)="savePassword()" novalidate>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Current Password</mat-label>
+            <input matInput [type]="hideCurrentPw ? 'password' : 'text'" formControlName="currentPassword" autocomplete="current-password" />
+            <button mat-icon-button matSuffix type="button" (click)="hideCurrentPw = !hideCurrentPw">
+              <mat-icon>{{ hideCurrentPw ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            <mat-error *ngIf="passwordForm.get('currentPassword')?.hasError('required')">Required</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>New Password</mat-label>
+            <input matInput [type]="hideNewPw ? 'password' : 'text'" formControlName="newPassword" autocomplete="new-password" />
+            <button mat-icon-button matSuffix type="button" (click)="hideNewPw = !hideNewPw">
+              <mat-icon>{{ hideNewPw ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            <mat-hint>Minimum 8 characters</mat-hint>
+            <mat-error *ngIf="passwordForm.get('newPassword')?.hasError('minlength')">At least 8 characters</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Confirm New Password</mat-label>
+            <input matInput [type]="hideConfirmPw ? 'password' : 'text'" formControlName="confirmPassword" autocomplete="new-password" />
+            <button mat-icon-button matSuffix type="button" (click)="hideConfirmPw = !hideConfirmPw">
+              <mat-icon>{{ hideConfirmPw ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            <mat-error *ngIf="passwordForm.hasError('passwordsMismatch')">Passwords do not match</mat-error>
+          </mat-form-field>
+          <div class="panel-actions">
+            <button mat-raised-button color="primary" type="submit" [disabled]="savingPassword">
+              <mat-spinner diameter="18" *ngIf="savingPassword"></mat-spinner>
+              <span *ngIf="!savingPassword">Change Password</span>
+            </button>
+          </div>
+        </form>
+      </mat-expansion-panel>
+
+      <!-- ── Change Email ──────────────────────────────────────────────────── -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title><mat-icon>email</mat-icon> Change Email</mat-panel-title>
+        </mat-expansion-panel-header>
+        <form [formGroup]="emailForm" (ngSubmit)="saveEmail()" novalidate>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>New Email Address</mat-label>
+            <input matInput type="email" formControlName="newEmail" autocomplete="email" />
+            <mat-error *ngIf="emailForm.get('newEmail')?.hasError('email')">Enter a valid email</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Current Password</mat-label>
+            <input matInput [type]="hideEmailPw ? 'password' : 'text'" formControlName="password" autocomplete="current-password" />
+            <button mat-icon-button matSuffix type="button" (click)="hideEmailPw = !hideEmailPw">
+              <mat-icon>{{ hideEmailPw ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+          </mat-form-field>
+          <div class="panel-actions">
+            <button mat-raised-button color="primary" type="submit" [disabled]="savingEmail">
+              <mat-spinner diameter="18" *ngIf="savingEmail"></mat-spinner>
+              <span *ngIf="!savingEmail">Request Email Change</span>
+            </button>
+          </div>
+        </form>
+      </mat-expansion-panel>
+
+      <!-- ── Danger Zone ───────────────────────────────────────────────────── -->
+      <mat-expansion-panel class="danger-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title class="danger-title"><mat-icon color="warn">warning</mat-icon> Danger Zone</mat-panel-title>
+        </mat-expansion-panel-header>
+        <p class="hint-text danger-hint">Deleting your account is permanent. You will be removed from all groups and all your data will be erased.</p>
+        <form [formGroup]="deleteForm" (ngSubmit)="deleteAccount()" novalidate>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Current Password</mat-label>
+            <input matInput [type]="hideDeletePw ? 'password' : 'text'" formControlName="password" autocomplete="current-password" />
+            <button mat-icon-button matSuffix type="button" (click)="hideDeletePw = !hideDeletePw">
+              <mat-icon>{{ hideDeletePw ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Type DELETE MY ACCOUNT to confirm</mat-label>
+            <input matInput formControlName="confirmation" />
+            <mat-error *ngIf="deleteForm.get('confirmation')?.hasError('pattern')">Must match exactly</mat-error>
+          </mat-form-field>
+          <div class="panel-actions">
+            <button mat-raised-button color="warn" type="submit" [disabled]="deleteForm.invalid">
+              Delete My Account
+            </button>
+          </div>
+        </form>
+      </mat-expansion-panel>
+
+    </mat-accordion>
+  </ng-container>
+</div>

@@ -1,0 +1,72 @@
+<div class="page-container detail-page">
+
+  <div *ngIf="loading" class="loading-center">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <div *ngIf="error" class="error-state">
+    <mat-icon>person_off</mat-icon>
+    <p>{{ error }}</p>
+    <a mat-button routerLink="/dashboard">Go to Dashboard</a>
+  </div>
+
+  <ng-container *ngIf="!loading && !error && member">
+    <div class="detail-header">
+      <mat-icon class="avatar-icon">account_circle</mat-icon>
+      <div>
+        <h1>{{ member.displayName }}</h1>
+        <p class="timezone-line" *ngIf="member.timeZone">
+          <mat-icon inline>schedule</mat-icon> {{ member.timeZone }}
+        </p>
+        <a mat-button color="primary" routerLink="/profile" *ngIf="isOwnProfile">
+          Edit My Profile
+        </a>
+      </div>
+    </div>
+
+    <mat-card class="detail-card">
+      <!-- Sobriety -->
+      <mat-card-content>
+        <div class="detail-section" *ngIf="member.sobriety">
+          <h3><mat-icon>self_improvement</mat-icon> Sobriety</h3>
+          <div class="days-badge" *ngIf="member.sobriety.daysSober !== null">
+            <strong>{{ sobrietyLabel(member.sobriety.daysSober) }}</strong>
+          </div>
+          <p class="sobriety-date" *ngIf="member.sobriety.sobrietyDate">
+            Since {{ member.sobriety.sobrietyDate | date:'longDate' }}
+          </p>
+          <p class="private-note" *ngIf="member.sobriety.daysSober === null && !member.sobriety.sobrietyDate">
+            Sobriety information is private.
+          </p>
+        </div>
+
+        <mat-divider *ngIf="member.sobriety && member.phoneNumber"></mat-divider>
+
+        <!-- Phone -->
+        <div class="detail-section" *ngIf="member.phoneNumber">
+          <h3><mat-icon>phone</mat-icon> Phone</h3>
+          <a [href]="'tel:' + member.phoneNumber" class="phone-link">{{ member.phoneNumber }}</a>
+        </div>
+
+        <mat-divider *ngIf="member.groupsInCommon?.length"></mat-divider>
+
+        <!-- Groups in common -->
+        <div class="detail-section" *ngIf="member.groupsInCommon?.length">
+          <h3><mat-icon>groups</mat-icon> Groups in Common</h3>
+          <div class="chips-row">
+            <mat-chip *ngFor="let slug of member.groupsInCommon"
+                      [routerLink]="['/groups', slug]">
+              {{ slug }}
+            </mat-chip>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="back-row">
+      <a mat-button routerLink="/dashboard">
+        <mat-icon>arrow_back</mat-icon> Back to Dashboard
+      </a>
+    </div>
+  </ng-container>
+</div>

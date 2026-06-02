@@ -13,6 +13,7 @@ public class GroupMembership
     public bool IsProbationary { get; set; } = true;   // posts require moderation for new members
     public int ApprovedPostCount { get; set; } = 0;
     public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? DeletedAt { get; set; }           // soft remove — member history preserved (T12)
     public DateTime? ApprovedAt { get; set; }

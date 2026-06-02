@@ -206,6 +206,142 @@ Anonymity and member responsibility are both honored.
 
 ---
 
+## Engineering Standards
+
+These standards apply to every feature, PR, and code change on Sober Network. They are standing instructions — not suggestions.
+
+---
+
+### 1. SOLID Principles
+
+**Single Responsibility**
+- Every class does one thing. `TokenService` generates tokens. `AuditService` writes audit events. `EmailService` sends email. Never combine concerns.
+- Controllers orchestrate only — no business logic in controllers. If a controller method is getting complex, extract a service.
+
+**Open/Closed**
+- New behavior is added by implementing new classes against existing interfaces, not by modifying working code.
+- Adding a new email provider means implementing `IEmailService` — not editing `EmailService`.
+
+**Liskov Substitution**
+- Any implementation of an interface must be fully substitutable. If a test mock can't replace the real service without breaking contracts, the interface is wrong.
+
+**Interface Segregation**
+- Interfaces are small and focused. `ITokenService`, `IEmailService`, `IAuditService` — never a God interface that bundles unrelated capabilities.
+- If a consumer only needs one method, it shouldn't be forced to depend on ten.
+
+**Dependency Inversion**
+- `SoberNetwork.Core` defines interfaces. `SoberNetwork.Infrastructure` implements them. `SoberNetwork.Api` consumes them via DI.
+- **Core never imports Infrastructure** — this is enforced by project reference structure.
+- Controllers and services depend on interfaces, never on concrete implementations directly.
+
+---
+
+### 2. API Design Standards
+
+**URL Structure**
+- Resources are plural nouns: `GET /api/groups`, `POST /api/groups/{slug}/members`
+- Use **slugs** for group identifiers in URLs, never raw database IDs (Tradition 12 — no enumerable IDs for members or groups)
+- Nested routes for owned resources: `/api/groups/{slug}/events`, `/api/groups/{slug}/documents`
+- Actions that don't fit REST get a verb: `/api/auth/refresh`, `/api/auth/logout`
+
+**HTTP Conventions**
+- `GET` — read, never mutates state
+- `POST` — create or action
+- `PUT` / `PATCH` — full / partial update
+- `DELETE` — soft delete only (sets `deleted_at`, never removes rows)
+
+**Authorization Default**
+- `[Authorize]` is the default on all controllers. `[AllowAnonymous]` must be explicitly applied AND documented with a comment explaining why it's public.
+- Every `[AllowAnonymous]` endpoint is a security decision that must pass Tradition 11/12 review.
+
+**Response Shape**
+- Success: return the resource or a plain confirmation message — never raw entity objects
+- Error: always return a consistent shape: `{ "message": "..." }` — never stack traces, never Identity error detail in production
+- Generic messages on auth endpoints always — no user enumeration
+
+**DTO Boundary**
+- Entities (`ApplicationUser`, `Group`, etc.) never leave the API layer. Always map to a DTO/record before returning.
+- Input DTOs use `[Required]`, `[MaxLength]`, `[EmailAddress]` etc. — validate at the boundary, not deep in services.
+
+---
+
+### 3. Data Standards
+
+**Every table must have:**
+- `created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`
+- `updated_at TIMESTAMPTZ` (updated via EF `SaveChanges` interceptor — planned)
+- Soft delete via `deleted_at TIMESTAMPTZ NULL` — never hard delete member content
+
+**Multi-tenancy isolation (Tradition 4)**
+- Every table containing member-scoped data must have a `group_id` column with a foreign key to `groups`
+- Queries for member data must always include a `group_id` filter — no cross-tenant data leakage ever
+- Supabase RLS policies will enforce this at the DB level as a second line of defense
+
+**Naming conventions**
+- PostgreSQL tables and columns: `snake_case`
+- C# entities and properties: `PascalCase`
+- EF Core handles the mapping via `UseSnakeCaseNamingConvention()` or explicit config
+
+**Indexes**
+- Always index foreign keys
+- Index any column used in a `WHERE` clause in common queries (`group_id`, `user_id`, `created_at`, `slug`)
+- Index columns used for lookup uniqueness (`slug` on groups, `token_hash` on refresh tokens)
+
+**Logging / PII (Tradition 12)**
+- Logs contain `userId` (GUID) only — never email, display name, sobriety date, phone number, or IP in application logs
+- IP address and user agent are stored only in `security_events` for security purposes, never in application/debug logs
+- Audit log rows describe *actions*, not *people* — "user X reset their password" not "Scott reset their password"
+
+---
+
+### 4. Tradition Compliance Checklist
+
+Run this checklist before designing or implementing any new feature. If any answer is "yes" or "unclear", stop and resolve it before writing code.
+
+| # | Question | Tradition |
+|---|----------|-----------|
+| 1 | Does this expose any member data (name, email, phone, sobriety date) to unauthenticated users? | T11, T12 |
+| 2 | Does this create a public-facing profile, roster, or searchable directory of members? | T11, T12 |
+| 3 | Does this require personal information beyond what's strictly necessary for the feature? | T3 |
+| 4 | Could this give one member disproportionate power or visibility over others? | T2, T9 |
+| 5 | Could this allow one group's data to be seen by another group or its members? | T4 |
+| 6 | Does this serve the primary purpose of recovery, or does it distract from it? | T5 |
+| 7 | Does this involve advertising, sponsorship, gamification, or engagement mechanics? | T5, T6 |
+| 8 | Does this involve or imply professional clinical services (therapy, counseling)? | T8 |
+| 9 | Could this draw the platform into political or social controversy? | T10 |
+| 10 | Does this use the name or trademarks of Alcoholics Anonymous? | T6 |
+
+---
+
+### 5. Testing Standards
+
+**What to test**
+- All service logic in `SoberNetwork.Core` and `SoberNetwork.Infrastructure` — unit tested with mocked dependencies
+- All API endpoints — integration tested against a real in-memory or test DB
+- Security-sensitive paths get dedicated tests: auth flows, phone list access, member data isolation, group boundary enforcement
+
+**Test naming convention**
+```
+MethodName_Scenario_ExpectedResult
+// Examples:
+Login_WithInvalidPassword_ReturnsUnauthorized
+Register_WithDuplicateEmail_ReturnsBadRequest
+GetPhoneList_AsNonMember_ReturnsForbidden
+GetPhoneList_AsActiveMember_ReturnsPhoneList
+```
+
+**Security test requirements**
+Every protected endpoint must have at least:
+1. A test asserting unauthenticated requests return `401`
+2. A test asserting insufficient role returns `403`
+3. A test asserting cross-group access returns `403` or `404` (no data leakage)
+
+**No production secrets in tests**
+- Tests use in-memory SQLite or a dedicated test Supabase schema, never the production DB
+- JWT secrets and API keys in tests are hardcoded throwaway values only
+
+---
+
 ## Technology Stack ✅ DECIDED
 
 ### Stack: C# + Angular (developer-familiar, free-hosted)

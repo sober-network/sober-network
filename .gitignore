@@ -19,3 +19,6 @@ src/SoberNetwork.Web/.angular/
 # OS
 .DS_Store
 Thumbs.db
+
+# Serilog local log files
+logs/

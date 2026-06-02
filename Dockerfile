@@ -17,11 +17,11 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS dotnet-build
 WORKDIR /src
 
 # Restore (layer cache — only re-runs when .csproj files change)
-COPY SoberNetwork.slnx ./
+# Copy only the source projects — test projects are not needed in the runtime image
 COPY src/SoberNetwork.Api/SoberNetwork.Api.csproj           src/SoberNetwork.Api/
 COPY src/SoberNetwork.Core/SoberNetwork.Core.csproj         src/SoberNetwork.Core/
 COPY src/SoberNetwork.Infrastructure/SoberNetwork.Infrastructure.csproj src/SoberNetwork.Infrastructure/
-RUN dotnet restore
+RUN dotnet restore src/SoberNetwork.Api/SoberNetwork.Api.csproj
 
 # Build & publish
 COPY src/SoberNetwork.Api/           src/SoberNetwork.Api/

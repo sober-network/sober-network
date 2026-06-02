@@ -12,6 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatBadgeModule } from '@angular/material/badge';
+import { ChangeDetectorRef } from '@angular/core';
 import { MemberService } from '@app/core/services/member.service';
 import { GroupService } from '@app/core/services/group.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@app/shared/components/confirm-dialog/confirm-dialog.component';
@@ -36,6 +37,7 @@ export class AdminDashboardComponent implements OnInit {
   private readonly groupService  = inject(GroupService);
   private readonly snack         = inject(MatSnackBar);
   private readonly dialog        = inject(MatDialog);
+  private readonly cdr           = inject(ChangeDetectorRef);
 
   members: AdminMemberResponse[] = [];
   groups:  GroupResponse[]        = [];
@@ -53,8 +55,9 @@ export class AdminDashboardComponent implements OnInit {
         this.members = members;
         this.groups  = groups.items;
         this.loading = false;
+        this.cdr.detectChanges();
       },
-      error: () => { this.loading = false; },
+      error: () => { this.loading = false; this.cdr.detectChanges(); },
     });
   }
 

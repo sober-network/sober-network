@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { catchError, finalize, forkJoin, map, of, switchMap } from 'rxjs';
 import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
@@ -43,6 +43,7 @@ export class GroupMembersComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly groupService = inject(GroupService);
   private readonly dialog = inject(MatDialog);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly membershipStatuses: MembershipStatus[] = ['Active', 'Probationary', 'Suspended', 'Banned'];
 
@@ -203,6 +204,7 @@ export class GroupMembersComponent implements OnInit {
       }),
       finalize(() => {
         this.loading = false;
+        this.cdr.detectChanges();
       })
     ).subscribe({
       next: members => {

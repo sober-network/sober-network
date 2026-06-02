@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -39,6 +39,7 @@ export class GroupSettingsComponent implements OnInit {
   private readonly groupService = inject(GroupService);
   private readonly dialog = inject(MatDialog);
   private readonly fb = inject(FormBuilder);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   slug = '';
   group: GroupResponse | null = null;
@@ -130,6 +131,7 @@ export class GroupSettingsComponent implements OnInit {
     this.groupService.getGroup(this.slug).pipe(
       finalize(() => {
         this.loading = false;
+        this.cdr.detectChanges();
       })
     ).subscribe({
       next: group => {

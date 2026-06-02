@@ -15,6 +15,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
+import { ChangeDetectorRef } from '@angular/core';
 import { MemberService } from '@app/core/services/member.service';
 import { AuthService } from '@app/core/services/auth.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@app/shared/components/confirm-dialog/confirm-dialog.component';
@@ -51,6 +52,7 @@ export class MyProfileComponent implements OnInit {
   private readonly snack = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
   private readonly fb = inject(FormBuilder);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   profile: MemberProfileResponse | null = null;
   sobriety: SobrietyResponse | null = null;
@@ -110,8 +112,9 @@ export class MyProfileComponent implements OnInit {
         this.profile = p;
         this.profileForm.patchValue({ displayName: p.displayName, timeZone: p.timeZone ?? '' });
         this.loading = false;
+        this.cdr.detectChanges();
       },
-      error: () => { this.loading = false; },
+      error: () => { this.loading = false; this.cdr.detectChanges(); },
     });
     this.memberService.getMySobriety().subscribe({
       next: s => {

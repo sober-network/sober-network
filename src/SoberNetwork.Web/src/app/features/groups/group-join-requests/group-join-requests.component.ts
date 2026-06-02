@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
 import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
@@ -31,6 +31,7 @@ export class GroupJoinRequestsComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly groupService = inject(GroupService);
   private readonly dialog = inject(MatDialog);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   slug = '';
   groupName = '';
@@ -114,6 +115,7 @@ export class GroupJoinRequestsComponent implements OnInit {
     }).pipe(
       finalize(() => {
         this.loading = false;
+        this.cdr.detectChanges();
       })
     ).subscribe({
       next: ({ group, response }) => {

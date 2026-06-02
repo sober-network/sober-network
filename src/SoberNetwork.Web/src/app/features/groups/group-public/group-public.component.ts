@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -39,6 +39,7 @@ export class GroupPublicComponent implements OnInit {
   private readonly groupService = inject(GroupService);
   private readonly dialog = inject(MatDialog);
   private readonly fb = inject(FormBuilder);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   @ViewChild('joinDialog') private joinDialog?: TemplateRef<unknown>;
 
@@ -106,6 +107,7 @@ export class GroupPublicComponent implements OnInit {
     this.groupService.getGroup(this.slug).pipe(
       finalize(() => {
         this.loading = false;
+        this.cdr.detectChanges();
       })
     ).subscribe({
       next: group => {

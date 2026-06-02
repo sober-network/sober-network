@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { GroupService } from '@app/core/services/group.service';
 import { AuthService } from '@app/core/services/auth.service';
 import { MemberDetailResponse } from '@app/core/models';
+import { ChangeDetectorRef } from '@angular/core';
 import { switchMap, of } from 'rxjs';
 
 @Component({
@@ -27,6 +28,7 @@ export class MemberDetailComponent implements OnInit {
   private readonly route  = inject(ActivatedRoute);
   private readonly groups = inject(GroupService);
   private readonly auth   = inject(AuthService);
+  private readonly cdr    = inject(ChangeDetectorRef);
 
   member: MemberDetailResponse | null = null;
   loading = true;
@@ -46,8 +48,8 @@ export class MemberDetailComponent implements OnInit {
     slug$.pipe(
       switchMap(slug => slug ? this.groups.getMemberDetail(slug, userId) : of(null))
     ).subscribe({
-      next: m => { this.member = m; this.loading = false; },
-      error: () => { this.error = 'Could not load member profile.'; this.loading = false; },
+      next: m => { this.member = m; this.loading = false; this.cdr.detectChanges(); },
+      error: () => { this.error = 'Could not load member profile.'; this.loading = false; this.cdr.detectChanges(); },
     });
   }
 

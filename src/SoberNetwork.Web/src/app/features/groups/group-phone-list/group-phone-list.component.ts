@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { catchError, finalize, forkJoin, map, of, switchMap } from 'rxjs';
@@ -44,6 +44,7 @@ export class GroupPhoneListComponent implements OnInit {
   private readonly groupService = inject(GroupService);
   private readonly memberService = inject(MemberService);
   private readonly fb = inject(FormBuilder);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   slug = '';
   groupName = '';
@@ -148,6 +149,7 @@ export class GroupPhoneListComponent implements OnInit {
       }),
       finalize(() => {
         this.loading = false;
+        this.cdr.detectChanges();
       })
     ).subscribe({
       next: ({ phoneList, details }) => {

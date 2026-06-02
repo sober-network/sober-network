@@ -212,7 +212,7 @@ public class AuthController(
         await auditService.LogAsync(SecurityEventType.TokenRefreshed, storedToken.UserId, ipAddress: Ip(), userAgent: Ua());
 
         var response = new AuthResponse(
-            Token: tokenService.GenerateToken(storedToken.User),
+            AccessToken: tokenService.GenerateToken(storedToken.User),
             ExpiresAt: tokenService.GetExpiry(),
             RefreshToken: newPlainToken,
             RefreshTokenExpiresAt: tokenService.GetRefreshExpiry(),
@@ -244,7 +244,7 @@ public class AuthController(
         var refreshToken = await refreshTokenService.CreateAsync(user.Id);
 
         return new AuthResponse(
-            Token: tokenService.GenerateToken(user),
+            AccessToken: tokenService.GenerateToken(user),
             ExpiresAt: tokenService.GetExpiry(),
             RefreshToken: refreshToken,
             RefreshTokenExpiresAt: tokenService.GetRefreshExpiry(),

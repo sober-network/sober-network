@@ -1,7 +1,7 @@
 namespace SoberNetwork.Core.DTOs.Auth;
 
 public record AuthResponse(
-    string Token,
+    string AccessToken,
     DateTime ExpiresAt,
     string RefreshToken,
     DateTime RefreshTokenExpiresAt,

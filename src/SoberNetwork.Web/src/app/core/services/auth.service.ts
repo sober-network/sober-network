@@ -40,7 +40,7 @@ export class AuthService {
     const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
     if (!refreshToken) return throwError(() => new Error('No refresh token available'));
     const body: RefreshTokenRequest = { refreshToken };
-    return this.http.post<AuthResponse>(`${this.base}/refresh-token`, body).pipe(
+    return this.http.post<AuthResponse>(`${this.base}/refresh`, body).pipe(
       tap(r => this.handleAuthResponse(r))
     );
   }
@@ -62,7 +62,7 @@ export class AuthService {
     if (refreshToken) {
       const body: RevokeTokenRequest = { refreshToken };
       // Fire-and-forget — clear local state regardless of server response
-      this.http.post(`${this.base}/revoke-token`, body).subscribe({ error: () => {} });
+      this.http.post(`${this.base}/logout`, body).subscribe({ error: () => {} });
     }
     this.clearSession();
     this.router.navigate(['/auth/login']);

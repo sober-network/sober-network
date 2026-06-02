@@ -7,12 +7,13 @@ import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { timeoutInterceptor } from './core/interceptors/timeout.interceptor';
+import { loggingInterceptor } from './core/interceptors/logging.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideAnimationsAsync(),
-    provideHttpClient(withInterceptors([timeoutInterceptor, authInterceptor, errorInterceptor])),
+    provideHttpClient(withInterceptors([loggingInterceptor, timeoutInterceptor, authInterceptor, errorInterceptor])),
   ]
 };

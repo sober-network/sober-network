@@ -13,7 +13,7 @@ namespace SoberNetwork.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class GroupsController(IGroupService groupService) : ControllerBase
+public class GroupsController(IGroupService groupService, IMemberService memberService) : ControllerBase
 {
     private string UserId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
     private bool IsSuperAdmin => User.FindFirstValue("isSuperAdmin") == "true";
@@ -188,5 +188,43 @@ public class GroupsController(IGroupService groupService) : ControllerBase
         var (success, error) = await groupService.ClearProbationaryStatusAsync(slug, userId, UserId);
         if (!success) return error!.Contains("permission") ? Forbid() : BadRequest(new { error });
         return Ok(new { message = "Probationary status cleared." });
+    }
+
+    // ── Group-scoped member views (delegated to IMemberService) ───────────────
+
+    /// <summary>
+    /// Toggles per-group phone sharing for the current user.
+    /// Caller must be an active member of the group (T12).
+    /// </summary>
+    [HttpPatch("{slug}/members/me/phone-visibility")]
+    public async Task<IActionResult> SetMyPhoneVisibility(string slug, [FromBody] PhoneVisibilityRequest request)
+    {
+        var (success, error) = await memberService.SetGroupPhoneVisibilityAsync(UserId, slug, request.IsShared);
+        if (!success) return error!.Contains("not an active member") ? Forbid() : BadRequest(new { error });
+        return Ok(new { message = request.IsShared ? "Phone shared with group." : "Phone hidden from group." });
+    }
+
+    /// <summary>
+    /// Returns the phone list — only members who have opted in for this group (T12).
+    /// Caller must be an active member.
+    /// </summary>
+    [HttpGet("{slug}/phone-list")]
+    public async Task<IActionResult> GetPhoneList(string slug)
+    {
+        var (list, error) = await memberService.GetGroupPhoneListAsync(UserId, slug);
+        if (error != null) return error.Contains("not a member") ? Forbid() : NotFound();
+        return Ok(list);
+    }
+
+    /// <summary>
+    /// Returns a group-scoped profile of another member.
+    /// Respects all visibility settings — no PII leaked (T3, T12).
+    /// </summary>
+    [HttpGet("{slug}/members/{userId}")]
+    public async Task<IActionResult> GetMemberDetail(string slug, string userId)
+    {
+        var (member, error) = await memberService.GetMemberInGroupContextAsync(UserId, slug, userId);
+        if (error != null) return error.Contains("not a member") ? Forbid() : NotFound();
+        return Ok(member);
     }
 }

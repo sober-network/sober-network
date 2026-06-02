@@ -34,5 +34,18 @@ public enum SecurityEventType
     GroupMemberLeft,
     GroupRoleChanged,
     GroupMemberStatusChanged,
-    GroupProbationCleared
+    GroupProbationCleared,
+
+    // Member profile
+    ProfileUpdated,
+    EmailChangeRequested,
+    EmailChanged,
+    PasswordChanged,
+    AccountDeactivated,
+    SobrietyDateSet,
+    SobrietyDateRemoved,
+    SobrietyVisibilityChanged,
+    PhoneSet,
+    PhoneRemoved,
+    PhoneVisibilityChanged
 }

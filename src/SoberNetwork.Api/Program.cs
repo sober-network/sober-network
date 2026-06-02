@@ -92,6 +92,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
+builder.Services.AddScoped<IMemberService, MemberService>();
 
 // Resend email service
 builder.Services.AddOptions();

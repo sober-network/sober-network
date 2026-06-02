@@ -29,7 +29,9 @@ jobs:
         run: dotnet build src/SoberNetwork.Api/SoberNetwork.Api.csproj --no-restore --configuration Release
 
       - name: Run tests
-        run: dotnet test --configuration Release --verbosity normal
+        run: |
+          dotnet test tests/SoberNetwork.Core.Tests/SoberNetwork.Core.Tests.csproj --configuration Release --verbosity normal
+          dotnet test tests/SoberNetwork.Api.Tests/SoberNetwork.Api.Tests.csproj --configuration Release --verbosity normal
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

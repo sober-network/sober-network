@@ -48,10 +48,10 @@
           <a [href]="'tel:' + member.phoneNumber" class="phone-link">{{ member.phoneNumber }}</a>
         </div>
 
-        <mat-divider *ngIf="member.groupsInCommon?.length"></mat-divider>
+        <mat-divider *ngIf="member.groupsInCommon.length"></mat-divider>
 
         <!-- Groups in common -->
-        <div class="detail-section" *ngIf="member.groupsInCommon?.length">
+        <div class="detail-section" *ngIf="member.groupsInCommon.length">
           <h3><mat-icon>groups</mat-icon> Groups in Common</h3>
           <div class="chips-row">
             <mat-chip *ngFor="let slug of member.groupsInCommon"

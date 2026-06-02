@@ -17,7 +17,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS dotnet-build
 WORKDIR /src
 
 # Restore (layer cache — only re-runs when .csproj files change)
-COPY SoberNetwork.sln ./
+COPY SoberNetwork.slnx ./
 COPY src/SoberNetwork.Api/SoberNetwork.Api.csproj           src/SoberNetwork.Api/
 COPY src/SoberNetwork.Core/SoberNetwork.Core.csproj         src/SoberNetwork.Core/
 COPY src/SoberNetwork.Infrastructure/SoberNetwork.Infrastructure.csproj src/SoberNetwork.Infrastructure/

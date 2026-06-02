@@ -11,6 +11,8 @@ public class Group
     public string? TimeZone { get; set; }
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? DeletedAt { get; set; }           // soft delete — groups are never permanently removed (T4)
 
     public ICollection<GroupMembership> Memberships { get; set; } = [];
 }

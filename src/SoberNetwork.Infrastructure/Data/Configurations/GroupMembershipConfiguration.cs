@@ -14,6 +14,9 @@ public class GroupMembershipConfiguration : IEntityTypeConfiguration<GroupMember
         // Unique: one membership record per user per group
         builder.HasIndex(m => new { m.UserId, m.GroupId }).IsUnique();
 
+        // Index GroupId alone for efficient "get all members of group X" queries
+        builder.HasIndex(m => m.GroupId);
+
         builder.HasOne(m => m.User)
             .WithMany(u => u.GroupMemberships)
             .HasForeignKey(m => m.UserId)

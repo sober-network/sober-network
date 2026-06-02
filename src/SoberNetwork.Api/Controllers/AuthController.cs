@@ -1,15 +1,17 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using SoberNetwork.Core.DTOs.Auth;
 using SoberNetwork.Core.Entities;
 using SoberNetwork.Core.Enums;
 using SoberNetwork.Core.Interfaces;
-using SoberNetwork.Infrastructure.Data;
 
 namespace SoberNetwork.Api.Controllers;
 
+// [AllowAnonymous] — auth endpoints are intentionally public; the global [Authorize] fallback
+// policy is overridden here since users cannot be authenticated before registering or logging in.
+[AllowAnonymous]
 [ApiController]
 [Route("api/[controller]")]
 [EnableRateLimiting("auth")]
@@ -19,7 +21,7 @@ public class AuthController(
     ITokenService tokenService,
     IEmailService emailService,
     IAuditService auditService,
-    AppDbContext db,
+    IRefreshTokenService refreshTokenService,
     ILogger<AuthController> logger) : ControllerBase
 {
     // ─── Registration ────────────────────────────────────────────────────────
@@ -39,8 +41,8 @@ public class AuthController(
 
         if (!result.Succeeded)
         {
-            logger.LogWarning("Registration failed for {Email}: {Errors}",
-                request.Email, string.Join(", ", result.Errors.Select(e => e.Description)));
+            logger.LogWarning("Registration failed: {Errors}",
+                string.Join(", ", result.Errors.Select(e => e.Description)));
             return BadRequest("Unable to complete registration. Check your details and try again.");
         }
 
@@ -59,6 +61,8 @@ public class AuthController(
 
     // ─── Email Confirmation ───────────────────────────────────────────────────
 
+    // GET is required here (not POST) because confirmation links are clicked in email clients,
+    // which always issue GET requests. This is a documented exception to the GET-never-mutates rule.
     [HttpGet("confirm-email")]
     public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token)
     {
@@ -83,7 +87,7 @@ public class AuthController(
     {
         var user = await userManager.FindByEmailAsync(request.Email);
 
-        // Always return the same response — no user enumeration
+        // Always return the same response — no user enumeration (T12)
         if (user is null || user.EmailConfirmed)
             return Ok("If that email is registered and unconfirmed, a new confirmation link has been sent.");
 
@@ -108,7 +112,6 @@ public class AuthController(
 
         if (user is null)
         {
-            logger.LogWarning("Login attempt for unknown email");
             await auditService.LogAsync(SecurityEventType.LoginFailed, details: "Unknown email", ipAddress: Ip(), userAgent: Ua());
             return Unauthorized("Invalid credentials.");
         }
@@ -118,18 +121,17 @@ public class AuthController(
         if (result.IsLockedOut)
         {
             await auditService.LogAsync(SecurityEventType.Lockout, user.Id, ipAddress: Ip(), userAgent: Ua());
-            logger.LogWarning("Locked out login attempt: {UserId}", user.Id);
             return Unauthorized("Invalid credentials.");
         }
 
         if (!result.Succeeded)
         {
             await auditService.LogAsync(SecurityEventType.LoginFailed, user.Id, ipAddress: Ip(), userAgent: Ua());
-            logger.LogWarning("Failed login: {UserId}", user.Id);
             return Unauthorized("Invalid credentials.");
         }
 
         user.LastLoginAt = DateTime.UtcNow;
+        user.UpdatedAt = DateTime.UtcNow;
         await userManager.UpdateAsync(user);
         await auditService.LogAsync(SecurityEventType.LoginSuccess, user.Id, ipAddress: Ip(), userAgent: Ua());
 
@@ -144,7 +146,7 @@ public class AuthController(
     {
         var user = await userManager.FindByEmailAsync(request.Email);
 
-        // Always return the same response — no user enumeration
+        // Always return the same response — no user enumeration (T12)
         if (user is null || !user.EmailConfirmed)
             return Ok("If that email is registered, a password reset link has been sent.");
 
@@ -174,8 +176,8 @@ public class AuthController(
             return BadRequest("Password reset failed. The link may have expired.");
         }
 
-        // Revoke all existing refresh tokens on password change — forces re-login everywhere
-        await RevokeAllRefreshTokensAsync(user.Id, "password reset");
+        // Revoke all sessions on password change — forces re-login on all devices
+        await refreshTokenService.RevokeAllForUserAsync(user.Id);
         await auditService.LogAsync(SecurityEventType.PasswordReset, user.Id, ipAddress: Ip(), userAgent: Ua());
 
         logger.LogInformation("Password reset completed: {UserId}", user.Id);
@@ -187,44 +189,26 @@ public class AuthController(
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
     {
-        var hash = tokenService.HashToken(request.RefreshToken);
+        var rotated = await refreshTokenService.RotateAsync(request.RefreshToken);
 
-        var stored = await db.RefreshTokens
-            .Include(t => t.User)
-            .FirstOrDefaultAsync(t => t.TokenHash == hash);
-
-        if (stored is null || !stored.IsActive)
+        if (rotated is null)
         {
             logger.LogWarning("Invalid or expired refresh token attempt");
             return Unauthorized("Invalid or expired refresh token.");
         }
 
-        // Rotate: revoke the old token, issue a new one
-        stored.RevokedAt = DateTime.UtcNow;
-        var (newToken, newHash) = tokenService.GenerateRefreshToken();
-        stored.ReplacedByTokenHash = newHash;
-
-        var newRefreshToken = new RefreshToken
-        {
-            UserId = stored.UserId,
-            TokenHash = newHash,
-            ExpiresAt = tokenService.GetRefreshExpiry()
-        };
-
-        db.RefreshTokens.Add(newRefreshToken);
-        await db.SaveChangesAsync();
-
-        await auditService.LogAsync(SecurityEventType.TokenRefreshed, stored.UserId, ipAddress: Ip(), userAgent: Ua());
+        var (newPlainToken, storedToken) = rotated.Value;
+        await auditService.LogAsync(SecurityEventType.TokenRefreshed, storedToken.UserId, ipAddress: Ip(), userAgent: Ua());
 
         var response = new AuthResponse(
-            Token: tokenService.GenerateToken(stored.User),
+            Token: tokenService.GenerateToken(storedToken.User),
             ExpiresAt: tokenService.GetExpiry(),
-            RefreshToken: newToken,
-            RefreshTokenExpiresAt: newRefreshToken.ExpiresAt,
-            UserId: stored.User.Id,
-            Email: stored.User.Email!,
-            DisplayName: stored.User.DisplayName,
-            IsSuperAdmin: stored.User.IsSuperAdmin
+            RefreshToken: newPlainToken,
+            RefreshTokenExpiresAt: tokenService.GetRefreshExpiry(),
+            UserId: storedToken.User.Id,
+            Email: storedToken.User.Email!,
+            DisplayName: storedToken.User.DisplayName,
+            IsSuperAdmin: storedToken.User.IsSuperAdmin
         );
 
         return Ok(response);
@@ -235,17 +219,10 @@ public class AuthController(
     [HttpPost("logout")]
     public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest request)
     {
-        var hash = tokenService.HashToken(request.RefreshToken);
-        var stored = await db.RefreshTokens.FirstOrDefaultAsync(t => t.TokenHash == hash);
+        await refreshTokenService.RevokeAsync(request.RefreshToken);
+        await auditService.LogAsync(SecurityEventType.Logout, ipAddress: Ip(), userAgent: Ua());
 
-        if (stored is { IsActive: true })
-        {
-            stored.RevokedAt = DateTime.UtcNow;
-            await db.SaveChangesAsync();
-            await auditService.LogAsync(SecurityEventType.Logout, stored.UserId, ipAddress: Ip(), userAgent: Ua());
-        }
-
-        // Always return 200 — no enumeration on logout
+        // Always return 200 — no token enumeration on logout (T12)
         return Ok("Logged out successfully.");
     }
 
@@ -253,15 +230,7 @@ public class AuthController(
 
     private async Task<AuthResponse> BuildResponseAsync(ApplicationUser user)
     {
-        var (refreshToken, refreshHash) = tokenService.GenerateRefreshToken();
-
-        db.RefreshTokens.Add(new RefreshToken
-        {
-            UserId = user.Id,
-            TokenHash = refreshHash,
-            ExpiresAt = tokenService.GetRefreshExpiry()
-        });
-        await db.SaveChangesAsync();
+        var refreshToken = await refreshTokenService.CreateAsync(user.Id);
 
         return new AuthResponse(
             Token: tokenService.GenerateToken(user),
@@ -273,20 +242,6 @@ public class AuthController(
             DisplayName: user.DisplayName,
             IsSuperAdmin: user.IsSuperAdmin
         );
-    }
-
-    private async Task RevokeAllRefreshTokensAsync(string userId, string reason)
-    {
-        var tokens = await db.RefreshTokens
-            .Where(t => t.UserId == userId && t.RevokedAt == null)
-            .ToListAsync();
-
-        foreach (var t in tokens)
-            t.RevokedAt = DateTime.UtcNow;
-
-        await db.SaveChangesAsync();
-        logger.LogInformation("Revoked {Count} refresh token(s) for {UserId} — reason: {Reason}",
-            tokens.Count, userId, reason);
     }
 
     private string? Ip() => HttpContext.Connection.RemoteIpAddress?.ToString();

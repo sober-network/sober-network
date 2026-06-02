@@ -65,7 +65,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("ApiCors", policy => policy
         .WithOrigins(allowedOrigins)
         .AllowAnyHeader()
-        .WithMethods("GET", "POST", "PUT", "DELETE")
+        .WithMethods("GET", "POST", "PUT", "PATCH", "DELETE")
         .AllowCredentials()));
 
 // Rate limiting — 5 requests per minute on auth endpoints
@@ -90,6 +90,7 @@ builder.Services.AddHsts(options =>
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
+builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
 // Resend email service
 builder.Services.AddOptions();
@@ -100,6 +101,13 @@ builder.Services.Configure<ResendClientOptions>(o =>
 builder.Services.AddTransient<IResend, ResendClient>();
 
 builder.Services.AddControllers();
+
+// Require authentication globally — every endpoint is protected by default.
+// Use [AllowAnonymous] explicitly on public endpoints with a justification comment.
+builder.Services.AddAuthorizationBuilder()
+    .SetFallbackPolicy(new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build());
 
 var app = builder.Build();
 

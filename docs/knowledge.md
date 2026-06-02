@@ -20,12 +20,84 @@ The platform must honor the **12 Traditions of A.A.** at every design decision.
 - Public-facing content is strictly limited (meeting times, contact form, no member data)
 - Phone lists and member information are never exposed publicly
 
-### AA 12 Traditions Alignment
-- **Tradition 1**: Platform design supports group unity; no feature should fracture a group
-- **Tradition 6**: Platform is not "AA" — it's *Sober Network*, an independently operated tool
-- **Tradition 7**: Each group is self-supporting; billing/costs should be per-group where applicable
-- **Tradition 11**: Anonymity at the public level — no last names, photos optional, no public rosters
-- **Tradition 12**: Anonymity is the spiritual foundation — built into the data model, not bolted on
+### AA 12 Traditions — Full Text & Design Implications
+
+These are non-negotiable constraints. Every feature, endpoint, data model, and UX decision must be evaluated against them.
+
+---
+
+**Tradition 1** — *"Our common welfare should come first; personal recovery depends upon A.A. unity."*
+- No feature may be designed to serve one member at the expense of the group
+- Platform governance must support group unity, not individual prestige or control
+- Disputes between members must be resolvable without destroying the group's digital space
+- `superadmin` power is a stewardship role, not ownership
+
+**Tradition 2** — *"For our group purpose there is but one ultimate authority — a loving God as He may express Himself in our group conscience. Our leaders are but trusted servants; they do not govern."*
+- `group_admin` is a **trusted servant**, not a ruler — the role has limits
+- Platform must support group conscience decisions (polls, announcements, voting features)
+- No single admin account should be an unrecoverable single point of failure
+- Succession planning is a platform feature, not an afterthought
+
+**Tradition 3** — *"The only requirement for A.A. membership is a desire to stop drinking."*
+- No demographic, financial, or personal data may be required beyond what's needed for auth
+- Sobriety date is **opt-in only** — never required
+- Phone number, last name, location — all optional, never exposed publicly
+- The join request process must not be a gatekeeping mechanism beyond basic identity
+
+**Tradition 4** — *"Each group should be autonomous except in matters affecting other groups or A.A. as a whole."*
+- Groups configure their own content rules, roles, and moderation policies independently
+- Platform cannot force one group's settings onto another
+- `superadmin` can only intervene if a group's actions affect the platform or other groups
+- Multi-group membership must not leak one group's data to another
+
+**Tradition 5** — *"Each group has but one primary purpose — to carry its message to the alcoholic who still suffers."*
+- Features must serve recovery, not distract from it
+- No advertising, no gamification, no engagement-bait mechanics
+- The meeting schedule and newcomer contact features are highest-priority public-facing content
+- Every feature should pass the test: "Does this help carry the message?"
+
+**Tradition 6** — *"An A.A. group ought never endorse, finance, or lend the A.A. name to any related facility or outside enterprise, lest problems of money, property, and prestige divert us from our primary purpose."*
+- Platform is named **Sober Network**, never "AA [anything]"
+- No AA logos, trademarks, or official branding may be used
+- No partnerships, sponsors, or affiliate links — ever
+- The platform serves AA groups but is not AA itself
+
+**Tradition 7** — *"Every A.A. group ought to be fully self-supporting, declining outside contributions."*
+- Each group's costs should be transparent and covered by that group's own voluntary contributions
+- No outside donations, VC funding, or sponsorships
+- Platform cost dashboard is a planned feature: groups can see their share of running costs
+- Payment processing (if ever added) must be voluntary and group-managed, not platform-mandated
+
+**Tradition 8** — *"Alcoholics Anonymous should remain forever non-professional, but our service centers may employ special workers."*
+- Platform developers are **volunteers or trusted servants** — not a commercial service provider
+- If paid infrastructure is ever used (Fly.io, etc.), it is a service worker cost, not a professional AA service
+- No professional counseling, therapy, or clinical features may be offered through the platform
+
+**Tradition 9** — *"A.A., as such, ought never be organized; but we may create service boards or committees directly responsible to those they serve."*
+- `superadmin` and platform governance exist to serve groups, not to control them
+- Platform structure is flat — no hierarchy between groups
+- Groups may organize their own internal structure (officers, committees) through custom roles
+- Platform governance docs (how decisions are made) must be public and in the repo
+
+**Tradition 10** — *"Alcoholics Anonymous has no opinion on outside issues; hence the A.A. name ought never be drawn into public controversy."*
+- No political content, social cause endorsements, or outside controversy features
+- Discussion boards must be scoped to recovery — no off-topic general forums
+- Moderation must remove content that draws the group into outside controversy
+- Platform itself must never take political or social positions
+
+**Tradition 11** — *"Our public relations policy is based on attraction rather than promotion; we need always maintain personal anonymity at the press, radio, and films level."*
+- No public member roster, no public profiles, no searchable member directory
+- Last names are never displayed publicly — first name or display name only
+- No social media sharing buttons, no "invite friends" viral mechanics
+- Public-facing pages are minimal: meeting times, a contact form, nothing more
+
+**Tradition 12** — *"Anonymity is the spiritual foundation of all our traditions, ever reminding us to place principles before personalities."*
+- Anonymity is a **first-class architectural constraint**, not a setting
+- Display names default to first name only; full names stored but never shown publicly
+- No public-facing profile pages
+- Member data (phone, email, sobriety date) is accessible only to authenticated group members
+- Phone lists are never indexed, cached, or exposed via any public endpoint
+- Audit logs record actions, not personal narratives — dignity in every log line
 
 ---
 

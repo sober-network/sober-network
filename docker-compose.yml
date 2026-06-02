@@ -1,0 +1,26 @@
+# Local development only — starts PostgreSQL so you can run the API with `dotnet run`.
+# Usage:
+#   docker compose up -d        # start DB in background
+#   docker compose down         # stop and remove containers (data volume persists)
+#   docker compose down -v      # also delete the data volume (fresh start)
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       sobernetwork_dev
+      POSTGRES_USER:     sober
+      POSTGRES_PASSWORD: soberdev
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sober -d sobernetwork_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:

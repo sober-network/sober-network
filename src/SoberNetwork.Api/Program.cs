@@ -160,4 +160,12 @@ app.MapControllers();
 // so Angular's client-side router handles navigation
 app.MapFallbackToFile("index.html");
 
+// Auto-apply pending EF Core migrations on startup.
+// Safe to run on every start — EF checks which migrations are already applied.
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
+}
+
 app.Run();

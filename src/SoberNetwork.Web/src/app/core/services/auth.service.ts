@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable, throwError, tap } from 'rxjs';
 import {
   AuthResponse, CurrentUser, LoginRequest, RegisterRequest,
   RefreshTokenRequest, ForgotPasswordRequest, ResetPasswordRequest,
@@ -38,7 +38,7 @@ export class AuthService {
 
   refreshToken(): Observable<AuthResponse> {
     const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
-    if (!refreshToken) throw new Error('No refresh token available');
+    if (!refreshToken) return throwError(() => new Error('No refresh token available'));
     const body: RefreshTokenRequest = { refreshToken };
     return this.http.post<AuthResponse>(`${this.base}/refresh-token`, body).pipe(
       tap(r => this.handleAuthResponse(r))
@@ -70,6 +70,7 @@ export class AuthService {
 
   /** Attempt silent token refresh on app startup using stored refresh token. */
   tryRestoreSession(): Observable<AuthResponse> {
+    if (!localStorage.getItem(REFRESH_TOKEN_KEY)) return EMPTY;
     return this.refreshToken();
   }
 

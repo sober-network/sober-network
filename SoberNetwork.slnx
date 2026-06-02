@@ -9,6 +9,9 @@
     <Project Path="tests/SoberNetwork.Core.Tests/SoberNetwork.Core.Tests.csproj" />
   </Folder>
   <Folder Name="/web/">
-    <Project Path="src/SoberNetwork.Web/SoberNetwork.Web.esproj" />
+    <Project Path="src/SoberNetwork.Web/SoberNetwork.Web.esproj">
+      <Build />
+      <Deploy />
+    </Project>
   </Folder>
 </Solution>

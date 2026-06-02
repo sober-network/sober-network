@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { GroupResponse } from '@app/core/models';
 import { GroupService } from '@app/core/services/group.service';
+import { ClientLogService } from '@app/core/services/client-log.service';
 import { ConfirmDialogComponent } from '@app/shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
@@ -32,6 +33,7 @@ export class GroupHubComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly groupService = inject(GroupService);
   private readonly dialog = inject(MatDialog);
+  private readonly log = inject(ClientLogService);
 
   slug = '';
   group: GroupResponse | null = null;
@@ -43,6 +45,7 @@ export class GroupHubComponent implements OnInit {
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       this.slug = params.get('slug') ?? '';
+      this.log.info('GroupHub.ngOnInit', { slug: this.slug });
       this.loadGroup();
     });
   }
@@ -72,6 +75,7 @@ export class GroupHubComponent implements OnInit {
   private loadGroup(): void {
     this.loading = true;
     this.error = '';
+    this.log.info('GroupHub.loadGroup: subscribing', { slug: this.slug });
 
     forkJoin({
       group: this.groupService.getGroup(this.slug),
@@ -81,14 +85,17 @@ export class GroupHubComponent implements OnInit {
       ),
     }).pipe(
       finalize(() => {
+        this.log.info('GroupHub.loadGroup: finalize', { slug: this.slug });
         this.loading = false;
       })
     ).subscribe({
       next: result => {
+        this.log.info('GroupHub.loadGroup: next', { groupName: result.group.name, isAdmin: result.isAdmin });
         this.group = result.group;
         this.isAdmin = result.isAdmin;
       },
       error: err => {
+        this.log.error('GroupHub.loadGroup: error', { message: String(err) });
         this.group = null;
         this.error = this.getErrorMessage(err, 'We could not load this group right now.');
       },

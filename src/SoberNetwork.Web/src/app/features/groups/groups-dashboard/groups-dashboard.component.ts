@@ -13,6 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { GroupResponse } from '@app/core/models';
 import { GroupService } from '@app/core/services/group.service';
+import { ClientLogService } from '@app/core/services/client-log.service';
 
 @Component({
   selector: 'app-groups-dashboard',
@@ -37,6 +38,7 @@ export class GroupsDashboardComponent implements OnInit {
   private readonly groupService = inject(GroupService);
   private readonly dialog = inject(MatDialog);
   private readonly fb = inject(FormBuilder);
+  private readonly log = inject(ClientLogService);
 
   @ViewChild('createGroupDialog') private createGroupDialog?: TemplateRef<unknown>;
 
@@ -65,6 +67,7 @@ export class GroupsDashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.log.info('GroupsDashboard.ngOnInit');
     this.loadGroups();
   }
 
@@ -141,16 +144,20 @@ export class GroupsDashboardComponent implements OnInit {
   private loadGroups(): void {
     this.loading = true;
     this.error = '';
+    this.log.info('GroupsDashboard.loadGroups: subscribing');
 
     this.groupService.getMyGroups().pipe(
       finalize(() => {
+        this.log.info('GroupsDashboard.loadGroups: finalize', { loading: false });
         this.loading = false;
       })
     ).subscribe({
       next: groups => {
+        this.log.info('GroupsDashboard.loadGroups: next', { count: groups.length });
         this.groups = groups;
       },
       error: err => {
+        this.log.error('GroupsDashboard.loadGroups: error', { message: String(err) });
         this.groups = [];
         this.error = this.getErrorMessage(err, 'We could not load your groups right now.');
       },

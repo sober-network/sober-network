@@ -1,21 +1,38 @@
-using SoberNetwork.Core.Entities;
+using SoberNetwork.Domain.Entities;
+
+
 
 namespace SoberNetwork.Core.Interfaces;
 
+
+
+/// <summary>Creates, rotates, and revokes refresh tokens for authenticated sessions.</summary>
+
 public interface IRefreshTokenService
+
 {
-    /// <summary>Creates and persists a new refresh token for the given user. Returns the plaintext token.</summary>
+
+    /// <summary>Creates and persists a new refresh token for the specified user.</summary>
+
     Task<string> CreateAsync(string userId);
 
-    /// <summary>
-    /// Validates the plaintext token, rotates it (revokes old, issues new), and returns the new plaintext token.
-    /// Returns null if the token is invalid or expired.
-    /// </summary>
+
+
+    /// <summary>Validates and rotates a refresh token, returning the new plaintext token when successful.</summary>
+
     Task<(string newPlainToken, RefreshToken storedToken)?> RotateAsync(string plainToken);
 
-    /// <summary>Revokes a single refresh token by its plaintext value. No-op if not found or already revoked.</summary>
+
+
+    /// <summary>Revokes a single refresh token by its plaintext value.</summary>
+
     Task RevokeAsync(string plainToken);
 
-    /// <summary>Revokes all active refresh tokens for a user (e.g. on password reset).</summary>
+
+
+    /// <summary>Revokes all active refresh tokens for the specified user.</summary>
+
     Task RevokeAllForUserAsync(string userId);
+
 }
+

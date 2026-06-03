@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace SoberNetwork.Core.Entities;
+namespace SoberNetwork.Domain.Entities;
 
 public class ApplicationUser : IdentityUser
 {

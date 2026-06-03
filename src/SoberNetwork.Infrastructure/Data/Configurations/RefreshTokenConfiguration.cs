@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using SoberNetwork.Core.Entities;
+using SoberNetwork.Domain.Entities;
 
 namespace SoberNetwork.Infrastructure.Data.Configurations;
 

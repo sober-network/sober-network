@@ -23,33 +23,61 @@
       <h1>{{ group.name }}</h1>
       <p class="description">{{ group.description || 'A caring place to stay connected between meetings.' }}</p>
 
+      <div class="badge-list">
+        <span class="badge">{{ group.isOpen ? 'Open meeting' : 'Closed meeting' }}</span>
+        <span class="badge">{{ group.isPublic ? 'Public group' : 'Private group' }}</span>
+        <span class="badge">{{ group.requiresApproval ? 'Approval needed' : 'Instant join' }}</span>
+      </div>
+
       <div class="meta-row">
         <div class="member-count">
-          <mat-icon>groups</mat-icon>
-          {{ group.memberCount }} member{{ group.memberCount === 1 ? '' : 's' }}
+          <mat-icon>event</mat-icon>
+          {{ meetingWhen() }}
         </div>
-
-        <div class="badge-list">
-          <span class="badge">{{ group.isPublic ? 'Public group' : 'Private group' }}</span>
-          <span class="badge">{{ group.requiresApproval ? 'Approval needed' : 'Open to join' }}</span>
+        <div class="member-count">
+          <mat-icon>schedule</mat-icon>
+          {{ group.durationMinutes }} min
+        </div>
+        <div class="member-count" *ngIf="group.timeZone">
+          <mat-icon>public</mat-icon>
+          {{ group.timeZone }}
         </div>
       </div>
 
+      <p class="description" *ngIf="group.language">
+        <strong>Language:</strong> {{ group.language }}
+      </p>
+
+      <p class="description" *ngIf="group.meetingSchedule">
+        <strong>Meeting notes:</strong> {{ group.meetingSchedule }}
+      </p>
+
+      <mat-chip-set *ngIf="meetingFormats().length > 0">
+        <mat-chip *ngFor="let format of meetingFormats()">{{ format }}</mat-chip>
+      </mat-chip-set>
+
+      <p class="description" *ngIf="group.requiresApproval">
+        New members are reviewed by a group admin before access is granted.
+      </p>
+
       <div class="action-row" *ngIf="auth.isLoggedIn; else guestActions">
         <ng-container *ngIf="!joinRequested; else requestSent">
-          <button mat-raised-button color="primary" type="button" (click)="openJoinDialog()">
-            <mat-icon>person_add</mat-icon>
-            Request to Join
+          <button mat-raised-button color="primary" type="button" [disabled]="joining" (click)="handleJoinAction()">
+            <mat-icon *ngIf="!joining">person_add</mat-icon>
+            <mat-spinner *ngIf="joining" diameter="20"></mat-spinner>
+            {{ joining ? 'Working…' : joinButtonLabel() }}
           </button>
         </ng-container>
 
         <ng-template #requestSent>
           <div class="success-banner">
             <mat-icon>favorite</mat-icon>
-            <span>Your request has been sent. Hang tight — someone will be with you soon.</span>
+            <span>{{ joinSuccessMessage() }}</span>
           </div>
         </ng-template>
       </div>
+
+      <p class="form-error" *ngIf="joinError && !group.requiresApproval">{{ joinError }}</p>
 
       <ng-template #guestActions>
         <div class="guest-actions">

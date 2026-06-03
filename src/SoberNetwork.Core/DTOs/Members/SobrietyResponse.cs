@@ -1,13 +1,13 @@
-namespace SoberNetwork.Core.DTOs.Members;
-
-/// <summary>
-/// Sobriety information returned by the API.
-/// Null fields mean the data exists but the user has chosen not to share it publicly.
-/// When viewing own profile, all fields are always populated.
-/// </summary>
-public record SobrietyResponse(
-    DateOnly? SobrietyDate,      // null if not set, or not public (when viewed by others)
-    int? DaysSober,              // null if not set, or not public (when viewed by others)
-    bool IsDatePublic,
-    bool IsDaysPublic
-);
+namespace SoberNetwork.Core.DTOs.Members;
+
+/// <summary>Sobriety information returned by the API.</summary>
+public record SobrietyResponse(
+    /// <summary>Sobriety date when set and visible in the current context; otherwise null.</summary>
+    DateOnly? SobrietyDate,
+    /// <summary>Calculated days sober when set and visible in the current context; otherwise null.</summary>
+    int? DaysSober,
+    /// <summary>Whether the member has opted to share their sobriety date.</summary>
+    bool IsDatePublic,
+    /// <summary>Whether the member has opted to share their days-sober count.</summary>
+    bool IsDaysPublic
+);

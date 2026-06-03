@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
-  GroupResponse, GroupMemberResponse, PagedResponse,
+  GroupResponse, GroupSummaryResponse, GroupMemberResponse, PagedResponse,
   CreateGroupRequest, UpdateGroupRequest, JoinGroupRequest,
   JoinRequestResponse, UpdateMemberRoleRequest, UpdateMemberStatusRequest,
   ApproveJoinRequest, PhoneVisibilityRequest,
@@ -21,12 +21,16 @@ export class GroupService {
     return this.http.get<GroupResponse[]>(this.base);
   }
 
-  getAllGroups(): Observable<GroupResponse[]> {
-    return this.http.get<GroupResponse[]>(`${this.base}/all`);
+  getAllGroups(): Observable<GroupSummaryResponse[]> {
+    return this.http.get<GroupSummaryResponse[]>(`${this.base}/all`);
   }
 
   getGroup(slug: string): Observable<GroupResponse> {
     return this.http.get<GroupResponse>(`${this.base}/${slug}`);
+  }
+
+  getGroupInfo(slug: string): Observable<GroupSummaryResponse> {
+    return this.http.get<GroupSummaryResponse>(`${this.base}/${slug}/info`);
   }
 
   createGroup(request: CreateGroupRequest): Observable<GroupResponse> {

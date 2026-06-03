@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using SoberNetwork.Core.Entities;
+using SoberNetwork.Domain.Entities;
 using SoberNetwork.Core.Interfaces;
 using SoberNetwork.Infrastructure.Data;
 

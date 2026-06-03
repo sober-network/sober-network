@@ -1,16 +1,21 @@
-namespace SoberNetwork.Core.DTOs.Members;
-
-/// <summary>
-/// Group-scoped view of another member — only what they have opted to share (T3, T12).
-/// No email, no last name. Sobriety and phone subject to their visibility settings.
-/// </summary>
-public record MemberDetailResponse(
-    string UserId,
-    string DisplayName,
-    string Role,
-    string Status,
-    bool IsProbationary,
-    SobrietyResponse? Sobriety,
-    string? PhoneNumber,        // null unless IsPhoneShared=true for this group
-    DateTime JoinedAt
-);
+namespace SoberNetwork.Core.DTOs.Members;
+
+/// <summary>Group-scoped view of another member that respects all visibility settings.</summary>
+public record MemberDetailResponse(
+    /// <summary>Unique identifier of the member.</summary>
+    string UserId,
+    /// <summary>Display name visible to other group members.</summary>
+    string DisplayName,
+    /// <summary>Member role within the group.</summary>
+    string Role,
+    /// <summary>Current membership status within the group.</summary>
+    string Status,
+    /// <summary>Whether the member is still marked as probationary.</summary>
+    bool IsProbationary,
+    /// <summary>Sobriety information visible in this group context, if any.</summary>
+    SobrietyResponse? Sobriety,
+    /// <summary>Phone number when the member has chosen to share it with this group; otherwise null.</summary>
+    string? PhoneNumber,
+    /// <summary>UTC timestamp when the member joined the group.</summary>
+    DateTime JoinedAt
+);

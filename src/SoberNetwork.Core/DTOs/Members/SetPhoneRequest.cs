@@ -1,8 +1,7 @@
-using System.ComponentModel.DataAnnotations;
-
-namespace SoberNetwork.Core.DTOs.Members;
-
-public record SetPhoneRequest(
-    /// <summary>E.164 format recommended, e.g. "+15555550100".</summary>
-    [Required, MaxLength(20)] string PhoneNumber
-);
+namespace SoberNetwork.Core.DTOs.Members;
+
+/// <summary>Request body for setting or replacing a member phone number.</summary>
+public record SetPhoneRequest(
+    /// <summary>Phone number to store. Required and maximum 20 characters. E.164 format is recommended.</summary>
+    string PhoneNumber
+);

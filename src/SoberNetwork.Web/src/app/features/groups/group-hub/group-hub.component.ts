@@ -8,7 +8,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { GroupResponse } from '@app/core/models';
+import { DAYS_OF_WEEK, GroupResponse } from '@app/core/models';
 import { GroupService } from '@app/core/services/group.service';
 import { ClientLogService } from '@app/core/services/client-log.service';
 import { ConfirmDialogComponent } from '@app/shared/components/confirm-dialog/confirm-dialog.component';
@@ -35,6 +35,8 @@ export class GroupHubComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly log = inject(ClientLogService);
   private readonly cdr = inject(ChangeDetectorRef);
+
+  readonly daysOfWeek = DAYS_OF_WEEK;
 
   slug = '';
   group: GroupResponse | null = null;
@@ -73,6 +75,29 @@ export class GroupHubComponent implements OnInit {
     });
   }
 
+  meetingWhen(): string {
+    if (!this.group) {
+      return 'Meeting time varies';
+    }
+
+    const parts: string[] = [];
+    if (this.group.meetingDay !== null && this.group.meetingDay !== undefined) {
+      parts.push(this.daysOfWeek[this.group.meetingDay] ?? 'Scheduled meeting');
+    }
+    if (this.group.meetingTime) {
+      parts.push(this.group.meetingTime);
+    }
+
+    return parts.length > 0 ? parts.join(' • ') : 'Meeting time varies';
+  }
+
+  meetingFormats(): string[] {
+    return (this.group?.meetingFormats ?? '')
+      .split(',')
+      .map(value => value.trim())
+      .filter(Boolean);
+  }
+
   private loadGroup(): void {
     this.loading = true;
     this.error = '';
@@ -92,7 +117,7 @@ export class GroupHubComponent implements OnInit {
       })
     ).subscribe({
       next: result => {
-        this.log.info('GroupHub.loadGroup: next', { groupName: result.group.name, isAdmin: result.isAdmin });
+        this.log.info('GroupHub.loadGroup: next', { groupName: result.group.name, isAdmin: String(result.isAdmin) });
         this.group = result.group;
         this.isAdmin = result.isAdmin;
       },

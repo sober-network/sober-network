@@ -69,12 +69,12 @@ resolve it before writing code.
 
 | Layer | Project | Contains |
 |-------|---------|----------|
-| Domain | `SoberNetwork.Core` | Entities, value objects, domain services, domain events |
+| Domain | `SoberNetwork.Domain` | Entities, value objects, domain services, domain events |
 | Application | `SoberNetwork.Core` | Commands, queries, MediatR handlers, validators, persistence interfaces |
 | Infrastructure | `SoberNetwork.Infrastructure` | EF Core DbContext, repository implementations, external services |
 | API | `SoberNetwork.Api` | Controllers, request/response DTOs, filters, middleware |
 
-- **Core (Domain + Application) never imports Infrastructure** — enforced by project reference structure.
+- **Domain never imports Application or Infrastructure** — enforced by project reference structure. **Application (Core) never imports Infrastructure.**
 - Controllers and services depend on **interfaces**, never on concrete implementations.
 - **Never bypass the Application layer** to access the database directly from a controller.
 - Domain models must contain **business logic** — not DTOs or EF Core attributes.
@@ -210,11 +210,13 @@ When generating code:
 ## 12. File & Folder Structure
 
 ```
-/Domain (SoberNetwork.Core)        — Entities, value objects, domain services, events
+/Domain (SoberNetwork.Domain)      — Entities, value objects, domain services, events
 /Application (SoberNetwork.Core)   — Commands, queries, MediatR handlers, validators, interfaces
 /Infrastructure                    — EF Core DbContext, repository implementations, external services
 /API (SoberNetwork.Api)            — Controllers, DTOs, filters, middleware
 ```
+
+> **Note:** `ApplicationUser` inherits `IdentityUser` — Domain holds an intentional Microsoft.AspNetCore.Identity dependency as an accepted architectural compromise. A future refactor may introduce a pure domain user type.
 
 Place new files in the correct layer automatically.
 

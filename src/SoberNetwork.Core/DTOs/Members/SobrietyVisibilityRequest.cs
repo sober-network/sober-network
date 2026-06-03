@@ -1,10 +1,9 @@
-namespace SoberNetwork.Core.DTOs.Members;
-
-/// <summary>
-/// Controls two independent visibility toggles (T3 — granular opt-in).
-/// A member may share their days-sober count without revealing their actual date.
-/// </summary>
-public record SobrietyVisibilityRequest(
-    bool IsDatePublic,
-    bool IsDaysPublic
-);
+namespace SoberNetwork.Core.DTOs.Members;
+
+/// <summary>Request body for updating sobriety visibility settings independently.</summary>
+public record SobrietyVisibilityRequest(
+    /// <summary>Whether the member allows their sobriety date to be shown where permitted.</summary>
+    bool IsDatePublic,
+    /// <summary>Whether the member allows their days-sober count to be shown where permitted.</summary>
+    bool IsDaysPublic
+);

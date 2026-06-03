@@ -1,6 +1,6 @@
-using SoberNetwork.Core.Enums;
+using SoberNetwork.Domain.Enums;
 
-namespace SoberNetwork.Core.Entities;
+namespace SoberNetwork.Domain.Entities;
 
 public class SecurityEvent
 {

@@ -1,8 +1,9 @@
-using System.ComponentModel.DataAnnotations;
-
-namespace SoberNetwork.Core.DTOs.Auth;
-
-public record LoginRequest(
-    [Required, EmailAddress, MaxLength(256)] string Email,
-    [Required, MaxLength(256)] string Password
-);
+namespace SoberNetwork.Core.DTOs.Auth;
+
+/// <summary>Request body for member login.</summary>
+public record LoginRequest(
+    /// <summary>Registered email address. Required, valid email, maximum 256 characters.</summary>
+    string Email,
+    /// <summary>Account password. Required, maximum 256 characters.</summary>
+    string Password
+);

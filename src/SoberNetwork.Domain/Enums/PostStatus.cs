@@ -1,4 +1,4 @@
-namespace SoberNetwork.Core.Enums;
+namespace SoberNetwork.Domain.Enums;
 
 public enum PostStatus
 {

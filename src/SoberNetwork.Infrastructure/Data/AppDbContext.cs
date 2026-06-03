@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using SoberNetwork.Core.Entities;
+using SoberNetwork.Domain.Entities;
 
 namespace SoberNetwork.Infrastructure.Data;
 

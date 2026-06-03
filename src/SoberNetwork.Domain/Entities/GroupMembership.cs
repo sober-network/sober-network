@@ -1,6 +1,6 @@
-using SoberNetwork.Core.Enums;
+using SoberNetwork.Domain.Enums;
 
-namespace SoberNetwork.Core.Entities;
+namespace SoberNetwork.Domain.Entities;
 
 // Join table: one user can belong to many groups, with a role per group (T4 — group autonomy)
 public class GroupMembership

@@ -6,12 +6,13 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { GroupResponse } from '@app/core/models';
+import { DAYS_OF_WEEK, GroupSummaryResponse } from '@app/core/models';
 import { AuthService } from '@app/core/services/auth.service';
 import { GroupService } from '@app/core/services/group.service';
 
@@ -24,6 +25,7 @@ import { GroupService } from '@app/core/services/group.service';
     ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,
+    MatChipsModule,
     MatDialogModule,
     MatFormFieldModule,
     MatIconModule,
@@ -43,8 +45,10 @@ export class GroupPublicComponent implements OnInit {
 
   @ViewChild('joinDialog') private joinDialog?: TemplateRef<unknown>;
 
+  readonly daysOfWeek = DAYS_OF_WEEK;
+
   slug = '';
-  group: GroupResponse | null = null;
+  group: GroupSummaryResponse | null = null;
   loading = true;
   joining = false;
   notFound = false;
@@ -63,8 +67,21 @@ export class GroupPublicComponent implements OnInit {
     });
   }
 
+  handleJoinAction(): void {
+    if (!this.group || this.joining) {
+      return;
+    }
+
+    if (this.group.requiresApproval) {
+      this.openJoinDialog();
+      return;
+    }
+
+    this.submitJoinRequest();
+  }
+
   openJoinDialog(): void {
-    if (!this.joinDialog) {
+    if (!this.joinDialog || !this.group?.requiresApproval) {
       return;
     }
 
@@ -79,20 +96,62 @@ export class GroupPublicComponent implements OnInit {
 
   submitJoin(dialogRef: MatDialogRef<unknown>): void {
     const message = this.joinForm.controls.message.value?.trim();
+    this.submitJoinRequest(message || undefined, dialogRef);
+  }
+
+  meetingFormats(): string[] {
+    return (this.group?.meetingFormats ?? '')
+      .split(',')
+      .map(value => value.trim())
+      .filter(Boolean);
+  }
+
+  meetingWhen(): string {
+    if (!this.group) {
+      return 'Meeting time varies';
+    }
+
+    const parts: string[] = [];
+    if (this.group.meetingDay !== null && this.group.meetingDay !== undefined) {
+      parts.push(this.daysOfWeek[this.group.meetingDay] ?? 'Scheduled meeting');
+    }
+
+    if (this.group.meetingTime) {
+      parts.push(this.group.meetingTime);
+    }
+
+    if (parts.length === 0) {
+      parts.push('Meeting time varies');
+    }
+
+    return parts.join(' • ');
+  }
+
+  joinButtonLabel(): string {
+    return this.group?.requiresApproval ? 'Request to Join' : 'Join Group';
+  }
+
+  joinSuccessMessage(): string {
+    return this.group?.requiresApproval
+      ? 'Your request has been sent. Hang tight — someone will be with you soon.'
+      : 'You are in. Head to the group hub anytime.';
+  }
+
+  private submitJoinRequest(message?: string, dialogRef?: MatDialogRef<unknown>): void {
     this.joining = true;
     this.joinError = '';
 
-    this.groupService.joinGroup(this.slug, { message: message || undefined }).pipe(
+    this.groupService.joinGroup(this.slug, { message }).pipe(
       finalize(() => {
         this.joining = false;
       })
     ).subscribe({
       next: () => {
         this.joinRequested = true;
-        dialogRef.close();
+        dialogRef?.close();
       },
       error: err => {
-        this.joinError = this.getErrorMessage(err, 'We could not send your request just now. Please try again.');
+        this.joinError = this.getErrorMessage(err, 'We could not complete that just now. Please try again.');
       },
     });
   }
@@ -104,7 +163,7 @@ export class GroupPublicComponent implements OnInit {
     this.group = null;
     this.joinRequested = false;
 
-    this.groupService.getGroup(this.slug).pipe(
+    this.groupService.getGroupInfo(this.slug).pipe(
       finalize(() => {
         this.loading = false;
         this.cdr.detectChanges();

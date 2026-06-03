@@ -3,15 +3,50 @@
 export type MembershipStatus = 'Active' | 'Probationary' | 'Suspended' | 'Banned';
 export type MemberRole = 'Member' | 'GroupAdmin';
 
+export type MeetingFormat = 'Discussion' | 'Speaker' | 'StepStudy' | 'BigBook' | 'Beginners';
+
+export const MEETING_FORMATS: MeetingFormat[] = ['Discussion', 'Speaker', 'StepStudy', 'BigBook', 'Beginners'];
+export const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
 export interface GroupResponse {
   id: string;
   name: string;
   slug: string;
   description: string | null;
+  meetingSchedule: string | null;
+  meetingDay: number | null;        // 0=Sun..6=Sat
+  meetingTime: string | null;       // "HH:mm"
+  durationMinutes: number;
+  isOpen: boolean;
+  language: string | null;
+  meetingFormats: string | null;    // comma-separated MeetingFormat values
+  zoomLink: string | null;
+  zoomMeetingId: string | null;
+  zoomPasscode: string | null;
+  timeZone: string | null;
+  isActive: boolean;
   isPublic: boolean;
   requiresApproval: boolean;
-  createdAt: string;
   memberCount: number;
+  userRole: string;
+  createdAt: string;
+}
+
+export interface GroupSummaryResponse {
+  name: string;
+  slug: string;
+  description: string | null;
+  meetingSchedule: string | null;
+  meetingDay: number | null;
+  meetingTime: string | null;
+  durationMinutes: number;
+  isOpen: boolean;
+  language: string | null;
+  meetingFormats: string | null;
+  timeZone: string | null;
+  isActive: boolean;
+  isPublic: boolean;
+  requiresApproval: boolean;
 }
 
 export interface GroupMemberResponse {
@@ -37,6 +72,17 @@ export interface CreateGroupRequest {
   name: string;
   slug: string;
   description?: string;
+  meetingSchedule?: string;
+  meetingDay?: number | null;
+  meetingTime?: string | null;
+  durationMinutes?: number;
+  isOpen?: boolean;
+  language?: string;
+  meetingFormats?: string;
+  zoomLink?: string;
+  zoomMeetingId?: string;
+  zoomPasscode?: string;
+  timeZone?: string;
   isPublic: boolean;
   requiresApproval: boolean;
 }
@@ -44,6 +90,17 @@ export interface CreateGroupRequest {
 export interface UpdateGroupRequest {
   name?: string;
   description?: string;
+  meetingSchedule?: string;
+  meetingDay?: number | null;
+  meetingTime?: string | null;
+  durationMinutes?: number;
+  isOpen?: boolean;
+  language?: string;
+  meetingFormats?: string;
+  zoomLink?: string;
+  zoomMeetingId?: string;
+  zoomPasscode?: string;
+  timeZone?: string;
   isPublic?: boolean;
   requiresApproval?: boolean;
 }

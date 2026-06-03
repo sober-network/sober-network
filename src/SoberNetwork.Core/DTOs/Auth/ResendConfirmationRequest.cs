@@ -1,7 +1,7 @@
-using System.ComponentModel.DataAnnotations;
-
-namespace SoberNetwork.Core.DTOs.Auth;
-
-public record ResendConfirmationRequest(
-    [Required, EmailAddress] string Email
-);
+namespace SoberNetwork.Core.DTOs.Auth;
+
+/// <summary>Request body for resending an email confirmation link.</summary>
+public record ResendConfirmationRequest(
+    /// <summary>Registered email address. Required and must be a valid email address.</summary>
+    string Email
+);

@@ -1,15 +1,19 @@
-namespace SoberNetwork.Core.DTOs.Groups;
-
-/// <summary>
-/// Member info visible to other group members — no email, phone, or sobriety date (T3, T12).
-/// Display name only; last name is never included.
-/// </summary>
-public record MemberResponse(
-    string UserId,
-    string DisplayName,
-    string Role,
-    string Status,
-    bool IsProbationary,
-    DateTime JoinedAt,
-    DateTime? ApprovedAt
-);
+namespace SoberNetwork.Core.DTOs.Groups;
+
+/// <summary>Member information visible to other group members.</summary>
+public record MemberResponse(
+    /// <summary>Unique identifier of the member.</summary>
+    string UserId,
+    /// <summary>Display name visible within the group.</summary>
+    string DisplayName,
+    /// <summary>Role of the member within the group.</summary>
+    string Role,
+    /// <summary>Current membership status.</summary>
+    string Status,
+    /// <summary>Whether the member is still marked as probationary.</summary>
+    bool IsProbationary,
+    /// <summary>UTC timestamp when the member joined the group.</summary>
+    DateTime JoinedAt,
+    /// <summary>UTC timestamp when the member was approved, if applicable.</summary>
+    DateTime? ApprovedAt
+);

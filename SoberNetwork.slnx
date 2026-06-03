@@ -5,6 +5,7 @@
   <Folder Name="/src/">
     <Project Path="src/SoberNetwork.Api/SoberNetwork.Api.csproj" />
     <Project Path="src/SoberNetwork.Core/SoberNetwork.Core.csproj" />
+    <Project Path="src/SoberNetwork.Domain/SoberNetwork.Domain.csproj" />
     <Project Path="src/SoberNetwork.Infrastructure/SoberNetwork.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/">

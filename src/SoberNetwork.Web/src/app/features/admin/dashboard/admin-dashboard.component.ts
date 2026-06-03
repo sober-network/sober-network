@@ -16,7 +16,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import { MemberService } from '@app/core/services/member.service';
 import { GroupService } from '@app/core/services/group.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@app/shared/components/confirm-dialog/confirm-dialog.component';
-import { AdminMemberResponse, GroupResponse } from '@app/core/models';
+import { AdminMemberResponse, GroupSummaryResponse } from '@app/core/models';
 import { forkJoin } from 'rxjs';
 
 @Component({
@@ -40,11 +40,11 @@ export class AdminDashboardComponent implements OnInit {
   private readonly cdr           = inject(ChangeDetectorRef);
 
   members: AdminMemberResponse[] = [];
-  groups:  GroupResponse[]        = [];
+  groups:  GroupSummaryResponse[] = [];
   loading = true;
 
   memberColumns = ['displayName', 'email', 'emailConfirmed', 'groupCount', 'createdAt', 'actions'];
-  groupColumns  = ['name', 'slug', 'memberCount', 'isPublic', 'requiresApproval', 'createdAt', 'actions'];
+  groupColumns  = ['name', 'slug', 'isActive', 'isPublic', 'requiresApproval', 'actions'];
 
   ngOnInit(): void {
     forkJoin({
@@ -85,10 +85,10 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  deleteGroup(group: GroupResponse): void {
+  deleteGroup(group: GroupSummaryResponse): void {
     const data: ConfirmDialogData = {
       title:        `Delete "${group.name}"?`,
-      message:      `This will permanently delete the group and remove all ${group.memberCount} members from it.`,
+      message:      'This will permanently delete the group and remove access for its members.',
       confirmLabel: 'Delete Group',
       dangerous:    true,
     };

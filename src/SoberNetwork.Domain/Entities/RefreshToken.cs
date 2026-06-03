@@ -1,4 +1,4 @@
-namespace SoberNetwork.Core.Entities;
+namespace SoberNetwork.Domain.Entities;
 
 public class RefreshToken
 {

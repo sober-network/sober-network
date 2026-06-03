@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using SoberNetwork.Core.Entities;
-using SoberNetwork.Core.Enums;
+using SoberNetwork.Domain.Entities;
+using SoberNetwork.Domain.Enums;
 
 namespace SoberNetwork.Infrastructure.Data.Configurations;
 

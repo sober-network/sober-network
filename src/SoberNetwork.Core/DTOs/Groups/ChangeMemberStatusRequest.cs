@@ -1,8 +1,19 @@
-using System.ComponentModel.DataAnnotations;
-using SoberNetwork.Core.Enums;
+using SoberNetwork.Domain.Enums;
+
+
 
 namespace SoberNetwork.Core.DTOs.Groups;
 
+
+
+/// <summary>Request body for changing a group member's status.</summary>
+
 public record ChangeMemberStatusRequest(
-    [Required] MemberStatus NewStatus
+
+    /// <summary>New membership status to assign to the member.</summary>
+
+    MemberStatus NewStatus
+
 );
+
+

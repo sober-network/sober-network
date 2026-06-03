@@ -1,10 +1,7 @@
-using System.ComponentModel.DataAnnotations;
-
-namespace SoberNetwork.Core.DTOs.Members;
-
-/// <summary>
-/// Password is required to confirm account deletion — prevents accidental/unauthorized removal.
-/// </summary>
-public record DeleteAccountRequest(
-    [Required] string Password
-);
+namespace SoberNetwork.Core.DTOs.Members;
+
+/// <summary>Request body for permanently soft-deleting the authenticated account.</summary>
+public record DeleteAccountRequest(
+    /// <summary>Current password used to confirm account deletion. Required.</summary>
+    string Password
+);

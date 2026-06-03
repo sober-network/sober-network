@@ -18,7 +18,7 @@ function initializeSession(auth: AuthService, clientLog: ClientLogService) {
     clientLog.info('APP_INITIALIZER: starting session restore');
     return lastValueFrom(
       auth.tryRestoreSession().pipe(
-        tap(r => clientLog.info('APP_INITIALIZER: session restored', { userId: r.userId })),
+        tap(r => clientLog.info('APP_INITIALIZER: session restored', { userId: r.userId ?? '' })),
         catchError(err => {
           clientLog.warn('APP_INITIALIZER: restore failed', { message: String(err) });
           return of(null);
@@ -26,7 +26,7 @@ function initializeSession(auth: AuthService, clientLog: ClientLogService) {
       ),
       { defaultValue: null }
     ).then(result => {
-      clientLog.info('APP_INITIALIZER: complete', { loggedIn: auth.isLoggedIn });
+      clientLog.info('APP_INITIALIZER: complete', { loggedIn: String(auth.isLoggedIn) });
       return result;
     });
   };

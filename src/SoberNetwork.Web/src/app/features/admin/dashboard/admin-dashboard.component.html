@@ -119,11 +119,6 @@
               <td mat-cell *matCellDef="let g"><code>{{ g.slug }}</code></td>
             </ng-container>
 
-            <ng-container matColumnDef="memberCount">
-              <th mat-header-cell *matHeaderCellDef>Members</th>
-              <td mat-cell *matCellDef="let g">{{ g.memberCount }}</td>
-            </ng-container>
-
             <ng-container matColumnDef="isPublic">
               <th mat-header-cell *matHeaderCellDef>Public</th>
               <td mat-cell *matCellDef="let g">
@@ -142,9 +137,9 @@
               </td>
             </ng-container>
 
-            <ng-container matColumnDef="createdAt">
-              <th mat-header-cell *matHeaderCellDef>Created</th>
-              <td mat-cell *matCellDef="let g">{{ g.createdAt | date:'mediumDate' }}</td>
+            <ng-container matColumnDef="isActive">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let g">{{ g.isActive ? 'Active' : 'Inactive' }}</td>
             </ng-container>
 
             <ng-container matColumnDef="actions">

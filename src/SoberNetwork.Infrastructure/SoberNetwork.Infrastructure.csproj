@@ -1,6 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <ProjectReference Include="..\SoberNetwork.Domain\SoberNetwork.Domain.csproj" />
     <ProjectReference Include="..\SoberNetwork.Core\SoberNetwork.Core.csproj" />
   </ItemGroup>
 

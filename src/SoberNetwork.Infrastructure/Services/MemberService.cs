@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SoberNetwork.Core.DTOs.Members;
-using SoberNetwork.Core.Entities;
-using SoberNetwork.Core.Enums;
+using SoberNetwork.Domain.Entities;
+using SoberNetwork.Domain.Enums;
 using SoberNetwork.Core.Interfaces;
 using SoberNetwork.Infrastructure.Data;
 
@@ -47,7 +47,9 @@ public class MemberService(
 
     public async Task<MemberProfileResponse?> GetMyProfileAsync(string userId)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userManager.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id == userId);
         return user == null || user.DeletedAt != null ? null : ToProfileResponse(user);
     }
 
@@ -232,8 +234,9 @@ public class MemberService(
     public async Task<(bool Success, string? Error)> SetGroupPhoneVisibilityAsync(
         string userId, string groupSlug, bool isShared)
     {
-        var group = await db.Groups.FirstOrDefaultAsync(g =>
-            g.Slug == groupSlug && g.DeletedAt == null);
+        var group = await db.Groups
+            .AsNoTracking()
+            .FirstOrDefaultAsync(g => g.Slug == groupSlug && g.DeletedAt == null);
         if (group == null) return (false, "Group not found.");
 
         var membership = await db.GroupMemberships.FirstOrDefaultAsync(m =>
@@ -262,19 +265,23 @@ public class MemberService(
     public async Task<(IReadOnlyList<PhoneListEntryResponse>? List, string? Error)> GetGroupPhoneListAsync(
         string requestingUserId, string groupSlug)
     {
-        var group = await db.Groups.FirstOrDefaultAsync(g =>
-            g.Slug == groupSlug && g.DeletedAt == null);
+        var group = await db.Groups
+            .AsNoTracking()
+            .FirstOrDefaultAsync(g => g.Slug == groupSlug && g.DeletedAt == null);
         if (group == null) return (null, "Group not found.");
 
         // Caller must be an active member (T12 — auth-only)
-        var callerMembership = await db.GroupMemberships.FirstOrDefaultAsync(m =>
-            m.GroupId == group.Id &&
-            m.UserId == requestingUserId &&
-            m.Status == MemberStatus.Active &&
-            m.DeletedAt == null);
+        var callerMembership = await db.GroupMemberships
+            .AsNoTracking()
+            .FirstOrDefaultAsync(m =>
+                m.GroupId == group.Id &&
+                m.UserId == requestingUserId &&
+                m.Status == MemberStatus.Active &&
+                m.DeletedAt == null);
         if (callerMembership == null) return (null, "You are not a member of this group.");
 
         var list = await db.GroupMemberships
+            .AsNoTracking()
             .Include(m => m.User)
             .Where(m =>
                 m.GroupId == group.Id &&
@@ -293,19 +300,23 @@ public class MemberService(
     public async Task<(MemberDetailResponse? Member, string? Error)> GetMemberInGroupContextAsync(
         string requestingUserId, string groupSlug, string targetUserId)
     {
-        var group = await db.Groups.FirstOrDefaultAsync(g =>
-            g.Slug == groupSlug && g.DeletedAt == null);
+        var group = await db.Groups
+            .AsNoTracking()
+            .FirstOrDefaultAsync(g => g.Slug == groupSlug && g.DeletedAt == null);
         if (group == null) return (null, "Group not found.");
 
         // Caller must be an active member of this group (T4)
-        var callerMembership = await db.GroupMemberships.FirstOrDefaultAsync(m =>
-            m.GroupId == group.Id &&
-            m.UserId == requestingUserId &&
-            m.Status == MemberStatus.Active &&
-            m.DeletedAt == null);
+        var callerMembership = await db.GroupMemberships
+            .AsNoTracking()
+            .FirstOrDefaultAsync(m =>
+                m.GroupId == group.Id &&
+                m.UserId == requestingUserId &&
+                m.Status == MemberStatus.Active &&
+                m.DeletedAt == null);
         if (callerMembership == null) return (null, "You are not a member of this group.");
 
         var targetMembership = await db.GroupMemberships
+            .AsNoTracking()
             .Include(m => m.User)
             .FirstOrDefaultAsync(m =>
                 m.GroupId == group.Id &&
@@ -337,6 +348,7 @@ public class MemberService(
     public async Task<IReadOnlyList<AdminMemberResponse>> GetAllMembersAsync()
     {
         var users = await userManager.Users
+            .AsNoTracking()
             .Where(u => u.DeletedAt == null)
             .OrderBy(u => u.DisplayName)
             .ToListAsync();
@@ -345,6 +357,7 @@ public class MemberService(
         foreach (var user in users)
         {
             var groupCount = await db.GroupMemberships
+                .AsNoTracking()
                 .CountAsync(m => m.UserId == user.Id && m.Status == MemberStatus.Active && m.DeletedAt == null);
             var isLockedOut = await userManager.IsLockedOutAsync(user);
             var daysSober = user.SobrietyDate.HasValue
@@ -378,10 +391,13 @@ public class MemberService(
 
     public async Task<AdminMemberResponse?> GetUserByIdAsync(string targetUserId)
     {
-        var user = await userManager.FindByIdAsync(targetUserId);
+        var user = await userManager.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id == targetUserId);
         if (user == null) return null;
 
         var groupCount = await db.GroupMemberships
+            .AsNoTracking()
             .CountAsync(m => m.UserId == user.Id && m.Status == MemberStatus.Active && m.DeletedAt == null);
         var daysSober = user.SobrietyDate.HasValue
             ? (DateTime.UtcNow.Date - user.SobrietyDate.Value.ToDateTime(TimeOnly.MinValue)).Days

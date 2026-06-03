@@ -1,11 +1,11 @@
-namespace SoberNetwork.Core.DTOs.Members;
-
-/// <summary>
-/// A single entry in the group phone list — user ID, first name + phone only (T11, T12).
-/// No last name, no email, no sobriety info.
-/// </summary>
-public record PhoneListEntryResponse(
-    string UserId,
-    string DisplayName,
-    string PhoneNumber
-);
+namespace SoberNetwork.Core.DTOs.Members;
+
+/// <summary>Single entry in a group phone list for members who opted in.</summary>
+public record PhoneListEntryResponse(
+    /// <summary>Unique identifier of the member.</summary>
+    string UserId,
+    /// <summary>Display name shown alongside the phone number.</summary>
+    string DisplayName,
+    /// <summary>Shared phone number for the member.</summary>
+    string PhoneNumber
+);

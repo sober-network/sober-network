@@ -44,6 +44,7 @@
 
         <mat-card-content>
           <p class="description">{{ descriptionPreview(group) }}</p>
+          <p class="description" *ngIf="meetingSummary(group) as summary">{{ summary }}</p>
         </mat-card-content>
 
         <mat-card-actions>
@@ -61,33 +62,107 @@
     <p class="dialog-copy">Start a welcoming home for your people. You can adjust these details anytime.</p>
 
     <form [formGroup]="createForm" class="dialog-form" novalidate>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Name</mat-label>
-        <input matInput formControlName="name" maxlength="80" />
-        <mat-hint align="end">{{ createForm.controls.name.value?.length ?? 0 }}/80</mat-hint>
-        <mat-error *ngIf="createForm.controls.name.hasError('required')">Name is required.</mat-error>
-        <mat-error *ngIf="createForm.controls.name.hasError('minlength')">Name must be at least 2 characters.</mat-error>
-        <mat-error *ngIf="createForm.controls.name.hasError('maxlength')">Name must be 80 characters or less.</mat-error>
-      </mat-form-field>
+      <section>
+        <h3>Basics</h3>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Slug</mat-label>
-        <input matInput formControlName="slug" maxlength="80" (input)="markSlugEdited()" />
-        <mat-hint>Lowercase letters, numbers, and hyphens only.</mat-hint>
-        <mat-error *ngIf="createForm.controls.slug.hasError('required')">Slug is required.</mat-error>
-        <mat-error *ngIf="createForm.controls.slug.hasError('pattern')">Use lowercase letters, numbers, and hyphens only.</mat-error>
-      </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" maxlength="100" />
+          <mat-hint align="end">{{ createForm.controls.name.value?.length ?? 0 }}/100</mat-hint>
+          <mat-error *ngIf="createForm.controls.name.hasError('required')">Name is required.</mat-error>
+          <mat-error *ngIf="createForm.controls.name.hasError('minlength')">Name must be at least 2 characters.</mat-error>
+          <mat-error *ngIf="createForm.controls.name.hasError('maxlength')">Name must be 100 characters or less.</mat-error>
+        </mat-form-field>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Description</mat-label>
-        <textarea matInput formControlName="description" rows="4" maxlength="500"></textarea>
-        <mat-hint align="end">{{ createForm.controls.description.value?.length ?? 0 }}/500</mat-hint>
-      </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Slug</mat-label>
+          <input matInput formControlName="slug" maxlength="50" (input)="markSlugEdited()" />
+          <mat-hint>Lowercase letters, numbers, and hyphens only.</mat-hint>
+          <mat-error *ngIf="createForm.controls.slug.hasError('required')">Slug is required.</mat-error>
+          <mat-error *ngIf="createForm.controls.slug.hasError('pattern')">Use lowercase letters, numbers, and hyphens only.</mat-error>
+        </mat-form-field>
 
-      <div class="toggle-list">
-        <mat-slide-toggle formControlName="isPublic">Public group page</mat-slide-toggle>
-        <mat-slide-toggle formControlName="requiresApproval">Approve new members before they join</mat-slide-toggle>
-      </div>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="4" maxlength="500"></textarea>
+          <mat-hint align="end">{{ createForm.controls.description.value?.length ?? 0 }}/500</mat-hint>
+        </mat-form-field>
+      </section>
+
+      <section>
+        <h3>Meeting details</h3>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Meeting notes</mat-label>
+          <textarea matInput formControlName="meetingSchedule" rows="4" maxlength="1000"></textarea>
+          <mat-hint align="end">{{ createForm.controls.meetingSchedule.value?.length ?? 0 }}/1000</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Day of week</mat-label>
+          <mat-select formControlName="meetingDay">
+            <mat-option [value]="null">No fixed day</mat-option>
+            <mat-option *ngFor="let day of daysOfWeek; let index = index" [value]="index">{{ day }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Meeting time</mat-label>
+          <input matInput type="time" formControlName="meetingTime" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Duration (minutes)</mat-label>
+          <input matInput type="number" formControlName="durationMinutes" min="1" />
+        </mat-form-field>
+
+        <mat-slide-toggle formControlName="isOpen">Open meeting (anyone can attend)</mat-slide-toggle>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Language</mat-label>
+          <input matInput formControlName="language" maxlength="100" placeholder="Leave blank for English" />
+        </mat-form-field>
+
+        <div formGroupName="meetingFormats" class="toggle-list">
+          <label>Formats</label>
+          <mat-checkbox *ngFor="let format of meetingFormats" [formControlName]="format">{{ format }}</mat-checkbox>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Time zone</mat-label>
+          <input matInput formControlName="timeZone" list="dashboard-timezones" maxlength="100" placeholder="e.g. America/New_York" />
+        </mat-form-field>
+        <datalist id="dashboard-timezones">
+          <option *ngFor="let zone of timeZones" [value]="zone"></option>
+        </datalist>
+      </section>
+
+      <section>
+        <h3>Zoom details</h3>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Zoom link</mat-label>
+          <input matInput formControlName="zoomLink" maxlength="500" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Zoom meeting ID</mat-label>
+          <input matInput formControlName="zoomMeetingId" maxlength="100" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Zoom passcode</mat-label>
+          <input matInput formControlName="zoomPasscode" maxlength="100" />
+        </mat-form-field>
+      </section>
+
+      <section>
+        <h3>Access</h3>
+        <div class="toggle-list">
+          <mat-slide-toggle formControlName="isPublic">Public group page</mat-slide-toggle>
+          <mat-slide-toggle formControlName="requiresApproval">Approve new members before they join</mat-slide-toggle>
+        </div>
+      </section>
 
       <p class="form-error" *ngIf="createError">{{ createError }}</p>
     </form>

@@ -21,8 +21,37 @@
           <mat-icon matChipAvatar>groups</mat-icon>
           {{ group.memberCount }} member{{ group.memberCount === 1 ? '' : 's' }}
         </mat-chip>
+        <mat-chip>
+          {{ group.isOpen ? 'Open meeting' : 'Closed meeting' }}
+        </mat-chip>
+        <mat-chip *ngIf="group.userRole">{{ group.userRole }}</mat-chip>
       </mat-chip-set>
     </header>
+
+    <mat-card class="bulletin-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>schedule</mat-icon>
+        <mat-card-title>Meeting details</mat-card-title>
+        <mat-card-subtitle>Everything members need to get into the room</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p><strong>When:</strong> {{ meetingWhen() }}</p>
+        <p><strong>Duration:</strong> {{ group.durationMinutes }} minutes</p>
+        <p *ngIf="group.timeZone"><strong>Time zone:</strong> {{ group.timeZone }}</p>
+        <p *ngIf="group.language"><strong>Language:</strong> {{ group.language }}</p>
+        <p *ngIf="group.meetingSchedule"><strong>Meeting notes:</strong> {{ group.meetingSchedule }}</p>
+
+        <mat-chip-set *ngIf="meetingFormats().length > 0">
+          <mat-chip *ngFor="let format of meetingFormats()">{{ format }}</mat-chip>
+        </mat-chip-set>
+
+        <div *ngIf="group.zoomLink || group.zoomMeetingId || group.zoomPasscode">
+          <p *ngIf="group.zoomLink"><strong>Zoom link:</strong> <a [href]="group.zoomLink" target="_blank" rel="noreferrer">Join meeting</a></p>
+          <p *ngIf="group.zoomMeetingId"><strong>Meeting ID:</strong> {{ group.zoomMeetingId }}</p>
+          <p *ngIf="group.zoomPasscode"><strong>Passcode:</strong> {{ group.zoomPasscode }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
 
     <section class="quick-links">
       <mat-card class="nav-card">

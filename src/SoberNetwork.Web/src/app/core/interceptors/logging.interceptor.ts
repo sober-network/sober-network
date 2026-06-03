@@ -31,10 +31,11 @@ export const loggingInterceptor: HttpInterceptorFn = (req, next) => {
           console.error(`[HTTP] ✖ ${req.method} ${req.url} — status=${err?.status ?? 'network'} (${ms}ms)`, err?.error ?? err);
         }
         clientLog.error(`HTTP ${req.method} ${req.url} failed`, {
-          status: err?.status,
-          statusText: err?.statusText,
-          error: err?.error,
-          ms,
+          status: String(err?.status ?? 'network'),
+          statusText: String(err?.statusText ?? ''),
+          ms: String(ms),
+          // err?.error may contain PII or stack traces — log only its type/shape, never the raw value (T12).
+          errorType: typeof err?.error === 'string' ? 'string' : typeof err?.error,
         });
       },
     })

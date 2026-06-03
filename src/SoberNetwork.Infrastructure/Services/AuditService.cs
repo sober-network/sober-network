@@ -1,5 +1,5 @@
-using SoberNetwork.Core.Entities;
-using SoberNetwork.Core.Enums;
+using SoberNetwork.Domain.Entities;
+using SoberNetwork.Domain.Enums;
 using SoberNetwork.Core.Interfaces;
 using SoberNetwork.Infrastructure.Data;
 

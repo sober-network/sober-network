@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using SoberNetwork.Core.DTOs;
 using SoberNetwork.Core.DTOs.Groups;
-using SoberNetwork.Core.Entities;
-using SoberNetwork.Core.Enums;
+using SoberNetwork.Domain.Entities;
+using SoberNetwork.Domain.Enums;
 using SoberNetwork.Core.Interfaces;
+using SoberNetwork.Core.Options;
 using SoberNetwork.Infrastructure.Data;
 
 namespace SoberNetwork.Infrastructure.Services;
@@ -13,9 +14,9 @@ public class GroupService(
     AppDbContext db,
     IAuditService audit,
     IEmailService email,
-    IConfiguration config) : IGroupService
+    IOptions<AppOptions> appOptions) : IGroupService
 {
-    private string AppBaseUrl => config["App:BaseUrl"] ?? "https://app.sobernetwork.group";
+    private string AppBaseUrl => appOptions.Value.BaseUrl;
 
     // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -33,9 +34,22 @@ public class GroupService(
             m.Status == MemberStatus.Active &&
             m.DeletedAt == null);
 
+    private static string? NullIfWhiteSpace(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
     private static GroupResponse ToGroupResponse(Group g, string userRole, int memberCount) => new(
         g.Id, g.Name, g.Slug, g.Description, g.MeetingSchedule,
-        g.ZoomLink, g.TimeZone, g.IsActive, memberCount, userRole, g.CreatedAt);
+        g.MeetingDay, g.MeetingTime, g.DurationMinutes,
+        g.IsOpen, g.Language, g.MeetingFormats,
+        g.ZoomLink, g.ZoomMeetingId, g.ZoomPasscode,
+        g.TimeZone, g.IsActive, g.IsPublic, g.RequiresApproval,
+        memberCount, userRole, g.CreatedAt);
+
+    private static GroupSummaryResponse ToGroupSummaryResponse(Group group) => new(
+        group.Name, group.Slug, group.Description, group.MeetingSchedule,
+        group.MeetingDay, group.MeetingTime, group.DurationMinutes,
+        group.IsOpen, group.Language, group.MeetingFormats,
+        group.TimeZone, group.IsActive, group.IsPublic, group.RequiresApproval);
 
     private static MemberResponse ToMemberResponse(GroupMembership m) => new(
         m.UserId,
@@ -57,6 +71,7 @@ public class GroupService(
     public async Task<IReadOnlyList<GroupResponse>> GetUserGroupsAsync(string userId)
     {
         var memberships = await db.GroupMemberships
+            .AsNoTracking()
             .Include(m => m.Group)
             .Where(m =>
                 m.UserId == userId &&
@@ -69,7 +84,12 @@ public class GroupService(
         var result = new List<GroupResponse>();
         foreach (var m in memberships)
         {
-            var count = await GetMemberCountAsync(m.GroupId);
+            var count = await db.GroupMemberships
+                .AsNoTracking()
+                .CountAsync(x =>
+                    x.GroupId == m.GroupId &&
+                    x.Status == MemberStatus.Active &&
+                    x.DeletedAt == null);
             result.Add(ToGroupResponse(m.Group!, m.Role.ToString(), count));
         }
         return result;
@@ -77,23 +97,47 @@ public class GroupService(
 
     public async Task<IReadOnlyList<GroupSummaryResponse>> GetAllGroupsAsync()
     {
-        return await db.Groups
+        var groups = await db.Groups
+            .AsNoTracking()
             .Where(g => g.DeletedAt == null)
-            .Select(g => new GroupSummaryResponse(
-                g.Name, g.Slug, g.Description, g.MeetingSchedule, g.TimeZone, g.IsActive))
             .ToListAsync();
+
+        return groups.Select(ToGroupSummaryResponse).ToList();
+    }
+
+    public async Task<GroupSummaryResponse?> GetGroupInfoAsync(string slug)
+    {
+        // IsPublic controls group-list discoverability, not direct-link access (T4 — group autonomy).
+        // A group admin can share a join link for a private group; the recipient can still see info + request to join.
+        var group = await db.Groups
+            .AsNoTracking()
+            .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null && g.IsActive);
+        if (group == null) return null;
+        return ToGroupSummaryResponse(group);
     }
 
     public async Task<GroupResponse?> GetGroupBySlugAsync(string slug, string userId)
     {
-        var group = await db.Groups.FirstOrDefaultAsync(g =>
-            g.Slug == slug && g.DeletedAt == null);
+        var group = await db.Groups
+            .AsNoTracking()
+            .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null);
         if (group == null) return null;
 
-        var membership = await GetActiveMembershipAsync(group.Id, userId);
+        var membership = await db.GroupMemberships
+            .AsNoTracking()
+            .FirstOrDefaultAsync(m =>
+                m.GroupId == group.Id &&
+                m.UserId == userId &&
+                m.Status == MemberStatus.Active &&
+                m.DeletedAt == null);
         if (membership == null) return null;  // not a member — access denied (T4)
 
-        var count = await GetMemberCountAsync(group.Id);
+        var count = await db.GroupMemberships
+            .AsNoTracking()
+            .CountAsync(m =>
+                m.GroupId == group.Id &&
+                m.Status == MemberStatus.Active &&
+                m.DeletedAt == null);
         return ToGroupResponse(group, membership.Role.ToString(), count);
     }
 
@@ -108,12 +152,22 @@ public class GroupService(
         var group = new Group
         {
             Id = Guid.NewGuid(),
-            Name = request.Name,
-            Slug = request.Slug,
-            Description = request.Description,
-            MeetingSchedule = request.MeetingSchedule,
-            ZoomLink = request.ZoomLink,
-            TimeZone = request.TimeZone,
+            Name = request.Name.Trim(),
+            Slug = request.Slug.Trim(),
+            Description = NullIfWhiteSpace(request.Description),
+            MeetingSchedule = NullIfWhiteSpace(request.MeetingSchedule),
+            MeetingDay = request.MeetingDay,
+            MeetingTime = NullIfWhiteSpace(request.MeetingTime),
+            DurationMinutes = request.DurationMinutes,
+            IsOpen = request.IsOpen,
+            Language = NullIfWhiteSpace(request.Language),
+            MeetingFormats = NullIfWhiteSpace(request.MeetingFormats),
+            ZoomLink = NullIfWhiteSpace(request.ZoomLink),
+            ZoomMeetingId = NullIfWhiteSpace(request.ZoomMeetingId),
+            ZoomPasscode = NullIfWhiteSpace(request.ZoomPasscode),
+            TimeZone = NullIfWhiteSpace(request.TimeZone),
+            IsPublic = request.IsPublic,
+            RequiresApproval = request.RequiresApproval,
             IsActive = true,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -155,10 +209,21 @@ public class GroupService(
         if (membership == null || membership.Role != GroupRole.GroupAdmin)
             return (null, "You do not have permission to update this group.");
 
-        if (request.Description != null) group.Description = request.Description;
-        if (request.MeetingSchedule != null) group.MeetingSchedule = request.MeetingSchedule;
-        if (request.ZoomLink != null) group.ZoomLink = request.ZoomLink;
-        if (request.TimeZone != null) group.TimeZone = request.TimeZone;
+        if (request.Name != null) group.Name = request.Name.Trim();
+        if (request.Description != null) group.Description = NullIfWhiteSpace(request.Description);
+        if (request.MeetingSchedule != null) group.MeetingSchedule = NullIfWhiteSpace(request.MeetingSchedule);
+        if (request.MeetingDay != null) group.MeetingDay = request.MeetingDay;
+        if (request.MeetingTime != null) group.MeetingTime = NullIfWhiteSpace(request.MeetingTime);
+        if (request.DurationMinutes != null) group.DurationMinutes = request.DurationMinutes.Value;
+        if (request.IsOpen != null) group.IsOpen = request.IsOpen.Value;
+        if (request.Language != null) group.Language = NullIfWhiteSpace(request.Language);
+        if (request.MeetingFormats != null) group.MeetingFormats = NullIfWhiteSpace(request.MeetingFormats);
+        if (request.ZoomLink != null) group.ZoomLink = NullIfWhiteSpace(request.ZoomLink);
+        if (request.ZoomMeetingId != null) group.ZoomMeetingId = NullIfWhiteSpace(request.ZoomMeetingId);
+        if (request.ZoomPasscode != null) group.ZoomPasscode = NullIfWhiteSpace(request.ZoomPasscode);
+        if (request.TimeZone != null) group.TimeZone = NullIfWhiteSpace(request.TimeZone);
+        if (request.IsPublic != null) group.IsPublic = request.IsPublic.Value;
+        if (request.RequiresApproval != null) group.RequiresApproval = request.RequiresApproval.Value;
         group.UpdatedAt = DateTime.UtcNow;
 
         await db.SaveChangesAsync();
@@ -192,14 +257,22 @@ public class GroupService(
     public async Task<(PagedResponse<MemberResponse>? Members, string? Error)> GetMembersAsync(
         string slug, string userId, int page = 1, int pageSize = 25)
     {
-        var group = await db.Groups.FirstOrDefaultAsync(g =>
-            g.Slug == slug && g.DeletedAt == null);
+        var group = await db.Groups
+            .AsNoTracking()
+            .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null);
         if (group == null) return (null, "Group not found.");
 
-        var callerMembership = await GetActiveMembershipAsync(group.Id, userId);
+        var callerMembership = await db.GroupMemberships
+            .AsNoTracking()
+            .FirstOrDefaultAsync(m =>
+                m.GroupId == group.Id &&
+                m.UserId == userId &&
+                m.Status == MemberStatus.Active &&
+                m.DeletedAt == null);
         if (callerMembership == null) return (null, "You are not a member of this group.");
 
         var query = db.GroupMemberships
+            .AsNoTracking()
             .Include(m => m.User)
             .Where(m =>
                 m.GroupId == group.Id &&
@@ -220,15 +293,23 @@ public class GroupService(
     public async Task<(PagedResponse<JoinRequestResponse>? Requests, string? Error)> GetJoinRequestsAsync(
         string slug, string userId, int page = 1, int pageSize = 25)
     {
-        var group = await db.Groups.FirstOrDefaultAsync(g =>
-            g.Slug == slug && g.DeletedAt == null);
+        var group = await db.Groups
+            .AsNoTracking()
+            .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null);
         if (group == null) return (null, "Group not found.");
 
-        var callerMembership = await GetActiveMembershipAsync(group.Id, userId);
+        var callerMembership = await db.GroupMemberships
+            .AsNoTracking()
+            .FirstOrDefaultAsync(m =>
+                m.GroupId == group.Id &&
+                m.UserId == userId &&
+                m.Status == MemberStatus.Active &&
+                m.DeletedAt == null);
         if (callerMembership == null || callerMembership.Role != GroupRole.GroupAdmin)
             return (null, "You do not have permission to view join requests.");
 
         var query = db.GroupMemberships
+            .AsNoTracking()
             .Include(m => m.User)
             .Where(m =>
                 m.GroupId == group.Id &&
@@ -248,31 +329,35 @@ public class GroupService(
 
     // ── Membership mutations ───────────────────────────────────────────────────
 
-    public async Task<(bool Success, string? Error)> RequestToJoinAsync(string slug, string userId)
+    public async Task<(bool Success, bool AutoApproved, string? Error)> RequestToJoinAsync(string slug, string userId)
     {
-        var group = await db.Groups.FirstOrDefaultAsync(g =>
-            g.Slug == slug && g.DeletedAt == null && g.IsActive);
-        if (group == null) return (false, "Group not found.");
+        var group = await db.Groups
+            .AsNoTracking()
+            .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null && g.IsActive);
+        if (group == null) return (false, false, "Group not found.");
 
-        var existing = await db.GroupMemberships.FirstOrDefaultAsync(m =>
-            m.GroupId == group.Id && m.UserId == userId && m.DeletedAt == null);
+        var existing = await db.GroupMemberships
+            .AsNoTracking()
+            .FirstOrDefaultAsync(m => m.GroupId == group.Id && m.UserId == userId && m.DeletedAt == null);
 
         if (existing != null)
         {
-            if (existing.Status == MemberStatus.Active) return (false, "You are already a member of this group.");
-            if (existing.Status == MemberStatus.PendingApproval) return (true, null);  // idempotent
-            if (existing.Status == MemberStatus.Banned) return (false, "You may not join this group.");
+            if (existing.Status == MemberStatus.Active) return (false, false, "You are already a member of this group.");
+            if (existing.Status == MemberStatus.PendingApproval) return (true, false, null);  // idempotent
+            if (existing.Status == MemberStatus.Banned) return (false, false, "You may not join this group.");
         }
 
+        var autoApprove = !group.RequiresApproval;
         var membership = new GroupMembership
         {
             Id = Guid.NewGuid(),
             GroupId = group.Id,
             UserId = userId,
             Role = GroupRole.Member,
-            Status = MemberStatus.PendingApproval,
+            Status = autoApprove ? MemberStatus.Active : MemberStatus.PendingApproval,
             IsProbationary = true,
             JoinedAt = DateTime.UtcNow,
+            ApprovedAt = autoApprove ? DateTime.UtcNow : null,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -280,12 +365,24 @@ public class GroupService(
         db.GroupMemberships.Add(membership);
         await db.SaveChangesAsync();
 
-        await audit.LogAsync(SecurityEventType.GroupJoinRequested, userId,
-            $"Requested to join group slug={slug}");
+        await audit.LogAsync(
+            autoApprove ? SecurityEventType.GroupMemberApproved : SecurityEventType.GroupJoinRequested,
+            userId,
+            autoApprove
+                ? $"Auto-approved join for group slug={slug}"
+                : $"Requested to join group slug={slug}");
+
+        if (autoApprove)
+        {
+            return (true, true, null);
+        }
 
         // Notify all current admins of the new join request (fire-and-forget — don't fail the request)
-        var applicant = await db.Users.FindAsync(userId);
+        var applicant = await db.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id == userId);
         var admins = await db.GroupMemberships
+            .AsNoTracking()
             .Include(m => m.User)
             .Where(m =>
                 m.GroupId == group.Id &&
@@ -302,7 +399,7 @@ public class GroupService(
             catch { /* email failure must not block the join request */ }
         }
 
-        return (true, null);
+        return (true, false, null);
     }
 
     public async Task<(bool Success, string? Error)> ApproveMemberAsync(
@@ -473,8 +570,9 @@ public class GroupService(
     private async Task<(Group? Group, GroupMembership? Membership, string? Error)> GetAdminAndTarget(
         string slug, string targetUserId, string adminUserId)
     {
-        var group = await db.Groups.FirstOrDefaultAsync(g =>
-            g.Slug == slug && g.DeletedAt == null);
+        var group = await db.Groups
+            .AsNoTracking()
+            .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null);
         if (group == null) return (null, null, "Group not found.");
 
         var adminMembership = await GetActiveMembershipAsync(group.Id, adminUserId);

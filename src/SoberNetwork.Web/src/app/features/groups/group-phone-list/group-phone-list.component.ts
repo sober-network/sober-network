@@ -95,6 +95,7 @@ export class GroupPhoneListComponent implements OnInit {
       switchMap(() => this.groupService.setPhoneVisibility(this.slug, { isPhoneShared })),
       finalize(() => {
         this.saving = false;
+        this.cdr.detectChanges();
       })
     ).subscribe({
       next: () => {

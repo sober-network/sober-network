@@ -84,6 +84,7 @@ export class GroupSettingsComponent implements OnInit {
     }).pipe(
       finalize(() => {
         this.saving = false;
+        this.cdr.detectChanges();
       })
     ).subscribe({
       next: group => {
@@ -155,6 +156,7 @@ export class GroupSettingsComponent implements OnInit {
     this.groupService.deleteGroup(this.slug).pipe(
       finalize(() => {
         this.deleting = false;
+        this.cdr.detectChanges();
       })
     ).subscribe({
       next: () => {

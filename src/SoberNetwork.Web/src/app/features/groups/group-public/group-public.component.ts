@@ -12,7 +12,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { DAYS_OF_WEEK, GroupSummaryResponse } from '@app/core/models';
+import { DAYS_OF_WEEK, GroupSummaryResponse, PublicMeetingResponse } from '@app/core/models';
 import { AuthService } from '@app/core/services/auth.service';
 import { GroupService } from '@app/core/services/group.service';
 
@@ -99,32 +99,24 @@ export class GroupPublicComponent implements OnInit {
     this.submitJoinRequest(message || undefined, dialogRef);
   }
 
-  meetingFormats(): string[] {
-    return (this.group?.meetingFormats ?? '')
+  meetingFormats(m: PublicMeetingResponse): string[] {
+    return (m.formats ?? '')
       .split(',')
       .map(value => value.trim())
       .filter(Boolean);
   }
 
-  meetingWhen(): string {
-    if (!this.group) {
-      return 'Meeting time varies';
-    }
-
+  meetingWhen(m: PublicMeetingResponse): string {
     const parts: string[] = [];
-    if (this.group.meetingDay !== null && this.group.meetingDay !== undefined) {
-      parts.push(this.daysOfWeek[this.group.meetingDay] ?? 'Scheduled meeting');
+    if (m.isRecurring && m.dayOfWeek !== null && m.dayOfWeek !== undefined) {
+      parts.push(this.daysOfWeek[m.dayOfWeek] ?? 'Scheduled meeting');
+    } else if (!m.isRecurring && m.occursOn) {
+      parts.push(new Date(m.occursOn).toLocaleDateString());
     }
-
-    if (this.group.meetingTime) {
-      parts.push(this.group.meetingTime);
+    if (m.time) {
+      parts.push(m.time);
     }
-
-    if (parts.length === 0) {
-      parts.push('Meeting time varies');
-    }
-
-    return parts.join(' • ');
+    return parts.length > 0 ? parts.join(' • ') : 'Meeting time varies';
   }
 
   joinButtonLabel(): string {

@@ -46,6 +46,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/groups/group-join-requests/group-join-requests.component').then(m => m.GroupJoinRequestsComponent)
   },
   {
+    path: 'groups/:slug/meetings',
+    canActivate: [authGuard, groupAdminGuard],
+    loadComponent: () => import('./features/groups/group-meetings/group-meetings.component').then(m => m.GroupMeetingsComponent)
+  },
+  {
     path: 'groups/:slug/settings',
     canActivate: [authGuard, groupAdminGuard],
     loadComponent: () => import('./features/groups/group-settings/group-settings.component').then(m => m.GroupSettingsComponent)

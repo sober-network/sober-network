@@ -8,7 +8,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { DAYS_OF_WEEK, GroupResponse } from '@app/core/models';
+import { DAYS_OF_WEEK, GroupResponse, MeetingResponse } from '@app/core/models';
 import { GroupService } from '@app/core/services/group.service';
 import { ClientLogService } from '@app/core/services/client-log.service';
 import { ConfirmDialogComponent } from '@app/shared/components/confirm-dialog/confirm-dialog.component';
@@ -75,24 +75,21 @@ export class GroupHubComponent implements OnInit {
     });
   }
 
-  meetingWhen(): string {
-    if (!this.group) {
-      return 'Meeting time varies';
-    }
-
+  meetingWhen(m: MeetingResponse): string {
     const parts: string[] = [];
-    if (this.group.meetingDay !== null && this.group.meetingDay !== undefined) {
-      parts.push(this.daysOfWeek[this.group.meetingDay] ?? 'Scheduled meeting');
+    if (m.isRecurring && m.dayOfWeek !== null && m.dayOfWeek !== undefined) {
+      parts.push(this.daysOfWeek[m.dayOfWeek] ?? 'Scheduled meeting');
+    } else if (!m.isRecurring && m.occursOn) {
+      parts.push(new Date(m.occursOn).toLocaleDateString());
     }
-    if (this.group.meetingTime) {
-      parts.push(this.group.meetingTime);
+    if (m.time) {
+      parts.push(m.time);
     }
-
     return parts.length > 0 ? parts.join(' • ') : 'Meeting time varies';
   }
 
-  meetingFormats(): string[] {
-    return (this.group?.meetingFormats ?? '')
+  meetingFormats(m: MeetingResponse): string[] {
+    return (m.formats ?? '')
       .split(',')
       .map(value => value.trim())
       .filter(Boolean);

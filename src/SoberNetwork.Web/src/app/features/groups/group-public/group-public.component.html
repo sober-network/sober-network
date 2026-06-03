@@ -24,37 +24,38 @@
       <p class="description">{{ group.description || 'A caring place to stay connected between meetings.' }}</p>
 
       <div class="badge-list">
-        <span class="badge">{{ group.isOpen ? 'Open meeting' : 'Closed meeting' }}</span>
         <span class="badge">{{ group.isPublic ? 'Public group' : 'Private group' }}</span>
         <span class="badge">{{ group.requiresApproval ? 'Approval needed' : 'Instant join' }}</span>
       </div>
 
-      <div class="meta-row">
+      <div class="meta-row" *ngIf="group.timeZone">
         <div class="member-count">
-          <mat-icon>event</mat-icon>
-          {{ meetingWhen() }}
-        </div>
-        <div class="member-count">
-          <mat-icon>schedule</mat-icon>
-          {{ group.durationMinutes }} min
-        </div>
-        <div class="member-count" *ngIf="group.timeZone">
           <mat-icon>public</mat-icon>
           {{ group.timeZone }}
         </div>
       </div>
 
-      <p class="description" *ngIf="group.language">
-        <strong>Language:</strong> {{ group.language }}
-      </p>
+      <ng-container *ngFor="let m of group.meetings">
+        <div class="meta-row">
+          <div class="member-count">
+            <mat-icon>event</mat-icon>
+            <strong>{{ m.name }}:</strong>&nbsp;{{ meetingWhen(m) }}
+          </div>
+          <div class="member-count">
+            <mat-icon>schedule</mat-icon>
+            {{ m.durationMinutes }} min
+          </div>
+        </div>
+        <p class="description" *ngIf="m.description">{{ m.description }}</p>
+        <p class="description" *ngIf="m.language"><strong>Language:</strong> {{ m.language }}</p>
+        <p class="description" *ngIf="m.location"><strong>Location:</strong> {{ m.location }}</p>
+        <mat-chip-set *ngIf="meetingFormats(m).length > 0">
+          <mat-chip>{{ m.isOpen ? 'Open' : 'Closed' }}</mat-chip>
+          <mat-chip *ngFor="let format of meetingFormats(m)">{{ format }}</mat-chip>
+        </mat-chip-set>
+      </ng-container>
 
-      <p class="description" *ngIf="group.meetingSchedule">
-        <strong>Meeting notes:</strong> {{ group.meetingSchedule }}
-      </p>
-
-      <mat-chip-set *ngIf="meetingFormats().length > 0">
-        <mat-chip *ngFor="let format of meetingFormats()">{{ format }}</mat-chip>
-      </mat-chip-set>
+      <p class="description" *ngIf="group.meetings.length === 0">Meeting times not yet set.</p>
 
       <p class="description" *ngIf="group.requiresApproval">
         New members are reviewed by a group admin before access is granted.

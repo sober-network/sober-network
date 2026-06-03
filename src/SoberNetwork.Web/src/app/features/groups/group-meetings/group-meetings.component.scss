@@ -1,0 +1,42 @@
+.meetings-page {
+  max-width: 760px;
+}
+
+.meeting-form section {
+  margin-bottom: 1.5rem;
+}
+
+.field-row {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.field-hint {
+  font-size: 0.85rem;
+  color: var(--mat-sys-on-surface-variant);
+  margin-bottom: 0.5rem;
+}
+
+.meeting-card {
+  margin-bottom: 1rem;
+}
+
+.inactive-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  color: var(--mat-sys-error);
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  padding: 0 6px;
+}
+
+.empty-card {
+  text-align: center;
+
+  mat-icon {
+    font-size: 3rem;
+    width: 3rem;
+    height: 3rem;
+    opacity: 0.4;
+  }
+}

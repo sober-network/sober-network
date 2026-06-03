@@ -8,21 +8,83 @@ export type MeetingFormat = 'Discussion' | 'Speaker' | 'StepStudy' | 'BigBook' |
 export const MEETING_FORMATS: MeetingFormat[] = ['Discussion', 'Speaker', 'StepStudy', 'BigBook', 'Beginners'];
 export const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+// ── Meeting DTOs ──────────────────────────────────────────────────────────────
+
+/** Publicly-safe meeting detail (no Zoom, no Notes). Used on public group pages (T11/T12). */
+export interface PublicMeetingResponse {
+  id: string;
+  name: string;
+  description: string | null;
+  isRecurring: boolean;
+  dayOfWeek: number | null;       // 0=Sun..6=Sat
+  time: string;                   // "HH:mm"
+  durationMinutes: number;
+  occursOn: string | null;        // ISO date for one-off meetings
+  isOpen: boolean;
+  formats: string | null;         // comma-separated
+  language: string | null;
+  location: string | null;
+  isActive: boolean;
+}
+
+/** Member-facing meeting detail. Includes Zoom credentials. No admin Notes. */
+export interface MeetingResponse extends PublicMeetingResponse {
+  zoomLink: string | null;
+  zoomMeetingId: string | null;
+  zoomPasscode: string | null;
+  createdAt: string;
+}
+
+/** Admin-only meeting detail. Includes Notes and all Zoom fields. */
+export interface AdminMeetingResponse extends MeetingResponse {
+  notes: string | null;
+  updatedAt: string;
+}
+
+export interface CreateMeetingRequest {
+  name: string;
+  description?: string | null;
+  notes?: string | null;
+  isRecurring?: boolean;
+  dayOfWeek?: number | null;
+  time: string;
+  durationMinutes?: number;
+  occursOn?: string | null;
+  isOpen?: boolean;
+  formats?: string | null;
+  language?: string | null;
+  location?: string | null;
+  zoomLink?: string | null;
+  zoomMeetingId?: string | null;
+  zoomPasscode?: string | null;
+}
+
+export interface UpdateMeetingRequest {
+  name?: string;
+  description?: string | null;
+  notes?: string | null;
+  isRecurring?: boolean;
+  dayOfWeek?: number | null;
+  time?: string;
+  durationMinutes?: number;
+  occursOn?: string | null;
+  isOpen?: boolean;
+  formats?: string | null;
+  language?: string | null;
+  location?: string | null;
+  zoomLink?: string | null;
+  zoomMeetingId?: string | null;
+  zoomPasscode?: string | null;
+  isActive?: boolean;
+}
+
+// ── Group DTOs ────────────────────────────────────────────────────────────────
+
 export interface GroupResponse {
   id: string;
   name: string;
   slug: string;
   description: string | null;
-  meetingSchedule: string | null;
-  meetingDay: number | null;        // 0=Sun..6=Sat
-  meetingTime: string | null;       // "HH:mm"
-  durationMinutes: number;
-  isOpen: boolean;
-  language: string | null;
-  meetingFormats: string | null;    // comma-separated MeetingFormat values
-  zoomLink: string | null;
-  zoomMeetingId: string | null;
-  zoomPasscode: string | null;
   timeZone: string | null;
   isActive: boolean;
   isPublic: boolean;
@@ -30,23 +92,18 @@ export interface GroupResponse {
   memberCount: number;
   userRole: string;
   createdAt: string;
+  meetings: MeetingResponse[];
 }
 
 export interface GroupSummaryResponse {
   name: string;
   slug: string;
   description: string | null;
-  meetingSchedule: string | null;
-  meetingDay: number | null;
-  meetingTime: string | null;
-  durationMinutes: number;
-  isOpen: boolean;
-  language: string | null;
-  meetingFormats: string | null;
   timeZone: string | null;
   isActive: boolean;
   isPublic: boolean;
   requiresApproval: boolean;
+  meetings: PublicMeetingResponse[];
 }
 
 export interface GroupMemberResponse {
@@ -72,16 +129,6 @@ export interface CreateGroupRequest {
   name: string;
   slug: string;
   description?: string;
-  meetingSchedule?: string;
-  meetingDay?: number | null;
-  meetingTime?: string | null;
-  durationMinutes?: number;
-  isOpen?: boolean;
-  language?: string;
-  meetingFormats?: string;
-  zoomLink?: string;
-  zoomMeetingId?: string;
-  zoomPasscode?: string;
   timeZone?: string;
   isPublic: boolean;
   requiresApproval: boolean;
@@ -90,16 +137,6 @@ export interface CreateGroupRequest {
 export interface UpdateGroupRequest {
   name?: string;
   description?: string;
-  meetingSchedule?: string;
-  meetingDay?: number | null;
-  meetingTime?: string | null;
-  durationMinutes?: number;
-  isOpen?: boolean;
-  language?: string;
-  meetingFormats?: string;
-  zoomLink?: string;
-  zoomMeetingId?: string;
-  zoomPasscode?: string;
   timeZone?: string;
   isPublic?: boolean;
   requiresApproval?: boolean;

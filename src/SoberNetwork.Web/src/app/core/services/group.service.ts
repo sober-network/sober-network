@@ -6,7 +6,8 @@ import {
   CreateGroupRequest, UpdateGroupRequest, JoinGroupRequest,
   JoinRequestResponse, UpdateMemberRoleRequest, UpdateMemberStatusRequest,
   ApproveJoinRequest, PhoneVisibilityRequest,
-  PhoneListEntryResponse, MemberDetailResponse
+  PhoneListEntryResponse, MemberDetailResponse,
+  MeetingResponse, AdminMeetingResponse, CreateMeetingRequest, UpdateMeetingRequest
 } from '@app/core/models';
 import { environment } from '../../../environments/environment';
 
@@ -43,6 +44,28 @@ export class GroupService {
 
   deleteGroup(slug: string): Observable<void> {
     return this.http.delete<void>(`${this.base}/${slug}`);
+  }
+
+  // ── Meetings ────────────────────────────────────────────────────────────────
+
+  getMeetings(slug: string): Observable<MeetingResponse[]> {
+    return this.http.get<MeetingResponse[]>(`${this.base}/${slug}/meetings`);
+  }
+
+  getAdminMeetings(slug: string): Observable<AdminMeetingResponse[]> {
+    return this.http.get<AdminMeetingResponse[]>(`${this.base}/${slug}/meetings/admin`);
+  }
+
+  createMeeting(slug: string, request: CreateMeetingRequest): Observable<AdminMeetingResponse> {
+    return this.http.post<AdminMeetingResponse>(`${this.base}/${slug}/meetings`, request);
+  }
+
+  updateMeeting(slug: string, meetingId: string, request: UpdateMeetingRequest): Observable<AdminMeetingResponse> {
+    return this.http.put<AdminMeetingResponse>(`${this.base}/${slug}/meetings/${meetingId}`, request);
+  }
+
+  deleteMeeting(slug: string, meetingId: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${slug}/meetings/${meetingId}`);
   }
 
   // ── Membership ──────────────────────────────────────────────────────────────

@@ -236,6 +236,43 @@ These standards apply to every feature, PR, and code change on Sober Network. Th
 
 ---
 
+### Architecture: Project Layer Map
+
+| Project | Role | Depends on |
+|---------|------|------------|
+| `SoberNetwork.Domain` | Entities, Enums — zero local deps | (none) |
+| `SoberNetwork.Core` | Commands, Queries, Handlers, Validators, DTOs, Interfaces, Results | Domain |
+| `SoberNetwork.Infrastructure` | EF Core, Repositories, Service implementations | Domain, Core |
+| `SoberNetwork.Api` | Controllers (IMediator only), DI wiring, Program.cs | Core, Infrastructure, Domain |
+
+**MediatR CQRS pattern (mandatory)**
+- All application logic flows through MediatR commands/queries → handlers
+- Controllers inject only `IMediator`; all business logic lives in handlers
+- Commands return `CommandResult` or `DataResult<T>` using `ResultCode` enum (Ok/BadRequest/Unauthorized/Forbidden/NotFound/Conflict)
+- Controllers map `ResultCode` → HTTP status via switch expressions
+- `LoggingBehavior` pipeline behavior logs only request type name + elapsed ms — NEVER request/response contents
+
+**Result types** (in `SoberNetwork.Core.Results`)
+- `ResultCode` — Ok, BadRequest, Unauthorized, Forbidden, NotFound, Conflict
+- `CommandResult(ResultCode, string? Error)` — for commands with no return data
+- `DataResult<T>(ResultCode, T? Data, string? Error)` — for data-returning operations
+
+**Auth service pattern**
+- `IAuthService` (Core) owns ALL auth workflows: Register, ConfirmEmail, ResendConfirmation, Login, ForgotPassword, ResetPassword, Refresh, Logout
+- Auth handlers delegate entirely to `IAuthService`; they contain no auth logic themselves
+- Callback URL templates built in controller with `{userId}/{token}` placeholders; `AuthService` substitutes real values
+
+**Build commands** (verified working)
+```
+dotnet build src\SoberNetwork.Api\SoberNetwork.Api.csproj
+cd src\SoberNetwork.Web && npx ng build --configuration=development
+dotnet test tests\SoberNetwork.Core.Tests\SoberNetwork.Core.Tests.csproj
+dotnet test tests\SoberNetwork.Api.Tests\SoberNetwork.Api.Tests.csproj
+```
+Note: solution-level `dotnet test` does not work due to `SoberNetwork.Web.esproj` in solution.
+
+---
+
 ### 2. API Design Standards
 
 **URL Structure**
@@ -316,18 +353,34 @@ Run this checklist before designing or implementing any new feature. If any answ
 ### 5. Testing Standards
 
 **What to test**
-- All service logic in `SoberNetwork.Core` and `SoberNetwork.Infrastructure` — unit tested with mocked dependencies
-- All API endpoints — integration tested against a real in-memory or test DB
+- Handler result-mapping logic in `SoberNetwork.Core` — unit tested with mocked service interfaces (Moq)
+- FluentValidation validators — validated with `TestValidate()` / `ShouldHaveValidationErrorFor()`
+- All API endpoints — integration tested via `WebApplicationFactory<Program>` with mocked services
 - Security-sensitive paths get dedicated tests: auth flows, phone list access, member data isolation, group boundary enforcement
+
+**Test infrastructure**
+- `TestWebApplicationFactory` extends `WebApplicationFactory<Program>`
+  - Uses `ConfigureAppConfiguration` to inject test JWT/Resend config before app startup
+  - Replaces Npgsql with EF Core InMemory database
+  - Exposes named `Mock<IGroupService>`, `Mock<IMemberService>`, etc. so tests can `Setup()` them
+  - Provides `CreateAuthenticatedClient(userId)` and `CreateSuperAdminClient(userId)` helpers
+- `JwtTestHelper.GenerateToken()` creates JWTs with any claims needed for tests
+- Solution-level `dotnet test` does not work (SoberNetwork.Web.esproj in solution); run each project separately
+
+**Run tests**
+```
+dotnet test tests\SoberNetwork.Core.Tests\SoberNetwork.Core.Tests.csproj
+dotnet test tests\SoberNetwork.Api.Tests\SoberNetwork.Api.Tests.csproj
+```
 
 **Test naming convention**
 ```
-MethodName_Scenario_ExpectedResult
+Scenario_condition_expected_outcome (snake_case)
 // Examples:
-Login_WithInvalidPassword_ReturnsUnauthorized
-Register_WithDuplicateEmail_ReturnsBadRequest
-GetPhoneList_AsNonMember_ReturnsForbidden
-GetPhoneList_AsActiveMember_ReturnsPhoneList
+Valid_request_passes
+Password_too_short_fails
+Outsider_cannot_view_member_list
+GetAllGroups_returns_403_for_regular_user
 ```
 
 **Security test requirements**
@@ -337,7 +390,7 @@ Every protected endpoint must have at least:
 3. A test asserting cross-group access returns `403` or `404` (no data leakage)
 
 **No production secrets in tests**
-- Tests use in-memory SQLite or a dedicated test Supabase schema, never the production DB
+- Tests use EF Core InMemory database, never the production DB
 - JWT secrets and API keys in tests are hardcoded throwaway values only
 
 ---
@@ -412,4 +465,4 @@ As more groups join, Supabase/Vercel free tiers may be exceeded. Should each gro
 
 ---
 
-*Last updated: 2026-06-02*
+*Last updated: 2026-06-03*

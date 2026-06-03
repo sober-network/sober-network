@@ -1,7 +1,7 @@
 # Sober Network — Copilot Standing Instructions
 
 These instructions apply to every task, feature, PR, and code change on this repository.
-They are derived from `docs/knowledge.md` and are non-negotiable. Always apply them.
+They are non-negotiable. Always apply them when generating, reviewing, or refactoring code.
 
 ---
 
@@ -37,17 +37,50 @@ resolve it before writing code.
 
 ## 2. Security Principles
 
+
 - **`[Authorize]` is the default** on all controllers. `[AllowAnonymous]` must be explicitly applied AND must have a comment explaining why it's public and that it passed T11/T12 review.
 - All users must be authenticated before accessing member content.
 - Phone lists and member information are **never** exposed publicly.
 - Public-facing content is strictly limited: meeting times, contact form — no member data.
 - No user enumeration: auth endpoints always return generic error messages.
 - Entities (`ApplicationUser`, `Group`, etc.) never leave the API layer. Always map to a DTO before returning.
-- Input DTOs validate at the boundary: `[Required]`, `[MaxLength]`, `[EmailAddress]`, etc.
+- Input DTOs use **FluentValidation** for request validation at the boundary.
+- Use **CancellationToken** in all async endpoints.
 
 ---
 
-## 3. SOLID Principles
+## 3. General C# Standards
+
+- Use **C# 12** features when appropriate.
+- Prefer **async/await** everywhere; avoid `Task.Run` unless explicitly required. Async all the way down — never generate synchronous I/O or blocking calls.
+- Use **guard clauses** at the start of methods.
+- Use **interfaces** for abstractions; avoid returning concrete types from public APIs.
+- Prefer **records** for immutable models (DTOs, value objects).
+- Use **expression-bodied members** when they improve clarity.
+- Follow **PascalCase** for public members and **camelCase** for locals and parameters.
+- Avoid static classes for business logic.
+- Generate **XML documentation** for all public APIs.
+
+---
+
+## 4. Clean Architecture & SOLID
+
+### Layer Responsibilities
+
+| Layer | Project | Contains |
+|-------|---------|----------|
+| Domain | `SoberNetwork.Core` | Entities, value objects, domain services, domain events |
+| Application | `SoberNetwork.Core` | Commands, queries, MediatR handlers, validators, persistence interfaces |
+| Infrastructure | `SoberNetwork.Infrastructure` | EF Core DbContext, repository implementations, external services |
+| API | `SoberNetwork.Api` | Controllers, request/response DTOs, filters, middleware |
+
+- **Core (Domain + Application) never imports Infrastructure** — enforced by project reference structure.
+- Controllers and services depend on **interfaces**, never on concrete implementations.
+- **Never bypass the Application layer** to access the database directly from a controller.
+- Domain models must contain **business logic** — not DTOs or EF Core attributes.
+- Use **MediatR** for all commands and queries. Never bypass MediatR for application logic.
+
+### SOLID
 
 **Single Responsibility** — Every class does one thing. No business logic in controllers; controllers orchestrate only.
 
@@ -57,16 +90,33 @@ resolve it before writing code.
 
 **Interface Segregation** — Interfaces are small and focused (`ITokenService`, `IEmailService`, `IAuditService`). No God interfaces.
 
-**Dependency Inversion:**
-- `SoberNetwork.Core` defines interfaces.
-- `SoberNetwork.Infrastructure` implements them.
-- `SoberNetwork.Api` consumes them via DI.
-- **Core never imports Infrastructure** — enforced by project reference structure.
-- Controllers and services depend on interfaces, never on concrete implementations directly.
+**Dependency Inversion** — Application layer defines interfaces; Infrastructure implements them; Api consumes via DI.
 
 ---
 
-## 4. API Design Standards
+## 5. Dependency Injection
+
+- All services must be registered via DI.
+- Prefer **constructor injection** — avoid service locators or static access to services.
+- Use **IOptions\<T\>** for configuration.
+- Use **AddScoped** for business services unless a different lifetime is explicitly required.
+
+---
+
+## 6. EF Core Standards
+
+- Use **DbContext** per request (scoped lifetime).
+- Avoid lazy loading; prefer **explicit** or **eager** loading.
+- Always use **AsNoTracking** for read-only queries.
+- Avoid N+1 queries; use `Include`, `ThenInclude`, or projection.
+- Use **migrations** for all schema changes — never modify the database manually.
+- Use **value objects** where appropriate; avoid primitive obsession.
+- Do not expose `IQueryable` from repositories.
+- Repositories return domain models or DTOs, not EF entities.
+
+---
+
+## 7. API Design Standards
 
 **URLs**
 - Resources are plural nouns: `GET /api/groups`, `POST /api/groups/{slug}/members`
@@ -81,12 +131,25 @@ resolve it before writing code.
 - `DELETE` — soft delete only (`deleted_at`), never removes rows
 
 **Response Shape**
-- Success: return the resource or a plain confirmation — never raw entity objects
-- Error: `{ "message": "..." }` — never stack traces, never Identity error detail in production
+- Success: return the resource or a plain confirmation — never raw entity objects or EF entities
+- Error: return **ProblemDetails** (`application/problem+json`) — never stack traces, never Identity error detail in production
+- Auth endpoints always return generic messages — no user enumeration
 
 ---
 
-## 5. Data Standards
+## 8. Error Handling & Logging
+
+- Do not swallow exceptions.
+- Use structured logging with **ILogger\<T\>**.
+- Use domain-specific exceptions only when meaningful; avoid throwing generic `Exception`.
+- Logs contain `userId` (GUID) **only** — never email, display name, sobriety date, phone number, or IP in application logs (T12).
+- IP and user agent are stored only in `security_events` for security purposes.
+- `ClientLogData = Record<string, string>` — all Angular log metadata values must be strings; convert with `String()` at the call site.
+- Audit log rows describe *actions*, not *people*.
+
+---
+
+## 9. Data Standards
 
 **Every table must have:**
 - `created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`
@@ -107,16 +170,13 @@ resolve it before writing code.
 
 ---
 
-## 6. Logging / PII (T12)
+## 10. Testing Standards
 
-- Logs contain `userId` (GUID) **only** — never email, display name, sobriety date, phone number, or IP in application logs
-- IP and user agent are stored only in `security_events` for security purposes
-- `ClientLogData = Record<string, string>` — all log metadata values must be strings; convert with `String()` at the call site
-- Audit log rows describe *actions*, not *people*
-
----
-
-## 7. Testing Standards
+- Use **xUnit** for all tests.
+- Use **Moq** or **NSubstitute** for mocking.
+- Follow **AAA (Arrange-Act-Assert)** structure.
+- Unit tests must not depend on EF Core or external services.
+- Integration tests may use **Testcontainers** or an in-memory database.
 
 **Security test requirements — every protected endpoint must have:**
 1. A test asserting unauthenticated requests return `401`
@@ -135,7 +195,32 @@ Login_WithInvalidPassword_ReturnsUnauthorized
 
 ---
 
-## 8. Architecture Reminders
+## 11. Code Generation Preferences
+
+When generating code:
+- Prefer **clean, minimal, readable** solutions. Avoid unnecessary abstractions.
+- Use **async all the way down** with `CancellationToken` in all async methods.
+- Use **dependency injection** patterns consistently.
+- Generate **XML documentation** for all public APIs.
+- Generate **DTOs** for all API input/output — never expose domain models or EF entities directly.
+- Follow architecture boundaries strictly — place new files in the correct layer.
+
+---
+
+## 12. File & Folder Structure
+
+```
+/Domain (SoberNetwork.Core)        — Entities, value objects, domain services, events
+/Application (SoberNetwork.Core)   — Commands, queries, MediatR handlers, validators, interfaces
+/Infrastructure                    — EF Core DbContext, repository implementations, external services
+/API (SoberNetwork.Api)            — Controllers, DTOs, filters, middleware
+```
+
+Place new files in the correct layer automatically.
+
+---
+
+## 13. Architecture Reminders
 
 - **Modular Monolith** — clean module boundaries: `Auth`, `Groups`, `Events`, `Documents`, `Members`, `Notifications`
 - `IsPublic` on `Group` controls directory discoverability only — NOT direct-link access. Private groups can still share join links.
@@ -143,7 +228,22 @@ Login_WithInvalidPassword_ReturnsUnauthorized
 
 ---
 
-## 9. Build & Validation Commands
+## 14. Things Copilot Must Never Do
+
+- Never access DbContext from controllers.
+- Never put business logic in controllers.
+- Never return EF Core entities from API endpoints.
+- Never create static helper classes for domain logic.
+- Never bypass MediatR for application logic.
+- Never generate synchronous I/O or blocking calls.
+- Never hard-delete rows — always use soft delete (`deleted_at`).
+- Never expose member data (email, phone, sobriety date, full name) to unauthenticated users.
+- Never add `[AllowAnonymous]` without a comment explaining the T11/T12 review.
+- Never cross group boundaries in a query — always filter by `group_id`.
+
+---
+
+## 15. Build & Validation Commands
 
 ```powershell
 # Backend

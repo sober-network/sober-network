@@ -15,8 +15,9 @@
       <mat-icon class="avatar-icon">account_circle</mat-icon>
       <div>
         <h1>{{ member.displayName }}</h1>
-        <p class="timezone-line" *ngIf="member.timeZone">
-          <mat-icon inline>schedule</mat-icon> {{ member.timeZone }}
+        <p class="timezone-line">
+          <mat-icon inline>badge</mat-icon> {{ member.role }} · {{ member.status }}
+          <span *ngIf="member.isProbationary"> · Probationary</span>
         </p>
         <a mat-button color="primary" routerLink="/profile" *ngIf="isOwnProfile">
           Edit My Profile
@@ -48,17 +49,13 @@
           <a [href]="'tel:' + member.phoneNumber" class="phone-link">{{ member.phoneNumber }}</a>
         </div>
 
-        <mat-divider *ngIf="member.groupsInCommon.length"></mat-divider>
+        <mat-divider *ngIf="member.sobriety || member.phoneNumber"></mat-divider>
 
-        <!-- Groups in common -->
-        <div class="detail-section" *ngIf="member.groupsInCommon.length">
-          <h3><mat-icon>groups</mat-icon> Groups in Common</h3>
-          <div class="chips-row">
-            <mat-chip *ngFor="let slug of member.groupsInCommon"
-                      [routerLink]="['/groups', slug]">
-              {{ slug }}
-            </mat-chip>
-          </div>
+        <div class="detail-section">
+          <h3><mat-icon>event</mat-icon> Membership</h3>
+          <p>Joined {{ member.joinedAt | date:'longDate' }}</p>
+          <p>Status: {{ member.status }}</p>
+          <p *ngIf="member.isProbationary">This member is currently probationary.</p>
         </div>
       </mat-card-content>
     </mat-card>

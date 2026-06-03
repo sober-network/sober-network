@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
@@ -15,7 +15,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
-import { ChangeDetectorRef } from '@angular/core';
 import { MemberService } from '@app/core/services/member.service';
 import { AuthService } from '@app/core/services/auth.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@app/shared/components/confirm-dialog/confirm-dialog.component';
@@ -121,8 +120,8 @@ export class MyProfileComponent implements OnInit {
         this.sobriety = s;
         this.sobrietyForm.patchValue({
           sobrietyDate: s.sobrietyDate ? new Date(s.sobrietyDate) : null,
-          isSobrietyDatePublic: s.isSobrietyDatePublic,
-          isDaysSoberPublic: s.isDaysSoberPublic,
+          isSobrietyDatePublic: s.isDatePublic,
+          isDaysSoberPublic: s.isDaysPublic,
         });
       },
     });
@@ -144,16 +143,24 @@ export class MyProfileComponent implements OnInit {
   saveSobriety(): void {
     this.savingSobriety = true;
     const { sobrietyDate, isSobrietyDatePublic, isDaysSoberPublic } = this.sobrietyForm.getRawValue();
-    const dateReq: SetSobrietyDateRequest = {
-      sobrietyDate: sobrietyDate ? (sobrietyDate as Date).toISOString().split('T')[0] : null,
-    };
     const visReq: SobrietyVisibilityRequest = {
-      isSobrietyDatePublic: isSobrietyDatePublic ?? false,
-      isDaysSoberPublic:    isDaysSoberPublic    ?? false,
+      isDatePublic: isSobrietyDatePublic ?? false,
+      isDaysPublic: isDaysSoberPublic ?? false,
     };
-    this.memberService.setSobrietyDate(dateReq).subscribe();
-    this.memberService.setSobrietyVisibility(visReq).subscribe({
-      next: () => { this.savingSobriety = false; this.snack.open('Sobriety settings saved', 'OK', { duration: 3000 }); },
+
+    const saveDate$ = sobrietyDate
+      ? this.memberService.setSobrietyDate({
+          sobrietyDate: (sobrietyDate as Date).toISOString().split('T')[0],
+        })
+      : this.memberService.removeSobrietyDate();
+
+    saveDate$.subscribe({
+      next: () => {
+        this.memberService.setSobrietyVisibility(visReq).subscribe({
+          next: () => { this.savingSobriety = false; this.snack.open('Sobriety settings saved', 'OK', { duration: 3000 }); },
+          error: () => { this.savingSobriety = false; this.snack.open('Save failed', 'OK', { duration: 3000 }); },
+        });
+      },
       error: () => { this.savingSobriety = false; this.snack.open('Save failed', 'OK', { duration: 3000 }); },
     });
   }
@@ -171,7 +178,11 @@ export class MyProfileComponent implements OnInit {
     if (this.passwordForm.invalid) return;
     this.savingPassword = true;
     const { currentPassword, newPassword } = this.passwordForm.getRawValue();
-    const req: ChangePasswordRequest = { currentPassword: currentPassword!, newPassword: newPassword! };
+    const req: ChangePasswordRequest = {
+      currentPassword: currentPassword!,
+      newPassword: newPassword!,
+      confirmNewPassword: newPassword!,
+    };
     this.memberService.changePassword(req).subscribe({
       next: () => { this.passwordForm.reset(); this.savingPassword = false; this.snack.open('Password changed', 'OK', { duration: 3000 }); },
       error: err => { this.savingPassword = false; this.snack.open(err?.error?.message ?? 'Change failed', 'OK', { duration: 4000 }); },
@@ -182,7 +193,7 @@ export class MyProfileComponent implements OnInit {
     if (this.emailForm.invalid) return;
     this.savingEmail = true;
     const { newEmail, password } = this.emailForm.getRawValue();
-    const req: ChangeEmailRequest = { newEmail: newEmail!, password: password! };
+    const req: ChangeEmailRequest = { newEmail: newEmail!, currentPassword: password! };
     this.memberService.changeEmail(req).subscribe({
       next: () => { this.emailForm.reset(); this.savingEmail = false; this.snack.open('Confirmation sent to new address', 'OK', { duration: 4000 }); },
       error: err => { this.savingEmail = false; this.snack.open(err?.error?.message ?? 'Change failed', 'OK', { duration: 4000 }); },

@@ -71,6 +71,9 @@ public interface IMemberService
 
     // ── SuperAdmin ─────────────────────────────────────────────────────────────
 
+    /// <summary>Returns all users on the platform. SuperAdmin only.</summary>
+    Task<IReadOnlyList<AdminMemberResponse>> GetAllMembersAsync();
+
     /// <summary>Returns the full admin view of any user. SuperAdmin only.</summary>
     Task<AdminMemberResponse?> GetUserByIdAsync(string targetUserId);
 

@@ -70,12 +70,17 @@ export class GroupPhoneListComponent implements OnInit {
       this.slug = params.get('slug') ?? '';
       this.loadPhoneList();
     });
+
+    this.phoneForm.controls.isPhoneShared.valueChanges.subscribe(() => {
+      this.saveError = '';
+      this.saveSuccess = '';
+    });
   }
 
   savePhoneSettings(): void {
     const isPhoneShared = this.phoneForm.controls.isPhoneShared.value === true;
     const phoneNumber = this.phoneForm.controls.phoneNumber.value?.trim() ?? '';
-    const hasStoredPhone = this.profile?.hasPhone ?? false;
+    const hasStoredPhone = !!this.profile?.phoneNumber;
 
     this.saveError = '';
     this.saveSuccess = '';
@@ -92,7 +97,7 @@ export class GroupPhoneListComponent implements OnInit {
       : of(void 0);
 
     savePhone$.pipe(
-      switchMap(() => this.groupService.setPhoneVisibility(this.slug, { isPhoneShared })),
+      switchMap(() => this.groupService.setPhoneVisibility(this.slug, { isShared: isPhoneShared })),
       finalize(() => {
         this.saving = false;
         this.cdr.detectChanges();

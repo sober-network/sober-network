@@ -4,7 +4,6 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { GroupService } from '@app/core/services/group.service';
@@ -19,7 +18,7 @@ import { switchMap, of } from 'rxjs';
   imports: [
     CommonModule, RouterModule,
     MatCardModule, MatButtonModule, MatIconModule,
-    MatChipsModule, MatDividerModule, MatProgressSpinnerModule,
+    MatDividerModule, MatProgressSpinnerModule,
   ],
   templateUrl: './member-detail.component.html',
   styleUrl: './member-detail.component.scss',

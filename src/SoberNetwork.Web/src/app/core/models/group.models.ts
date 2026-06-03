@@ -75,5 +75,5 @@ export interface ApproveJoinRequest {
 }
 
 export interface PhoneVisibilityRequest {
-  isPhoneShared: boolean;
+  isShared: boolean;
 }

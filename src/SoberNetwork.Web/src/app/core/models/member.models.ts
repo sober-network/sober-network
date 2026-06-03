@@ -1,49 +1,53 @@
 // Member models — mirror MembersController request/response DTOs
 
+export interface SobrietyResponse {
+  sobrietyDate: string | null;
+  daysSober: number | null;
+  isDatePublic: boolean;
+  isDaysPublic: boolean;
+}
+
 export interface MemberProfileResponse {
   userId: string;
   displayName: string;
+  firstName: string | null;
   email: string;
+  phoneNumber: string | null;
   timeZone: string | null;
-  isSobrietyDatePublic: boolean;
-  isDaysSoberPublic: boolean;
-  hasPhone: boolean;
+  sobriety: SobrietyResponse | null;
+  isSuperAdmin: boolean;
   createdAt: string;
+  lastLoginAt: string | null;
 }
 
 export interface UpdateProfileRequest {
   displayName?: string;
+  firstName?: string;
   timeZone?: string;
 }
 
 export interface ChangePasswordRequest {
   currentPassword: string;
   newPassword: string;
+  confirmNewPassword: string;
 }
 
 export interface ChangeEmailRequest {
   newEmail: string;
-  password: string;
+  currentPassword: string;
 }
 
 export interface SetSobrietyDateRequest {
-  sobrietyDate: string | null; // ISO date string YYYY-MM-DD, null to clear
+  sobrietyDate: string; // ISO date string YYYY-MM-DD
 }
 
 export interface SobrietyVisibilityRequest {
-  isSobrietyDatePublic: boolean;
-  isDaysSoberPublic: boolean;
-}
-
-export interface SobrietyResponse {
-  sobrietyDate: string | null;    // ISO date, null if hidden or not set
-  daysSober: number | null;       // null if hidden or no date
-  isSobrietyDatePublic: boolean;
-  isDaysSoberPublic: boolean;
+  isDatePublic: boolean;
+  isDaysPublic: boolean;
 }
 
 export interface SetPhoneRequest {
-  phoneNumber: string | null; // null to remove
+  phoneNumber: string | null;
 }
 
 export interface PhoneListEntryResponse {
@@ -55,24 +59,36 @@ export interface PhoneListEntryResponse {
 export interface MemberDetailResponse {
   userId: string;
   displayName: string;
-  timeZone: string | null;
+  role: string;
+  status: string;
+  isProbationary: boolean;
   sobriety: SobrietyResponse | null;
-  phoneNumber: string | null;    // only present if caller is in same group and phone is shared
-  groupsInCommon: string[];      // group slugs
+  phoneNumber: string | null;
+  joinedAt: string;
 }
 
 export interface DeleteAccountRequest {
   password: string;
-  confirmation: string;          // must equal "DELETE MY ACCOUNT"
+  confirmation: string;
 }
 
 export interface AdminMemberResponse {
   userId: string;
   displayName: string;
+  firstName: string | null;
   email: string;
-  emailConfirmed: boolean;
+  phoneNumber: string | null;
+  timeZone: string | null;
+  sobrietyDate: string | null;
+  daysSober: number | null;
+  isSobrietyDatePublic: boolean;
+  isDaysSoberPublic: boolean;
   isSuperAdmin: boolean;
-  lockoutEnd: string | null;
+  isLockedOut: boolean;
   createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  lastLoginAt: string | null;
+  emailConfirmed: boolean;
   groupCount: number;
 }

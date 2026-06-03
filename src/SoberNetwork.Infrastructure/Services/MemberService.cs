@@ -284,7 +284,7 @@ public class MemberService(
                 m.User != null &&
                 m.User.PhoneNumber != null)
             .OrderBy(m => m.User!.DisplayName)
-            .Select(m => new PhoneListEntryResponse(m.User!.DisplayName, m.User.PhoneNumber!))
+            .Select(m => new PhoneListEntryResponse(m.UserId, m.User!.DisplayName, m.User.PhoneNumber!))
             .ToListAsync();
 
         return (list, null);
@@ -334,11 +334,55 @@ public class MemberService(
 
     // ── SuperAdmin ─────────────────────────────────────────────────────────────
 
+    public async Task<IReadOnlyList<AdminMemberResponse>> GetAllMembersAsync()
+    {
+        var users = await userManager.Users
+            .Where(u => u.DeletedAt == null)
+            .OrderBy(u => u.DisplayName)
+            .ToListAsync();
+
+        var result = new List<AdminMemberResponse>();
+        foreach (var user in users)
+        {
+            var groupCount = await db.GroupMemberships
+                .CountAsync(m => m.UserId == user.Id && m.Status == MemberStatus.Active && m.DeletedAt == null);
+            var isLockedOut = await userManager.IsLockedOutAsync(user);
+            var daysSober = user.SobrietyDate.HasValue
+                ? (DateTime.UtcNow.Date - user.SobrietyDate.Value.ToDateTime(TimeOnly.MinValue)).Days
+                : (int?)null;
+
+            result.Add(new AdminMemberResponse(
+                user.Id,
+                user.DisplayName,
+                user.FirstName,
+                user.Email!,
+                user.PhoneNumber,
+                user.TimeZone,
+                user.SobrietyDate,
+                daysSober,
+                user.IsSobrietyDatePublic,
+                user.IsDaysSoberPublic,
+                user.IsSuperAdmin,
+                isLockedOut,
+                user.CreatedAt,
+                user.UpdatedAt,
+                user.DeletedAt,
+                user.LastLoginAt,
+                user.EmailConfirmed,
+                groupCount
+            ));
+        }
+
+        return result;
+    }
+
     public async Task<AdminMemberResponse?> GetUserByIdAsync(string targetUserId)
     {
         var user = await userManager.FindByIdAsync(targetUserId);
         if (user == null) return null;
 
+        var groupCount = await db.GroupMemberships
+            .CountAsync(m => m.UserId == user.Id && m.Status == MemberStatus.Active && m.DeletedAt == null);
         var daysSober = user.SobrietyDate.HasValue
             ? (DateTime.UtcNow.Date - user.SobrietyDate.Value.ToDateTime(TimeOnly.MinValue)).Days
             : (int?)null;
@@ -361,7 +405,9 @@ public class MemberService(
             user.CreatedAt,
             user.UpdatedAt,
             user.DeletedAt,
-            user.LastLoginAt
+            user.LastLoginAt,
+            user.EmailConfirmed,
+            groupCount
         );
     }
 

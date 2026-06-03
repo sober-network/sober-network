@@ -49,11 +49,11 @@ export class AdminDashboardComponent implements OnInit {
   ngOnInit(): void {
     forkJoin({
       members: this.memberService.getAllMembers(),
-      groups:  this.groupService.getAllGroups(1, 200),
+      groups: this.groupService.getAllGroups(),
     }).subscribe({
       next: ({ members, groups }) => {
         this.members = members;
-        this.groups  = groups.items;
+        this.groups = groups;
         this.loading = false;
         this.cdr.detectChanges();
       },

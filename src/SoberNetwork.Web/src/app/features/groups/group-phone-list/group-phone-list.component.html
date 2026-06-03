@@ -34,13 +34,13 @@
           <mat-form-field appearance="outline" class="full-width" *ngIf="phoneForm.controls.isPhoneShared.value">
             <mat-label>Phone number</mat-label>
             <input matInput formControlName="phoneNumber" autocomplete="tel" />
-            <mat-hint *ngIf="profile?.hasPhone && !phoneForm.controls.phoneNumber.value">Leave blank to keep your saved number.</mat-hint>
+            <mat-hint *ngIf="profile?.phoneNumber && !phoneForm.controls.phoneNumber.value">Leave blank to keep your saved number.</mat-hint>
           </mat-form-field>
 
           <p class="save-message success" *ngIf="saveSuccess">{{ saveSuccess }}</p>
           <p class="save-message error" *ngIf="saveError">{{ saveError }}</p>
 
-          <button mat-raised-button color="primary" type="button" [disabled]="saving" (click)="savePhoneSettings()">
+          <button mat-raised-button color="primary" type="button" [disabled]="saving || !phoneForm.controls.isPhoneShared.value" (click)="savePhoneSettings()">
             <mat-icon *ngIf="!saving">save</mat-icon>
             <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
             <span>{{ saving ? 'Saving…' : 'Save' }}</span>

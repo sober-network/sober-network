@@ -27,6 +27,15 @@ public class MembersController(IMemberService memberService) : ControllerBase
         return Ok(profile);
     }
 
+    /// <summary>Returns the authenticated user's sobriety data.</summary>
+    [HttpGet("me/sobriety")]
+    public async Task<IActionResult> GetMySobriety()
+    {
+        var profile = await memberService.GetMyProfileAsync(UserId);
+        if (profile == null) return NotFound();
+        return Ok(profile.Sobriety);
+    }
+
     /// <summary>Updates display name, first name, and/or timezone.</summary>
     [HttpPut("me")]
     public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
@@ -136,6 +145,15 @@ public class MembersController(IMemberService memberService) : ControllerBase
     }
 
     // ── SuperAdmin ─────────────────────────────────────────────────────────────
+
+    /// <summary>Returns all users on the platform. SuperAdmin only.</summary>
+    [HttpGet]
+    public async Task<IActionResult> GetAllMembers()
+    {
+        if (!IsSuperAdmin) return Forbid();
+        var members = await memberService.GetAllMembersAsync();
+        return Ok(members);
+    }
 
     /// <summary>Returns the full admin view of any user. SuperAdmin only.</summary>
     [HttpGet("{userId}")]

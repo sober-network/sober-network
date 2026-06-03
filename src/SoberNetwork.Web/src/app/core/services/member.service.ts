@@ -26,21 +26,25 @@ export class MemberService {
   // ── Credentials ─────────────────────────────────────────────────────────────
 
   changePassword(request: ChangePasswordRequest): Observable<void> {
-    return this.http.post<void>(`${this.base}/me/change-password`, request);
+    return this.http.patch<void>(`${this.base}/me/password`, request);
   }
 
   changeEmail(request: ChangeEmailRequest): Observable<void> {
-    return this.http.post<void>(`${this.base}/me/change-email`, request);
+    return this.http.patch<void>(`${this.base}/me/email`, request);
   }
 
   // ── Sobriety ────────────────────────────────────────────────────────────────
 
   setSobrietyDate(request: SetSobrietyDateRequest): Observable<void> {
-    return this.http.post<void>(`${this.base}/me/sobriety-date`, request);
+    return this.http.put<void>(`${this.base}/me/sobriety-date`, request);
+  }
+
+  removeSobrietyDate(): Observable<void> {
+    return this.http.delete<void>(`${this.base}/me/sobriety-date`);
   }
 
   setSobrietyVisibility(request: SobrietyVisibilityRequest): Observable<void> {
-    return this.http.put<void>(`${this.base}/me/sobriety-visibility`, request);
+    return this.http.patch<void>(`${this.base}/me/sobriety-date/visibility`, request);
   }
 
   getMySobriety(): Observable<SobrietyResponse> {
@@ -50,22 +54,22 @@ export class MemberService {
   // ── Phone ────────────────────────────────────────────────────────────────────
 
   setPhone(request: SetPhoneRequest): Observable<void> {
-    return this.http.post<void>(`${this.base}/me/phone`, request);
+    return this.http.put<void>(`${this.base}/me/phone`, request);
   }
 
   // ── Account ──────────────────────────────────────────────────────────────────
 
   deleteAccount(request: DeleteAccountRequest): Observable<void> {
-    return this.http.post<void>(`${this.base}/me/delete`, request);
+    return this.http.delete<void>(`${this.base}/me`, { body: request });
   }
 
   // ── SuperAdmin ───────────────────────────────────────────────────────────────
 
   getAllMembers(): Observable<AdminMemberResponse[]> {
-    return this.http.get<AdminMemberResponse[]>(`${this.base}/admin/all`);
+    return this.http.get<AdminMemberResponse[]>(this.base);
   }
 
   adminDeleteMember(userId: string): Observable<void> {
-    return this.http.delete<void>(`${this.base}/admin/${userId}`);
+    return this.http.patch<void>(`${this.base}/${userId}/deactivate`, {});
   }
 }

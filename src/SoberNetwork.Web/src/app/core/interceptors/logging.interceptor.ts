@@ -1,25 +1,41 @@
 import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
 import { tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { ClientLogService } from '../services/client-log.service';
 
 export const loggingInterceptor: HttpInterceptorFn = (req, next) => {
-  if (environment.production) return next(req);
+  // Never log the log endpoint itself — avoids infinite recursion.
+  if (req.url.includes('/api/client-log')) return next(req);
 
+  const clientLog = inject(ClientLogService);
   const start = Date.now();
-  console.debug(`[HTTP] ▶ ${req.method} ${req.url}`);
+
+  if (!environment.production) {
+    console.debug(`[HTTP] ▶ ${req.method} ${req.url}`);
+  }
 
   return next(req).pipe(
     tap({
       next: event => {
-        // Only log the final response, not progress events
         if ((event as { status?: number }).status !== undefined) {
           const ms = Date.now() - start;
-          console.debug(`[HTTP] ✔ ${req.method} ${req.url} — ${ (event as { status: number }).status } (${ms}ms)`);
+          if (!environment.production) {
+            console.debug(`[HTTP] ✔ ${req.method} ${req.url} — ${(event as { status: number }).status} (${ms}ms)`);
+          }
         }
       },
       error: err => {
         const ms = Date.now() - start;
-        console.error(`[HTTP] ✖ ${req.method} ${req.url} — status=${err?.status ?? 'network'} (${ms}ms)`, err?.error ?? err);
+        if (!environment.production) {
+          console.error(`[HTTP] ✖ ${req.method} ${req.url} — status=${err?.status ?? 'network'} (${ms}ms)`, err?.error ?? err);
+        }
+        clientLog.error(`HTTP ${req.method} ${req.url} failed`, {
+          status: err?.status,
+          statusText: err?.statusText,
+          error: err?.error,
+          ms,
+        });
       },
     })
   );

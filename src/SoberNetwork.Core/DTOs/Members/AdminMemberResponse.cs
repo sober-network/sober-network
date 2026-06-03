@@ -20,5 +20,7 @@ public record AdminMemberResponse(
     DateTime CreatedAt,
     DateTime UpdatedAt,
     DateTime? DeletedAt,
-    DateTime? LastLoginAt
+    DateTime? LastLoginAt,
+    bool EmailConfirmed,
+    int GroupCount
 );

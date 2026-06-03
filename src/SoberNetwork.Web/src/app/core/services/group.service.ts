@@ -21,9 +21,8 @@ export class GroupService {
     return this.http.get<GroupResponse[]>(this.base);
   }
 
-  getAllGroups(page = 1, pageSize = 20): Observable<PagedResponse<GroupResponse>> {
-    const params = new HttpParams().set('page', page).set('pageSize', pageSize);
-    return this.http.get<PagedResponse<GroupResponse>>(this.base, { params });
+  getAllGroups(): Observable<GroupResponse[]> {
+    return this.http.get<GroupResponse[]>(`${this.base}/all`);
   }
 
   getGroup(slug: string): Observable<GroupResponse> {
@@ -54,7 +53,7 @@ export class GroupService {
   }
 
   leaveGroup(slug: string): Observable<void> {
-    return this.http.post<void>(`${this.base}/${slug}/leave`, {});
+    return this.http.delete<void>(`${this.base}/${slug}/members/me`);
   }
 
   getJoinRequests(slug: string, page = 1, pageSize = 50): Observable<PagedResponse<JoinRequestResponse>> {
@@ -63,15 +62,17 @@ export class GroupService {
   }
 
   approveOrReject(slug: string, userId: string, request: ApproveJoinRequest): Observable<void> {
-    return this.http.post<void>(`${this.base}/${slug}/join-requests/${userId}`, request);
+    const action = request.approved ? 'approve' : 'reject';
+    const body = request.reason ? { reason: request.reason } : {};
+    return this.http.post<void>(`${this.base}/${slug}/members/${userId}/${action}`, body);
   }
 
   updateMemberRole(slug: string, userId: string, request: UpdateMemberRoleRequest): Observable<void> {
-    return this.http.put<void>(`${this.base}/${slug}/members/${userId}/role`, request);
+    return this.http.patch<void>(`${this.base}/${slug}/members/${userId}/role`, request);
   }
 
   updateMemberStatus(slug: string, userId: string, request: UpdateMemberStatusRequest): Observable<void> {
-    return this.http.put<void>(`${this.base}/${slug}/members/${userId}/status`, request);
+    return this.http.patch<void>(`${this.base}/${slug}/members/${userId}/status`, request);
   }
 
   removeMember(slug: string, userId: string): Observable<void> {
@@ -79,13 +80,13 @@ export class GroupService {
   }
 
   clearProbationaryStatus(slug: string, userId: string): Observable<void> {
-    return this.http.post<void>(`${this.base}/${slug}/members/${userId}/clear-probation`, {});
+    return this.http.patch<void>(`${this.base}/${slug}/members/${userId}/probation`, {});
   }
 
   // ── Phone (group-scoped) ────────────────────────────────────────────────────
 
   setPhoneVisibility(slug: string, request: PhoneVisibilityRequest): Observable<void> {
-    return this.http.put<void>(`${this.base}/${slug}/my-phone-visibility`, request);
+    return this.http.patch<void>(`${this.base}/${slug}/members/me/phone-visibility`, request);
   }
 
   getPhoneList(slug: string): Observable<PhoneListEntryResponse[]> {
@@ -93,6 +94,6 @@ export class GroupService {
   }
 
   getMemberDetail(slug: string, userId: string): Observable<MemberDetailResponse> {
-    return this.http.get<MemberDetailResponse>(`${this.base}/${slug}/members/${userId}/detail`);
+    return this.http.get<MemberDetailResponse>(`${this.base}/${slug}/members/${userId}`);
   }
 }

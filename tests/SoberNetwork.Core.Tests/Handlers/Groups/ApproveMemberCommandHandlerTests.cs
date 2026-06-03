@@ -1,0 +1,73 @@
+using Moq;
+using SoberNetwork.Core.Commands.Groups;
+using SoberNetwork.Core.Handlers.Groups;
+using SoberNetwork.Core.Interfaces;
+using SoberNetwork.Core.Results;
+
+namespace SoberNetwork.Core.Tests.Handlers.Groups;
+
+public class ApproveMemberCommandHandlerTests
+{
+    private readonly Mock<IGroupService> _groupService = new();
+    private readonly ApproveMemberCommandHandler _handler;
+
+    public ApproveMemberCommandHandlerTests() => _handler = new ApproveMemberCommandHandler(_groupService.Object);
+
+    [Fact]
+    public async Task success_returns_ok()
+    {
+        // Arrange
+        var command = new ApproveMemberCommand("group-slug", "target-user-id", "admin-user-id");
+        _groupService
+            .Setup(service => service.ApproveMemberAsync(command.Slug, command.TargetUserId, command.AdminUserId))
+            .ReturnsAsync((true, (string?)null));
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert.True(result.Success);
+        Assert.Equal(ResultCode.Ok, result.Code);
+        Assert.Null(result.Error);
+    }
+
+    [Fact]
+    public async Task permission_error_returns_forbidden()
+    {
+        // Arrange
+        var command = new ApproveMemberCommand("group-slug", "target-user-id", "user-id");
+        const string error = "You do not have permission to approve members.";
+
+        _groupService
+            .Setup(service => service.ApproveMemberAsync(command.Slug, command.TargetUserId, command.AdminUserId))
+            .ReturnsAsync((false, error));
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert.False(result.Success);
+        Assert.Equal(ResultCode.Forbidden, result.Code);
+        Assert.Equal(error, result.Error);
+    }
+
+    [Fact]
+    public async Task other_error_returns_bad_request()
+    {
+        // Arrange
+        var command = new ApproveMemberCommand("group-slug", "target-user-id", "admin-user-id");
+        const string error = "Member is not pending approval.";
+
+        _groupService
+            .Setup(service => service.ApproveMemberAsync(command.Slug, command.TargetUserId, command.AdminUserId))
+            .ReturnsAsync((false, error));
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert.False(result.Success);
+        Assert.Equal(ResultCode.BadRequest, result.Code);
+        Assert.Equal(error, result.Error);
+    }
+}

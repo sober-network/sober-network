@@ -1,489 +1,115 @@
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
-
-using Microsoft.AspNetCore.Identity;
-
 using Microsoft.AspNetCore.Mvc;
-
 using Microsoft.AspNetCore.RateLimiting;
-
-using SoberNetwork.Core.DTOs.Auth;
-
-using SoberNetwork.Domain.Entities;
-
-using SoberNetwork.Domain.Enums;
-
-using SoberNetwork.Core.Interfaces;
-
-
+using SoberNetwork.Core.Commands.Auth;
+using SoberNetwork.Core.Results;
 
 namespace SoberNetwork.Api.Controllers;
 
-
-
 // [AllowAnonymous] — auth endpoints are intentionally public; the global [Authorize] fallback
-
 // policy is overridden here since users cannot be authenticated before registering or logging in.
-
 // T11/T12 review: no member data, no identifiers, no PII exposed on any of these endpoints.
-
 // Public access is required by design — you cannot authenticate before you have an account.
-
 [AllowAnonymous]
-
 [ApiController]
-
 [Route("api/[controller]")]
-
 [EnableRateLimiting("auth")]
-
-public class AuthController(
-
-    UserManager<ApplicationUser> userManager,
-
-    SignInManager<ApplicationUser> signInManager,
-
-    ITokenService tokenService,
-
-    IEmailService emailService,
-
-    IAuditService auditService,
-
-    IRefreshTokenService refreshTokenService,
-
-    ILogger<AuthController> logger) : ControllerBase
-
+public class AuthController(IMediator mediator) : ControllerBase
 {
-
     [HttpPost("register")]
-
-    public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken = default)
-
+    public async Task<IActionResult> Register([FromBody] Core.DTOs.Auth.RegisterRequest request, CancellationToken cancellationToken = default)
     {
+        var callbackTemplate = Url.Action(nameof(ConfirmEmail), "Auth",
+            new { userId = "{userId}", token = "{token}" }, Request.Scheme)!;
 
-        var user = new ApplicationUser
+        var result = await mediator.Send(new RegisterCommand(
+            request.Email, request.Password, request.DisplayName, request.FirstName,
+            callbackTemplate, Ip(), Ua()), cancellationToken);
 
+        return result.Code switch
         {
-
-            UserName = request.Email,
-
-            Email = request.Email,
-
-            DisplayName = request.DisplayName,
-
-            FirstName = request.FirstName
-
+            ResultCode.Ok => Ok("Registration successful. Please check your email to confirm your account."),
+            _ => Problem(result.Error, statusCode: 400)
         };
-
-
-
-        var result = await userManager.CreateAsync(user, request.Password);
-
-
-
-        if (!result.Succeeded)
-
-        {
-
-            logger.LogWarning("Registration failed: {Errors}",
-
-                string.Join(", ", result.Errors.Select(e => e.Description)));
-
-            return Problem("Unable to complete registration. Check your details and try again.", statusCode: 400);
-
-        }
-
-
-
-        var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-
-        var confirmationLink = Url.Action(
-
-            nameof(ConfirmEmail), "Auth",
-
-            new { userId = user.Id, token },
-
-            Request.Scheme)!;
-
-
-
-        await emailService.SendEmailConfirmationAsync(user.Email!, user.DisplayName, confirmationLink);
-
-        await auditService.LogAsync(SecurityEventType.Register, user.Id, ipAddress: Ip(), userAgent: Ua());
-
-
-
-        logger.LogInformation("New user registered: {UserId}", user.Id);
-
-        return Ok("Registration successful. Please check your email to confirm your account.");
-
     }
-
-
 
     // GET is required here (not POST) because confirmation links are clicked in email clients,
-
     // which always issue GET requests. This is a documented exception to the GET-never-mutates rule.
-
     [HttpGet("confirm-email")]
-
     public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token, CancellationToken cancellationToken = default)
-
     {
-
-        var user = await userManager.FindByIdAsync(userId);
-
-        if (user is null)
-
-            return Problem("Invalid confirmation link.", statusCode: 400);
-
-
-
-        var result = await userManager.ConfirmEmailAsync(user, token);
-
-        if (!result.Succeeded)
-
+        var result = await mediator.Send(new ConfirmEmailCommand(userId, token, Ip(), Ua()), cancellationToken);
+        return result.Code switch
         {
-
-            logger.LogWarning("Email confirmation failed for {UserId}", userId);
-
-            return Problem("Email confirmation failed. The link may have expired.", statusCode: 400);
-
-        }
-
-
-
-        await auditService.LogAsync(SecurityEventType.EmailConfirmed, userId, ipAddress: Ip(), userAgent: Ua());
-
-        logger.LogInformation("Email confirmed for {UserId}", userId);
-
-        return Ok("Email confirmed. You can now log in.");
-
+            ResultCode.Ok => Ok("Email confirmed. You can now log in."),
+            _ => Problem(result.Error, statusCode: 400)
+        };
     }
-
-
 
     [HttpPost("resend-confirmation")]
-
-    public async Task<IActionResult> ResendConfirmation([FromBody] ResendConfirmationRequest request, CancellationToken cancellationToken = default)
-
+    public async Task<IActionResult> ResendConfirmation([FromBody] Core.DTOs.Auth.ResendConfirmationRequest request, CancellationToken cancellationToken = default)
     {
+        var callbackTemplate = Url.Action(nameof(ConfirmEmail), "Auth",
+            new { userId = "{userId}", token = "{token}" }, Request.Scheme)!;
 
-        var user = await userManager.FindByEmailAsync(request.Email);
-
-
-
-        if (user is null || user.EmailConfirmed)
-
-            return Ok("If that email is registered and unconfirmed, a new confirmation link has been sent.");
-
-
-
-        var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-
-        var confirmationLink = Url.Action(
-
-            nameof(ConfirmEmail), "Auth",
-
-            new { userId = user.Id, token },
-
-            Request.Scheme)!;
-
-
-
-        await emailService.SendEmailConfirmationAsync(user.Email!, user.DisplayName, confirmationLink);
-
-        await auditService.LogAsync(SecurityEventType.ResendConfirmation, user.Id, ipAddress: Ip(), userAgent: Ua());
-
-
-
+        await mediator.Send(new ResendConfirmationCommand(request.Email, callbackTemplate, Ip(), Ua()), cancellationToken);
         return Ok("If that email is registered and unconfirmed, a new confirmation link has been sent.");
-
     }
-
-
 
     [HttpPost("login")]
-
-    public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken = default)
-
+    public async Task<IActionResult> Login([FromBody] Core.DTOs.Auth.LoginRequest request, CancellationToken cancellationToken = default)
     {
-
-        logger.LogInformation("Login attempt from {IP}", Ip());
-
-
-
-        var user = await userManager.FindByEmailAsync(request.Email);
-
-
-
-        if (user is null)
-
+        var result = await mediator.Send(new LoginCommand(request.Email, request.Password, Ip(), Ua()), cancellationToken);
+        return result.Code switch
         {
-
-            logger.LogWarning("Login failed — email not found");
-
-            await auditService.LogAsync(SecurityEventType.LoginFailed, details: "Unknown email", ipAddress: Ip(), userAgent: Ua());
-
-            return Problem("Invalid credentials.", statusCode: 401);
-
-        }
-
-
-
-        if (!user.EmailConfirmed)
-
-        {
-
-            logger.LogWarning("Login failed — email not confirmed: {UserId}", user.Id);
-
-            return Problem("Please confirm your email address before signing in.", statusCode: 401);
-
-        }
-
-
-
-        var result = await signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
-
-
-
-        if (result.IsLockedOut)
-
-        {
-
-            logger.LogWarning("Login failed — account locked out: {UserId}", user.Id);
-
-            await auditService.LogAsync(SecurityEventType.Lockout, user.Id, ipAddress: Ip(), userAgent: Ua());
-
-            return Problem("Invalid credentials.", statusCode: 401);
-
-        }
-
-
-
-        if (!result.Succeeded)
-
-        {
-
-            logger.LogWarning("Login failed — wrong password: {UserId}", user.Id);
-
-            await auditService.LogAsync(SecurityEventType.LoginFailed, user.Id, ipAddress: Ip(), userAgent: Ua());
-
-            return Problem("Invalid credentials.", statusCode: 401);
-
-        }
-
-
-
-        user.LastLoginAt = DateTime.UtcNow;
-
-        user.UpdatedAt = DateTime.UtcNow;
-
-        await userManager.UpdateAsync(user);
-
-        await auditService.LogAsync(SecurityEventType.LoginSuccess, user.Id, ipAddress: Ip(), userAgent: Ua());
-
-
-
-        logger.LogInformation("Login succeeded: {UserId}", user.Id);
-
-        return Ok(await BuildResponseAsync(user));
-
+            ResultCode.Ok => Ok(result.Data),
+            ResultCode.Unauthorized => Problem(result.Error, statusCode: 401),
+            _ => Problem(result.Error, statusCode: 400)
+        };
     }
-
-
 
     [HttpPost("forgot-password")]
-
-    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request, CancellationToken cancellationToken = default)
-
+    public async Task<IActionResult> ForgotPassword([FromBody] Core.DTOs.Auth.ForgotPasswordRequest request, CancellationToken cancellationToken = default)
     {
+        var callbackTemplate = Url.Action(nameof(ResetPassword), "Auth",
+            new { userId = "{userId}", token = "{token}" }, Request.Scheme)!;
 
-        var user = await userManager.FindByEmailAsync(request.Email);
-
-
-
-        if (user is null || !user.EmailConfirmed)
-
-            return Ok("If that email is registered, a password reset link has been sent.");
-
-
-
-        var token = await userManager.GeneratePasswordResetTokenAsync(user);
-
-        var resetLink = Url.Action(
-
-            nameof(ResetPassword), "Auth",
-
-            new { userId = user.Id, token },
-
-            Request.Scheme)!;
-
-
-
-        await emailService.SendPasswordResetAsync(user.Email!, user.DisplayName, resetLink);
-
-        await auditService.LogAsync(SecurityEventType.ForgotPassword, user.Id, ipAddress: Ip(), userAgent: Ua());
-
-
-
+        await mediator.Send(new ForgotPasswordCommand(request.Email, callbackTemplate, Ip(), Ua()), cancellationToken);
         return Ok("If that email is registered, a password reset link has been sent.");
-
     }
-
-
 
     [HttpPost("reset-password")]
-
-    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request, CancellationToken cancellationToken = default)
-
+    public async Task<IActionResult> ResetPassword([FromBody] Core.DTOs.Auth.ResetPasswordRequest request, CancellationToken cancellationToken = default)
     {
-
-        var user = await userManager.FindByIdAsync(request.UserId);
-
-        if (user is null)
-
-            return Problem("Invalid password reset request.", statusCode: 400);
-
-
-
-        var result = await userManager.ResetPasswordAsync(user, request.Token, request.NewPassword);
-
-        if (!result.Succeeded)
-
+        var result = await mediator.Send(new ResetPasswordCommand(
+            request.UserId, request.Token, request.NewPassword, Ip(), Ua()), cancellationToken);
+        return result.Code switch
         {
-
-            logger.LogWarning("Password reset failed for {UserId}", request.UserId);
-
-            return Problem("Password reset failed. The link may have expired.", statusCode: 400);
-
-        }
-
-
-
-        await refreshTokenService.RevokeAllForUserAsync(user.Id);
-
-        await auditService.LogAsync(SecurityEventType.PasswordReset, user.Id, ipAddress: Ip(), userAgent: Ua());
-
-
-
-        logger.LogInformation("Password reset completed: {UserId}", user.Id);
-
-        return Ok("Password reset successful. You can now log in.");
-
+            ResultCode.Ok => Ok("Password reset successful. You can now log in."),
+            _ => Problem(result.Error, statusCode: 400)
+        };
     }
-
-
 
     [HttpPost("refresh")]
-
-    public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken = default)
-
+    public async Task<IActionResult> Refresh([FromBody] Core.DTOs.Auth.RefreshTokenRequest request, CancellationToken cancellationToken = default)
     {
-
-        var rotated = await refreshTokenService.RotateAsync(request.RefreshToken);
-
-
-
-        if (rotated is null)
-
+        var result = await mediator.Send(new RefreshTokenCommand(request.RefreshToken, Ip(), Ua()), cancellationToken);
+        return result.Code switch
         {
-
-            logger.LogWarning("Invalid or expired refresh token attempt");
-
-            return Problem("Invalid or expired refresh token.", statusCode: 401);
-
-        }
-
-
-
-        var (newPlainToken, storedToken) = rotated.Value;
-
-        await auditService.LogAsync(SecurityEventType.TokenRefreshed, storedToken.UserId, ipAddress: Ip(), userAgent: Ua());
-
-
-
-        var response = new AuthResponse(
-
-            AccessToken: tokenService.GenerateToken(storedToken.User),
-
-            ExpiresAt: tokenService.GetExpiry(),
-
-            RefreshToken: newPlainToken,
-
-            RefreshTokenExpiresAt: tokenService.GetRefreshExpiry(),
-
-            UserId: storedToken.User.Id,
-
-            Email: storedToken.User.Email!,
-
-            DisplayName: storedToken.User.DisplayName,
-
-            IsSuperAdmin: storedToken.User.IsSuperAdmin
-
-        );
-
-
-
-        return Ok(response);
-
+            ResultCode.Ok => Ok(result.Data),
+            ResultCode.Unauthorized => Problem(result.Error, statusCode: 401),
+            _ => Problem(result.Error, statusCode: 400)
+        };
     }
-
-
 
     [HttpPost("logout")]
-
-    public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken = default)
-
+    public async Task<IActionResult> Logout([FromBody] Core.DTOs.Auth.RefreshTokenRequest request, CancellationToken cancellationToken = default)
     {
-
-        await refreshTokenService.RevokeAsync(request.RefreshToken);
-
-        await auditService.LogAsync(SecurityEventType.Logout, ipAddress: Ip(), userAgent: Ua());
-
-
-
+        await mediator.Send(new LogoutCommand(request.RefreshToken, Ip(), Ua()), cancellationToken);
         return Ok("Logged out successfully.");
-
     }
-
-
-
-    private async Task<AuthResponse> BuildResponseAsync(ApplicationUser user)
-
-    {
-
-        var refreshToken = await refreshTokenService.CreateAsync(user.Id);
-
-
-
-        return new AuthResponse(
-
-            AccessToken: tokenService.GenerateToken(user),
-
-            ExpiresAt: tokenService.GetExpiry(),
-
-            RefreshToken: refreshToken,
-
-            RefreshTokenExpiresAt: tokenService.GetRefreshExpiry(),
-
-            UserId: user.Id,
-
-            Email: user.Email!,
-
-            DisplayName: user.DisplayName,
-
-            IsSuperAdmin: user.IsSuperAdmin
-
-        );
-
-    }
-
-
 
     private string? Ip() => HttpContext.Connection.RemoteIpAddress?.ToString();
-
     private string? Ua() => HttpContext.Request.Headers.UserAgent.ToString() is { Length: > 0 } ua ? ua : null;
-
 }
-
-

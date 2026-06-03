@@ -2,6 +2,8 @@ using System.Text;
 
 using System.Threading.RateLimiting;
 
+using MediatR;
+
 using FluentValidation;
 
 using FluentValidation.AspNetCore;
@@ -204,6 +206,13 @@ builder.Services.AddHsts(options =>
 
 
 
+// MediatR — scans SoberNetwork.Core for all command/query handlers
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssemblyContaining<SoberNetwork.Core.Commands.Auth.LoginCommand>();
+    cfg.AddBehavior(typeof(MediatR.IPipelineBehavior<,>), typeof(SoberNetwork.Core.Behaviors.LoggingBehavior<,>));
+});
+
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 builder.Services.AddScoped<IEmailService, EmailService>();
@@ -215,6 +224,9 @@ builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
 
 builder.Services.AddScoped<IMemberService, MemberService>();
+
+// Auth service
+builder.Services.AddScoped<SoberNetwork.Core.Interfaces.IAuthService, SoberNetwork.Infrastructure.Services.AuthService>();
 
 
 

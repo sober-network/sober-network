@@ -6,7 +6,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
-import { catchError, distinctUntilChanged, Observable, of, switchMap } from 'rxjs';
+import { NavigationEnd } from '@angular/router';
+import { catchError, combineLatest, distinctUntilChanged, filter, map, Observable, of, startWith, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '@app/core/services/auth.service';
 import { GroupService } from '@app/core/services/group.service';
@@ -36,8 +37,13 @@ export class NavbarComponent {
   myGroups: GroupResponse[] = [];
 
   constructor() {
-    this.auth.currentUser$.pipe(
-      distinctUntilChanged((a, b) => a?.userId === b?.userId),
+    const nav$ = this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd),
+      startWith(null),
+    );
+
+    combineLatest([this.auth.currentUser$.pipe(distinctUntilChanged((a, b) => a?.userId === b?.userId)), nav$]).pipe(
+      map(([user]) => user),
       switchMap(user => user ? this.groupService.getMyGroups().pipe(catchError(() => of([]))) : of([])),
       takeUntilDestroyed(),
     ).subscribe(groups => (this.myGroups = groups));

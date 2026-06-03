@@ -223,6 +223,8 @@ builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
 builder.Services.AddScoped<IGroupService, GroupService>();
 
+builder.Services.AddScoped<IMeetingService, MeetingService>();
+
 builder.Services.AddScoped<IMemberService, MemberService>();
 
 // Auth service

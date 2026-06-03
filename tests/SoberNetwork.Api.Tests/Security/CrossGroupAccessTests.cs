@@ -237,7 +237,7 @@ public class CrossGroupAccessTests
         // Arrange
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
-        var request = new UpdateGroupRequest("Hacked", null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        var request = new UpdateGroupRequest("Hacked", null, null, null, null);
 
         // Act
         var response = await client.PutAsJsonAsync($"/api/groups/{GroupSlug}", request);

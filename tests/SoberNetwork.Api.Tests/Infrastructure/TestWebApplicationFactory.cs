@@ -22,6 +22,7 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
 
     public Mock<IGroupService> GroupService { get; } = new();
     public Mock<IMemberService> MemberService { get; } = new();
+    public Mock<IMeetingService> MeetingService { get; } = new();
     public Mock<IAuthService> AuthService { get; } = new();
     public Mock<IEmailService> EmailService { get; } = new();
     public Mock<ITokenService> TokenService { get; } = new();
@@ -61,6 +62,7 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
 
             services.RemoveAll<IGroupService>();
             services.RemoveAll<IMemberService>();
+            services.RemoveAll<IMeetingService>();
             services.RemoveAll<IAuthService>();
             services.RemoveAll<IEmailService>();
             services.RemoveAll<ITokenService>();
@@ -69,6 +71,7 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
 
             services.AddScoped<IGroupService>(_ => GroupService.Object);
             services.AddScoped<IMemberService>(_ => MemberService.Object);
+            services.AddScoped<IMeetingService>(_ => MeetingService.Object);
             services.AddScoped<IAuthService>(_ => AuthService.Object);
             services.AddScoped<IEmailService>(_ => EmailService.Object);
             services.AddScoped<ITokenService>(_ => TokenService.Object);

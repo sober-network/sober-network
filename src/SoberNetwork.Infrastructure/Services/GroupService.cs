@@ -37,19 +37,37 @@ public class GroupService(
     private static string? NullIfWhiteSpace(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
+    private static MeetingResponse ToMeetingResponse(Meeting m) => new(
+        m.Id, m.Name, m.Description, m.IsRecurring, m.DayOfWeek, m.Time,
+        m.DurationMinutes, m.OccursOn, m.IsOpen, m.Formats, m.Language,
+        m.Location, m.ZoomLink, m.ZoomMeetingId, m.ZoomPasscode, m.IsActive, m.CreatedAt);
+
+    private static PublicMeetingResponse ToPublicMeetingResponse(Meeting m) => new(
+        m.Id, m.Name, m.Description, m.IsRecurring, m.DayOfWeek, m.Time,
+        m.DurationMinutes, m.OccursOn, m.IsOpen, m.Formats, m.Language,
+        m.Location, m.IsActive);
+
+    private static IReadOnlyList<MeetingResponse> ActiveMeetings(Group g) =>
+        g.Meetings
+            .Where(m => m.DeletedAt == null && m.IsActive)
+            .OrderBy(m => m.IsRecurring ? 0 : 1).ThenBy(m => m.DayOfWeek).ThenBy(m => m.Time)
+            .Select(ToMeetingResponse).ToList();
+
+    private static IReadOnlyList<PublicMeetingResponse> ActivePublicMeetings(Group g) =>
+        g.Meetings
+            .Where(m => m.DeletedAt == null && m.IsActive)
+            .OrderBy(m => m.IsRecurring ? 0 : 1).ThenBy(m => m.DayOfWeek).ThenBy(m => m.Time)
+            .Select(ToPublicMeetingResponse).ToList();
+
     private static GroupResponse ToGroupResponse(Group g, string userRole, int memberCount) => new(
-        g.Id, g.Name, g.Slug, g.Description, g.MeetingSchedule,
-        g.MeetingDay, g.MeetingTime, g.DurationMinutes,
-        g.IsOpen, g.Language, g.MeetingFormats,
-        g.ZoomLink, g.ZoomMeetingId, g.ZoomPasscode,
-        g.TimeZone, g.IsActive, g.IsPublic, g.RequiresApproval,
-        memberCount, userRole, g.CreatedAt);
+        g.Id, g.Name, g.Slug, g.Description, g.TimeZone,
+        g.IsActive, g.IsPublic, g.RequiresApproval,
+        memberCount, userRole, g.CreatedAt, ActiveMeetings(g));
 
     private static GroupSummaryResponse ToGroupSummaryResponse(Group group) => new(
-        group.Name, group.Slug, group.Description, group.MeetingSchedule,
-        group.MeetingDay, group.MeetingTime, group.DurationMinutes,
-        group.IsOpen, group.Language, group.MeetingFormats,
-        group.TimeZone, group.IsActive, group.IsPublic, group.RequiresApproval);
+        group.Name, group.Slug, group.Description, group.TimeZone,
+        group.IsActive, group.IsPublic, group.RequiresApproval,
+        ActivePublicMeetings(group));
 
     private static MemberResponse ToMemberResponse(GroupMembership m) => new(
         m.UserId,
@@ -73,6 +91,7 @@ public class GroupService(
         var memberships = await db.GroupMemberships
             .AsNoTracking()
             .Include(m => m.Group)
+                .ThenInclude(g => g!.Meetings)
             .Where(m =>
                 m.UserId == userId &&
                 m.Status == MemberStatus.Active &&
@@ -99,6 +118,7 @@ public class GroupService(
     {
         var groups = await db.Groups
             .AsNoTracking()
+            .Include(g => g.Meetings)
             .Where(g => g.DeletedAt == null)
             .ToListAsync();
 
@@ -111,6 +131,7 @@ public class GroupService(
         // A group admin can share a join link for a private group; the recipient can still see info + request to join.
         var group = await db.Groups
             .AsNoTracking()
+            .Include(g => g.Meetings)
             .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null && g.IsActive);
         if (group == null) return null;
         return ToGroupSummaryResponse(group);
@@ -120,6 +141,7 @@ public class GroupService(
     {
         var group = await db.Groups
             .AsNoTracking()
+            .Include(g => g.Meetings)
             .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null);
         if (group == null) return null;
 
@@ -155,20 +177,11 @@ public class GroupService(
             Name = request.Name.Trim(),
             Slug = request.Slug.Trim(),
             Description = NullIfWhiteSpace(request.Description),
-            MeetingSchedule = NullIfWhiteSpace(request.MeetingSchedule),
-            MeetingDay = request.MeetingDay,
-            MeetingTime = NullIfWhiteSpace(request.MeetingTime),
-            DurationMinutes = request.DurationMinutes,
-            IsOpen = request.IsOpen,
-            Language = NullIfWhiteSpace(request.Language),
-            MeetingFormats = NullIfWhiteSpace(request.MeetingFormats),
-            ZoomLink = NullIfWhiteSpace(request.ZoomLink),
-            ZoomMeetingId = NullIfWhiteSpace(request.ZoomMeetingId),
-            ZoomPasscode = NullIfWhiteSpace(request.ZoomPasscode),
             TimeZone = NullIfWhiteSpace(request.TimeZone),
             IsPublic = request.IsPublic,
             RequiresApproval = request.RequiresApproval,
             IsActive = true,
+            Meetings = [],
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -201,8 +214,9 @@ public class GroupService(
     public async Task<(GroupResponse? Group, string? Error)> UpdateGroupAsync(
         string slug, UpdateGroupRequest request, string userId)
     {
-        var group = await db.Groups.FirstOrDefaultAsync(g =>
-            g.Slug == slug && g.DeletedAt == null);
+        var group = await db.Groups
+            .Include(g => g.Meetings)
+            .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null);
         if (group == null) return (null, "Group not found.");
 
         var membership = await GetActiveMembershipAsync(group.Id, userId);
@@ -211,16 +225,6 @@ public class GroupService(
 
         if (request.Name != null) group.Name = request.Name.Trim();
         if (request.Description != null) group.Description = NullIfWhiteSpace(request.Description);
-        if (request.MeetingSchedule != null) group.MeetingSchedule = NullIfWhiteSpace(request.MeetingSchedule);
-        if (request.MeetingDay != null) group.MeetingDay = request.MeetingDay;
-        if (request.MeetingTime != null) group.MeetingTime = NullIfWhiteSpace(request.MeetingTime);
-        if (request.DurationMinutes != null) group.DurationMinutes = request.DurationMinutes.Value;
-        if (request.IsOpen != null) group.IsOpen = request.IsOpen.Value;
-        if (request.Language != null) group.Language = NullIfWhiteSpace(request.Language);
-        if (request.MeetingFormats != null) group.MeetingFormats = NullIfWhiteSpace(request.MeetingFormats);
-        if (request.ZoomLink != null) group.ZoomLink = NullIfWhiteSpace(request.ZoomLink);
-        if (request.ZoomMeetingId != null) group.ZoomMeetingId = NullIfWhiteSpace(request.ZoomMeetingId);
-        if (request.ZoomPasscode != null) group.ZoomPasscode = NullIfWhiteSpace(request.ZoomPasscode);
         if (request.TimeZone != null) group.TimeZone = NullIfWhiteSpace(request.TimeZone);
         if (request.IsPublic != null) group.IsPublic = request.IsPublic.Value;
         if (request.RequiresApproval != null) group.RequiresApproval = request.RequiresApproval.Value;

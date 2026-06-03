@@ -18,9 +18,9 @@ public class UpdateGroupCommandHandlerTests
     public async Task success_returns_ok_with_data()
     {
         // Arrange
-        var request = new UpdateGroupRequest("Updated Group", null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        var request = new UpdateGroupRequest("Updated Group", null, null, null, null);
         var command = new UpdateGroupCommand("group-slug", request, "admin-user-id");
-        var response = new GroupResponse(Guid.NewGuid(), "Updated Group", "group-slug", null, null, null, null, 60, true, null, null, null, null, null, null, true, true, true, 5, "GroupAdmin", DateTime.UtcNow);
+        var response = new GroupResponse(Guid.NewGuid(), "Updated Group", "group-slug", null, null, true, true, true, 5, "GroupAdmin", DateTime.UtcNow, []);
 
         _groupService
             .Setup(service => service.UpdateGroupAsync(command.Slug, command.Request, command.UserId))
@@ -40,7 +40,7 @@ public class UpdateGroupCommandHandlerTests
     public async Task permission_error_returns_forbidden()
     {
         // Arrange
-        var request = new UpdateGroupRequest("Updated Group", null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        var request = new UpdateGroupRequest("Updated Group", null, null, null, null);
         var command = new UpdateGroupCommand("group-slug", request, "user-id");
         const string error = "You do not have permission to update this group.";
 
@@ -62,7 +62,7 @@ public class UpdateGroupCommandHandlerTests
     public async Task other_error_returns_not_found()
     {
         // Arrange
-        var request = new UpdateGroupRequest("Updated Group", null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        var request = new UpdateGroupRequest("Updated Group", null, null, null, null);
         var command = new UpdateGroupCommand("missing-group", request, "admin-user-id");
         const string error = "Group not found.";
 

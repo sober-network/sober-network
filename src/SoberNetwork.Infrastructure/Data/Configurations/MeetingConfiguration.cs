@@ -13,7 +13,7 @@ public class MeetingConfiguration : IEntityTypeConfiguration<Meeting>
         builder.Property(m => m.Name).IsRequired().HasMaxLength(100);
         builder.Property(m => m.Time).IsRequired().HasMaxLength(5);
         builder.Property(m => m.DurationMinutes).HasDefaultValue(60);
-        builder.Property(m => m.Formats).HasColumnType("text[]").HasDefaultValue(new List<string>());
+        builder.Property(m => m.Formats).HasColumnType("text[]").HasDefaultValueSql("ARRAY[]::text[]");
 
         builder.HasOne(m => m.Group)
             .WithMany(g => g.Meetings)

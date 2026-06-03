@@ -22,8 +22,8 @@ public record AdminMeetingResponse(
     DateTime? OccursOn,
     /// <summary>True = open meeting (anyone welcome). False = closed (AA members only).</summary>
     bool IsOpen,
-    /// <summary>Comma-separated meeting formats.</summary>
-    string? Formats,
+    /// <summary>Meeting formats (e.g. Discussion, Speaker, StepStudy, BigBook, Beginners).</summary>
+    IReadOnlyList<string> Formats,
     /// <summary>Meeting language. Null = English.</summary>
     string? Language,
     /// <summary>Physical location address.</summary>

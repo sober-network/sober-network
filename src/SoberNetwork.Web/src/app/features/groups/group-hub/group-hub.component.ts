@@ -89,10 +89,7 @@ export class GroupHubComponent implements OnInit {
   }
 
   meetingFormats(m: MeetingResponse): string[] {
-    return (m.formats ?? '')
-      .split(',')
-      .map(value => value.trim())
-      .filter(Boolean);
+    return m.formats;
   }
 
   private loadGroup(): void {

@@ -91,9 +91,11 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Formats (comma-separated)</mat-label>
-            <input matInput formControlName="formats" maxlength="200" placeholder="e.g. Discussion, Speaker" />
-            <mat-hint>Options: {{ meetingFormats.join(', ') }}</mat-hint>
+            <mat-label>Formats</mat-label>
+            <mat-select formControlName="formats" multiple>
+              <mat-option *ngFor="let f of meetingFormats" [value]="f">{{ f }}</mat-option>
+            </mat-select>
+            <mat-hint>Select all formats that apply.</mat-hint>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="full-width">

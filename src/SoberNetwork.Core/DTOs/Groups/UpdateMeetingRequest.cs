@@ -21,7 +21,7 @@ public record UpdateMeetingRequest(
     /// <summary>Optional replacement open/closed flag.</summary>
     bool? IsOpen = null,
     /// <summary>Optional replacement formats.</summary>
-    string? Formats = null,
+    IReadOnlyList<string>? Formats = null,
     /// <summary>Optional replacement language.</summary>
     string? Language = null,
     /// <summary>Optional replacement physical location.</summary>

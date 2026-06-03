@@ -5,6 +5,9 @@ namespace SoberNetwork.Core.Validators.Groups;
 
 public class CreateMeetingRequestValidator : AbstractValidator<CreateMeetingRequest>
 {
+    private static readonly HashSet<string> ValidFormats = new(StringComparer.OrdinalIgnoreCase)
+        { "Discussion", "Speaker", "StepStudy", "BigBook", "Beginners" };
+
     public CreateMeetingRequestValidator()
     {
         RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
@@ -15,7 +18,9 @@ public class CreateMeetingRequestValidator : AbstractValidator<CreateMeetingRequ
             .Matches(@"^([01]\d|2[0-3]):[0-5]\d$")
             .WithMessage("Time must be in HH:mm 24-hour format (e.g. 07:00).");
         RuleFor(x => x.DurationMinutes).InclusiveBetween(1, 480);
-        RuleFor(x => x.Formats).MaximumLength(200);
+        RuleForEach(x => x.Formats)
+            .Must(f => ValidFormats.Contains(f))
+            .WithMessage("'{PropertyValue}' is not a valid meeting format. Valid values: Discussion, Speaker, StepStudy, BigBook, Beginners.");
         RuleFor(x => x.Language).MaximumLength(100);
         RuleFor(x => x.Location).MaximumLength(500);
         RuleFor(x => x.ZoomLink).MaximumLength(500);

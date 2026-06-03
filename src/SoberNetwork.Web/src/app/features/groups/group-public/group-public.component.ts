@@ -100,10 +100,7 @@ export class GroupPublicComponent implements OnInit {
   }
 
   meetingFormats(m: PublicMeetingResponse): string[] {
-    return (m.formats ?? '')
-      .split(',')
-      .map(value => value.trim())
-      .filter(Boolean);
+    return m.formats;
   }
 
   meetingWhen(m: PublicMeetingResponse): string {

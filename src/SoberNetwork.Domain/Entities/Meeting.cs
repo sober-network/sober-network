@@ -33,8 +33,8 @@ public class Meeting
     /// <summary>True = open meeting (anyone welcome). False = closed (AA members only).</summary>
     public bool IsOpen { get; set; } = true;
 
-    /// <summary>Comma-separated meeting formats: Discussion, Speaker, StepStudy, BigBook, Beginners.</summary>
-    public string? Formats { get; set; }
+    /// <summary>Meeting formats, e.g. Discussion, Speaker, StepStudy, BigBook, Beginners.</summary>
+    public List<string> Formats { get; set; } = [];
 
     /// <summary>Meeting language. Null defaults to English.</summary>
     public string? Language { get; set; }

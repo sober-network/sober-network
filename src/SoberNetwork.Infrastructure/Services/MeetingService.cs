@@ -105,7 +105,7 @@ public sealed class MeetingService(AppDbContext db) : IMeetingService
             DurationMinutes = request.DurationMinutes,
             OccursOn = request.OccursOn,
             IsOpen = request.IsOpen,
-            Formats = NullIfWhiteSpace(request.Formats),
+            Formats = request.Formats?.ToList() ?? [],
             Language = NullIfWhiteSpace(request.Language),
             Location = NullIfWhiteSpace(request.Location),
             ZoomLink = NullIfWhiteSpace(request.ZoomLink),
@@ -154,7 +154,7 @@ public sealed class MeetingService(AppDbContext db) : IMeetingService
         if (request.DurationMinutes != null) meeting.DurationMinutes = request.DurationMinutes.Value;
         if (request.OccursOn != null) meeting.OccursOn = request.OccursOn;
         if (request.IsOpen != null) meeting.IsOpen = request.IsOpen.Value;
-        if (request.Formats != null) meeting.Formats = NullIfWhiteSpace(request.Formats);
+        if (request.Formats != null) meeting.Formats = request.Formats.ToList();
         if (request.Language != null) meeting.Language = NullIfWhiteSpace(request.Language);
         if (request.Location != null) meeting.Location = NullIfWhiteSpace(request.Location);
         if (request.ZoomLink != null) meeting.ZoomLink = NullIfWhiteSpace(request.ZoomLink);

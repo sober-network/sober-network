@@ -5,6 +5,9 @@ namespace SoberNetwork.Core.Validators.Groups;
 
 public class UpdateMeetingRequestValidator : AbstractValidator<UpdateMeetingRequest>
 {
+    private static readonly HashSet<string> ValidFormats = new(StringComparer.OrdinalIgnoreCase)
+        { "Discussion", "Speaker", "StepStudy", "BigBook", "Beginners" };
+
     public UpdateMeetingRequestValidator()
     {
         RuleFor(x => x.Name).MaximumLength(100).When(x => x.Name is not null);
@@ -21,7 +24,10 @@ public class UpdateMeetingRequestValidator : AbstractValidator<UpdateMeetingRequ
             .InclusiveBetween(0, 6)
             .WithMessage("DayOfWeek must be between 0 (Sunday) and 6 (Saturday).")
             .When(x => x.DayOfWeek.HasValue);
-        RuleFor(x => x.Formats).MaximumLength(200);
+        RuleForEach(x => x.Formats)
+            .Must(f => ValidFormats.Contains(f))
+            .WithMessage("'{PropertyValue}' is not a valid meeting format. Valid values: Discussion, Speaker, StepStudy, BigBook, Beginners.")
+            .When(x => x.Formats is not null);
         RuleFor(x => x.Language).MaximumLength(100);
         RuleFor(x => x.Location).MaximumLength(500);
         RuleFor(x => x.ZoomLink).MaximumLength(500);

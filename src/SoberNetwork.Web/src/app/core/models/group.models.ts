@@ -21,7 +21,7 @@ export interface PublicMeetingResponse {
   durationMinutes: number;
   occursOn: string | null;        // ISO date for one-off meetings
   isOpen: boolean;
-  formats: string | null;         // comma-separated
+  formats: string[];            // array of meeting format tags
   language: string | null;
   location: string | null;
   isActive: boolean;
@@ -51,7 +51,7 @@ export interface CreateMeetingRequest {
   durationMinutes?: number;
   occursOn?: string | null;
   isOpen?: boolean;
-  formats?: string | null;
+  formats?: string[];
   language?: string | null;
   location?: string | null;
   zoomLink?: string | null;
@@ -69,7 +69,7 @@ export interface UpdateMeetingRequest {
   durationMinutes?: number;
   occursOn?: string | null;
   isOpen?: boolean;
-  formats?: string | null;
+  formats?: string[];
   language?: string | null;
   location?: string | null;
   zoomLink?: string | null;

@@ -20,8 +20,8 @@ public record CreateMeetingRequest(
     DateTime? OccursOn = null,
     /// <summary>True = open meeting. False = closed.</summary>
     bool IsOpen = true,
-    /// <summary>Comma-separated meeting formats.</summary>
-    string? Formats = null,
+    /// <summary>Meeting formats (e.g. Discussion, Speaker, StepStudy, BigBook, Beginners).</summary>
+    IReadOnlyList<string>? Formats = null,
     /// <summary>Meeting language. Null = English.</summary>
     string? Language = null,
     /// <summary>Physical location address.</summary>

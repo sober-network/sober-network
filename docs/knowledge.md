@@ -465,4 +465,74 @@ As more groups join, Supabase/Vercel free tiers may be exceeded. Should each gro
 
 ---
 
-*Last updated: 2026-06-03*
+---
+
+## Meeting Finder (Public, Cross-Group)
+
+**Status:** Backend + Angular component complete. ✅
+
+### Design Decisions
+- **Public, no login required** (T5 — carry the message; T11/T12 — no member data exposed)
+- Only `IsPublic = true` groups appear in the finder (T4 — group autonomy; each group opts in)
+- `PublicJoinUrl` is an admin-curated safe URL (e.g. a Zoom link without a password embedded). `ZoomLink` (members-only) is NEVER exposed publicly
+- Mailing addresses stored on `ApplicationUser` (opt-in) — used as default search location and for mailing sobriety chips. Unenrolled users enter a starting address or zip code manually
+- "Get Directions" CTA links to Google Maps using the meeting's stored address fields. Maps rendered with **Leaflet + OpenStreetMap** (no Google Maps API key required)
+
+### Backend
+- `MeetingType` enum: `InPerson=0, Online=1, Hybrid=2`
+- `TimeBlock` enum: `Morning, Afternoon, Evening, Night`
+- `Meeting` entity fields added: `MeetingType`, `VenueName`, `Street`, `City`, `State`, `PostalCode`, `Country`, `Lat`, `Lon`, `PublicJoinUrl`
+- `ApplicationUser` fields added: `MailingStreet`, `MailingCity`, `MailingState`, `MailingPostalCode`, `MailingCountry`, `MailingLatitude`, `MailingLongitude` — all opt-in, never required
+- `SearchPublicMeetingsQuery` / `SearchPublicMeetingsQueryHandler` — Haversine distance with bounding-box pre-filter. Earth radius: 3958.8 miles. Default search radius: 25 miles
+- `PublicMeetingsController` — `GET /api/meetings` with `[AllowAnonymous]` (T11/T12 review comment present)
+- Geocoding: Nominatim (OpenStreetMap) — no API key, free, OSM attribution required
+
+### Angular
+- `MeetingFinderComponent` — day chips, time-block and format filters, GPS/geocoding address input, Leaflet map with markers, list view
+- "Get Directions" links to `https://www.google.com/maps/dir/?api=1&destination={address}`
+- "Join Online" CTA opens `PublicJoinUrl` in new tab (only shown for Online/Hybrid meetings where URL is set)
+- Route: `/meetings` (no auth guard)
+- Navbar link added
+
+---
+
+## userId Type: Guid
+
+**Status:** Complete refactor ✅. All layers use `Guid` natively.
+
+### Rules
+- `ApplicationUser : IdentityUser<Guid>` — Identity tables store uuid columns
+- `AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>`
+- **JWT boundary rule (firm):** JWT claims are `string` by spec. The ONLY conversion points are:
+  - `TokenService`: `new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())`
+  - Controllers: `private Guid UserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!)`
+- `UserManager<TUser>` methods (`FindByIdAsync`, etc.) still take `string` — call `.ToString()` at those call sites only
+- `IAuditService.LogAsync` takes `Guid? userId` — callers pass Guid directly
+- `ResetPasswordRequest.UserId` is `Guid` — ASP.NET JSON body binding handles string→Guid automatically
+- `[FromQuery] Guid userId` in `ConfirmEmail` — model binding handles it
+- Moq setups for userId args: `It.IsAny<Guid>()` not `It.IsAny<string>()`
+- Test URLs with userId in route segments must use valid Guid strings (e.g., `"00000000-0000-0000-0000-000000000001"`) or model binding returns 400 instead of the expected 403
+- `TestWebApplicationFactory.CreateAuthenticatedClient(Guid userId = default)` — `default(Guid)` is `Guid.Empty` (valid)
+
+---
+
+## Database Migration Notes
+
+- All old migrations deleted; single `InitialSchema` migration regenerated — all Identity Id columns are `uuid`
+- Dev DB must be dropped and recreated when pulling this branch for the first time
+- `sober` PostgreSQL user needs `CREATEDB` privilege: `ALTER USER sober CREATEDB;`
+  - EF Core's `MigrateAsync` checks for DB existence and attempts `CREATE DATABASE` — requires `CREATEDB` even if DB already exists
+- Apply migration: `dotnet ef database update --project src\SoberNetwork.Infrastructure --startup-project src\SoberNetwork.Api`
+
+---
+
+## Superuser Seed
+
+- Seed block in `Program.cs` runs on every startup; skips if superuser already exists
+- Reads from user secrets: `Superuser:Email`, `Superuser:Password`, `Superuser:DisplayName`
+- Set with: `dotnet user-secrets set "Superuser:Email" "..." --project src\SoberNetwork.Api`
+- Seeds roles `superadmin` + `member`; creates user; assigns `superadmin` role; `EmailConfirmed = true`
+
+---
+
+*Last updated: 2026-06-04*

@@ -378,6 +378,62 @@ catch (Exception ex)
 
 
 
+// Seed superuser from config (Superuser:Email / Superuser:Password / Superuser:DisplayName).
+try
+{
+    using var scope = app.Services.CreateScope();
+    var cfg         = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var seedLogger  = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    var email       = cfg["Superuser:Email"];
+    var password    = cfg["Superuser:Password"];
+    var displayName = cfg["Superuser:DisplayName"] ?? "Super Admin";
+
+    if (!string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(password))
+    {
+        var existing = await userManager.FindByEmailAsync(email);
+        if (existing is null)
+        {
+            var superuser = new ApplicationUser
+            {
+                UserName       = email,
+                Email          = email,
+                EmailConfirmed = true,
+                DisplayName    = displayName,
+                IsSuperAdmin   = true,
+            };
+            var result = await userManager.CreateAsync(superuser, password);
+            if (result.Succeeded)
+                seedLogger.LogInformation("Superuser created: {Email}", email);
+            else
+                seedLogger.LogError("Superuser seed failed: {Errors}",
+                    string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+        else if (!existing.IsSuperAdmin)
+        {
+            existing.IsSuperAdmin = true;
+            await userManager.UpdateAsync(existing);
+            seedLogger.LogInformation("Existing user promoted to superuser: {Email}", email);
+        }
+        else
+        {
+            seedLogger.LogInformation("Superuser already exists: {Email}", email);
+        }
+    }
+    else
+    {
+        seedLogger.LogWarning("Superuser:Email or Superuser:Password not configured — skipping seed.");
+    }
+}
+catch (Exception ex)
+{
+    var seedLogger = app.Services.GetRequiredService<ILogger<Program>>();
+    seedLogger.LogError(ex, "Superuser seed failed unexpectedly.");
+}
+
+
+
 app.Run();
 
 // Required for WebApplicationFactory in integration tests

@@ -3,4 +3,4 @@ using SoberNetwork.Core.Results;
 
 namespace SoberNetwork.Core.Commands.Members;
 
-public record DeactivateUserCommand(string AdminUserId, string TargetUserId) : IRequest<CommandResult>;
+public record DeactivateUserCommand(Guid AdminUserId, Guid TargetUserId) : IRequest<CommandResult>;

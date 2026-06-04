@@ -7,6 +7,12 @@
 
   <span class="spacer"></span>
 
+  <!-- Find a Meeting — visible to all users (public, T11/T12 reviewed) -->
+  <a mat-button routerLink="/meetings" routerLinkActive="active-link">
+    <mat-icon>search</mat-icon>
+    Find a Meeting
+  </a>
+
   <ng-container *ngIf="currentUser$ | async as user; else guestNav">
     <!-- Group switcher -->
     <button mat-button [matMenuTriggerFor]="groupMenu" *ngIf="myGroups.length > 0">

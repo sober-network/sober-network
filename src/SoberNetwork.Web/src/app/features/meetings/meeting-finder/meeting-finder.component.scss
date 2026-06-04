@@ -1,0 +1,77 @@
+.meeting-finder {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.finder-header {
+  margin-bottom: 1.25rem;
+}
+
+.filter-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6c757d;
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.chip {
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid #dee2e6;
+  background: #fff;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  line-height: 1.5;
+
+  &:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+  }
+
+  &.active {
+    background: #0d6efd;
+    border-color: #0d6efd;
+    color: #fff;
+
+    &:hover {
+      background: #0b5ed7;
+    }
+  }
+}
+
+.day-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 0.25rem;
+}
+
+.meeting-card {
+  border-left: 3px solid #0d6efd;
+  transition: box-shadow 0.15s;
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.map-container {
+  width: 100%;
+}
+
+::ng-deep .map-popup {
+  font-size: 0.85rem;
+  line-height: 1.5;
+}

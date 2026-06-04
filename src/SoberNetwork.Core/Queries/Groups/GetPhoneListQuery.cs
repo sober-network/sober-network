@@ -4,4 +4,4 @@ using SoberNetwork.Core.Results;
 
 namespace SoberNetwork.Core.Queries.Groups;
 
-public record GetPhoneListQuery(string UserId, string Slug) : IRequest<DataResult<IReadOnlyList<PhoneListEntryResponse>>>;
+public record GetPhoneListQuery(Guid UserId, string Slug) : IRequest<DataResult<IReadOnlyList<PhoneListEntryResponse>>>;

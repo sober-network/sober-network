@@ -17,7 +17,7 @@ public class DeleteGroupCommandHandlerTests
     public async Task success_returns_ok()
     {
         // Arrange
-        var command = new DeleteGroupCommand("group-slug", "admin-user-id");
+        var command = new DeleteGroupCommand("group-slug", Guid.Parse("00000000-0000-0000-0000-000000000001"));
         _groupService
             .Setup(service => service.SoftDeleteGroupAsync(command.Slug, command.UserId))
             .ReturnsAsync((true, (string?)null));
@@ -35,7 +35,7 @@ public class DeleteGroupCommandHandlerTests
     public async Task permission_error_returns_forbidden()
     {
         // Arrange
-        var command = new DeleteGroupCommand("group-slug", "user-id");
+        var command = new DeleteGroupCommand("group-slug", Guid.Parse("00000000-0000-0000-0000-000000000001"));
         const string error = "You do not have permission to delete this group.";
 
         _groupService
@@ -55,7 +55,7 @@ public class DeleteGroupCommandHandlerTests
     public async Task other_error_returns_not_found()
     {
         // Arrange
-        var command = new DeleteGroupCommand("missing-group", "admin-user-id");
+        var command = new DeleteGroupCommand("missing-group", Guid.Parse("00000000-0000-0000-0000-000000000001"));
         const string error = "Group not found.";
 
         _groupService

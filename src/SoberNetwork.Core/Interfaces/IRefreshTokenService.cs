@@ -14,7 +14,7 @@ public interface IRefreshTokenService
 
     /// <summary>Creates and persists a new refresh token for the specified user.</summary>
 
-    Task<string> CreateAsync(string userId);
+    Task<string> CreateAsync(Guid userId);
 
 
 
@@ -32,7 +32,7 @@ public interface IRefreshTokenService
 
     /// <summary>Revokes all active refresh tokens for the specified user.</summary>
 
-    Task RevokeAllForUserAsync(string userId);
+    Task RevokeAllForUserAsync(Guid userId);
 
 }
 

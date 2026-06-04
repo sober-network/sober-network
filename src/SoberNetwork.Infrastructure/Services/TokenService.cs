@@ -44,7 +44,7 @@ public class TokenService(IOptions<JwtOptions> options) : ITokenService
 
         {
 
-            new(ClaimTypes.NameIdentifier, user.Id),
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
 
             new(ClaimTypes.Email, user.Email!),
 

@@ -5,7 +5,7 @@ namespace SoberNetwork.Domain.Entities;
 public class SecurityEvent
 {
     public long Id { get; set; }
-    public string? UserId { get; set; }
+    public Guid? UserId { get; set; }
     public ApplicationUser? User { get; set; }
     public SecurityEventType EventType { get; set; }
     public string? IpAddress { get; set; }

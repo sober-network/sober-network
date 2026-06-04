@@ -12,7 +12,7 @@ public class ResetPasswordRequestValidatorTests
     public void valid_request_passes()
     {
         // Arrange
-        var request = new ResetPasswordRequest("user-id", "valid-token", "NewPassword1!");
+        var request = new ResetPasswordRequest(Guid.Parse("00000000-0000-0000-0000-000000000001"), "valid-token", "NewPassword1!");
 
         // Act
         var result = _validator.TestValidate(request);
@@ -25,7 +25,7 @@ public class ResetPasswordRequestValidatorTests
     public void missing_user_id_fails()
     {
         // Arrange
-        var request = new ResetPasswordRequest(string.Empty, "token", "NewPassword1!");
+        var request = new ResetPasswordRequest(Guid.Empty, "token", "NewPassword1!");
 
         // Act
         var result = _validator.TestValidate(request);
@@ -38,7 +38,7 @@ public class ResetPasswordRequestValidatorTests
     public void missing_token_fails()
     {
         // Arrange
-        var request = new ResetPasswordRequest("user-id", string.Empty, "NewPassword1!");
+        var request = new ResetPasswordRequest(Guid.Parse("00000000-0000-0000-0000-000000000001"), string.Empty, "NewPassword1!");
 
         // Act
         var result = _validator.TestValidate(request);
@@ -51,7 +51,7 @@ public class ResetPasswordRequestValidatorTests
     public void short_password_fails()
     {
         // Arrange
-        var request = new ResetPasswordRequest("user-id", "token", "short");
+        var request = new ResetPasswordRequest(Guid.Parse("00000000-0000-0000-0000-000000000001"), "token", "short");
 
         // Act
         var result = _validator.TestValidate(request);

@@ -4,4 +4,4 @@ using SoberNetwork.Domain.Enums;
 
 namespace SoberNetwork.Core.Commands.Groups;
 
-public record ChangeMemberRoleCommand(string Slug, string TargetUserId, string AdminUserId, GroupRole NewRole) : IRequest<CommandResult>;
+public record ChangeMemberRoleCommand(string Slug, Guid TargetUserId, Guid AdminUserId, GroupRole NewRole) : IRequest<CommandResult>;

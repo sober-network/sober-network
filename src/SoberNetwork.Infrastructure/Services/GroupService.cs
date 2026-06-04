@@ -20,7 +20,7 @@ public class GroupService(
 
     // ── Helpers ────────────────────────────────────────────────────────────────
 
-    private Task<GroupMembership?> GetActiveMembershipAsync(Guid groupId, string userId) =>
+    private Task<GroupMembership?> GetActiveMembershipAsync(Guid groupId, Guid userId) =>
         db.GroupMemberships.FirstOrDefaultAsync(m =>
             m.GroupId == groupId &&
             m.UserId == userId &&
@@ -40,12 +40,15 @@ public class GroupService(
     private static MeetingResponse ToMeetingResponse(Meeting m) => new(
         m.Id, m.Name, m.Description, m.IsRecurring, m.DayOfWeek, m.Time,
         m.DurationMinutes, m.OccursOn, m.IsOpen, m.Formats, m.Language,
-        m.Location, m.ZoomLink, m.ZoomMeetingId, m.ZoomPasscode, m.IsActive, m.CreatedAt);
+        m.MeetingType, m.VenueName, m.Location, m.Street, m.City, m.State,
+        m.PostalCode, m.Country, m.Latitude, m.Longitude,
+        m.ZoomLink, m.ZoomMeetingId, m.ZoomPasscode, m.PublicJoinUrl, m.IsActive, m.CreatedAt);
 
     private static PublicMeetingResponse ToPublicMeetingResponse(Meeting m) => new(
         m.Id, m.Name, m.Description, m.IsRecurring, m.DayOfWeek, m.Time,
         m.DurationMinutes, m.OccursOn, m.IsOpen, m.Formats, m.Language,
-        m.Location, m.IsActive);
+        m.MeetingType, m.VenueName, m.Location, m.Street, m.City, m.State,
+        m.PostalCode, m.Country, m.Latitude, m.Longitude, m.PublicJoinUrl);
 
     private static IReadOnlyList<MeetingResponse> ActiveMeetings(Group g) =>
         g.Meetings
@@ -86,7 +89,7 @@ public class GroupService(
 
     // ── Group queries ──────────────────────────────────────────────────────────
 
-    public async Task<IReadOnlyList<GroupResponse>> GetUserGroupsAsync(string userId)
+    public async Task<IReadOnlyList<GroupResponse>> GetUserGroupsAsync(Guid userId)
     {
         var memberships = await db.GroupMemberships
             .AsNoTracking()
@@ -137,7 +140,7 @@ public class GroupService(
         return ToGroupSummaryResponse(group);
     }
 
-    public async Task<GroupResponse?> GetGroupBySlugAsync(string slug, string userId)
+    public async Task<GroupResponse?> GetGroupBySlugAsync(string slug, Guid userId)
     {
         var group = await db.Groups
             .AsNoTracking()
@@ -166,7 +169,7 @@ public class GroupService(
     // ── Group mutations ────────────────────────────────────────────────────────
 
     public async Task<(GroupResponse? Group, string? Error)> CreateGroupAsync(
-        CreateGroupRequest request, string creatorUserId)
+        CreateGroupRequest request, Guid creatorUserId)
     {
         if (await db.Groups.AnyAsync(g => g.Slug == request.Slug && g.DeletedAt == null))
             return (null, "A group with that slug already exists.");
@@ -212,7 +215,7 @@ public class GroupService(
     }
 
     public async Task<(GroupResponse? Group, string? Error)> UpdateGroupAsync(
-        string slug, UpdateGroupRequest request, string userId)
+        string slug, UpdateGroupRequest request, Guid userId)
     {
         var group = await db.Groups
             .Include(g => g.Meetings)
@@ -237,7 +240,7 @@ public class GroupService(
         return (ToGroupResponse(group, membership.Role.ToString(), count), null);
     }
 
-    public async Task<(bool Success, string? Error)> SoftDeleteGroupAsync(string slug, string userId)
+    public async Task<(bool Success, string? Error)> SoftDeleteGroupAsync(string slug, Guid userId)
     {
         var group = await db.Groups.FirstOrDefaultAsync(g =>
             g.Slug == slug && g.DeletedAt == null);
@@ -259,7 +262,7 @@ public class GroupService(
     // ── Member queries ─────────────────────────────────────────────────────────
 
     public async Task<(PagedResponse<MemberResponse>? Members, string? Error)> GetMembersAsync(
-        string slug, string userId, int page = 1, int pageSize = 25)
+        string slug, Guid userId, int page = 1, int pageSize = 25)
     {
         var group = await db.Groups
             .AsNoTracking()
@@ -295,7 +298,7 @@ public class GroupService(
     }
 
     public async Task<(PagedResponse<JoinRequestResponse>? Requests, string? Error)> GetJoinRequestsAsync(
-        string slug, string userId, int page = 1, int pageSize = 25)
+        string slug, Guid userId, int page = 1, int pageSize = 25)
     {
         var group = await db.Groups
             .AsNoTracking()
@@ -333,7 +336,7 @@ public class GroupService(
 
     // ── Membership mutations ───────────────────────────────────────────────────
 
-    public async Task<(bool Success, bool AutoApproved, string? Error)> RequestToJoinAsync(string slug, string userId)
+    public async Task<(bool Success, bool AutoApproved, string? Error)> RequestToJoinAsync(string slug, Guid userId)
     {
         var group = await db.Groups
             .AsNoTracking()
@@ -407,7 +410,7 @@ public class GroupService(
     }
 
     public async Task<(bool Success, string? Error)> ApproveMemberAsync(
-        string slug, string targetUserId, string adminUserId)
+        string slug, Guid targetUserId, Guid adminUserId)
     {
         var (group, membership, error) = await GetAdminAndTarget(slug, targetUserId, adminUserId);
         if (error != null) return (false, error);
@@ -435,7 +438,7 @@ public class GroupService(
     }
 
     public async Task<(bool Success, string? Error)> RejectMemberAsync(
-        string slug, string targetUserId, string adminUserId)
+        string slug, Guid targetUserId, Guid adminUserId)
     {
         var (group, membership, error) = await GetAdminAndTarget(slug, targetUserId, adminUserId);
         if (error != null) return (false, error);
@@ -461,7 +464,7 @@ public class GroupService(
     }
 
     public async Task<(bool Success, string? Error)> RemoveMemberAsync(
-        string slug, string targetUserId, string adminUserId)
+        string slug, Guid targetUserId, Guid adminUserId)
     {
         var (group, membership, error) = await GetAdminAndTarget(slug, targetUserId, adminUserId);
         if (error != null) return (false, error);
@@ -480,7 +483,7 @@ public class GroupService(
         return (true, null);
     }
 
-    public async Task<(bool Success, string? Error)> LeaveGroupAsync(string slug, string userId)
+    public async Task<(bool Success, string? Error)> LeaveGroupAsync(string slug, Guid userId)
     {
         var group = await db.Groups.FirstOrDefaultAsync(g =>
             g.Slug == slug && g.DeletedAt == null);
@@ -504,7 +507,7 @@ public class GroupService(
     }
 
     public async Task<(bool Success, string? Error)> ClearProbationaryStatusAsync(
-        string slug, string targetUserId, string adminUserId)
+        string slug, Guid targetUserId, Guid adminUserId)
     {
         var (group, membership, error) = await GetAdminAndTarget(slug, targetUserId, adminUserId);
         if (error != null) return (false, error);
@@ -522,7 +525,7 @@ public class GroupService(
     }
 
     public async Task<(bool Success, string? Error)> ChangeRoleAsync(
-        string slug, string targetUserId, string adminUserId, GroupRole newRole)
+        string slug, Guid targetUserId, Guid adminUserId, GroupRole newRole)
     {
         var (group, membership, error) = await GetAdminAndTarget(slug, targetUserId, adminUserId);
         if (error != null) return (false, error);
@@ -546,7 +549,7 @@ public class GroupService(
     }
 
     public async Task<(bool Success, string? Error)> ChangeMemberStatusAsync(
-        string slug, string targetUserId, string adminUserId, MemberStatus newStatus)
+        string slug, Guid targetUserId, Guid adminUserId, MemberStatus newStatus)
     {
         var (group, membership, error) = await GetAdminAndTarget(slug, targetUserId, adminUserId);
         if (error != null) return (false, error);
@@ -572,7 +575,7 @@ public class GroupService(
     // ── Private helpers ────────────────────────────────────────────────────────
 
     private async Task<(Group? Group, GroupMembership? Membership, string? Error)> GetAdminAndTarget(
-        string slug, string targetUserId, string adminUserId)
+        string slug, Guid targetUserId, Guid adminUserId)
     {
         var group = await db.Groups
             .AsNoTracking()

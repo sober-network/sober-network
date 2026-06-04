@@ -17,7 +17,7 @@ namespace SoberNetwork.Api.Controllers;
 [Route("api/groups/{slug}/meetings")]
 public class MeetingsController(IMediator mediator) : ControllerBase
 {
-    private string UserId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+    private Guid UserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
     /// <summary>
     /// Returns all active meetings for the group.

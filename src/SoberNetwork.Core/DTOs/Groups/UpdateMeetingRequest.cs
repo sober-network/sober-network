@@ -1,3 +1,5 @@
+using SoberNetwork.Domain.Enums;
+
 namespace SoberNetwork.Core.DTOs.Groups;
 
 /// <summary>Request body for updating mutable meeting fields.</summary>
@@ -24,14 +26,34 @@ public record UpdateMeetingRequest(
     IReadOnlyList<string>? Formats = null,
     /// <summary>Optional replacement language.</summary>
     string? Language = null,
-    /// <summary>Optional replacement physical location.</summary>
+    /// <summary>Optional replacement meeting type (InPerson/Online/Hybrid).</summary>
+    MeetingType? MeetingType = null,
+    /// <summary>Optional replacement venue display name.</summary>
+    string? VenueName = null,
+    /// <summary>Optional replacement legacy location string.</summary>
     string? Location = null,
-    /// <summary>Optional replacement online meeting URL.</summary>
+    /// <summary>Optional replacement street address.</summary>
+    string? Street = null,
+    /// <summary>Optional replacement city.</summary>
+    string? City = null,
+    /// <summary>Optional replacement state/province.</summary>
+    string? State = null,
+    /// <summary>Optional replacement postal code.</summary>
+    string? PostalCode = null,
+    /// <summary>Optional replacement country code.</summary>
+    string? Country = null,
+    /// <summary>Optional replacement latitude.</summary>
+    double? Latitude = null,
+    /// <summary>Optional replacement longitude.</summary>
+    double? Longitude = null,
+    /// <summary>Optional replacement online meeting URL (member-visible only).</summary>
     string? ZoomLink = null,
     /// <summary>Optional replacement online meeting identifier.</summary>
     string? ZoomMeetingId = null,
     /// <summary>Optional replacement online meeting passcode.</summary>
     string? ZoomPasscode = null,
+    /// <summary>Optional replacement public join URL (no embedded credentials).</summary>
+    string? PublicJoinUrl = null,
     /// <summary>Optional replacement active flag.</summary>
     bool? IsActive = null
 );

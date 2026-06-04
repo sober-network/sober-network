@@ -19,7 +19,7 @@ public class SecurityEventConfiguration : IEntityTypeConfiguration<SecurityEvent
         builder.Property(e => e.IpAddress).HasMaxLength(45);   // IPv6 max length
         builder.Property(e => e.UserAgent).HasMaxLength(512);
         builder.Property(e => e.Details).HasMaxLength(1024);
-        builder.Property(e => e.UserId).HasMaxLength(450);
+        builder.Property(e => e.UserId);  // Guid — no MaxLength needed
 
         builder.HasIndex(e => e.UserId);
         builder.HasIndex(e => e.CreatedAt);

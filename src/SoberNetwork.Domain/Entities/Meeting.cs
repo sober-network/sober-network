@@ -1,3 +1,5 @@
+using SoberNetwork.Domain.Enums;
+
 namespace SoberNetwork.Domain.Entities;
 
 public class Meeting
@@ -50,6 +52,43 @@ public class Meeting
 
     /// <summary>Online meeting passcode — visible to authenticated members only, never public.</summary>
     public string? ZoomPasscode { get; set; }
+
+    /// <summary>
+    /// Explicitly public join URL for the meeting finder (e.g. a waiting-room Zoom link with no embedded passcode).
+    /// Distinct from ZoomLink which may contain embedded credentials. T11/T12 reviewed: admin opts in per meeting.
+    /// </summary>
+    public string? PublicJoinUrl { get; set; }
+
+    // ── Meeting type ─────────────────────────────────────────────────────────
+
+    /// <summary>InPerson, Online, or Hybrid.</summary>
+    public MeetingType MeetingType { get; set; } = MeetingType.InPerson;
+
+    // ── Structured address fields (for geocoding + directions) ───────────────
+
+    /// <summary>Display name of the venue (e.g., "First Presbyterian Church, Community Room").</summary>
+    public string? VenueName { get; set; }
+
+    /// <summary>Street address of the meeting location.</summary>
+    public string? Street { get; set; }
+
+    /// <summary>City of the meeting location.</summary>
+    public string? City { get; set; }
+
+    /// <summary>State or province of the meeting location.</summary>
+    public string? State { get; set; }
+
+    /// <summary>ZIP or postal code.</summary>
+    public string? PostalCode { get; set; }
+
+    /// <summary>Country code. Defaults to "US".</summary>
+    public string? Country { get; set; }
+
+    /// <summary>GPS latitude — populated via geocoding or manual entry. Used for distance-based search.</summary>
+    public double? Latitude { get; set; }
+
+    /// <summary>GPS longitude — populated via geocoding or manual entry. Used for distance-based search.</summary>
+    public double? Longitude { get; set; }
 
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

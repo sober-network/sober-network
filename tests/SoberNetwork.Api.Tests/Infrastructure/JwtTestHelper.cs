@@ -10,7 +10,7 @@ public static class JwtTestHelper
 {
     /// <summary>Generates a bearer token with the claims expected by the API.</summary>
     public static string GenerateToken(
-        string userId,
+        Guid userId,
         bool isSuperAdmin,
         string secret,
         string issuer,
@@ -18,7 +18,7 @@ public static class JwtTestHelper
     {
         var claims = new List<Claim>
         {
-            new(ClaimTypes.NameIdentifier, userId),
+            new(ClaimTypes.NameIdentifier, userId.ToString()),
             new("isSuperAdmin", isSuperAdmin ? "true" : "false"),
         };
 

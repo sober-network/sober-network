@@ -45,9 +45,9 @@ public class AuthService(
         return CommandResult.Ok();
     }
 
-    public async Task<CommandResult> ConfirmEmailAsync(string userId, string token, string? ipAddress, string? userAgent, CancellationToken cancellationToken = default)
+    public async Task<CommandResult> ConfirmEmailAsync(Guid userId, string token, string? ipAddress, string? userAgent, CancellationToken cancellationToken = default)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId.ToString());
         if (user is null)
             return CommandResult.Fail(ResultCode.BadRequest, "Invalid confirmation link.");
 
@@ -143,9 +143,9 @@ public class AuthService(
         return CommandResult.Ok();
     }
 
-    public async Task<CommandResult> ResetPasswordAsync(string userId, string token, string newPassword, string? ipAddress, string? userAgent, CancellationToken cancellationToken = default)
+    public async Task<CommandResult> ResetPasswordAsync(Guid userId, string token, string newPassword, string? ipAddress, string? userAgent, CancellationToken cancellationToken = default)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId.ToString());
         if (user is null)
             return CommandResult.Fail(ResultCode.BadRequest, "Invalid password reset request.");
 
@@ -192,14 +192,14 @@ public class AuthService(
         return CommandResult.Ok();
     }
 
-    private static string BuildCallbackUrl(string callbackTemplate, string userId, string token)
+    private static string BuildCallbackUrl(string callbackTemplate, Guid userId, string token)
     {
         var encodedToken = Uri.EscapeDataString(token);
 
         return callbackTemplate
-            .Replace("{userId}", userId, StringComparison.Ordinal)
+            .Replace("{userId}", userId.ToString(), StringComparison.Ordinal)
             .Replace("{token}", encodedToken, StringComparison.Ordinal)
-            .Replace("%7BuserId%7D", userId, StringComparison.OrdinalIgnoreCase)
+            .Replace("%7BuserId%7D", userId.ToString(), StringComparison.OrdinalIgnoreCase)
             .Replace("%7Btoken%7D", encodedToken, StringComparison.OrdinalIgnoreCase);
     }
 }

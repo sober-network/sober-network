@@ -11,7 +11,7 @@ public class RefreshTokenService(
     ITokenService tokenService,
     ILogger<RefreshTokenService> logger) : IRefreshTokenService
 {
-    public async Task<string> CreateAsync(string userId)
+    public async Task<string> CreateAsync(Guid userId)
     {
         var (plainToken, hash) = tokenService.GenerateRefreshToken();
 
@@ -65,7 +65,7 @@ public class RefreshTokenService(
         }
     }
 
-    public async Task RevokeAllForUserAsync(string userId)
+    public async Task RevokeAllForUserAsync(Guid userId)
     {
         var tokens = await db.RefreshTokens
             .Where(t => t.UserId == userId && t.RevokedAt == null)

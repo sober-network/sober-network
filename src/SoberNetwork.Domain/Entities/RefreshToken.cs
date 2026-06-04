@@ -3,7 +3,7 @@ namespace SoberNetwork.Domain.Entities;
 public class RefreshToken
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-    public string UserId { get; set; } = null!;
+    public Guid UserId { get; set; }
     public ApplicationUser User { get; set; } = null!;
 
     /// <summary>SHA-256 hash of the plaintext token — never store the raw token.</summary>

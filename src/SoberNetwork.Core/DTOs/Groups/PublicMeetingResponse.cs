@@ -1,7 +1,9 @@
+using SoberNetwork.Domain.Enums;
+
 namespace SoberNetwork.Core.DTOs.Groups;
 
 /// <summary>
-/// Meeting information safe for public/anonymous display.
+/// Meeting information safe for public/anonymous display (per-group page).
 /// T11/T12 reviewed: meeting time, day, location, open/closed status are non-member data —
 /// equivalent to what AA Intergroup publishes publicly. Zoom credentials excluded.
 /// </summary>
@@ -28,8 +30,26 @@ public record PublicMeetingResponse(
     IReadOnlyList<string> Formats,
     /// <summary>Meeting language. Null = English.</summary>
     string? Language,
-    /// <summary>Physical location address.</summary>
+    /// <summary>InPerson, Online, or Hybrid.</summary>
+    MeetingType MeetingType,
+    /// <summary>Display name of the venue.</summary>
+    string? VenueName,
+    /// <summary>Legacy combined location/address string.</summary>
     string? Location,
-    /// <summary>Whether this meeting is currently active.</summary>
-    bool IsActive
+    /// <summary>Street address. Null for online-only meetings.</summary>
+    string? Street,
+    /// <summary>City. Null for online-only meetings.</summary>
+    string? City,
+    /// <summary>State or province.</summary>
+    string? State,
+    /// <summary>ZIP or postal code.</summary>
+    string? PostalCode,
+    /// <summary>Country code.</summary>
+    string? Country,
+    /// <summary>GPS latitude. Null if not geocoded.</summary>
+    double? Latitude,
+    /// <summary>GPS longitude. Null if not geocoded.</summary>
+    double? Longitude,
+    /// <summary>Public join URL (no embedded credentials). Null unless admin opted in.</summary>
+    string? PublicJoinUrl
 );

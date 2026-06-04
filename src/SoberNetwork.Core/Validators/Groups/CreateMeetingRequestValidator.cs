@@ -1,5 +1,6 @@
 using FluentValidation;
 using SoberNetwork.Core.DTOs.Groups;
+using SoberNetwork.Domain.Enums;
 
 namespace SoberNetwork.Core.Validators.Groups;
 
@@ -22,10 +23,36 @@ public class CreateMeetingRequestValidator : AbstractValidator<CreateMeetingRequ
             .Must(f => ValidFormats.Contains(f))
             .WithMessage("'{PropertyValue}' is not a valid meeting format. Valid values: Discussion, Speaker, StepStudy, BigBook, Beginners.");
         RuleFor(x => x.Language).MaximumLength(100);
+        RuleFor(x => x.VenueName).MaximumLength(200);
         RuleFor(x => x.Location).MaximumLength(500);
+        RuleFor(x => x.Street).MaximumLength(300);
+        RuleFor(x => x.City).MaximumLength(100);
+        RuleFor(x => x.State).MaximumLength(100);
+        RuleFor(x => x.PostalCode).MaximumLength(20);
+        RuleFor(x => x.Country).MaximumLength(100);
+        RuleFor(x => x.Latitude).InclusiveBetween(-90.0, 90.0).When(x => x.Latitude.HasValue);
+        RuleFor(x => x.Longitude).InclusiveBetween(-180.0, 180.0).When(x => x.Longitude.HasValue);
         RuleFor(x => x.ZoomLink).MaximumLength(500);
         RuleFor(x => x.ZoomMeetingId).MaximumLength(100);
         RuleFor(x => x.ZoomPasscode).MaximumLength(100);
+        RuleFor(x => x.PublicJoinUrl).MaximumLength(500);
+
+        // MeetingType invariants: InPerson needs address, Online needs PublicJoinUrl, Hybrid needs both.
+        When(x => x.MeetingType == MeetingType.InPerson || x.MeetingType == MeetingType.Hybrid, () =>
+        {
+            RuleFor(x => x.Street)
+                .NotEmpty().WithMessage("Street is required for in-person and hybrid meetings.");
+            RuleFor(x => x.City)
+                .NotEmpty().WithMessage("City is required for in-person and hybrid meetings.");
+        });
+
+        When(x => x.MeetingType == MeetingType.Online || x.MeetingType == MeetingType.Hybrid, () =>
+        {
+            RuleFor(x => x.PublicJoinUrl)
+                .NotEmpty().WithMessage("PublicJoinUrl is required for online and hybrid meetings.")
+                .Must(url => Uri.TryCreate(url, UriKind.Absolute, out _))
+                .WithMessage("PublicJoinUrl must be a valid absolute URL.");
+        });
 
         // Recurring meetings require DayOfWeek; one-off meetings require OccursOn.
         When(x => x.IsRecurring, () =>

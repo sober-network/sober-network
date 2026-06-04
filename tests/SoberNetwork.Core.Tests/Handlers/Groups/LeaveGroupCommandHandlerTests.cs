@@ -17,7 +17,7 @@ public class LeaveGroupCommandHandlerTests
     public async Task success_returns_ok()
     {
         // Arrange
-        var command = new LeaveGroupCommand("group-slug", "user-id");
+        var command = new LeaveGroupCommand("group-slug", Guid.Parse("00000000-0000-0000-0000-000000000001"));
         _groupService
             .Setup(service => service.LeaveGroupAsync(command.Slug, command.UserId))
             .ReturnsAsync((true, (string?)null));
@@ -35,7 +35,7 @@ public class LeaveGroupCommandHandlerTests
     public async Task only_admin_error_returns_conflict()
     {
         // Arrange
-        var command = new LeaveGroupCommand("group-slug", "user-id");
+        var command = new LeaveGroupCommand("group-slug", Guid.Parse("00000000-0000-0000-0000-000000000001"));
         const string error = "You are the only admin for this group.";
 
         _groupService
@@ -55,7 +55,7 @@ public class LeaveGroupCommandHandlerTests
     public async Task other_error_returns_not_found()
     {
         // Arrange
-        var command = new LeaveGroupCommand("missing-group", "user-id");
+        var command = new LeaveGroupCommand("missing-group", Guid.Parse("00000000-0000-0000-0000-000000000001"));
         const string error = "Group not found.";
 
         _groupService

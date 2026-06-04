@@ -10,7 +10,7 @@ public interface IAuthService
     Task<CommandResult> RegisterAsync(string email, string password, string displayName, string? firstName, string confirmationCallbackUrl, string? ipAddress, string? userAgent, CancellationToken cancellationToken = default);
 
     /// <summary>Confirms the user's email via the token generated during registration.</summary>
-    Task<CommandResult> ConfirmEmailAsync(string userId, string token, string? ipAddress, string? userAgent, CancellationToken cancellationToken = default);
+    Task<CommandResult> ConfirmEmailAsync(Guid userId, string token, string? ipAddress, string? userAgent, CancellationToken cancellationToken = default);
 
     /// <summary>Resends the email confirmation link if the account is unconfirmed.</summary>
     Task<CommandResult> ResendConfirmationAsync(string email, string confirmationCallbackUrl, string? ipAddress, string? userAgent, CancellationToken cancellationToken = default);
@@ -22,7 +22,7 @@ public interface IAuthService
     Task<CommandResult> ForgotPasswordAsync(string email, string resetCallbackUrl, string? ipAddress, string? userAgent, CancellationToken cancellationToken = default);
 
     /// <summary>Resets the password and revokes all refresh tokens for the user.</summary>
-    Task<CommandResult> ResetPasswordAsync(string userId, string token, string newPassword, string? ipAddress, string? userAgent, CancellationToken cancellationToken = default);
+    Task<CommandResult> ResetPasswordAsync(Guid userId, string token, string newPassword, string? ipAddress, string? userAgent, CancellationToken cancellationToken = default);
 
     /// <summary>Rotates a refresh token and returns a new auth response.</summary>
     Task<DataResult<AuthResponse>> RefreshAsync(string refreshToken, string? ipAddress, string? userAgent, CancellationToken cancellationToken = default);

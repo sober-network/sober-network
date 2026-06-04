@@ -15,7 +15,7 @@ namespace SoberNetwork.Api.Controllers;
 [Route("api/[controller]")]
 public class MembersController(IMediator mediator) : ControllerBase
 {
-    private string UserId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+    private Guid UserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
     private bool IsSuperAdmin => User.FindFirstValue("isSuperAdmin") == "true";
 
     /// <summary>Returns the authenticated user's full profile.</summary>
@@ -163,7 +163,7 @@ public class MembersController(IMediator mediator) : ControllerBase
 
     /// <summary>Returns the full admin view of any user. SuperAdmin only.</summary>
     [HttpGet("{userId}")]
-    public async Task<IActionResult> GetUserById(string userId, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetUserById(Guid userId, CancellationToken cancellationToken = default)
     {
         if (!IsSuperAdmin) return Forbid();
         var user = await mediator.Send(new GetUserByIdQuery(userId), cancellationToken);
@@ -172,7 +172,7 @@ public class MembersController(IMediator mediator) : ControllerBase
 
     /// <summary>Force-deactivates any user account. SuperAdmin only.</summary>
     [HttpPatch("{userId}/deactivate")]
-    public async Task<IActionResult> DeactivateUser(string userId, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> DeactivateUser(Guid userId, CancellationToken cancellationToken = default)
     {
         if (!IsSuperAdmin) return Forbid();
         var result = await mediator.Send(new DeactivateUserCommand(UserId, userId), cancellationToken);

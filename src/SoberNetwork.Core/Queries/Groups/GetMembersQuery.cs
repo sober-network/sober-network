@@ -5,4 +5,4 @@ using SoberNetwork.Core.Results;
 
 namespace SoberNetwork.Core.Queries.Groups;
 
-public record GetMembersQuery(string Slug, string UserId, int Page, int PageSize) : IRequest<DataResult<PagedResponse<MemberResponse>>>;
+public record GetMembersQuery(string Slug, Guid UserId, int Page, int PageSize) : IRequest<DataResult<PagedResponse<MemberResponse>>>;

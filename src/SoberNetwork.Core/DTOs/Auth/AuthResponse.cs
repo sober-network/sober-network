@@ -11,7 +11,7 @@ public record AuthResponse(
     /// <summary>UTC timestamp when the refresh token expires.</summary>
     DateTime RefreshTokenExpiresAt,
     /// <summary>Unique identifier of the authenticated user.</summary>
-    string UserId,
+    Guid UserId,
     /// <summary>Email address of the authenticated user.</summary>
     string Email,
     /// <summary>Display name shown in the application.</summary>

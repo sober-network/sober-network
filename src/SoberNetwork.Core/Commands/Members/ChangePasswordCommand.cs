@@ -4,4 +4,4 @@ using SoberNetwork.Core.Results;
 
 namespace SoberNetwork.Core.Commands.Members;
 
-public record ChangePasswordCommand(string UserId, ChangePasswordRequest Request) : IRequest<CommandResult>;
+public record ChangePasswordCommand(Guid UserId, ChangePasswordRequest Request) : IRequest<CommandResult>;

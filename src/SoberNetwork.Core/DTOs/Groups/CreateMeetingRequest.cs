@@ -1,3 +1,5 @@
+using SoberNetwork.Domain.Enums;
+
 namespace SoberNetwork.Core.DTOs.Groups;
 
 /// <summary>Request body for creating a new meeting within a group.</summary>
@@ -24,12 +26,32 @@ public record CreateMeetingRequest(
     IReadOnlyList<string>? Formats = null,
     /// <summary>Meeting language. Null = English.</summary>
     string? Language = null,
-    /// <summary>Physical location address.</summary>
+    /// <summary>InPerson, Online, or Hybrid. Required.</summary>
+    MeetingType MeetingType = MeetingType.InPerson,
+    /// <summary>Display name of the venue (e.g., "First Presbyterian Church, Community Room").</summary>
+    string? VenueName = null,
+    /// <summary>Legacy combined location/address string.</summary>
     string? Location = null,
-    /// <summary>Online meeting URL.</summary>
+    /// <summary>Street address for in-person or hybrid meetings.</summary>
+    string? Street = null,
+    /// <summary>City for in-person or hybrid meetings.</summary>
+    string? City = null,
+    /// <summary>State or province.</summary>
+    string? State = null,
+    /// <summary>ZIP or postal code.</summary>
+    string? PostalCode = null,
+    /// <summary>Country code. Defaults to US.</summary>
+    string? Country = null,
+    /// <summary>GPS latitude. Populated automatically when address is geocoded.</summary>
+    double? Latitude = null,
+    /// <summary>GPS longitude. Populated automatically when address is geocoded.</summary>
+    double? Longitude = null,
+    /// <summary>Online meeting URL — member-visible only (may contain embedded credentials).</summary>
     string? ZoomLink = null,
-    /// <summary>Online meeting identifier.</summary>
+    /// <summary>Online meeting identifier — member-visible only.</summary>
     string? ZoomMeetingId = null,
-    /// <summary>Online meeting passcode.</summary>
-    string? ZoomPasscode = null
+    /// <summary>Online meeting passcode — member-visible only, never public.</summary>
+    string? ZoomPasscode = null,
+    /// <summary>Explicitly public join URL for the meeting finder (no embedded credentials).</summary>
+    string? PublicJoinUrl = null
 );

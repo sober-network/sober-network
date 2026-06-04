@@ -18,7 +18,7 @@ public class ChangeEmailCommandHandlerTests
     public async Task success_returns_ok()
     {
         // Arrange
-        var command = new ChangeEmailCommand("user-id", new ChangeEmailRequest("current-password", "new@example.com"));
+        var command = new ChangeEmailCommand(Guid.Parse("00000000-0000-0000-0000-000000000001"), new ChangeEmailRequest("current-password", "new@example.com"));
         _memberService
             .Setup(service => service.ChangeEmailAsync(command.UserId, command.Request))
             .ReturnsAsync((true, (string?)null));
@@ -36,7 +36,7 @@ public class ChangeEmailCommandHandlerTests
     public async Task incorrect_password_error_returns_unauthorized()
     {
         // Arrange
-        var command = new ChangeEmailCommand("user-id", new ChangeEmailRequest("bad-password", "new@example.com"));
+        var command = new ChangeEmailCommand(Guid.Parse("00000000-0000-0000-0000-000000000001"), new ChangeEmailRequest("bad-password", "new@example.com"));
         const string error = "Incorrect password.";
 
         _memberService
@@ -56,7 +56,7 @@ public class ChangeEmailCommandHandlerTests
     public async Task other_error_returns_bad_request()
     {
         // Arrange
-        var command = new ChangeEmailCommand("user-id", new ChangeEmailRequest("current-password", "existing@example.com"));
+        var command = new ChangeEmailCommand(Guid.Parse("00000000-0000-0000-0000-000000000001"), new ChangeEmailRequest("current-password", "existing@example.com"));
         const string error = "Email is already in use.";
 
         _memberService

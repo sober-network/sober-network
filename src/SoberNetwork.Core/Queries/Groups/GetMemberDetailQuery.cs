@@ -4,4 +4,4 @@ using SoberNetwork.Core.Results;
 
 namespace SoberNetwork.Core.Queries.Groups;
 
-public record GetMemberDetailQuery(string UserId, string Slug, string TargetUserId) : IRequest<DataResult<MemberDetailResponse>>;
+public record GetMemberDetailQuery(Guid UserId, string Slug, Guid TargetUserId) : IRequest<DataResult<MemberDetailResponse>>;

@@ -17,7 +17,7 @@ namespace SoberNetwork.Api.Controllers;
 [Route("api/[controller]")]
 public class GroupsController(IMediator mediator) : ControllerBase
 {
-    private string UserId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+    private Guid UserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
     private bool IsSuperAdmin => User.FindFirstValue("isSuperAdmin") == "true";
 
     /// <summary>Returns all groups the current user is an active member of.</summary>
@@ -164,7 +164,7 @@ public class GroupsController(IMediator mediator) : ControllerBase
 
     /// <summary>Approves a pending join request. Caller must be a GroupAdmin.</summary>
     [HttpPost("{slug}/members/{userId}/approve")]
-    public async Task<IActionResult> ApproveMember(string slug, string userId, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> ApproveMember(string slug, Guid userId, CancellationToken cancellationToken = default)
     {
         var result = await mediator.Send(new ApproveMemberCommand(slug, userId, UserId), cancellationToken);
         return result.Code switch
@@ -177,7 +177,7 @@ public class GroupsController(IMediator mediator) : ControllerBase
 
     /// <summary>Rejects a pending join request. Caller must be a GroupAdmin.</summary>
     [HttpPost("{slug}/members/{userId}/reject")]
-    public async Task<IActionResult> RejectMember(string slug, string userId, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> RejectMember(string slug, Guid userId, CancellationToken cancellationToken = default)
     {
         var result = await mediator.Send(new RejectMemberCommand(slug, userId, UserId), cancellationToken);
         return result.Code switch
@@ -190,7 +190,7 @@ public class GroupsController(IMediator mediator) : ControllerBase
 
     /// <summary>Removes a member. Caller must be a GroupAdmin. Last-admin guard enforced.</summary>
     [HttpDelete("{slug}/members/{userId}")]
-    public async Task<IActionResult> RemoveMember(string slug, string userId, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> RemoveMember(string slug, Guid userId, CancellationToken cancellationToken = default)
     {
         var result = await mediator.Send(new RemoveMemberCommand(slug, userId, UserId), cancellationToken);
         return result.Code switch
@@ -205,7 +205,7 @@ public class GroupsController(IMediator mediator) : ControllerBase
     [HttpPatch("{slug}/members/{userId}/role")]
     public async Task<IActionResult> ChangeMemberRole(
         string slug,
-        string userId,
+        Guid userId,
         [FromBody] ChangeRoleRequest request,
         CancellationToken cancellationToken = default)
     {
@@ -222,7 +222,7 @@ public class GroupsController(IMediator mediator) : ControllerBase
     [HttpPatch("{slug}/members/{userId}/status")]
     public async Task<IActionResult> ChangeMemberStatus(
         string slug,
-        string userId,
+        Guid userId,
         [FromBody] ChangeMemberStatusRequest request,
         CancellationToken cancellationToken = default)
     {
@@ -237,7 +237,7 @@ public class GroupsController(IMediator mediator) : ControllerBase
 
     /// <summary>Clears the probationary flag for a member. Caller must be a GroupAdmin.</summary>
     [HttpPatch("{slug}/members/{userId}/probation")]
-    public async Task<IActionResult> ClearProbation(string slug, string userId, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> ClearProbation(string slug, Guid userId, CancellationToken cancellationToken = default)
     {
         var result = await mediator.Send(new ClearProbationCommand(slug, userId, UserId), cancellationToken);
         return result.Code switch
@@ -285,7 +285,7 @@ public class GroupsController(IMediator mediator) : ControllerBase
     /// Respects all visibility settings — no PII leaked (T3, T12).
     /// </summary>
     [HttpGet("{slug}/members/{userId}")]
-    public async Task<IActionResult> GetMemberDetail(string slug, string userId, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetMemberDetail(string slug, Guid userId, CancellationToken cancellationToken = default)
     {
         var result = await mediator.Send(new GetMemberDetailQuery(UserId, slug, userId), cancellationToken);
         return result.Code switch

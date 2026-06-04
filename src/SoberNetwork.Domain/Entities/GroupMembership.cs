@@ -6,7 +6,7 @@ namespace SoberNetwork.Domain.Entities;
 public class GroupMembership
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-    public string UserId { get; set; } = string.Empty;
+    public Guid UserId { get; set; }
     public Guid GroupId { get; set; }
     public GroupRole Role { get; set; } = GroupRole.Member;
     public MemberStatus Status { get; set; } = MemberStatus.PendingApproval;
@@ -18,7 +18,7 @@ public class GroupMembership
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? DeletedAt { get; set; }           // soft remove — member history preserved (T12)
     public DateTime? ApprovedAt { get; set; }
-    public string? ApprovedByUserId { get; set; }
+    public Guid? ApprovedByUserId { get; set; }
 
     public ApplicationUser User { get; set; } = null!;
     public Group Group { get; set; } = null!;

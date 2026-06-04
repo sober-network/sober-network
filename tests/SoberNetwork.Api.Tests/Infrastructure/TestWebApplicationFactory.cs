@@ -84,7 +84,7 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
     public HttpClient CreateAnonymousClient() => CreateClient(ClientOptions);
 
     /// <summary>Creates an authenticated client for a regular member.</summary>
-    public HttpClient CreateAuthenticatedClient(string userId = "test-user-id")
+    public HttpClient CreateAuthenticatedClient(Guid userId = default)
     {
         var token = JwtTestHelper.GenerateToken(userId, false, TestJwtSecret, TestJwtIssuer, TestJwtAudience);
         var client = CreateAnonymousClient();
@@ -93,7 +93,7 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
     }
 
     /// <summary>Creates an authenticated client for a SuperAdmin.</summary>
-    public HttpClient CreateSuperAdminClient(string userId = "admin-user-id")
+    public HttpClient CreateSuperAdminClient(Guid userId = default)
     {
         var token = JwtTestHelper.GenerateToken(userId, true, TestJwtSecret, TestJwtIssuer, TestJwtAudience);
         var client = CreateAnonymousClient();

@@ -3,7 +3,7 @@ namespace SoberNetwork.Core.DTOs.Groups;
 /// <summary>Member information visible to other group members.</summary>
 public record MemberResponse(
     /// <summary>Unique identifier of the member.</summary>
-    string UserId,
+    Guid UserId,
     /// <summary>Display name visible within the group.</summary>
     string DisplayName,
     /// <summary>Role of the member within the group.</summary>

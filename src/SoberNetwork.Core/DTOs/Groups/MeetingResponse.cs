@@ -1,3 +1,5 @@
+using SoberNetwork.Domain.Enums;
+
 namespace SoberNetwork.Core.DTOs.Groups;
 
 /// <summary>Full meeting detail returned to authenticated group members. Includes Zoom credentials.</summary>
@@ -24,14 +26,34 @@ public record MeetingResponse(
     IReadOnlyList<string> Formats,
     /// <summary>Meeting language. Null = English.</summary>
     string? Language,
-    /// <summary>Physical location address.</summary>
+    /// <summary>InPerson, Online, or Hybrid.</summary>
+    MeetingType MeetingType,
+    /// <summary>Display name of the venue.</summary>
+    string? VenueName,
+    /// <summary>Legacy combined location/address string.</summary>
     string? Location,
-    /// <summary>Online meeting URL.</summary>
+    /// <summary>Street address.</summary>
+    string? Street,
+    /// <summary>City.</summary>
+    string? City,
+    /// <summary>State or province.</summary>
+    string? State,
+    /// <summary>ZIP or postal code.</summary>
+    string? PostalCode,
+    /// <summary>Country code.</summary>
+    string? Country,
+    /// <summary>GPS latitude.</summary>
+    double? Latitude,
+    /// <summary>GPS longitude.</summary>
+    double? Longitude,
+    /// <summary>Online meeting URL (member-visible only).</summary>
     string? ZoomLink,
-    /// <summary>Online meeting identifier.</summary>
+    /// <summary>Online meeting identifier (member-visible only).</summary>
     string? ZoomMeetingId,
-    /// <summary>Online meeting passcode.</summary>
+    /// <summary>Online meeting passcode (member-visible only).</summary>
     string? ZoomPasscode,
+    /// <summary>Public join URL (no embedded credentials).</summary>
+    string? PublicJoinUrl,
     /// <summary>Whether this meeting is currently active.</summary>
     bool IsActive,
     /// <summary>UTC timestamp when the meeting was created.</summary>

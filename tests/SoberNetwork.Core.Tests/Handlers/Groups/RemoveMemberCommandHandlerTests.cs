@@ -17,7 +17,7 @@ public class RemoveMemberCommandHandlerTests
     public async Task success_returns_ok()
     {
         // Arrange
-        var command = new RemoveMemberCommand("group-slug", "target-user-id", "admin-user-id");
+        var command = new RemoveMemberCommand("group-slug", Guid.Parse("00000000-0000-0000-0000-000000000002"), Guid.Parse("00000000-0000-0000-0000-000000000001"));
         _groupService
             .Setup(service => service.RemoveMemberAsync(command.Slug, command.TargetUserId, command.AdminUserId))
             .ReturnsAsync((true, (string?)null));
@@ -35,7 +35,7 @@ public class RemoveMemberCommandHandlerTests
     public async Task permission_error_returns_forbidden()
     {
         // Arrange
-        var command = new RemoveMemberCommand("group-slug", "target-user-id", "user-id");
+        var command = new RemoveMemberCommand("group-slug", Guid.Parse("00000000-0000-0000-0000-000000000002"), Guid.Parse("00000000-0000-0000-0000-000000000001"));
         const string error = "You do not have permission to remove members.";
 
         _groupService
@@ -55,7 +55,7 @@ public class RemoveMemberCommandHandlerTests
     public async Task other_error_returns_bad_request()
     {
         // Arrange
-        var command = new RemoveMemberCommand("group-slug", "target-user-id", "admin-user-id");
+        var command = new RemoveMemberCommand("group-slug", Guid.Parse("00000000-0000-0000-0000-000000000002"), Guid.Parse("00000000-0000-0000-0000-000000000001"));
         const string error = "Cannot remove the last group admin.";
 
         _groupService

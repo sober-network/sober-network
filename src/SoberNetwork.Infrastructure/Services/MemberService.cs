@@ -45,7 +45,7 @@ public class MemberService(
 
     // ── Own profile ────────────────────────────────────────────────────────────
 
-    public async Task<MemberProfileResponse?> GetMyProfileAsync(string userId)
+    public async Task<MemberProfileResponse?> GetMyProfileAsync(Guid userId)
     {
         var user = await userManager.Users
             .AsNoTracking()
@@ -54,9 +54,9 @@ public class MemberService(
     }
 
     public async Task<(MemberProfileResponse? Profile, string? Error)> UpdateProfileAsync(
-        string userId, UpdateProfileRequest request)
+        Guid userId, UpdateProfileRequest request)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null || user.DeletedAt != null) return (null, "User not found.");
 
         if (request.DisplayName != null) user.DisplayName = request.DisplayName;
@@ -71,9 +71,9 @@ public class MemberService(
         return (ToProfileResponse(user), null);
     }
 
-    public async Task<(bool Success, string? Error)> DeleteAccountAsync(string userId, string password)
+    public async Task<(bool Success, string? Error)> DeleteAccountAsync(Guid userId, string password)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null || user.DeletedAt != null) return (false, "User not found.");
 
         if (!await userManager.CheckPasswordAsync(user, password))
@@ -105,12 +105,12 @@ public class MemberService(
     // ── Credentials ────────────────────────────────────────────────────────────
 
     public async Task<(bool Success, string? Error)> ChangePasswordAsync(
-        string userId, ChangePasswordRequest request)
+        Guid userId, ChangePasswordRequest request)
     {
         if (request.NewPassword != request.ConfirmNewPassword)
             return (false, "New passwords do not match.");
 
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null || user.DeletedAt != null) return (false, "User not found.");
 
         var result = await userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
@@ -122,9 +122,9 @@ public class MemberService(
     }
 
     public async Task<(bool Success, string? Error)> ChangeEmailAsync(
-        string userId, ChangeEmailRequest request)
+        Guid userId, ChangeEmailRequest request)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null || user.DeletedAt != null) return (false, "User not found.");
 
         if (!await userManager.CheckPasswordAsync(user, request.CurrentPassword))
@@ -138,7 +138,7 @@ public class MemberService(
         // Store the pending email in a way the confirm endpoint can use it.
         // We encode both in the token — the confirmation endpoint calls ChangeEmailAsync(token, newEmail).
         // For now, send the token directly; frontend appends it to the confirmation URL.
-        var confirmLink = $"confirm-email-change?userId={Uri.EscapeDataString(userId)}&token={Uri.EscapeDataString(token)}&newEmail={Uri.EscapeDataString(request.NewEmail)}";
+        var confirmLink = $"confirm-email-change?userId={Uri.EscapeDataString(userId.ToString())}&token={Uri.EscapeDataString(token)}&newEmail={Uri.EscapeDataString(request.NewEmail)}";
 
         try
         {
@@ -156,12 +156,12 @@ public class MemberService(
 
     // ── Sobriety date ──────────────────────────────────────────────────────────
 
-    public async Task<(bool Success, string? Error)> SetSobrietyDateAsync(string userId, DateOnly date)
+    public async Task<(bool Success, string? Error)> SetSobrietyDateAsync(Guid userId, DateOnly date)
     {
         if (date > DateOnly.FromDateTime(DateTime.UtcNow))
             return (false, "Sobriety date cannot be in the future.");
 
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null || user.DeletedAt != null) return (false, "User not found.");
 
         user.SobrietyDate = date;
@@ -172,9 +172,9 @@ public class MemberService(
         return (true, null);
     }
 
-    public async Task<bool> RemoveSobrietyDateAsync(string userId)
+    public async Task<bool> RemoveSobrietyDateAsync(Guid userId)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null || user.DeletedAt != null) return false;
 
         user.SobrietyDate = null;
@@ -187,9 +187,9 @@ public class MemberService(
         return true;
     }
 
-    public async Task<bool> UpdateSobrietyVisibilityAsync(string userId, bool isDatePublic, bool isDaysPublic)
+    public async Task<bool> UpdateSobrietyVisibilityAsync(Guid userId, bool isDatePublic, bool isDaysPublic)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null || user.DeletedAt != null) return false;
 
         user.IsSobrietyDatePublic = isDatePublic;
@@ -204,9 +204,9 @@ public class MemberService(
 
     // ── Phone ──────────────────────────────────────────────────────────────────
 
-    public async Task<(bool Success, string? Error)> SetPhoneAsync(string userId, string phoneNumber)
+    public async Task<(bool Success, string? Error)> SetPhoneAsync(Guid userId, string phoneNumber)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null || user.DeletedAt != null) return (false, "User not found.");
 
         var result = await userManager.SetPhoneNumberAsync(user, phoneNumber);
@@ -219,9 +219,9 @@ public class MemberService(
         return (true, null);
     }
 
-    public async Task<bool> RemovePhoneAsync(string userId)
+    public async Task<bool> RemovePhoneAsync(Guid userId)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null || user.DeletedAt != null) return false;
 
         await userManager.SetPhoneNumberAsync(user, null);
@@ -232,7 +232,7 @@ public class MemberService(
     }
 
     public async Task<(bool Success, string? Error)> SetGroupPhoneVisibilityAsync(
-        string userId, string groupSlug, bool isShared)
+        Guid userId, string groupSlug, bool isShared)
     {
         var group = await db.Groups
             .AsNoTracking()
@@ -247,7 +247,7 @@ public class MemberService(
         if (membership == null) return (false, "You are not an active member of this group.");
 
         // Cannot share phone if none is set
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId.ToString());
         if (isShared && string.IsNullOrEmpty(user?.PhoneNumber))
             return (false, "Add a phone number before sharing it with a group.");
 
@@ -263,7 +263,7 @@ public class MemberService(
     // ── Group-scoped member views ──────────────────────────────────────────────
 
     public async Task<(IReadOnlyList<PhoneListEntryResponse>? List, string? Error)> GetGroupPhoneListAsync(
-        string requestingUserId, string groupSlug)
+        Guid requestingUserId, string groupSlug)
     {
         var group = await db.Groups
             .AsNoTracking()
@@ -298,7 +298,7 @@ public class MemberService(
     }
 
     public async Task<(MemberDetailResponse? Member, string? Error)> GetMemberInGroupContextAsync(
-        string requestingUserId, string groupSlug, string targetUserId)
+        Guid requestingUserId, string groupSlug, Guid targetUserId)
     {
         var group = await db.Groups
             .AsNoTracking()
@@ -389,7 +389,7 @@ public class MemberService(
         return result;
     }
 
-    public async Task<AdminMemberResponse?> GetUserByIdAsync(string targetUserId)
+    public async Task<AdminMemberResponse?> GetUserByIdAsync(Guid targetUserId)
     {
         var user = await userManager.Users
             .AsNoTracking()
@@ -427,12 +427,12 @@ public class MemberService(
         );
     }
 
-    public async Task<(bool Success, string? Error)> DeactivateUserAsync(string adminUserId, string targetUserId)
+    public async Task<(bool Success, string? Error)> DeactivateUserAsync(Guid adminUserId, Guid targetUserId)
     {
         if (adminUserId == targetUserId)
             return (false, "Use DELETE /api/members/me to deactivate your own account.");
 
-        var user = await userManager.FindByIdAsync(targetUserId);
+        var user = await userManager.FindByIdAsync(targetUserId.ToString());
         if (user == null) return (false, "User not found.");
         if (user.DeletedAt != null) return (false, "Account is already deactivated.");
 

@@ -18,7 +18,7 @@ public class ChangeMemberStatusCommandHandlerTests
     public async Task success_returns_ok()
     {
         // Arrange
-        var command = new ChangeMemberStatusCommand("group-slug", "target-user-id", "admin-user-id", MemberStatus.Suspended);
+        var command = new ChangeMemberStatusCommand("group-slug", Guid.Parse("00000000-0000-0000-0000-000000000002"), Guid.Parse("00000000-0000-0000-0000-000000000001"), MemberStatus.Suspended);
         _groupService
             .Setup(service => service.ChangeMemberStatusAsync(command.Slug, command.TargetUserId, command.AdminUserId, command.NewStatus))
             .ReturnsAsync((true, (string?)null));
@@ -36,7 +36,7 @@ public class ChangeMemberStatusCommandHandlerTests
     public async Task permission_error_returns_forbidden()
     {
         // Arrange
-        var command = new ChangeMemberStatusCommand("group-slug", "target-user-id", "user-id", MemberStatus.Suspended);
+        var command = new ChangeMemberStatusCommand("group-slug", Guid.Parse("00000000-0000-0000-0000-000000000002"), Guid.Parse("00000000-0000-0000-0000-000000000001"), MemberStatus.Suspended);
         const string error = "You do not have permission to change member status.";
 
         _groupService
@@ -56,7 +56,7 @@ public class ChangeMemberStatusCommandHandlerTests
     public async Task other_error_returns_bad_request()
     {
         // Arrange
-        var command = new ChangeMemberStatusCommand("group-slug", "target-user-id", "admin-user-id", MemberStatus.Banned);
+        var command = new ChangeMemberStatusCommand("group-slug", Guid.Parse("00000000-0000-0000-0000-000000000002"), Guid.Parse("00000000-0000-0000-0000-000000000001"), MemberStatus.Banned);
         const string error = "Cannot ban the last group admin.";
 
         _groupService

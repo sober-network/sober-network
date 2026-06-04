@@ -3,4 +3,4 @@ using SoberNetwork.Core.Results;
 
 namespace SoberNetwork.Core.Commands.Groups;
 
-public record ApproveMemberCommand(string Slug, string TargetUserId, string AdminUserId) : IRequest<CommandResult>;
+public record ApproveMemberCommand(string Slug, Guid TargetUserId, Guid AdminUserId) : IRequest<CommandResult>;

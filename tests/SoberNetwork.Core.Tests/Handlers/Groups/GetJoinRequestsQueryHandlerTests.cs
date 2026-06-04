@@ -19,9 +19,9 @@ public class GetJoinRequestsQueryHandlerTests
     public async Task success_returns_ok_with_data()
     {
         // Arrange
-        var query = new GetJoinRequestsQuery("group-slug", "admin-user-id", 1, 25);
+        var query = new GetJoinRequestsQuery("group-slug", Guid.Parse("00000000-0000-0000-0000-000000000001"), 1, 25);
         var response = new PagedResponse<JoinRequestResponse>(
-            [new JoinRequestResponse("member-id", "Jane D.", DateTime.UtcNow)],
+            [new JoinRequestResponse(Guid.Parse("00000000-0000-0000-0000-000000000003"), "Jane D.", DateTime.UtcNow)],
             1,
             25,
             1);
@@ -44,7 +44,7 @@ public class GetJoinRequestsQueryHandlerTests
     public async Task permission_error_returns_forbidden()
     {
         // Arrange
-        var query = new GetJoinRequestsQuery("group-slug", "user-id", 1, 25);
+        var query = new GetJoinRequestsQuery("group-slug", Guid.Parse("00000000-0000-0000-0000-000000000001"), 1, 25);
         const string error = "You do not have permission to view join requests.";
 
         _groupService
@@ -65,7 +65,7 @@ public class GetJoinRequestsQueryHandlerTests
     public async Task other_error_returns_not_found()
     {
         // Arrange
-        var query = new GetJoinRequestsQuery("missing-group", "user-id", 1, 25);
+        var query = new GetJoinRequestsQuery("missing-group", Guid.Parse("00000000-0000-0000-0000-000000000001"), 1, 25);
         const string error = "Group not found.";
 
         _groupService

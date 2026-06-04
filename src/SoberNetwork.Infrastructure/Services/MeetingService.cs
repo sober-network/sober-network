@@ -15,7 +15,7 @@ public sealed class MeetingService(AppDbContext db) : IMeetingService
 {
     /// <inheritdoc/>
     public async Task<(IReadOnlyList<MeetingResponse>? Meetings, string? Error)> GetGroupMeetingsAsync(
-        string slug, string userId, CancellationToken ct = default)
+        string slug, Guid userId, CancellationToken ct = default)
     {
         var group = await db.Groups
             .AsNoTracking()
@@ -38,7 +38,9 @@ public sealed class MeetingService(AppDbContext db) : IMeetingService
             .Select(m => new MeetingResponse(
                 m.Id, m.Name, m.Description, m.IsRecurring, m.DayOfWeek, m.Time,
                 m.DurationMinutes, m.OccursOn, m.IsOpen, m.Formats, m.Language,
-                m.Location, m.ZoomLink, m.ZoomMeetingId, m.ZoomPasscode, m.IsActive, m.CreatedAt))
+                m.MeetingType, m.VenueName, m.Location, m.Street, m.City, m.State,
+                m.PostalCode, m.Country, m.Latitude, m.Longitude,
+                m.ZoomLink, m.ZoomMeetingId, m.ZoomPasscode, m.PublicJoinUrl, m.IsActive, m.CreatedAt))
             .ToListAsync(ct);
 
         return (meetings, null);
@@ -46,7 +48,7 @@ public sealed class MeetingService(AppDbContext db) : IMeetingService
 
     /// <inheritdoc/>
     public async Task<(IReadOnlyList<AdminMeetingResponse>? Meetings, string? Error)> GetAdminMeetingsAsync(
-        string slug, string userId, CancellationToken ct = default)
+        string slug, Guid userId, CancellationToken ct = default)
     {
         var group = await db.Groups
             .AsNoTracking()
@@ -75,7 +77,7 @@ public sealed class MeetingService(AppDbContext db) : IMeetingService
 
     /// <inheritdoc/>
     public async Task<(AdminMeetingResponse? Meeting, string? Error)> CreateMeetingAsync(
-        string slug, CreateMeetingRequest request, string userId, CancellationToken ct = default)
+        string slug, CreateMeetingRequest request, Guid userId, CancellationToken ct = default)
     {
         var group = await db.Groups
             .AsNoTracking()
@@ -107,10 +109,20 @@ public sealed class MeetingService(AppDbContext db) : IMeetingService
             IsOpen = request.IsOpen,
             Formats = request.Formats?.ToList() ?? [],
             Language = NullIfWhiteSpace(request.Language),
+            MeetingType = request.MeetingType,
+            VenueName = NullIfWhiteSpace(request.VenueName),
             Location = NullIfWhiteSpace(request.Location),
+            Street = NullIfWhiteSpace(request.Street),
+            City = NullIfWhiteSpace(request.City),
+            State = NullIfWhiteSpace(request.State),
+            PostalCode = NullIfWhiteSpace(request.PostalCode),
+            Country = NullIfWhiteSpace(request.Country),
+            Latitude = request.Latitude,
+            Longitude = request.Longitude,
             ZoomLink = NullIfWhiteSpace(request.ZoomLink),
             ZoomMeetingId = NullIfWhiteSpace(request.ZoomMeetingId),
             ZoomPasscode = NullIfWhiteSpace(request.ZoomPasscode),
+            PublicJoinUrl = NullIfWhiteSpace(request.PublicJoinUrl),
             IsActive = true,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -124,7 +136,7 @@ public sealed class MeetingService(AppDbContext db) : IMeetingService
 
     /// <inheritdoc/>
     public async Task<(AdminMeetingResponse? Meeting, string? Error)> UpdateMeetingAsync(
-        string slug, Guid meetingId, UpdateMeetingRequest request, string userId, CancellationToken ct = default)
+        string slug, Guid meetingId, UpdateMeetingRequest request, Guid userId, CancellationToken ct = default)
     {
         var group = await db.Groups
             .AsNoTracking()
@@ -156,10 +168,20 @@ public sealed class MeetingService(AppDbContext db) : IMeetingService
         if (request.IsOpen != null) meeting.IsOpen = request.IsOpen.Value;
         if (request.Formats != null) meeting.Formats = request.Formats.ToList();
         if (request.Language != null) meeting.Language = NullIfWhiteSpace(request.Language);
+        if (request.MeetingType != null) meeting.MeetingType = request.MeetingType.Value;
+        if (request.VenueName != null) meeting.VenueName = NullIfWhiteSpace(request.VenueName);
         if (request.Location != null) meeting.Location = NullIfWhiteSpace(request.Location);
+        if (request.Street != null) meeting.Street = NullIfWhiteSpace(request.Street);
+        if (request.City != null) meeting.City = NullIfWhiteSpace(request.City);
+        if (request.State != null) meeting.State = NullIfWhiteSpace(request.State);
+        if (request.PostalCode != null) meeting.PostalCode = NullIfWhiteSpace(request.PostalCode);
+        if (request.Country != null) meeting.Country = NullIfWhiteSpace(request.Country);
+        if (request.Latitude != null) meeting.Latitude = request.Latitude;
+        if (request.Longitude != null) meeting.Longitude = request.Longitude;
         if (request.ZoomLink != null) meeting.ZoomLink = NullIfWhiteSpace(request.ZoomLink);
         if (request.ZoomMeetingId != null) meeting.ZoomMeetingId = NullIfWhiteSpace(request.ZoomMeetingId);
         if (request.ZoomPasscode != null) meeting.ZoomPasscode = NullIfWhiteSpace(request.ZoomPasscode);
+        if (request.PublicJoinUrl != null) meeting.PublicJoinUrl = NullIfWhiteSpace(request.PublicJoinUrl);
         if (request.IsActive != null) meeting.IsActive = request.IsActive.Value;
         meeting.UpdatedAt = DateTime.UtcNow;
 
@@ -170,7 +192,7 @@ public sealed class MeetingService(AppDbContext db) : IMeetingService
 
     /// <inheritdoc/>
     public async Task<(bool Success, string? Error)> DeleteMeetingAsync(
-        string slug, Guid meetingId, string userId, CancellationToken ct = default)
+        string slug, Guid meetingId, Guid userId, CancellationToken ct = default)
     {
         var group = await db.Groups
             .AsNoTracking()
@@ -201,8 +223,106 @@ public sealed class MeetingService(AppDbContext db) : IMeetingService
     private static AdminMeetingResponse ToAdminResponse(Meeting m) => new(
         m.Id, m.Name, m.Description, m.Notes, m.IsRecurring, m.DayOfWeek, m.Time,
         m.DurationMinutes, m.OccursOn, m.IsOpen, m.Formats, m.Language,
-        m.Location, m.ZoomLink, m.ZoomMeetingId, m.ZoomPasscode, m.IsActive, m.CreatedAt, m.UpdatedAt);
+        m.MeetingType, m.VenueName, m.Location, m.Street, m.City, m.State,
+        m.PostalCode, m.Country, m.Latitude, m.Longitude,
+        m.ZoomLink, m.ZoomMeetingId, m.ZoomPasscode, m.PublicJoinUrl, m.IsActive, m.CreatedAt, m.UpdatedAt);
 
     private static string? NullIfWhiteSpace(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<PublicMeetingSearchResponse>> SearchPublicMeetingsAsync(
+        int[]? days,
+        TimeBlock? timeBlock,
+        string[]? formats,
+        MeetingType? meetingType,
+        bool? isOpen,
+        double? latitude,
+        double? longitude,
+        double? radiusMiles,
+        CancellationToken ct = default)
+    {
+        var radius = radiusMiles ?? 25.0;
+
+        var query = db.Meetings
+            .AsNoTracking()
+            .Include(m => m.Group)
+            .Where(m =>
+                m.DeletedAt == null &&
+                m.IsActive &&
+                m.Group.DeletedAt == null &&
+                m.Group.IsActive &&
+                m.Group.IsPublic);
+
+        if (days?.Length > 0)
+            query = query.Where(m => m.DayOfWeek != null && days.Contains(m.DayOfWeek.Value));
+
+        if (timeBlock.HasValue)
+        {
+            query = timeBlock.Value switch
+            {
+                TimeBlock.Morning   => query.Where(m => string.Compare(m.Time, "06:00") >= 0 && string.Compare(m.Time, "12:00") < 0),
+                TimeBlock.Afternoon => query.Where(m => string.Compare(m.Time, "12:00") >= 0 && string.Compare(m.Time, "17:00") < 0),
+                TimeBlock.Evening   => query.Where(m => string.Compare(m.Time, "17:00") >= 0 && string.Compare(m.Time, "21:00") < 0),
+                TimeBlock.Night     => query.Where(m => string.Compare(m.Time, "21:00") >= 0 || string.Compare(m.Time, "06:00") < 0),
+                _ => query
+            };
+        }
+
+        if (formats?.Length > 0)
+            query = query.Where(m => m.Formats.Any(f => formats.Contains(f)));
+
+        if (meetingType.HasValue)
+            query = query.Where(m => m.MeetingType == meetingType.Value);
+
+        if (isOpen.HasValue)
+            query = query.Where(m => m.IsOpen == isOpen.Value);
+
+        // Apply location radius filter when lat/lon provided and meeting has coordinates
+        if (latitude.HasValue && longitude.HasValue)
+        {
+            var lat = latitude.Value;
+            var lon = longitude.Value;
+            // Haversine approximation: 1 degree latitude ≈ 69 miles; 1 degree longitude ≈ 69 * cos(lat) miles
+            var latDelta = radius / 69.0;
+            var lonDelta = radius / (69.0 * Math.Cos(lat * Math.PI / 180.0));
+
+            query = query.Where(m =>
+                m.Latitude != null && m.Longitude != null &&
+                m.Latitude >= lat - latDelta && m.Latitude <= lat + latDelta &&
+                m.Longitude >= lon - lonDelta && m.Longitude <= lon + lonDelta);
+        }
+
+        var meetings = await query
+            .OrderBy(m => m.DayOfWeek)
+            .ThenBy(m => m.Time)
+            .ThenBy(m => m.Name)
+            .ToListAsync(ct);
+
+        return meetings.Select(m =>
+        {
+            double? distanceMiles = null;
+            if (latitude.HasValue && longitude.HasValue && m.Latitude.HasValue && m.Longitude.HasValue)
+                distanceMiles = HaversineDistance(latitude.Value, longitude.Value, m.Latitude.Value, m.Longitude.Value);
+
+            return new PublicMeetingSearchResponse(
+                m.Id, m.Name, m.Description,
+                m.Group.Name, m.Group.Slug,
+                m.MeetingType, m.IsRecurring, m.DayOfWeek, m.Time, m.DurationMinutes, m.OccursOn,
+                m.IsOpen, m.Formats, m.Language,
+                m.VenueName, m.Location, m.Street, m.City, m.State, m.PostalCode, m.Country,
+                m.Latitude, m.Longitude, m.PublicJoinUrl, distanceMiles);
+        }).ToList();
+    }
+
+    private static double HaversineDistance(double lat1, double lon1, double lat2, double lon2)
+    {
+        const double R = 3958.8; // Earth radius in miles
+        var dLat = (lat2 - lat1) * Math.PI / 180.0;
+        var dLon = (lon2 - lon1) * Math.PI / 180.0;
+        var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                Math.Cos(lat1 * Math.PI / 180.0) * Math.Cos(lat2 * Math.PI / 180.0) *
+                Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+        return R * 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+    }
 }

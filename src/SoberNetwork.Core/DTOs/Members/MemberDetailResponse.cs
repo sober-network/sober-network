@@ -3,7 +3,7 @@ namespace SoberNetwork.Core.DTOs.Members;
 /// <summary>Group-scoped view of another member that respects all visibility settings.</summary>
 public record MemberDetailResponse(
     /// <summary>Unique identifier of the member.</summary>
-    string UserId,
+    Guid UserId,
     /// <summary>Display name visible to other group members.</summary>
     string DisplayName,
     /// <summary>Member role within the group.</summary>

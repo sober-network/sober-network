@@ -17,7 +17,7 @@ public class DeleteAccountCommandHandlerTests
     public async Task success_returns_ok()
     {
         // Arrange
-        var command = new DeleteAccountCommand("user-id", "current-password");
+        var command = new DeleteAccountCommand(Guid.Parse("00000000-0000-0000-0000-000000000001"), "current-password");
         _memberService
             .Setup(service => service.DeleteAccountAsync(command.UserId, command.Password))
             .ReturnsAsync((true, (string?)null));
@@ -35,7 +35,7 @@ public class DeleteAccountCommandHandlerTests
     public async Task incorrect_password_error_returns_unauthorized()
     {
         // Arrange
-        var command = new DeleteAccountCommand("user-id", "bad-password");
+        var command = new DeleteAccountCommand(Guid.Parse("00000000-0000-0000-0000-000000000001"), "bad-password");
         const string error = "Incorrect password.";
 
         _memberService
@@ -55,7 +55,7 @@ public class DeleteAccountCommandHandlerTests
     public async Task other_error_returns_bad_request()
     {
         // Arrange
-        var command = new DeleteAccountCommand("user-id", "current-password");
+        var command = new DeleteAccountCommand(Guid.Parse("00000000-0000-0000-0000-000000000001"), "current-password");
         const string error = "Account could not be deleted.";
 
         _memberService

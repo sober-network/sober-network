@@ -3,4 +3,4 @@ using SoberNetwork.Core.Results;
 
 namespace SoberNetwork.Core.Commands.Members;
 
-public record RemoveSobrietyDateCommand(string UserId) : IRequest<CommandResult>;
+public record RemoveSobrietyDateCommand(Guid UserId) : IRequest<CommandResult>;

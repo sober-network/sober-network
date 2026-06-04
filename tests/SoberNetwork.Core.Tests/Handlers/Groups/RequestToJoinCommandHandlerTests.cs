@@ -17,7 +17,7 @@ public class RequestToJoinCommandHandlerTests
     public async Task success_with_auto_approved_returns_ok_true()
     {
         // Arrange
-        var command = new RequestToJoinCommand("group-slug", "user-id");
+        var command = new RequestToJoinCommand("group-slug", Guid.Parse("00000000-0000-0000-0000-000000000001"));
         _groupService
             .Setup(service => service.RequestToJoinAsync(command.Slug, command.UserId))
             .ReturnsAsync((true, true, (string?)null));
@@ -36,7 +36,7 @@ public class RequestToJoinCommandHandlerTests
     public async Task success_without_auto_approved_returns_ok_false()
     {
         // Arrange
-        var command = new RequestToJoinCommand("group-slug", "user-id");
+        var command = new RequestToJoinCommand("group-slug", Guid.Parse("00000000-0000-0000-0000-000000000001"));
         _groupService
             .Setup(service => service.RequestToJoinAsync(command.Slug, command.UserId))
             .ReturnsAsync((true, false, (string?)null));
@@ -55,7 +55,7 @@ public class RequestToJoinCommandHandlerTests
     public async Task already_a_member_error_returns_conflict()
     {
         // Arrange
-        var command = new RequestToJoinCommand("group-slug", "user-id");
+        var command = new RequestToJoinCommand("group-slug", Guid.Parse("00000000-0000-0000-0000-000000000001"));
         const string error = "User is already a member.";
         _groupService
             .Setup(service => service.RequestToJoinAsync(command.Slug, command.UserId))
@@ -75,7 +75,7 @@ public class RequestToJoinCommandHandlerTests
     public async Task other_error_returns_not_found()
     {
         // Arrange
-        var command = new RequestToJoinCommand("missing-group", "user-id");
+        var command = new RequestToJoinCommand("missing-group", Guid.Parse("00000000-0000-0000-0000-000000000001"));
         const string error = "Group not found.";
         _groupService
             .Setup(service => service.RequestToJoinAsync(command.Slug, command.UserId))

@@ -37,7 +37,7 @@ public class AuthController(IMediator mediator) : ControllerBase
     // GET is required here (not POST) because confirmation links are clicked in email clients,
     // which always issue GET requests. This is a documented exception to the GET-never-mutates rule.
     [HttpGet("confirm-email")]
-    public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> ConfirmEmail([FromQuery] Guid userId, [FromQuery] string token, CancellationToken cancellationToken = default)
     {
         var result = await mediator.Send(new ConfirmEmailCommand(userId, token, Ip(), Ua()), cancellationToken);
         return result.Code switch

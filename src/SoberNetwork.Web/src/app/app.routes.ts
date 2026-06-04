@@ -12,6 +12,11 @@ export const routes: Routes = [
     path: 'group/:slug',
     loadComponent: () => import('./features/groups/group-public/group-public.component').then(m => m.GroupPublicComponent)
   },
+  {
+    // Public meeting finder — no auth required (T11/T12 reviewed, meeting schedules only)
+    path: 'meetings',
+    loadComponent: () => import('./features/meetings/meeting-finder/meeting-finder.component').then(m => m.MeetingFinderComponent)
+  },
 
   // ── Auth ─────────────────────────────────────────────────────────────────────
   {

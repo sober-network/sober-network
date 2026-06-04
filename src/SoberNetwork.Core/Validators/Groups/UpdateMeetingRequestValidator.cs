@@ -1,5 +1,6 @@
 using FluentValidation;
 using SoberNetwork.Core.DTOs.Groups;
+using SoberNetwork.Domain.Enums;
 
 namespace SoberNetwork.Core.Validators.Groups;
 
@@ -29,10 +30,30 @@ public class UpdateMeetingRequestValidator : AbstractValidator<UpdateMeetingRequ
             .WithMessage("'{PropertyValue}' is not a valid meeting format. Valid values: Discussion, Speaker, StepStudy, BigBook, Beginners.")
             .When(x => x.Formats is not null);
         RuleFor(x => x.Language).MaximumLength(100);
+        RuleFor(x => x.VenueName).MaximumLength(200);
         RuleFor(x => x.Location).MaximumLength(500);
+        RuleFor(x => x.Street).MaximumLength(300);
+        RuleFor(x => x.City).MaximumLength(100);
+        RuleFor(x => x.State).MaximumLength(100);
+        RuleFor(x => x.PostalCode).MaximumLength(20);
+        RuleFor(x => x.Country).MaximumLength(100);
+        RuleFor(x => x.Latitude).InclusiveBetween(-90.0, 90.0).When(x => x.Latitude.HasValue);
+        RuleFor(x => x.Longitude).InclusiveBetween(-180.0, 180.0).When(x => x.Longitude.HasValue);
         RuleFor(x => x.ZoomLink).MaximumLength(500);
         RuleFor(x => x.ZoomMeetingId).MaximumLength(100);
         RuleFor(x => x.ZoomPasscode).MaximumLength(100);
+        RuleFor(x => x.PublicJoinUrl)
+            .MaximumLength(500)
+            .Must(url => url is null || Uri.TryCreate(url, UriKind.Absolute, out _))
+            .WithMessage("PublicJoinUrl must be a valid absolute URL.")
+            .When(x => x.PublicJoinUrl is not null);
+
+        // MeetingType invariants when type is being set (only validate when MeetingType is provided).
+        When(x => x.MeetingType == MeetingType.Online || x.MeetingType == MeetingType.Hybrid, () =>
+        {
+            RuleFor(x => x.PublicJoinUrl)
+                .NotEmpty().WithMessage("PublicJoinUrl is required when setting meeting type to Online or Hybrid.");
+        });
 
         // When IsRecurring is being changed, enforce co-field requirements.
         When(x => x.IsRecurring == true, () =>

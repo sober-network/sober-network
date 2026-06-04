@@ -18,7 +18,7 @@ public class ChangePasswordCommandHandlerTests
     public async Task success_returns_ok()
     {
         // Arrange
-        var command = new ChangePasswordCommand("user-id", new ChangePasswordRequest("current-password", "NewPassword1!", "NewPassword1!"));
+        var command = new ChangePasswordCommand(Guid.Parse("00000000-0000-0000-0000-000000000001"), new ChangePasswordRequest("current-password", "NewPassword1!", "NewPassword1!"));
         _memberService
             .Setup(service => service.ChangePasswordAsync(command.UserId, command.Request))
             .ReturnsAsync((true, (string?)null));
@@ -36,7 +36,7 @@ public class ChangePasswordCommandHandlerTests
     public async Task match_error_returns_bad_request()
     {
         // Arrange
-        var command = new ChangePasswordCommand("user-id", new ChangePasswordRequest("current-password", "NewPassword1!", "DifferentPassword1!"));
+        var command = new ChangePasswordCommand(Guid.Parse("00000000-0000-0000-0000-000000000001"), new ChangePasswordRequest("current-password", "NewPassword1!", "DifferentPassword1!"));
         const string error = "New password and confirmation do not match.";
 
         _memberService
@@ -56,7 +56,7 @@ public class ChangePasswordCommandHandlerTests
     public async Task non_match_error_returns_unauthorized()
     {
         // Arrange
-        var command = new ChangePasswordCommand("user-id", new ChangePasswordRequest("bad-password", "NewPassword1!", "NewPassword1!"));
+        var command = new ChangePasswordCommand(Guid.Parse("00000000-0000-0000-0000-000000000001"), new ChangePasswordRequest("bad-password", "NewPassword1!", "NewPassword1!"));
         const string error = "Incorrect current password.";
 
         _memberService

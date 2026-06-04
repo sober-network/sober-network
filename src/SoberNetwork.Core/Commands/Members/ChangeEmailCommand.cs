@@ -4,4 +4,4 @@ using SoberNetwork.Core.Results;
 
 namespace SoberNetwork.Core.Commands.Members;
 
-public record ChangeEmailCommand(string UserId, ChangeEmailRequest Request) : IRequest<CommandResult>;
+public record ChangeEmailCommand(Guid UserId, ChangeEmailRequest Request) : IRequest<CommandResult>;

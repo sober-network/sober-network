@@ -19,7 +19,7 @@ public class UpdateGroupCommandHandlerTests
     {
         // Arrange
         var request = new UpdateGroupRequest("Updated Group", null, null, null, null);
-        var command = new UpdateGroupCommand("group-slug", request, "admin-user-id");
+        var command = new UpdateGroupCommand("group-slug", request, Guid.Parse("00000000-0000-0000-0000-000000000001"));
         var response = new GroupResponse(Guid.NewGuid(), "Updated Group", "group-slug", null, null, true, true, true, 5, "GroupAdmin", DateTime.UtcNow, []);
 
         _groupService
@@ -41,7 +41,7 @@ public class UpdateGroupCommandHandlerTests
     {
         // Arrange
         var request = new UpdateGroupRequest("Updated Group", null, null, null, null);
-        var command = new UpdateGroupCommand("group-slug", request, "user-id");
+        var command = new UpdateGroupCommand("group-slug", request, Guid.Parse("00000000-0000-0000-0000-000000000001"));
         const string error = "You do not have permission to update this group.";
 
         _groupService
@@ -63,7 +63,7 @@ public class UpdateGroupCommandHandlerTests
     {
         // Arrange
         var request = new UpdateGroupRequest("Updated Group", null, null, null, null);
-        var command = new UpdateGroupCommand("missing-group", request, "admin-user-id");
+        var command = new UpdateGroupCommand("missing-group", request, Guid.Parse("00000000-0000-0000-0000-000000000001"));
         const string error = "Group not found.";
 
         _groupService

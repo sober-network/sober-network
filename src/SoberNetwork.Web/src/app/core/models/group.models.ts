@@ -4,9 +4,12 @@ export type MembershipStatus = 'Active' | 'Probationary' | 'Suspended' | 'Banned
 export type MemberRole = 'Member' | 'GroupAdmin';
 
 export type MeetingFormat = 'Discussion' | 'Speaker' | 'StepStudy' | 'BigBook' | 'Beginners';
+export enum MeetingType { InPerson = 0, Online = 1, Hybrid = 2 }
+export enum TimeBlock { Morning = 0, Afternoon = 1, Evening = 2, Night = 3 }
 
 export const MEETING_FORMATS: MeetingFormat[] = ['Discussion', 'Speaker', 'StepStudy', 'BigBook', 'Beginners'];
 export const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+export const DAY_ABBR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 // ── Meeting DTOs ──────────────────────────────────────────────────────────────
 
@@ -21,10 +24,26 @@ export interface PublicMeetingResponse {
   durationMinutes: number;
   occursOn: string | null;        // ISO date for one-off meetings
   isOpen: boolean;
-  formats: string[];            // array of meeting format tags
+  formats: string[];
   language: string | null;
+  meetingType: MeetingType;
+  venueName: string | null;
   location: string | null;
-  isActive: boolean;
+  street: string | null;
+  city: string | null;
+  state: string | null;
+  postalCode: string | null;
+  country: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  publicJoinUrl: string | null;
+}
+
+/** Cross-group public meeting finder result. Includes group info and optional distance. No ZoomLink/Notes. */
+export interface PublicMeetingSearchResponse extends PublicMeetingResponse {
+  groupName: string;
+  groupSlug: string;
+  distanceMiles: number | null;
 }
 
 /** Member-facing meeting detail. Includes Zoom credentials. No admin Notes. */
@@ -32,6 +51,7 @@ export interface MeetingResponse extends PublicMeetingResponse {
   zoomLink: string | null;
   zoomMeetingId: string | null;
   zoomPasscode: string | null;
+  isActive: boolean;
   createdAt: string;
 }
 
@@ -53,10 +73,20 @@ export interface CreateMeetingRequest {
   isOpen?: boolean;
   formats?: string[];
   language?: string | null;
+  meetingType?: MeetingType;
+  venueName?: string | null;
   location?: string | null;
+  street?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postalCode?: string | null;
+  country?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   zoomLink?: string | null;
   zoomMeetingId?: string | null;
   zoomPasscode?: string | null;
+  publicJoinUrl?: string | null;
 }
 
 export interface UpdateMeetingRequest {
@@ -71,12 +101,54 @@ export interface UpdateMeetingRequest {
   isOpen?: boolean;
   formats?: string[];
   language?: string | null;
+  meetingType?: MeetingType;
+  venueName?: string | null;
   location?: string | null;
+  street?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postalCode?: string | null;
+  country?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   zoomLink?: string | null;
   zoomMeetingId?: string | null;
   zoomPasscode?: string | null;
+  publicJoinUrl?: string | null;
   isActive?: boolean;
 }
+
+/** Search parameters for the public meeting finder. */
+export interface MeetingSearchParams {
+  days?: number[];
+  timeBlock?: TimeBlock;
+  formats?: string[];
+  meetingType?: MeetingType;
+  isOpen?: boolean;
+  lat?: number;
+  lon?: number;
+  radiusMiles?: number;
+}
+
+/** Mailing address — opt-in, used for chip mailing and meeting finder default. Never public (T3). */
+export interface MailingAddressResponse {
+  mailingStreet: string | null;
+  mailingCity: string | null;
+  mailingState: string | null;
+  mailingPostalCode: string | null;
+  mailingCountry: string | null;
+  mailingLatitude: number | null;
+  mailingLongitude: number | null;
+}
+
+export interface UpdateMailingAddressRequest {
+  mailingStreet?: string | null;
+  mailingCity?: string | null;
+  mailingState?: string | null;
+  mailingPostalCode?: string | null;
+  mailingCountry?: string | null;
+}
+
 
 // ── Group DTOs ────────────────────────────────────────────────────────────────
 

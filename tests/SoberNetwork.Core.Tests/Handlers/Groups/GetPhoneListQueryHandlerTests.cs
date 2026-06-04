@@ -18,8 +18,8 @@ public class GetPhoneListQueryHandlerTests
     public async Task success_returns_ok_with_data()
     {
         // Arrange
-        var query = new GetPhoneListQuery("user-id", "group-slug");
-        IReadOnlyList<PhoneListEntryResponse> response = [new PhoneListEntryResponse("member-id", "John D.", "555-0100")];
+        var query = new GetPhoneListQuery(Guid.Parse("00000000-0000-0000-0000-000000000001"), "group-slug");
+        IReadOnlyList<PhoneListEntryResponse> response = [new PhoneListEntryResponse(Guid.Parse("00000000-0000-0000-0000-000000000003"), "John D.", "555-0100")];
 
         _memberService
             .Setup(service => service.GetGroupPhoneListAsync(query.UserId, query.Slug))
@@ -39,7 +39,7 @@ public class GetPhoneListQueryHandlerTests
     public async Task not_a_member_error_returns_forbidden()
     {
         // Arrange
-        var query = new GetPhoneListQuery("user-id", "group-slug");
+        var query = new GetPhoneListQuery(Guid.Parse("00000000-0000-0000-0000-000000000001"), "group-slug");
         const string error = "You are not a member of this group.";
 
         _memberService
@@ -60,7 +60,7 @@ public class GetPhoneListQueryHandlerTests
     public async Task other_error_returns_not_found()
     {
         // Arrange
-        var query = new GetPhoneListQuery("user-id", "missing-group");
+        var query = new GetPhoneListQuery(Guid.Parse("00000000-0000-0000-0000-000000000001"), "missing-group");
         const string error = "Group not found.";
 
         _memberService

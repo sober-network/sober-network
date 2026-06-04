@@ -35,7 +35,7 @@ public class SuperAdminForbiddenTests : IClassFixture<TestWebApplicationFactory>
     public async Task get_user_by_id_returns_403_for_regular_user()
     {
         // Act
-        var response = await _regularClient.GetAsync("/api/members/some-user");
+        var response = await _regularClient.GetAsync("/api/members/00000000-0000-0000-0000-000000000099");
 
         // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
@@ -45,7 +45,7 @@ public class SuperAdminForbiddenTests : IClassFixture<TestWebApplicationFactory>
     public async Task deactivate_user_returns_403_for_regular_user()
     {
         // Act
-        var response = await _regularClient.PatchAsync("/api/members/some-user/deactivate", null);
+        var response = await _regularClient.PatchAsync("/api/members/00000000-0000-0000-0000-000000000099/deactivate", null);
 
         // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);

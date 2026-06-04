@@ -11,7 +11,8 @@ namespace SoberNetwork.Api.Tests.Security;
 
 public class CrossGroupAccessTests
 {
-    private const string OutsiderUserId = "outsider-user-id";
+    private static readonly Guid OutsiderUserId = Guid.Parse("00000000-0000-0000-0000-000000000099");
+    private static readonly Guid SomeMemberId   = Guid.Parse("00000000-0000-0000-0000-000000000098");
     private const string GroupSlug = "group-alpha";
 
     private static TestWebApplicationFactory CreateFactory()
@@ -35,7 +36,7 @@ public class CrossGroupAccessTests
             .ReturnsAsync(((IReadOnlyList<PhoneListEntryResponse>?)null, "You are not a member of this group."));
 
         factory.MemberService
-            .Setup(service => service.GetMemberInGroupContextAsync(OutsiderUserId, GroupSlug, It.IsAny<string>()))
+            .Setup(service => service.GetMemberInGroupContextAsync(OutsiderUserId, GroupSlug, It.IsAny<Guid>()))
             .ReturnsAsync(((MemberDetailResponse?)null, "You are not a member of this group."));
 
         factory.MemberService
@@ -43,27 +44,27 @@ public class CrossGroupAccessTests
             .ReturnsAsync((false, "You are not an active member of this group."));
 
         factory.GroupService
-            .Setup(service => service.ApproveMemberAsync(GroupSlug, It.IsAny<string>(), OutsiderUserId))
+            .Setup(service => service.ApproveMemberAsync(GroupSlug, It.IsAny<Guid>(), OutsiderUserId))
             .ReturnsAsync((false, "You do not have permission to approve members."));
 
         factory.GroupService
-            .Setup(service => service.RejectMemberAsync(GroupSlug, It.IsAny<string>(), OutsiderUserId))
+            .Setup(service => service.RejectMemberAsync(GroupSlug, It.IsAny<Guid>(), OutsiderUserId))
             .ReturnsAsync((false, "You do not have permission to reject members."));
 
         factory.GroupService
-            .Setup(service => service.RemoveMemberAsync(GroupSlug, It.IsAny<string>(), OutsiderUserId))
+            .Setup(service => service.RemoveMemberAsync(GroupSlug, It.IsAny<Guid>(), OutsiderUserId))
             .ReturnsAsync((false, "You do not have permission to remove members."));
 
         factory.GroupService
-            .Setup(service => service.ChangeRoleAsync(GroupSlug, It.IsAny<string>(), OutsiderUserId, It.IsAny<GroupRole>()))
+            .Setup(service => service.ChangeRoleAsync(GroupSlug, It.IsAny<Guid>(), OutsiderUserId, It.IsAny<GroupRole>()))
             .ReturnsAsync((false, "You do not have permission to change roles."));
 
         factory.GroupService
-            .Setup(service => service.ChangeMemberStatusAsync(GroupSlug, It.IsAny<string>(), OutsiderUserId, It.IsAny<MemberStatus>()))
+            .Setup(service => service.ChangeMemberStatusAsync(GroupSlug, It.IsAny<Guid>(), OutsiderUserId, It.IsAny<MemberStatus>()))
             .ReturnsAsync((false, "You do not have permission to change member status."));
 
         factory.GroupService
-            .Setup(service => service.ClearProbationaryStatusAsync(GroupSlug, It.IsAny<string>(), OutsiderUserId))
+            .Setup(service => service.ClearProbationaryStatusAsync(GroupSlug, It.IsAny<Guid>(), OutsiderUserId))
             .ReturnsAsync((false, "You do not have permission to clear probationary status."));
 
         factory.GroupService
@@ -80,197 +81,155 @@ public class CrossGroupAccessTests
     [Fact]
     public async Task outsider_cannot_view_member_list()
     {
-        // Arrange
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
 
-        // Act
         var response = await client.GetAsync($"/api/groups/{GroupSlug}/members");
 
-        // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
     public async Task outsider_cannot_view_join_requests()
     {
-        // Arrange
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
 
-        // Act
         var response = await client.GetAsync($"/api/groups/{GroupSlug}/join-requests");
 
-        // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
     public async Task outsider_cannot_view_phone_list()
     {
-        // Arrange
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
 
-        // Act
         var response = await client.GetAsync($"/api/groups/{GroupSlug}/phone-list");
 
-        // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
     public async Task outsider_cannot_view_member_detail()
     {
-        // Arrange
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
 
-        // Act
-        var response = await client.GetAsync($"/api/groups/{GroupSlug}/members/some-member-id");
+        var response = await client.GetAsync($"/api/groups/{GroupSlug}/members/{SomeMemberId}");
 
-        // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
     public async Task outsider_cannot_change_phone_visibility()
     {
-        // Arrange
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
 
-        // Act
         var response = await client.PatchAsJsonAsync($"/api/groups/{GroupSlug}/members/me/phone-visibility", new PhoneVisibilityRequest(true));
 
-        // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
     public async Task non_admin_outsider_cannot_approve_member()
     {
-        // Arrange
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
 
-        // Act
-        var response = await client.PostAsync($"/api/groups/{GroupSlug}/members/some-user/approve", null);
+        var response = await client.PostAsync($"/api/groups/{GroupSlug}/members/{SomeMemberId}/approve", null);
 
-        // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
     public async Task non_admin_outsider_cannot_reject_member()
     {
-        // Arrange
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
 
-        // Act
-        var response = await client.PostAsync($"/api/groups/{GroupSlug}/members/some-user/reject", null);
+        var response = await client.PostAsync($"/api/groups/{GroupSlug}/members/{SomeMemberId}/reject", null);
 
-        // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
     public async Task non_admin_outsider_cannot_remove_member()
     {
-        // Arrange
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
 
-        // Act
-        var response = await client.DeleteAsync($"/api/groups/{GroupSlug}/members/some-user");
+        var response = await client.DeleteAsync($"/api/groups/{GroupSlug}/members/{SomeMemberId}");
 
-        // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
     public async Task non_admin_outsider_cannot_change_member_role()
     {
-        // Arrange
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
 
-        // Act
-        var response = await client.PatchAsJsonAsync($"/api/groups/{GroupSlug}/members/some-user/role", new ChangeRoleRequest(GroupRole.GroupAdmin));
+        var response = await client.PatchAsJsonAsync($"/api/groups/{GroupSlug}/members/{SomeMemberId}/role", new ChangeRoleRequest(GroupRole.GroupAdmin));
 
-        // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
     public async Task non_admin_outsider_cannot_change_member_status()
     {
-        // Arrange
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
 
-        // Act
-        var response = await client.PatchAsJsonAsync($"/api/groups/{GroupSlug}/members/some-user/status", new ChangeMemberStatusRequest(MemberStatus.Banned));
+        var response = await client.PatchAsJsonAsync($"/api/groups/{GroupSlug}/members/{SomeMemberId}/status", new ChangeMemberStatusRequest(MemberStatus.Banned));
 
-        // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
     public async Task non_admin_outsider_cannot_clear_probation()
     {
-        // Arrange
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
 
-        // Act
-        var response = await client.PatchAsync($"/api/groups/{GroupSlug}/members/some-user/probation", null);
+        var response = await client.PatchAsync($"/api/groups/{GroupSlug}/members/{SomeMemberId}/probation", null);
 
-        // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
     public async Task non_admin_outsider_cannot_update_group()
     {
-        // Arrange
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
         var request = new UpdateGroupRequest("Hacked", null, null, null, null);
 
-        // Act
         var response = await client.PutAsJsonAsync($"/api/groups/{GroupSlug}", request);
 
-        // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
     public async Task non_admin_outsider_cannot_delete_group()
     {
-        // Arrange
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
 
-        // Act
         var response = await client.DeleteAsync($"/api/groups/{GroupSlug}");
 
-        // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
     public async Task outsider_gets_404_for_group_detail()
     {
-        // Arrange
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
 
-        // Act
         var response = await client.GetAsync($"/api/groups/{GroupSlug}");
 
-        // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 }

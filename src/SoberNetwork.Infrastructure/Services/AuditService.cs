@@ -9,7 +9,7 @@ public class AuditService(AppDbContext db) : IAuditService
 {
     public async Task LogAsync(
         SecurityEventType eventType,
-        string? userId = null,
+        Guid? userId = null,
         string? details = null,
         string? ipAddress = null,
         string? userAgent = null)

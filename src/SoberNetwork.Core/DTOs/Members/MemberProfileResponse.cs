@@ -3,7 +3,7 @@ namespace SoberNetwork.Core.DTOs.Members;
 /// <summary>Full self-profile view returned to the authenticated member.</summary>
 public record MemberProfileResponse(
     /// <summary>Unique identifier of the member.</summary>
-    string UserId,
+    Guid UserId,
     /// <summary>Display name shown in the application.</summary>
     string DisplayName,
     /// <summary>Optional first name stored on the profile.</summary>

@@ -18,9 +18,9 @@ public class GetMemberDetailQueryHandlerTests
     public async Task success_returns_ok_with_data()
     {
         // Arrange
-        var query = new GetMemberDetailQuery("user-id", "group-slug", "target-user-id");
+        var query = new GetMemberDetailQuery(Guid.Parse("00000000-0000-0000-0000-000000000001"), "group-slug", Guid.Parse("00000000-0000-0000-0000-000000000002"));
         var response = new MemberDetailResponse(
-            "target-user-id",
+            Guid.Parse("00000000-0000-0000-0000-000000000002"),
             "John D.",
             "Member",
             "Active",
@@ -47,7 +47,7 @@ public class GetMemberDetailQueryHandlerTests
     public async Task not_a_member_error_returns_forbidden()
     {
         // Arrange
-        var query = new GetMemberDetailQuery("user-id", "group-slug", "target-user-id");
+        var query = new GetMemberDetailQuery(Guid.Parse("00000000-0000-0000-0000-000000000001"), "group-slug", Guid.Parse("00000000-0000-0000-0000-000000000002"));
         const string error = "You are not a member of this group.";
 
         _memberService
@@ -68,7 +68,7 @@ public class GetMemberDetailQueryHandlerTests
     public async Task other_error_returns_not_found()
     {
         // Arrange
-        var query = new GetMemberDetailQuery("user-id", "missing-group", "target-user-id");
+        var query = new GetMemberDetailQuery(Guid.Parse("00000000-0000-0000-0000-000000000001"), "missing-group", Guid.Parse("00000000-0000-0000-0000-000000000002"));
         const string error = "Group not found.";
 
         _memberService

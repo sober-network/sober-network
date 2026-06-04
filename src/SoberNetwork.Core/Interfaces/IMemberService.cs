@@ -29,8 +29,14 @@ public interface IMemberService
     /// <summary>Removes the authenticated member's sobriety date and related visibility flags.</summary>
     Task<bool> RemoveSobrietyDateAsync(Guid userId);
 
-    /// <summary>Updates both sobriety visibility toggles for the authenticated member.</summary>
-    Task<bool> UpdateSobrietyVisibilityAsync(Guid userId, bool isDatePublic, bool isDaysPublic);
+    /// <summary>Updates sobriety visibility for the authenticated member. Controls date and days-sober count as a unit.</summary>
+    Task<bool> UpdateSobrietyVisibilityAsync(Guid userId, bool isPublic);
+
+    /// <summary>Returns the authenticated member's mailing address, or null if none is set.</summary>
+    Task<MailingAddressResponse?> GetMailingAddressAsync(Guid userId);
+
+    /// <summary>Updates the authenticated member's mailing address and caches geocoded coordinates.</summary>
+    Task<(bool Success, string? Error)> UpdateMailingAddressAsync(Guid userId, UpdateMailingAddressRequest request);
 
     /// <summary>Sets or replaces the authenticated member's phone number.</summary>
     Task<(bool Success, string? Error)> SetPhoneAsync(Guid userId, string phoneNumber);

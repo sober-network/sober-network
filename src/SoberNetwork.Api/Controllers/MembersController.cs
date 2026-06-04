@@ -116,15 +116,35 @@ public class MembersController(IMediator mediator) : ControllerBase
     }
 
     /// <summary>
-    /// Updates sobriety visibility independently for the date and the days-sober count (T3).
+    /// Updates sobriety visibility as a single toggle — controls both the date and the days-sober count (T3).
     /// </summary>
     [HttpPatch("me/sobriety-date/visibility")]
     public async Task<IActionResult> UpdateSobrietyVisibility([FromBody] Core.DTOs.Members.SobrietyVisibilityRequest request, CancellationToken cancellationToken = default)
     {
-        var result = await mediator.Send(new UpdateSobrietyVisibilityCommand(UserId, request.IsDatePublic, request.IsDaysPublic), cancellationToken);
+        var result = await mediator.Send(new UpdateSobrietyVisibilityCommand(UserId, request.IsPublic), cancellationToken);
         return result.Code switch
         {
             ResultCode.Ok => Ok(new { message = "Sobriety visibility updated." }),
+            _ => NotFound()
+        };
+    }
+
+    /// <summary>Returns the authenticated user's mailing address. T3/T12: self-only.</summary>
+    [HttpGet("me/mailing-address")]
+    public async Task<IActionResult> GetMailingAddress(CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(new GetMailingAddressQuery(UserId), cancellationToken);
+        return result == null ? NoContent() : Ok(result);
+    }
+
+    /// <summary>Saves or clears the authenticated user's mailing address (T3: opt-in, self-only).</summary>
+    [HttpPut("me/mailing-address")]
+    public async Task<IActionResult> UpdateMailingAddress([FromBody] Core.DTOs.Members.UpdateMailingAddressRequest request, CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(new UpdateMailingAddressCommand(UserId, request), cancellationToken);
+        return result.Code switch
+        {
+            ResultCode.Ok => Ok(new { message = "Mailing address saved." }),
             _ => NotFound()
         };
     }

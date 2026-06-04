@@ -3,8 +3,7 @@
 export interface SobrietyResponse {
   sobrietyDate: string | null;
   daysSober: number | null;
-  isDatePublic: boolean;
-  isDaysPublic: boolean;
+  isPublic: boolean;
 }
 
 export interface MemberProfileResponse {
@@ -42,8 +41,7 @@ export interface SetSobrietyDateRequest {
 }
 
 export interface SobrietyVisibilityRequest {
-  isDatePublic: boolean;
-  isDaysPublic: boolean;
+  isPublic: boolean;
 }
 
 export interface SetPhoneRequest {
@@ -81,8 +79,7 @@ export interface AdminMemberResponse {
   timeZone: string | null;
   sobrietyDate: string | null;
   daysSober: number | null;
-  isSobrietyDatePublic: boolean;
-  isDaysSoberPublic: boolean;
+  isSobrietyPublic: boolean;
   isSuperAdmin: boolean;
   isLockedOut: boolean;
   createdAt: string;

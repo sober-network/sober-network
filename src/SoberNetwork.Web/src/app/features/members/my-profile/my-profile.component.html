@@ -59,19 +59,54 @@
             <mat-hint>Your anniversary date — leave blank to not track</mat-hint>
           </mat-form-field>
           <div class="toggle-row">
-            <mat-slide-toggle formControlName="isSobrietyDatePublic" color="primary">
+            <mat-slide-toggle formControlName="isPublic" color="primary">
               Show my sobriety date to group members
-            </mat-slide-toggle>
-          </div>
-          <div class="toggle-row">
-            <mat-slide-toggle formControlName="isDaysSoberPublic" color="primary">
-              Show days sober count to group members
             </mat-slide-toggle>
           </div>
           <div class="panel-actions">
             <button mat-raised-button color="primary" type="submit" [disabled]="savingSobriety">
               <mat-spinner diameter="18" *ngIf="savingSobriety"></mat-spinner>
               <span *ngIf="!savingSobriety">Save Sobriety Settings</span>
+            </button>
+          </div>
+        </form>
+      </mat-expansion-panel>
+
+      <!-- ── Mailing Address ───────────────────────────────────────────────── -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title><mat-icon>home</mat-icon> Mailing Address</mat-panel-title>
+        </mat-expansion-panel-header>
+        <p class="hint-text">Used for chip mailing and as the default "near me" location in the meeting finder. Never shared publicly (T3).</p>
+        <form [formGroup]="addressForm" (ngSubmit)="saveAddress()" novalidate>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Street Address</mat-label>
+            <input matInput formControlName="street" autocomplete="street-address" />
+          </mat-form-field>
+          <div class="two-col">
+            <mat-form-field appearance="outline">
+              <mat-label>City</mat-label>
+              <input matInput formControlName="city" autocomplete="address-level2" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>State / Province</mat-label>
+              <input matInput formControlName="state" autocomplete="address-level1" />
+            </mat-form-field>
+          </div>
+          <div class="two-col">
+            <mat-form-field appearance="outline">
+              <mat-label>Postal Code</mat-label>
+              <input matInput formControlName="postalCode" autocomplete="postal-code" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Country</mat-label>
+              <input matInput formControlName="country" autocomplete="country-name" />
+            </mat-form-field>
+          </div>
+          <div class="panel-actions">
+            <button mat-raised-button color="primary" type="submit" [disabled]="savingAddress">
+              <mat-spinner diameter="18" *ngIf="savingAddress"></mat-spinner>
+              <span *ngIf="!savingAddress">Save Address</span>
             </button>
           </div>
         </form>

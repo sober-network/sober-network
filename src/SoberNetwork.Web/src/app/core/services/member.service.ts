@@ -6,6 +6,7 @@ import {
   ChangeEmailRequest, SetSobrietyDateRequest, SobrietyVisibilityRequest,
   SobrietyResponse, SetPhoneRequest, AdminMemberResponse, DeleteAccountRequest
 } from '@app/core/models';
+import { MailingAddressResponse, UpdateMailingAddressRequest } from '@app/core/models';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -61,6 +62,16 @@ export class MemberService {
 
   deleteAccount(request: DeleteAccountRequest): Observable<void> {
     return this.http.delete<void>(`${this.base}/me`, { body: request });
+  }
+
+  // ── Mailing Address ─────────────────────────────────────────────────────────
+
+  getMailingAddress(): Observable<MailingAddressResponse | null> {
+    return this.http.get<MailingAddressResponse | null>(`${this.base}/me/mailing-address`);
+  }
+
+  updateMailingAddress(request: UpdateMailingAddressRequest): Observable<void> {
+    return this.http.put<void>(`${this.base}/me/mailing-address`, request);
   }
 
   // ── SuperAdmin ───────────────────────────────────────────────────────────────

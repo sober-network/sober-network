@@ -60,6 +60,14 @@ mat-expansion-panel {
   margin: 0 0 16px;
 }
 
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+
+  mat-form-field { width: 100%; }
+}
+
 .danger-panel {
   border: 1px solid var(--mat-sys-error, #b00020) !important;
   border-radius: 4px;

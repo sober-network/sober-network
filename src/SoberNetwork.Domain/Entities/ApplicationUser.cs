@@ -9,7 +9,6 @@ public class ApplicationUser : IdentityUser<Guid>
     public string? TimeZone { get; set; }              // IANA timezone, e.g. "America/New_York"
     public DateOnly? SobrietyDate { get; set; }        // opt-in, private by default (T3, T12)
     public bool IsSobrietyDatePublic { get; set; } = false;
-    public bool IsDaysSoberPublic { get; set; } = false; // separate toggle: show count without revealing date
     public bool IsSuperAdmin { get; set; } = false;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

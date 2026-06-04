@@ -144,7 +144,7 @@
   @if (!loading() && view() === 'list' && results().length > 0) {
     @for (entry of grouped() | keyvalue; track entry.key) {
       <h5 class="day-heading mt-3 mb-2">
-        {{ entry.key !== null ? (DAYS[entry.key] ?? 'One-time') : 'One-time' }}
+        {{ entry.key !== null ? DAYS[entry.key] : 'One-time' }}
       </h5>
       @for (m of entry.value; track m.id) {
         <div class="card meeting-card mb-2">

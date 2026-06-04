@@ -24,6 +24,7 @@ import {
   ChangeEmailRequest, SetSobrietyDateRequest,
   SobrietyVisibilityRequest, SetPhoneRequest, DeleteAccountRequest
 } from '@app/core/models';
+import { MailingAddressResponse, UpdateMailingAddressRequest } from '@app/core/models';
 
 function passwordsMatch(c: AbstractControl): ValidationErrors | null {
   const pw = c.get('newPassword')?.value;
@@ -65,9 +66,17 @@ export class MyProfileComponent implements OnInit {
 
   // Sobriety form
   sobrietyForm = this.fb.group({
-    sobrietyDate:        [null as Date | null],
-    isSobrietyDatePublic: [false],
-    isDaysSoberPublic:    [false],
+    sobrietyDate: [null as Date | null],
+    isPublic:     [false],
+  });
+
+  // Mailing address form
+  addressForm = this.fb.group({
+    street:     [''],
+    city:       [''],
+    state:      [''],
+    postalCode: [''],
+    country:    [''],
   });
 
   // Phone form
@@ -96,6 +105,7 @@ export class MyProfileComponent implements OnInit {
 
   savingProfile   = false;
   savingSobriety  = false;
+  savingAddress   = false;
   savingPhone     = false;
   savingPassword  = false;
   savingEmail     = false;
@@ -120,9 +130,21 @@ export class MyProfileComponent implements OnInit {
         this.sobriety = s;
         this.sobrietyForm.patchValue({
           sobrietyDate: s.sobrietyDate ? new Date(s.sobrietyDate) : null,
-          isSobrietyDatePublic: s.isDatePublic,
-          isDaysSoberPublic: s.isDaysPublic,
+          isPublic:     s.isPublic,
         });
+      },
+    });
+    this.memberService.getMailingAddress().subscribe({
+      next: addr => {
+        if (addr) {
+          this.addressForm.patchValue({
+            street:     addr.mailingStreet     ?? '',
+            city:       addr.mailingCity       ?? '',
+            state:      addr.mailingState      ?? '',
+            postalCode: addr.mailingPostalCode ?? '',
+            country:    addr.mailingCountry    ?? '',
+          });
+        }
       },
     });
   }
@@ -142,11 +164,8 @@ export class MyProfileComponent implements OnInit {
 
   saveSobriety(): void {
     this.savingSobriety = true;
-    const { sobrietyDate, isSobrietyDatePublic, isDaysSoberPublic } = this.sobrietyForm.getRawValue();
-    const visReq: SobrietyVisibilityRequest = {
-      isDatePublic: isSobrietyDatePublic ?? false,
-      isDaysPublic: isDaysSoberPublic ?? false,
-    };
+    const { sobrietyDate, isPublic } = this.sobrietyForm.getRawValue();
+    const visReq: SobrietyVisibilityRequest = { isPublic: isPublic ?? false };
 
     const saveDate$ = sobrietyDate
       ? this.memberService.setSobrietyDate({
@@ -162,6 +181,22 @@ export class MyProfileComponent implements OnInit {
         });
       },
       error: () => { this.savingSobriety = false; this.snack.open('Save failed', 'OK', { duration: 3000 }); },
+    });
+  }
+
+  saveAddress(): void {
+    this.savingAddress = true;
+    const v = this.addressForm.getRawValue();
+    const req: UpdateMailingAddressRequest = {
+      mailingStreet:     v.street     || null,
+      mailingCity:       v.city       || null,
+      mailingState:      v.state      || null,
+      mailingPostalCode: v.postalCode || null,
+      mailingCountry:    v.country    || null,
+    };
+    this.memberService.updateMailingAddress(req).subscribe({
+      next: () => { this.savingAddress = false; this.snack.open('Address saved', 'OK', { duration: 3000 }); },
+      error: () => { this.savingAddress = false; this.snack.open('Save failed', 'OK', { duration: 3000 }); },
     });
   }
 

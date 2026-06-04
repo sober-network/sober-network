@@ -18,10 +18,8 @@ public record AdminMemberResponse(
     DateOnly? SobrietyDate,
     /// <summary>Calculated number of sober days, if available.</summary>
     int? DaysSober,
-    /// <summary>Whether the member has opted to share their sobriety date.</summary>
-    bool IsSobrietyDatePublic,
-    /// <summary>Whether the member has opted to share their days-sober count.</summary>
-    bool IsDaysSoberPublic,
+    /// <summary>Whether the member has opted to share their sobriety date and days-sober count with group members.</summary>
+    bool IsSobrietyPublic,
     /// <summary>Whether the member has SuperAdmin privileges.</summary>
     bool IsSuperAdmin,
     /// <summary>Whether the account is currently locked out.</summary>

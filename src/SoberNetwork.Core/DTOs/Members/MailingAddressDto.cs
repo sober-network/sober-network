@@ -5,20 +5,20 @@ namespace SoberNetwork.Core.DTOs.Members;
 /// T3/T12 reviewed: opt-in only, never exposed publicly, accessible only to the owner.
 /// </summary>
 public record MailingAddressResponse(
-    string? Street,
-    string? City,
-    string? State,
-    string? PostalCode,
-    string? Country,
-    double? Latitude,
-    double? Longitude
+    string? MailingStreet,
+    string? MailingCity,
+    string? MailingState,
+    string? MailingPostalCode,
+    string? MailingCountry,
+    double? MailingLatitude,
+    double? MailingLongitude
 );
 
 /// <summary>Request to update the authenticated user's mailing address.</summary>
 public record UpdateMailingAddressRequest(
-    string? Street,
-    string? City,
-    string? State,
-    string? PostalCode,
-    string? Country
+    string? MailingStreet,
+    string? MailingCity,
+    string? MailingState,
+    string? MailingPostalCode,
+    string? MailingCountry
 );

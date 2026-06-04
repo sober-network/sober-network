@@ -1,3 +1,4 @@
+using System.Net.Http.Json;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SoberNetwork.Core.DTOs.Members;
@@ -12,7 +13,8 @@ public class MemberService(
     AppDbContext db,
     UserManager<ApplicationUser> userManager,
     IAuditService audit,
-    IEmailService email) : IMemberService
+    IEmailService email,
+    IHttpClientFactory httpClientFactory) : IMemberService
 {
     // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -24,9 +26,8 @@ public class MemberService(
 
         return new SobrietyResponse(
             SobrietyDate: isSelf || user.IsSobrietyDatePublic ? user.SobrietyDate : null,
-            DaysSober:    isSelf || user.IsDaysSoberPublic    ? daysSober          : null,
-            IsDatePublic: user.IsSobrietyDatePublic,
-            IsDaysPublic: user.IsDaysSoberPublic
+            DaysSober:    isSelf || user.IsSobrietyDatePublic ? daysSober          : null,
+            IsPublic:     user.IsSobrietyDatePublic
         );
     }
 
@@ -179,7 +180,6 @@ public class MemberService(
 
         user.SobrietyDate = null;
         user.IsSobrietyDatePublic = false;
-        user.IsDaysSoberPublic = false;
         user.UpdatedAt = DateTime.UtcNow;
         await userManager.UpdateAsync(user);
 
@@ -187,18 +187,17 @@ public class MemberService(
         return true;
     }
 
-    public async Task<bool> UpdateSobrietyVisibilityAsync(Guid userId, bool isDatePublic, bool isDaysPublic)
+    public async Task<bool> UpdateSobrietyVisibilityAsync(Guid userId, bool isPublic)
     {
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null || user.DeletedAt != null) return false;
 
-        user.IsSobrietyDatePublic = isDatePublic;
-        user.IsDaysSoberPublic = isDaysPublic;
+        user.IsSobrietyDatePublic = isPublic;
         user.UpdatedAt = DateTime.UtcNow;
         await userManager.UpdateAsync(user);
 
         await audit.LogAsync(SecurityEventType.SobrietyVisibilityChanged, userId,
-            $"datePublic={isDatePublic} daysPublic={isDaysPublic}");
+            $"isPublic={isPublic}");
         return true;
     }
 
@@ -374,7 +373,6 @@ public class MemberService(
                 user.SobrietyDate,
                 daysSober,
                 user.IsSobrietyDatePublic,
-                user.IsDaysSoberPublic,
                 user.IsSuperAdmin,
                 isLockedOut,
                 user.CreatedAt,
@@ -415,7 +413,6 @@ public class MemberService(
             user.SobrietyDate,
             daysSober,
             user.IsSobrietyDatePublic,
-            user.IsDaysSoberPublic,
             user.IsSuperAdmin,
             isLockedOut,
             user.CreatedAt,
@@ -426,6 +423,77 @@ public class MemberService(
             groupCount
         );
     }
+
+    // ── Mailing Address ────────────────────────────────────────────────────────
+
+    public async Task<MailingAddressResponse?> GetMailingAddressAsync(Guid userId)
+    {
+        var user = await userManager.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null || user.DeletedAt != null) return null;
+
+        return new MailingAddressResponse(
+            user.MailingStreet,
+            user.MailingCity,
+            user.MailingState,
+            user.MailingPostalCode,
+            user.MailingCountry,
+            user.MailingLatitude,
+            user.MailingLongitude
+        );
+    }
+
+    public async Task<(bool Success, string? Error)> UpdateMailingAddressAsync(
+        Guid userId, UpdateMailingAddressRequest request)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user == null || user.DeletedAt != null) return (false, "User not found.");
+
+        user.MailingStreet     = request.MailingStreet;
+        user.MailingCity       = request.MailingCity;
+        user.MailingState      = request.MailingState;
+        user.MailingPostalCode = request.MailingPostalCode;
+        user.MailingCountry    = request.MailingCountry;
+
+        // Best-effort geocoding via Nominatim — clear old coords first.
+        user.MailingLatitude  = null;
+        user.MailingLongitude = null;
+
+        var addressParts = new[] { request.MailingStreet, request.MailingCity, request.MailingState, request.MailingCountry };
+        var query = string.Join(", ", addressParts.Where(p => !string.IsNullOrWhiteSpace(p)));
+
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            try
+            {
+                var http = httpClientFactory.CreateClient("Nominatim");
+                var url = $"https://nominatim.openstreetmap.org/search?q={Uri.EscapeDataString(query)}&format=json&limit=1";
+                var results = await http.GetFromJsonAsync<NominatimResult[]>(url);
+                if (results is { Length: > 0 })
+                {
+                    user.MailingLatitude  = results[0].Lat;
+                    user.MailingLongitude = results[0].Lon;
+                }
+            }
+            catch
+            {
+                // Geocoding is best-effort — a failure must not block the address save.
+            }
+        }
+
+        user.UpdatedAt = DateTime.UtcNow;
+        await userManager.UpdateAsync(user);
+        return (true, null);
+    }
+
+    private sealed class NominatimResult
+    {
+        public double Lat { get; init; }
+        public double Lon { get; init; }
+    }
+
+    // ── Superadmin: user deactivation ─────────────────────────────────────────
 
     public async Task<(bool Success, string? Error)> DeactivateUserAsync(Guid adminUserId, Guid targetUserId)
     {

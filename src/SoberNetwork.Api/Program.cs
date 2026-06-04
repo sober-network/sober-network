@@ -235,6 +235,11 @@ builder.Services.AddScoped<SoberNetwork.Core.Interfaces.IAuthService, SoberNetwo
 builder.Services.AddOptions();
 
 builder.Services.AddHttpClient<ResendClient>();
+builder.Services.AddHttpClient("Nominatim", c =>
+{
+    c.DefaultRequestHeaders.UserAgent.ParseAdd("SoberNetwork/1.0 (geocoding; contact=admin@sobernetwork.app)");
+    c.Timeout = TimeSpan.FromSeconds(5);
+});
 
 builder.Services.Configure<ResendClientOptions>(o =>
 

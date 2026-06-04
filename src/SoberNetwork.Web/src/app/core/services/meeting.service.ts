@@ -53,11 +53,11 @@ export class MeetingService {
 
   /** Get the authenticated user's optional mailing address (T3 — opt-in). */
   getMyMailingAddress(): Observable<MailingAddressResponse> {
-    return this.http.get<MailingAddressResponse>(`${this.baseUrl}/api/members/me/address`);
+    return this.http.get<MailingAddressResponse>(`${this.baseUrl}/api/members/me/mailing-address`);
   }
 
   /** Update the authenticated user's optional mailing address (T3 — opt-in). */
   updateMyMailingAddress(request: UpdateMailingAddressRequest): Observable<MailingAddressResponse> {
-    return this.http.put<MailingAddressResponse>(`${this.baseUrl}/api/members/me/address`, request);
+    return this.http.put<MailingAddressResponse>(`${this.baseUrl}/api/members/me/mailing-address`, request);
   }
 }

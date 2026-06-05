@@ -94,16 +94,6 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  async openRegister(): Promise<void> {
-    const { RegisterModalComponent } = await import('../register-modal/register-modal.component');
-    this.dialog.open(RegisterModalComponent, {
-      panelClass: 'sn-login-panel',
-      maxWidth:   '100vw',
-      width:      '440px',
-      autoFocus:  'first-tabbable',
-    });
-  }
-
   private setupScrollSpy(): void {
     if (typeof window === 'undefined') return;
 

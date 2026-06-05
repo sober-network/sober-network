@@ -24,9 +24,8 @@
         <a href="#traditions"   class="nav-link" [class.active]="activeAnchor === 'traditions'">12 Traditions</a>
       </div>
       <div class="nav-actions">
-        <button class="nav-signin" type="button" (click)="openSignIn()">Sign In</button>
-        <button type="button" class="nav-cta" (click)="openRegister()">
-          Join Your Group
+        <button type="button" class="nav-cta" (click)="openSignIn()">
+          Sign In
           <span class="arrow-circle">
             <svg viewBox="0 0 12 12" fill="none">
               <path d="M1 11L11 1M11 1H4.5M11 1V7.5" stroke="currentColor"
@@ -62,8 +61,7 @@
 
         <div class="nav-actions">
           <button class="user-pill" [matMenuTriggerFor]="userMenu" aria-label="Account menu">
-            <span class="user-display-name">{{ user.displayName }}</span>
-            <span class="user-initial">{{ user.displayName.charAt(0) | uppercase }}</span>
+            <span class="user-display-name">{{ user.displayName }}&nbsp;</span>
           </button>
           <mat-menu #userMenu="matMenu">
             <div class="user-menu-header">

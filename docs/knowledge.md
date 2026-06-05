@@ -535,4 +535,164 @@ As more groups join, Supabase/Vercel free tiers may be exceeded. Should each gro
 
 ---
 
-*Last updated: 2026-06-04*
+## UI Design System (v1.3 Mockup — Apply Sitewide)
+
+The approved visual design is documented in the v1.3 HTML mockup. All Angular components and pages must follow this system.
+
+### Fonts
+- **Inter Tight** — headings, nav, UI labels (weights 400–900, `letter-spacing: -0.02em` to `-0.05em`)
+- **Instrument Serif italic** — display accent lines inside headings (e.g. `<em>tradition.</em>`)
+- **Inter** — body copy
+- Load via Google Fonts: `Inter Tight`, `Instrument Serif`, `Inter`
+
+### Color Palette
+```
+--bg:        #f7f5f2   (page background — warm off-white)
+--bg-soft:   #f0ede8   (alternate section background)
+--text:      #111110   (primary text)
+--text-mid:  #3d3d3a   (secondary text)
+--text-muted:#7a7a75   (captions, labels)
+--border:    rgba(17,17,16,0.08)
+--cta-bg:    #1a1a18   (dark CTA/button background)
+```
+
+### Hero Gradient
+```css
+background-image:
+  linear-gradient(135deg,
+    rgba(212,232,245,0.88) 0%,
+    rgba(232,240,248,0.85) 20%,
+    rgba(247,245,240,0.82) 55%,
+    rgba(245,232,216,0.85) 80%,
+    rgba(240,223,200,0.88) 100%),
+  url('<photo>');
+background-size: cover;
+```
+Used on `#hero` and `#final-cta`. The photo sits behind the gradient at ~12% opacity.
+
+### Feature / Icon Tints (8 cheerful tint colors)
+```
+violet: hsla(260,70%,65%,0.12)   rose:   hsla(345,75%,65%,0.12)
+sky:    hsla(205,85%,60%,0.12)   amber:  hsla(38,90%,58%,0.12)
+green:  hsla(148,58%,52%,0.12)   teal:   hsla(183,62%,52%,0.12)
+indigo: hsla(230,70%,62%,0.12)   coral:  hsla(18,82%,62%,0.12)
+```
+Applied to: feature card icon backgrounds, About section badge pills, marquee icon bubbles.
+
+### Nav Logo
+CSS conic-gradient rainbow ring around the inner SVG:
+```css
+background: conic-gradient(from 0deg, #f06292, #ff9800, #ffeb3b, #4caf50, #2196f3, #9c27b0, #f06292);
+border-radius: 50%;
+padding: 2.5px;
+```
+Inner SVG has `background: white; border-radius: 50%`.
+
+### Nav Bar
+- White card pill container with inset box-shadow, `border-radius: 100px`
+- Active nav item: solid black pill (`background: var(--text); color: white`)
+- Nav gradient accent line: `nav::after` with `linear-gradient(90deg, sky→violet→amber→coral)` at `bottom: -1px`
+- Sign In: ghost link; Join CTA: dark gradient pill with frosted arrow circle
+
+### Section Cadence (alternating backgrounds)
+```
+#hero        → hero-grad + photo bg
+marquee      → white
+#about       → white
+#features    → --bg (off-white)
+#how-it-works→ white
+#newcomer    → --cta-bg (dark)
+#principles  → white
+#roadmap     → --bg (off-white)
+#traditions  → white
+#final-cta   → hero-grad
+```
+
+### Image Treatment
+- **Real photos** (Vecteezy free): used as hero background at ~15% opacity behind gradient
+- **Vector art** (Vecteezy free): `mix-blend-mode: multiply` + `filter: brightness(1.35) contrast(1.05)` removes white/off-white backgrounds cleanly
+- All section images hosted via `static.vecteezy.com` CDN using `non_2x` preview URLs
+
+### Mockup File Location
+```
+C:\Users\scott\.copilot\session-state\dc627e7b-f3a3-4928-8621-16da3c6acb7f\files\
+  sober-network-mockup-v1.2.html   ← last stable rollback before images
+  sober-network-mockup-v1.3.html   ← current approved design with images ✅
+```
+
+### Landing Page — Angular Implementation Notes
+
+- **Hero height**: `padding: 110px 32px 90px` with `justify-content: flex-start` — no `min-height`. Height is content-driven, matching ~70% viewport appearance of the mock.
+- **Back-to-top buttons**: Each named section (`#about`, `#features`, `#how-it-works`, `#principles`, `#traditions`) has a `.back-to-top` anchor inside `.section-wrap` (which is `position: relative`). Button is `position: absolute; top: 32px; right: 32px`.
+- **Section IDs used by scroll-spy**: `about`, `features`, `how-it-works`, `roadmap`, `traditions` (in `navbar.component.ts` `sectionIds` array).
+
+### Navbar — Angular Implementation Notes
+
+- **Position**: `position: fixed; top: 0; left: 0; right: 0; z-index: 200`. App content has `padding-top: 64px` to compensate (`app.scss`).
+- **Layout**: CSS Grid `grid-template-columns: 1fr auto 1fr` — logo left, pills center, actions right.
+- **Scroll-spy**: `IntersectionObserver` in `navbar.component.ts`, wrapped in `NgZone.run()` + `cdr.markForCheck()`. Re-initialized on `NavigationEnd` to `/`.
+- **Guest state**: single dark pill **"Sign In"** button → opens `LoginModalComponent` via `MatDialog`. No separate "Join Your Group" link — registration is discovered via "Don't have an account? Create one" inside the login modal.
+- **Logged-in state**: pills link to app routes. User pill (`display-name + initial`) opens `MatMenu`.
+
+### Logo
+
+- Rainbow conic-gradient ring with white inner circle
+- Inner SVG: **upward-pointing equilateral triangle** (AA-style), stroke only, no fill
+  - `<polygon points="15,3 25,21 5,21" fill="none" stroke="#1a1a18" stroke-width="2" stroke-linejoin="round"/>`
+  - viewBox `0 0 30 30`; inscribed in the circle
+- Applied consistently to: navbar, login modal, register modal
+
+### Login Modal
+
+- Component: `src/app/shared/components/login-modal/login-modal.component.ts`
+- Opened via `MatDialog` from `NavbarComponent.openSignIn()` with `panelClass: 'sn-login-panel'`
+- Global panel override in `styles.scss`: `.sn-login-panel .mat-mdc-dialog-surface` — removes Material padding, applies `border-radius: 20px` and custom shadow. Shared by both auth modals.
+- On success: closes modal, navigates to `/dashboard`
+- "Forgot password?" → closes modal, navigates to `/auth/forgot-password`
+- "Create one" → dynamically imports `RegisterModalComponent` and opens it (no navigation)
+- The existing `/auth/login` page is still reachable (used by `authGuard` redirects for protected routes)
+
+### Register Modal
+
+- Component: `src/app/shared/components/register-modal/register-modal.component.ts`
+- Same `lm-*` CSS design as login modal (rainbow ring, Inter Tight, dark pill submit)
+- Fields: Display Name, Email, Password, Confirm Password
+- Success state: green check icon + email confirmation message
+- "Sign in" → dynamically imports `LoginModalComponent` and opens it
+- Both modals use **async dynamic imports** to cross-open each other, avoiding circular TypeScript deps
+- `/auth/register` page route kept alive for `login.component` and `group-public` fallback links
+- Landing page hero, final-CTA, and "Get started" buttons all open `RegisterModalComponent`
+
+### Auth Redirect Behavior
+
+- `AuthService.logout()` navigates to `/` (landing page), NOT `/auth/login`
+- On page refresh with an expired refresh token: `APP_INITIALIZER` → `tryRestoreSession()` → 401 → `errorInterceptor` → `auth.logout()` → `/` (no redirect to login page)
+- Protected routes (`/dashboard`, `/groups`, etc.) still redirect to `/auth/login` via `authGuard` when unauthenticated
+
+---
+
+## Platform Stats API
+
+**Status:** Complete ✅
+
+### Design Decisions
+- **Public, no login required** (T11/T12 reviewed: aggregate integer counts only, no member data)
+- Three counts returned: distinct active members, active groups, active meetings
+- Member count = distinct `UserId` in `GroupMemberships` where `Status=Active` and `DeletedAt=null`
+- Group count = `Groups` where `DeletedAt=null`
+- Meeting count = `Meetings` where both meeting and its group have `DeletedAt=null`
+
+### Backend
+- `IStatsService` / `StatsService` (Infrastructure) — three `AsNoTracking` COUNT queries
+- `GetPlatformStatsQuery` → `GetPlatformStatsQueryHandler` → `IStatsService`
+- `PlatformStatsResponse(MemberCount, GroupCount, MeetingCount)` record DTO
+- `StatsController` — `GET /api/stats` with `[AllowAnonymous]` (T11/T12 review comment present)
+
+### Angular
+- `StatsService` at `src/app/core/services/stats.service.ts`
+- `LandingComponent.ngOnInit()` loads stats; errors silently fall back to zero
+- `stat-plus` (`+`) shown only when count > 0
+
+---
+
+*Last updated: 2026-06-05*

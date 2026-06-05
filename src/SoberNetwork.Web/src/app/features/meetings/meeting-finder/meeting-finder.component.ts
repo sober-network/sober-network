@@ -1,5 +1,5 @@
 import {
-  Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, signal, computed
+  Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, signal, computed, effect
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -25,6 +25,25 @@ export class MeetingFinderComponent implements OnInit, OnDestroy, AfterViewInit 
   private readonly authService = inject(AuthService);
   private readonly destroy$ = new Subject<void>();
   private readonly search$ = new Subject<void>();
+
+  constructor() {
+    // Reactive map lifecycle: destroy the L.Map instance whenever the container
+    // is hidden (loading OR list view), and re-initialise once it's visible again.
+    // This is needed because the Angular @if control flow destroys/recreates the
+    // #mapContainer div on every search, invalidating any prior L.Map reference.
+    effect(() => {
+      const mapVisible = !this.loading() && this.view() === 'map';
+      if (!mapVisible) {
+        this.map?.remove();
+        this.map = null;
+      } else {
+        // 100ms gives the browser time to paint the newly-created #mapContainer div
+        // before Leaflet reads its dimensions. Without this, Leaflet measures the
+        // container as 0×0 and renders the map collapsed around the centre pin.
+        setTimeout(() => this.initMap(), 100);
+      }
+    });
+  }
 
   @ViewChild('mapContainer') mapContainerRef!: ElementRef<HTMLDivElement>;
   private map: L.Map | null = null;
@@ -75,9 +94,7 @@ export class MeetingFinderComponent implements OnInit, OnDestroy, AfterViewInit 
     this.tryLoadUserAddress();
   }
 
-  ngAfterViewInit(): void {
-    if (this.view() === 'map') this.initMap();
-  }
+  ngAfterViewInit(): void { /* map lifecycle handled by constructor effect */ }
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -171,8 +188,7 @@ export class MeetingFinderComponent implements OnInit, OnDestroy, AfterViewInit 
   // ── View toggle ───────────────────────────────────────────────────────────────
 
   switchView(v: 'list' | 'map'): void {
-    this.view.set(v);
-    if (v === 'map') setTimeout(() => this.initMap(), 50);
+    this.view.set(v); // effect() reacts and calls initMap() when map becomes visible
   }
 
   // ── Google Maps directions URL ────────────────────────────────────────────────
@@ -246,6 +262,8 @@ export class MeetingFinderComponent implements OnInit, OnDestroy, AfterViewInit 
       maxZoom: 18,
     }).addTo(this.map);
     this.markers.addTo(this.map);
+    // Force Leaflet to recalculate container dimensions after any CSS transitions/layouts settle
+    this.map.invalidateSize();
     this.updateMapMarkers();
   }
 

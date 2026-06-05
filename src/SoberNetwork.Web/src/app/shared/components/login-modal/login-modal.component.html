@@ -1,0 +1,85 @@
+<!-- ══ SOBER NETWORK — SIGN IN MODAL ══════════════════════════════════════ -->
+<div class="lm-wrap">
+
+  <!-- Close -->
+  <button class="lm-close" (click)="dialogRef.close()" aria-label="Close">
+    <svg viewBox="0 0 14 14" fill="none">
+      <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <!-- Header -->
+  <div class="lm-header">
+    <span class="lm-logo-ring">
+      <svg viewBox="0 0 30 30" fill="none">
+        <path d="M10 15 C10 11.5 12.3 9 15 9 C17.7 9 20 11.5 20 15 C20 17.3 18.8 19.2 17 20.2 L15 22"
+              stroke="#1a1a18" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="15" cy="15" r="2.8" fill="#1a1a18" opacity="0.55"/>
+      </svg>
+    </span>
+    <h2 class="lm-title">Welcome back</h2>
+    <p class="lm-subtitle">Sign in to Sober Network</p>
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="lm-form">
+
+    <div class="lm-field">
+      <label class="lm-label" for="lm-email">Email</label>
+      <input id="lm-email" class="lm-input" type="email"
+             formControlName="email" autocomplete="email"
+             placeholder="you@example.com">
+      <span class="lm-field-error"
+            *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
+        <ng-container *ngIf="form.get('email')?.hasError('required')">Email is required.</ng-container>
+        <ng-container *ngIf="form.get('email')?.hasError('email')">Enter a valid email.</ng-container>
+      </span>
+    </div>
+
+    <div class="lm-field">
+      <div class="lm-label-row">
+        <label class="lm-label" for="lm-password">Password</label>
+        <button type="button" class="lm-forgot" (click)="navigateTo('/auth/forgot-password')">
+          Forgot password?
+        </button>
+      </div>
+      <div class="lm-input-wrap">
+        <input id="lm-password" class="lm-input" [type]="hidePassword ? 'password' : 'text'"
+               formControlName="password" autocomplete="current-password"
+               placeholder="••••••••">
+        <button type="button" class="lm-eye" (click)="hidePassword = !hidePassword"
+                [attr.aria-label]="hidePassword ? 'Show password' : 'Hide password'">
+          <svg *ngIf="hidePassword" viewBox="0 0 20 20" fill="none">
+            <path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" stroke="currentColor" stroke-width="1.4"/>
+            <circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.4"/>
+          </svg>
+          <svg *ngIf="!hidePassword" viewBox="0 0 20 20" fill="none">
+            <path d="M3 3l14 14M8.5 8.7A2.5 2.5 0 0 0 10 12.5m-3.7-3.3A9 9 0 0 0 1 10s3.5 6 9 6a8.9 8.9 0 0 0 4.7-1.4M6.3 4.6A8.9 8.9 0 0 1 10 4c5.5 0 9 6 9 6a9.3 9.3 0 0 1-2 2.4"
+                  stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <span class="lm-field-error"
+            *ngIf="form.get('password')?.invalid && form.get('password')?.touched">
+        Password is required.
+      </span>
+    </div>
+
+    <p class="lm-error" *ngIf="error">{{ error }}</p>
+
+    <button class="lm-submit" type="submit" [disabled]="loading">
+      <mat-spinner diameter="18" *ngIf="loading"></mat-spinner>
+      <span *ngIf="!loading">Sign In</span>
+    </button>
+
+  </form>
+
+  <!-- Footer -->
+  <p class="lm-footer">
+    Don't have an account?&nbsp;
+    <button type="button" class="lm-register-link" (click)="openRegisterModal()">
+      Create one
+    </button>
+  </p>
+
+</div>

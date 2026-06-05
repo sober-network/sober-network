@@ -135,7 +135,7 @@ export class GroupPhoneListComponent implements OnInit {
         const myEntry = phoneList.find(entry => entry.userId === this.currentUserId);
         this.phoneForm.reset({
           isPhoneShared: !!myEntry,
-          phoneNumber: myEntry?.phoneNumber ?? '',
+          phoneNumber: myEntry?.phoneNumber ?? profile?.phoneNumber ?? '',
         });
 
         if (phoneList.length === 0) {

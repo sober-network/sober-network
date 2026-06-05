@@ -1,119 +1,399 @@
-<!-- ── Hero ───────────────────────────────────────────────────────────────── -->
-<section class="hero">
-  <div class="hero-inner">
-    <div class="hero-text">
-      <h1 class="hero-title">
-        <mat-icon class="hero-icon">self_improvement</mat-icon>
-        Sober Network
-      </h1>
-      <p class="hero-tagline">
-        A private, secure space for A.A. home groups — stay connected,
-        share resources, and support one another between meetings.
-      </p>
-      <div class="hero-actions">
-        <ng-container *ngIf="auth.isLoggedIn; else guestActions">
-          <a mat-raised-button color="primary" routerLink="/dashboard">
-            <mat-icon>dashboard</mat-icon>
-            Go to Dashboard
-          </a>
-        </ng-container>
-        <ng-template #guestActions>
-          <a mat-raised-button color="primary" routerLink="/auth/register">
-            <mat-icon>person_add</mat-icon>
-            Join Your Group
-          </a>
-          <a mat-stroked-button routerLink="/auth/login">Sign In</a>
-        </ng-template>
-      </div>
-    </div>
-    <div class="hero-steps">
-      <div class="hero-step">
-        <mat-icon color="primary">lock</mat-icon>
-        <span>Private &amp; Secure</span>
-      </div>
-      <div class="hero-step">
-        <mat-icon color="primary">groups</mat-icon>
-        <span>Home Group Focused</span>
-      </div>
-      <div class="hero-step">
-        <mat-icon color="primary">volunteer_activism</mat-icon>
-        <span>Tradition Aligned</span>
-      </div>
-    </div>
-  </div>
-</section>
+<!-- ══════════════ HERO ══════════════════════════════════════════════════════ -->
+<section class="sn-hero">
+  <div class="hero-eyebrow">Private · Secure · Tradition-aligned</div>
 
-<!-- ── Newcomer CTA ───────────────────────────────────────────────────────── -->
-<section class="newcomer-section">
-  <mat-card class="newcomer-card">
-    <mat-card-content>
-      <mat-icon class="newcomer-icon">favorite</mat-icon>
-      <h2>New to A.A.?</h2>
-      <p>
-        You are not alone. If you think you may have a problem with alcohol,
-        A.A. members have been where you are. The only requirement for membership
-        is a desire to stop drinking.
-      </p>
-      <a mat-raised-button color="accent" href="https://www.aa.org/find-aa" target="_blank" rel="noopener">
-        <mat-icon>search</mat-icon>
+  <h1 class="hero-h1 fade-up">
+    A private home for your<br>
+    <span class="serif-line">home group to stay close.</span>
+  </h1>
+
+  <p class="hero-sub fade-up delay-1">
+    Sober Network gives A.A. home groups a secure, anonymous hub —
+    phone lists, meetings, bulletins, and real connection, all guided by the 12&nbsp;Traditions.
+  </p>
+
+  <div class="hero-ctas fade-up delay-2">
+    <ng-container *ngIf="auth.isLoggedIn; else guestCtas">
+      <a routerLink="/dashboard" class="btn-dark">
+        Go to Dashboard
+        <span class="arrow-circle">
+          <svg viewBox="0 0 12 12" fill="none"><path d="M1 11L11 1M11 1H4.5M11 1V7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </a>
+    </ng-container>
+    <ng-template #guestCtas>
+      <button type="button" (click)="openRegister()" class="btn-dark">
+        Join Your Group
+        <span class="arrow-circle">
+          <svg viewBox="0 0 12 12" fill="none"><path d="M1 11L11 1M11 1H4.5M11 1V7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </button>
+      <a routerLink="/meetings" class="btn-outline">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 7.5L7 5L9 7.5M7 5V10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Find a Meeting Near You
       </a>
-    </mat-card-content>
-  </mat-card>
-</section>
-
-<!-- ── Groups ─────────────────────────────────────────────────────────────── -->
-<section class="groups-section page-container">
-  <h2 class="section-title">Home Groups on Sober Network</h2>
-
-  <div *ngIf="loadingGroups" class="groups-loading">
-    <mat-spinner diameter="36"></mat-spinner>
+    </ng-template>
   </div>
 
-  <div *ngIf="!loadingGroups && !auth.isLoggedIn" class="groups-empty">
-    <mat-icon>lock</mat-icon>
-    <p>Sign in to see your home groups.</p>
-    <a mat-button color="primary" routerLink="/auth/login">Sign In</a>
-  </div>
-
-  <div *ngIf="!loadingGroups && auth.isLoggedIn && groups.length === 0" class="groups-empty">
-    <mat-icon>group_off</mat-icon>
-    <p>No groups yet — be the first to start one.</p>
-    <a mat-button color="primary" routerLink="/auth/register">Get started</a>
-  </div>
-
-  <div class="groups-grid" *ngIf="!loadingGroups && groups.length > 0">
-    <mat-card class="group-card" *ngFor="let g of groups">
-      <mat-card-header>
-        <mat-icon mat-card-avatar color="primary">group</mat-icon>
-        <mat-card-title>{{ g.name }}</mat-card-title>
-        <mat-card-subtitle>{{ g.memberCount }} member{{ g.memberCount !== 1 ? 's' : '' }}</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content *ngIf="g.description">
-        <p class="group-desc">{{ g.description }}</p>
-      </mat-card-content>
-      <mat-card-actions>
-        <mat-chip *ngIf="g.requiresApproval" class="approval-chip">
-          <mat-icon>approval</mat-icon> Approval required
-        </mat-chip>
-        <span class="spacer"></span>
-        <a mat-button color="primary" [routerLink]="['/group', g.slug]">View</a>
-      </mat-card-actions>
-    </mat-card>
+  <div class="hero-trust fade-up delay-3">
+    <span>Anonymous by design</span>
+    <span class="trust-dot"></span>
+    <span>No ads, no tracking</span>
+    <span class="trust-dot"></span>
+    <span>Fully self-supporting (T7)</span>
+    <span class="trust-dot"></span>
+    <span>Free to join</span>
   </div>
 </section>
 
-<!-- ── 12 Traditions ──────────────────────────────────────────────────────── -->
-<section class="traditions-section page-container" id="traditions">
-  <h2 class="section-title">The 12 Traditions</h2>
-  <p class="section-subtitle">
-    These traditions guide how Sober Network operates. We are not affiliated
-    with Alcoholics Anonymous World Services, Inc.
-  </p>
-  <div class="traditions-grid">
-    <div class="tradition-item" *ngFor="let t of traditions">
-      <span class="tradition-num">{{ t.num }}</span>
-      <p class="tradition-text">{{ t.text }}</p>
+<!-- ══════════════ MARQUEE ══════════════════════════════════════════════════ -->
+<div class="sn-marquee">
+  <div class="marquee-track">
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--sn-tint-violet)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--sn-icon-violet)" stroke-width="1.3"><path d="M7 2L8.5 5.5H12.5L9.5 7.7L10.5 11.5L7 9.3L3.5 11.5L4.5 7.7L1.5 5.5H5.5L7 2Z"/></svg></span>Anonymity First</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--sn-tint-rose)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--sn-icon-rose)" stroke-width="1.3"><path d="M4 7.5L5.5 3H9L11 6.5L9 10H5.5L4 7.5Z"/></svg></span>Private Phone Lists</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--sn-tint-sky)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--sn-icon-sky)" stroke-width="1.3"><rect x="2" y="2" width="10" height="10" rx="2"/><path d="M5 7H9M7 5V9" stroke-linecap="round"/></svg></span>Meeting Management</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--sn-tint-green)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--sn-icon-green)" stroke-width="1.3"><circle cx="7" cy="7" r="4.5"/><path d="M7 4.5V7L9 8.5" stroke-linecap="round"/></svg></span>Group Autonomy (T4)</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--sn-tint-amber)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--sn-icon-amber)" stroke-width="1.3"><path d="M7 1C3.7 1 1 3.7 1 7C1 10.3 3.7 13 7 13" stroke-linecap="round"/><path d="M13 9L11 7L9 9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>No Ads. No Tracking.</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--sn-tint-teal)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--sn-icon-teal)" stroke-width="1.3"><path d="M3.5 7L5.5 9.5L10.5 4.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Fully Self-Supporting (T7)</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--sn-tint-indigo)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--sn-icon-indigo)" stroke-width="1.3"><circle cx="5" cy="4.5" r="2"/><circle cx="9.5" cy="4.5" r="2"/><path d="M1 12C1 9.8 2.8 8 5 8" stroke-linecap="round"/><path d="M7 10C7.7 9 8.7 8 9.5 8C11.5 8 13 9.7 13 11.5" stroke-linecap="round"/></svg></span>Members-Only Access</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--sn-tint-coral)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--sn-icon-coral)" stroke-width="1.3"><path d="M4 10H3C2.4 10 2 9.6 2 9V3C2 2.4 2.4 2 3 2H11C11.6 2 12 2.4 12 3V9C12 9.6 11.6 10 11 10H8L7 12.5L6 10H4Z" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Group Bulletin Board</div>
+    <!-- Duplicate set for seamless loop -->
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--sn-tint-violet)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--sn-icon-violet)" stroke-width="1.3"><path d="M7 2L8.5 5.5H12.5L9.5 7.7L10.5 11.5L7 9.3L3.5 11.5L4.5 7.7L1.5 5.5H5.5L7 2Z"/></svg></span>Anonymity First</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--sn-tint-rose)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--sn-icon-rose)" stroke-width="1.3"><path d="M4 7.5L5.5 3H9L11 6.5L9 10H5.5L4 7.5Z"/></svg></span>Private Phone Lists</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--sn-tint-sky)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--sn-icon-sky)" stroke-width="1.3"><rect x="2" y="2" width="10" height="10" rx="2"/><path d="M5 7H9M7 5V9" stroke-linecap="round"/></svg></span>Meeting Management</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--sn-tint-green)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--sn-icon-green)" stroke-width="1.3"><circle cx="7" cy="7" r="4.5"/><path d="M7 4.5V7L9 8.5" stroke-linecap="round"/></svg></span>Group Autonomy (T4)</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--sn-tint-amber)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--sn-icon-amber)" stroke-width="1.3"><path d="M7 1C3.7 1 1 3.7 1 7C1 10.3 3.7 13 7 13" stroke-linecap="round"/><path d="M13 9L11 7L9 9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>No Ads. No Tracking.</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--sn-tint-teal)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--sn-icon-teal)" stroke-width="1.3"><path d="M3.5 7L5.5 9.5L10.5 4.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Fully Self-Supporting (T7)</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--sn-tint-indigo)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--sn-icon-indigo)" stroke-width="1.3"><circle cx="5" cy="4.5" r="2"/><circle cx="9.5" cy="4.5" r="2"/><path d="M1 12C1 9.8 2.8 8 5 8" stroke-linecap="round"/><path d="M7 10C7.7 9 8.7 8 9.5 8C11.5 8 13 9.7 13 11.5" stroke-linecap="round"/></svg></span>Members-Only Access</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--sn-tint-coral)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--sn-icon-coral)" stroke-width="1.3"><path d="M4 10H3C2.4 10 2 9.6 2 9V3C2 2.4 2.4 2 3 2H11C11.6 2 12 2.4 12 3V9C12 9.6 11.6 10 11 10H8L7 12.5L6 10H4Z" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Group Bulletin Board</div>
+  </div>
+</div>
+
+<!-- ══════════════ ABOUT ══════════════════════════════════════════════════════ -->
+<section id="about" class="sn-section sn-about">
+  <div class="section-wrap">
+    <a href="#" class="back-to-top" aria-label="Back to top">
+      <svg viewBox="0 0 12 12" fill="none"><path d="M1 9L6 4L11 9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <div class="about-layout">
+      <div>
+        <p class="section-eyebrow">About Sober Network</p>
+        <h2 class="section-h2 fade-up">
+          Built around your group,<br>guided by <em class="serif-accent">tradition.</em>
+        </h2>
+        <p class="section-body fade-up delay-1">
+          We help A.A. home groups stay connected between meetings — phone lists,
+          schedules, bulletin boards, shared documents — all without compromising
+          anyone's anonymity or crossing group boundaries.
+          No ads. No engagement tricks. No outside contributions.
+          Just the tools your group actually needs.
+        </p>
+        <div class="about-badges fade-up delay-2">
+          <span class="badge badge-violet">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="4" y="7" width="6" height="6" rx="1.5"/><path d="M5 7V5C5 3.9 5.9 3 7 3C8.1 3 9 3.9 9 5V7" stroke-linecap="round"/></svg>
+            Anonymous by design
+          </span>
+          <span class="badge badge-green">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3.5 7L5.5 9.5L10.5 4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            12-Tradition compliant
+          </span>
+          <span class="badge badge-amber">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7" cy="7" r="5.5"/><path d="M7 4V7L9 9" stroke-linecap="round"/></svg>
+            No outside funding
+          </span>
+          <span class="badge badge-sky">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M7 2C4.2 2 2 4.2 2 7C2 9.8 4.2 12 7 12C9.8 12 12 9.8 12 7"/><path d="M10 2L12 4L10 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Multi-group membership
+          </span>
+        </div>
+      </div>
+
+      <div class="stats-col fade-up delay-1">
+        <img src="https://static.vecteezy.com/system/resources/previews/055/160/636/non_2x/a-colorful-logo-with-people-holding-hand-free-vector.jpg"
+             alt="Community holding hands" class="about-img">
+        <div class="stat-row">
+          <div class="stat-number"><span class="stat-plus">+</span>240</div>
+          <div class="stat-label">Members enrolled across all groups</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-number"><span class="stat-plus">+</span>18</div>
+          <div class="stat-label">Active home groups on the network</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-number"><span class="stat-plus">+</span>60</div>
+          <div class="stat-label">Meetings listed this week</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-number">12</div>
+          <div class="stat-label">Traditions guiding every design decision</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ FEATURES ══════════════════════════════════════════════════ -->
+<section id="features" class="sn-section sn-features">
+  <div class="section-wrap">
+    <a href="#" class="back-to-top" aria-label="Back to top">
+      <svg viewBox="0 0 12 12" fill="none"><path d="M1 9L6 4L11 9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <div class="features-header-row">
+      <div>
+        <p class="section-eyebrow">Platform Features</p>
+        <h2 class="section-h2 fade-up">Where <em class="serif-accent">community</em><br>meets recovery.</h2>
+      </div>
+      <p class="features-sub fade-up delay-1">
+        Every feature passes a single test: <em>"Does this help carry the message to the alcoholic who still suffers?"</em> If it doesn't, it doesn't ship.
+      </p>
+    </div>
+
+    <div class="features-grid">
+      <!-- Live features -->
+      <div class="feature-card fade-up">
+        <div class="feature-icon" style="background:var(--sn-tint-violet)">
+          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-violet)" stroke-width="1.5" stroke-linecap="round"><path d="M7 8.5V6C7 4.3 8.3 3 10 3C11.7 3 13 4.3 13 6V8.5"/><rect x="4" y="8.5" width="12" height="9" rx="2"/><circle cx="10" cy="13" r="1.5" fill="var(--sn-icon-violet)"/></svg>
+        </div>
+        <div class="feature-title">Private Phone List</div>
+        <div class="feature-desc">Members opt-in their phone numbers. Only authenticated group members can see the list. T11/T12 enforced at the data layer — never cached or indexed.</div>
+        <span class="feature-badge live">LIVE</span>
+      </div>
+      <div class="feature-card fade-up delay-1">
+        <div class="feature-icon" style="background:var(--sn-tint-rose)">
+          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-rose)" stroke-width="1.5" stroke-linecap="round"><circle cx="7.5" cy="7" r="2.5"/><circle cx="12.5" cy="7" r="2.5"/><path d="M3 16C3 13.2 5 11 7.5 11"/><path d="M10 13C10.8 11.8 11.6 11 12.5 11C15 11 17 13 17 16"/></svg>
+        </div>
+        <div class="feature-title">Group Hub</div>
+        <div class="feature-desc">Each home group gets its own private space with a member roster, meeting details, and quick-access tools — all gated to members only.</div>
+        <span class="feature-badge live">LIVE</span>
+      </div>
+      <div class="feature-card fade-up delay-2">
+        <div class="feature-icon" style="background:var(--sn-tint-sky)">
+          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-sky)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8H17M7 4V6M13 4V6"/></svg>
+        </div>
+        <div class="feature-title">Meeting Management</div>
+        <div class="feature-desc">Manage recurring schedules, formats (in-person, online, hybrid), Zoom links, and passcodes. Members-only Zoom details never shown publicly.</div>
+        <span class="feature-badge live">LIVE</span>
+      </div>
+      <div class="feature-card fade-up delay-3">
+        <div class="feature-icon" style="background:var(--sn-tint-amber)">
+          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-amber)" stroke-width="1.5" stroke-linecap="round"><circle cx="10" cy="10" r="7"/><path d="M7 10L9.5 12.5L14 7.5" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="feature-title">Public Meeting Finder</div>
+        <div class="feature-desc">A public map for finding open meetings near you — no login required. Only meeting times and formats shown. No member data exposed (T11/T12).</div>
+        <span class="feature-badge live">LIVE</span>
+      </div>
+      <!-- Coming soon -->
+      <div class="feature-card fade-up">
+        <div class="feature-icon" style="background:var(--sn-tint-green)">
+          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-green)" stroke-width="1.5" stroke-linecap="round"><path d="M5 12H4C3.4 12 3 11.6 3 11V4C3 3.4 3.4 3 4 3H16C16.6 3 17 3.4 17 4V11C17 11.6 16.6 12 15 12H13L10 16L7 12H5Z" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="feature-title">Bulletin Board</div>
+        <div class="feature-desc">Trusted servants post announcements, event reminders, and group conscience calls. New members go through a probationary moderation queue.</div>
+        <span class="feature-badge soon">COMING SOON</span>
+      </div>
+      <div class="feature-card fade-up delay-1">
+        <div class="feature-icon" style="background:var(--sn-tint-teal)">
+          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-teal)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8H17M7 4V6M13 4V6M7 12H10M7 15H13"/></svg>
+        </div>
+        <div class="feature-title">Events Calendar</div>
+        <div class="feature-desc">Group-scoped events for speaker nights, chip ceremonies, and group conscience meetings. All visibility rules respect group autonomy (T4).</div>
+        <span class="feature-badge soon">COMING SOON</span>
+      </div>
+      <div class="feature-card fade-up delay-2">
+        <div class="feature-icon" style="background:var(--sn-tint-indigo)">
+          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-indigo)" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="2" width="12" height="16" rx="2"/><path d="M7 7H13M7 10H13M7 13H10"/></svg>
+        </div>
+        <div class="feature-title">Document Library</div>
+        <div class="feature-desc">Store group conscience notes, reading lists, formats, and meeting agendas. Accessible only to that group's members — no cross-group access ever (T4).</div>
+        <span class="feature-badge soon">COMING SOON</span>
+      </div>
+      <div class="feature-card fade-up delay-3">
+        <div class="feature-icon" style="background:var(--sn-tint-coral)">
+          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-coral)" stroke-width="1.5" stroke-linecap="round"><path d="M10 3L12 7H16L13 10L14 14L10 12L6 14L7 10L4 7H8L10 3Z"/></svg>
+        </div>
+        <div class="feature-title">Sobriety Milestones</div>
+        <div class="feature-desc">Opt-in anniversary recognition — members choose whether to share. Chip ceremonies posted to the group bulletin. Sobriety date always private.</div>
+        <span class="feature-badge soon">COMING SOON</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ HOW IT WORKS ══════════════════════════════════════════════ -->
+<section id="how-it-works" class="sn-section sn-hiw">
+  <div class="section-wrap">
+    <a href="#" class="back-to-top" aria-label="Back to top">
+      <svg viewBox="0 0 12 12" fill="none"><path d="M1 9L6 4L11 9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <p class="section-eyebrow">How it works</p>
+    <h2 class="section-h2 fade-up">Your group online in <em class="serif-accent">three steps.</em></h2>
+    <p class="section-body fade-up delay-1">
+      A trusted servant sets up the group. Members join privately.
+      Everyone stays connected — no tech expertise required.
+    </p>
+
+    <div class="steps-grid">
+      <div class="step-card fade-up">
+        <div class="step-num">01</div>
+        <div class="step-title">A trusted servant creates the group</div>
+        <div class="step-desc">An admin registers the home group with a private slug. They set whether new members require approval — group conscience decides (T2). Admin is a trusted servant role, not a ruler.</div>
+      </div>
+      <div class="step-card fade-up delay-1">
+        <div class="step-num">02</div>
+        <div class="step-title">Members join with a private invite link</div>
+        <div class="step-desc">Members register with first name only. Last name, phone, sobriety date, and location are always optional — never required. One account can belong to multiple groups (T3).</div>
+      </div>
+      <div class="step-card fade-up delay-2">
+        <div class="step-num">03</div>
+        <div class="step-title">Stay connected between meetings</div>
+        <div class="step-desc">Access the phone list, check the meeting schedule, read announcements, and reach out to other members — all inside a private, members-only group space.</div>
+      </div>
+    </div>
+
+    <div class="steps-visual fade-up delay-3">
+      <img src="https://static.vecteezy.com/system/resources/previews/058/730/043/non_2x/teamwork-logo-icon-design-free-vector.jpg"
+           alt="Teamwork and community connection">
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ MY GROUPS (logged-in only) ════════════════════════════════ -->
+<section class="sn-section sn-groups" *ngIf="auth.isLoggedIn">
+  <div class="section-wrap">
+    <p class="section-eyebrow">Your groups</p>
+    <h2 class="section-h2 fade-up">Welcome back to <em class="serif-accent">your network.</em></h2>
+
+    <div *ngIf="loadingGroups" class="groups-loading">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+    </div>
+
+    <div *ngIf="!loadingGroups && groups.length === 0" class="groups-empty">
+      <p>No groups yet — be the first to start one.</p>
+      <button type="button" (click)="openRegister()" class="btn-dark-sm">Get started</button>
+    </div>
+
+    <div class="groups-grid" *ngIf="!loadingGroups && groups.length > 0">
+      <a class="group-card fade-up" *ngFor="let g of groups; let i = index"
+         [routerLink]="['/group', g.slug]"
+         [style.animation-delay]="(i * 0.08) + 's'">
+        <div class="group-card-header">
+          <div class="group-initial">{{ g.name.charAt(0) }}</div>
+          <div>
+            <div class="group-name">{{ g.name }}</div>
+            <div class="group-meta">{{ g.memberCount }} member{{ g.memberCount !== 1 ? 's' : '' }}</div>
+          </div>
+          <span class="group-approval" *ngIf="g.requiresApproval">Approval required</span>
+        </div>
+        <p class="group-desc" *ngIf="g.description">{{ g.description }}</p>
+        <span class="group-arrow">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ NEWCOMER CTA (guest only) ═════════════════════════════════ -->
+<section class="sn-newcomer" *ngIf="!auth.isLoggedIn">
+  <div class="section-wrap">
+    <div class="newcomer-inner">
+      <div class="newcomer-text fade-up">
+        <h2>New to A.A.?<br>You are <em class="serif-accent">not alone.</em></h2>
+        <p>
+          The only requirement for membership is a desire to stop drinking.
+          No records, no commitments, no judgment. A.A. members have been
+          where you are — and they want to help.
+        </p>
+      </div>
+      <div class="newcomer-actions fade-up delay-1">
+        <a href="https://www.aa.org/find-aa" target="_blank" rel="noopener" class="btn-light">
+          Find a Meeting Near You
+          <span class="arrow-circle-dark">
+            <svg viewBox="0 0 12 12" fill="none"><path d="M1 11L11 1M11 1H4.5M11 1V7.5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+        </a>
+        <a href="https://www.aa.org" target="_blank" rel="noopener" class="btn-outline-white">Visit AA.org</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ DESIGN PRINCIPLES ════════════════════════════════════════ -->
+<section id="principles" class="sn-section sn-principles">
+  <div class="section-wrap">
+    <a href="#" class="back-to-top" aria-label="Back to top">
+      <svg viewBox="0 0 12 12" fill="none"><path d="M1 9L6 4L11 9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <p class="section-eyebrow">Design Principles</p>
+    <h2 class="section-h2 fade-up">Three <em class="serif-accent">unbreakable</em> commitments.</h2>
+    <p class="section-body fade-up delay-1">Not policies. Not settings. Hard-coded architectural constraints.</p>
+
+    <div class="principles-grid">
+      <div class="principle-card fade-up">
+        <div class="pi-wrap" style="background:var(--sn-tint-violet)">
+          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-violet)" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="9" width="12" height="9" rx="2"/><path d="M7 9V6.5C7 5 8.3 3.5 10 3.5C11.7 3.5 13 5 13 6.5V9"/></svg>
+        </div>
+        <div class="principle-title">Anonymity is non-negotiable</div>
+        <div class="principle-desc">No public profiles. No member directories. No searchable rosters. Display names default to first name only. T11 and T12 are enforced at the query layer — not just the UI.</div>
+      </div>
+      <div class="principle-card fade-up delay-1">
+        <div class="pi-wrap" style="background:var(--sn-tint-green)">
+          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-green)" stroke-width="1.5" stroke-linecap="round"><path d="M10 2L3 5.5V10.5C3 14 6 17 10 18C14 17 17 14 17 10.5V5.5L10 2Z"/><path d="M7 10L9.5 12.5L14 7.5" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="principle-title">Groups stay autonomous</div>
+        <div class="principle-desc">Every group is its own island. Members of Group A cannot see Group B's phone list, members, or announcements. T4 is enforced at the query layer with mandatory group_id filters.</div>
+      </div>
+      <div class="principle-card fade-up delay-2">
+        <div class="pi-wrap" style="background:var(--sn-tint-amber)">
+          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-amber)" stroke-width="1.5" stroke-linecap="round"><path d="M10 3C10 3 5 6 5 11C5 13.8 7.2 16 10 16C12.8 16 15 13.8 15 11C15 6 10 3 10 3Z"/><path d="M10 9V12"/></svg>
+        </div>
+        <div class="principle-title">No engagement mechanics</div>
+        <div class="principle-desc">No likes, streaks, leaderboards, or notifications engineered to pull you back. Our primary purpose is carrying the message, not maximizing time on site (T5).</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 12 TRADITIONS ════════════════════════════════════════════ -->
+<section id="traditions" class="sn-section sn-traditions">
+  <div class="section-wrap">
+    <a href="#" class="back-to-top" aria-label="Back to top">
+      <svg viewBox="0 0 12 12" fill="none"><path d="M1 9L6 4L11 9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <div class="traditions-layout">
+      <div class="traditions-left fade-up">
+        <p class="section-eyebrow">Our foundation</p>
+        <h2 class="section-h2">The 12<br><em class="serif-accent">Traditions.</em></h2>
+        <p class="traditions-intro">
+          Not suggestions — the foundations A.A. has found essential for unity and survival.
+          Every feature, query, and design decision on this platform is evaluated against them.
+        </p>
+        <p class="traditions-note">
+          Sober Network is not affiliated with Alcoholics Anonymous World Services, Inc.
+        </p>
+      </div>
+      <div class="traditions-list fade-up delay-1">
+        <div class="tradition-row" *ngFor="let t of traditions">
+          <span class="trad-num">{{ t.num }}</span>
+          <p class="trad-text">{{ t.text }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ FINAL CTA ═════════════════════════════════════════════════ -->
+<section class="sn-final-cta" *ngIf="!auth.isLoggedIn">
+  <div class="final-cta-inner fade-up">
+    <p class="section-eyebrow" style="text-align:center">Ready to get started?</p>
+    <h2>Your group deserves<br><em class="serif-accent">a private home.</em></h2>
+    <p>Set up your group in minutes. Free, anonymous, tradition-aligned.</p>
+    <div class="final-cta-actions">
+      <button type="button" (click)="openRegister()" class="btn-dark">
+        Join Your Group
+        <span class="arrow-circle">
+          <svg viewBox="0 0 12 12" fill="none"><path d="M1 11L11 1M11 1H4.5M11 1V7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </button>
+      <a routerLink="/meetings" class="btn-outline">Find a Meeting</a>
     </div>
   </div>
 </section>

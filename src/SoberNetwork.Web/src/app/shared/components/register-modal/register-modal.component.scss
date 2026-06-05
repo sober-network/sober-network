@@ -1,0 +1,228 @@
+// ── Register Modal — v1.3 design system ───────────────────────────────────────
+// Mirrors login-modal styles exactly; both use lm-* class names.
+
+:host { display: block; }
+
+.lm-wrap {
+  position: relative;
+  background: var(--sn-bg, #f7f5f2);
+  border-radius: 20px;
+  padding: 40px 36px 32px;
+  width: 100%;
+  max-width: 420px;
+  font-family: 'Inter', sans-serif;
+}
+
+// ── Close button ──────────────────────────────────────────────────────────────
+.lm-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(17,17,16,0.12);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sn-text-mid, #3d3d3a);
+  padding: 0;
+  transition: background 0.15s;
+
+  svg { width: 14px; height: 14px; }
+
+  &:hover { background: rgba(17,17,16,0.06); }
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+.lm-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.lm-logo-ring {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #f06292, #ff9800, #ffeb3b, #4caf50, #2196f3, #9c27b0, #f06292);
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+
+  svg {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--sn-bg, #f7f5f2);
+    padding: 8px;
+  }
+}
+
+.lm-title {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--sn-text, #111110);
+  margin: 0 0 4px;
+}
+
+.lm-subtitle {
+  font-size: 0.875rem;
+  color: var(--sn-text-muted, #7a7a75);
+  margin: 0;
+}
+
+// ── Form ──────────────────────────────────────────────────────────────────────
+.lm-form { display: flex; flex-direction: column; gap: 14px; }
+
+.lm-field { display: flex; flex-direction: column; gap: 6px; }
+
+.lm-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--sn-text-mid, #3d3d3a);
+  letter-spacing: 0.01em;
+}
+
+.lm-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid rgba(17,17,16,0.18);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.7);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9375rem;
+  color: var(--sn-text, #111110);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &::placeholder { color: var(--sn-text-muted, #7a7a75); }
+
+  &:focus {
+    border-color: rgba(17,17,16,0.4);
+    box-shadow: 0 0 0 3px rgba(17,17,16,0.06);
+  }
+}
+
+.lm-input-wrap {
+  position: relative;
+
+  .lm-input { padding-right: 44px; }
+}
+
+.lm-eye {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--sn-text-muted, #7a7a75);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg { width: 18px; height: 18px; }
+  &:hover { color: var(--sn-text-mid, #3d3d3a); }
+}
+
+.lm-field-error {
+  font-size: 0.8rem;
+  color: #c0392b;
+}
+
+.lm-error {
+  font-size: 0.875rem;
+  color: #c0392b;
+  margin: 0;
+  padding: 8px 12px;
+  background: rgba(192,57,43,0.07);
+  border-radius: 8px;
+}
+
+// ── Submit ────────────────────────────────────────────────────────────────────
+.lm-submit {
+  margin-top: 4px;
+  height: 46px;
+  border-radius: 100px;
+  border: none;
+  background: var(--sn-cta-bg, #1a1a18);
+  color: #fff;
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity 0.15s;
+
+  &:hover:not(:disabled) { opacity: 0.88; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  mat-spinner { --mat-progress-spinner-active-indicator-color: #fff; }
+}
+
+// ── Success state ─────────────────────────────────────────────────────────────
+.lm-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 12px 0 8px;
+  gap: 8px;
+}
+
+.lm-success-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(42,148,89,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2a9459;
+  margin-bottom: 6px;
+
+  svg { width: 28px; height: 28px; }
+}
+
+.lm-success-note {
+  font-size: 0.85rem;
+  color: var(--sn-text-muted, #7a7a75);
+  margin: 0 0 16px;
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+.lm-footer {
+  margin: 20px 0 0;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--sn-text-muted, #7a7a75);
+}
+
+.lm-register-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  font-weight: 600;
+  color: var(--sn-text, #111110);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  &:hover { opacity: 0.7; }
+}

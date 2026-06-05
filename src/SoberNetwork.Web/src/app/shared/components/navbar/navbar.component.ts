@@ -1,12 +1,12 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, AfterViewInit, OnDestroy, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDialog } from '@angular/material/dialog';
 import { NavigationEnd } from '@angular/router';
+import { LoginModalComponent } from '../login-modal/login-modal.component';
 import { catchError, combineLatest, distinctUntilChanged, filter, map, Observable, of, startWith, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '@app/core/services/auth.service';
@@ -19,8 +19,6 @@ import { CurrentUser, GroupResponse } from '@app/core/models';
   imports: [
     CommonModule,
     RouterModule,
-    MatToolbarModule,
-    MatButtonModule,
     MatIconModule,
     MatMenuModule,
     MatDividerModule,
@@ -28,13 +26,20 @@ import { CurrentUser, GroupResponse } from '@app/core/models';
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
 })
-export class NavbarComponent {
+export class NavbarComponent implements AfterViewInit, OnDestroy {
   private readonly auth = inject(AuthService);
   private readonly groupService = inject(GroupService);
   private readonly router = inject(Router);
+  private readonly zone = inject(NgZone);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly dialog = inject(MatDialog);
 
   currentUser$: Observable<CurrentUser | null> = this.auth.currentUser$;
   myGroups: GroupResponse[] = [];
+  activeAnchor: string | null = null;
+
+  private sectionObserver: IntersectionObserver | null = null;
+  private readonly sectionIds = ['about', 'features', 'how-it-works', 'roadmap', 'traditions'];
 
   constructor() {
     const nav$ = this.router.events.pipe(
@@ -47,6 +52,29 @@ export class NavbarComponent {
       switchMap(user => user ? this.groupService.getMyGroups().pipe(catchError(() => of([]))) : of([])),
       takeUntilDestroyed(),
     ).subscribe(groups => (this.myGroups = groups));
+
+    // Re-init scroll-spy on each navigation (sections appear after router-outlet renders)
+    this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd),
+      takeUntilDestroyed(),
+    ).subscribe(() => {
+      this.teardownScrollSpy();
+      if (this.router.url === '/') {
+        setTimeout(() => this.setupScrollSpy(), 150);
+      } else {
+        this.activeAnchor = null;
+      }
+    });
+  }
+
+  ngAfterViewInit(): void {
+    if (this.router.url === '/') {
+      setTimeout(() => this.setupScrollSpy(), 150);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.teardownScrollSpy();
   }
 
   navigateToGroup(slug: string): void {
@@ -55,5 +83,52 @@ export class NavbarComponent {
 
   logout(): void {
     this.auth.logout();
+  }
+
+  openSignIn(): void {
+    this.dialog.open(LoginModalComponent, {
+      panelClass: 'sn-login-panel',
+      maxWidth:   '100vw',
+      width:      '440px',
+      autoFocus:  'first-tabbable',
+    });
+  }
+
+  async openRegister(): Promise<void> {
+    const { RegisterModalComponent } = await import('../register-modal/register-modal.component');
+    this.dialog.open(RegisterModalComponent, {
+      panelClass: 'sn-login-panel',
+      maxWidth:   '100vw',
+      width:      '440px',
+      autoFocus:  'first-tabbable',
+    });
+  }
+
+  private setupScrollSpy(): void {
+    if (typeof window === 'undefined') return;
+
+    this.sectionObserver = new IntersectionObserver(
+      (entries) => {
+        this.zone.run(() => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              this.activeAnchor = entry.target.id;
+              this.cdr.markForCheck();
+            }
+          }
+        });
+      },
+      { rootMargin: '-10% 0px -55% 0px', threshold: 0 },
+    );
+
+    for (const id of this.sectionIds) {
+      const el = document.getElementById(id);
+      if (el) this.sectionObserver.observe(el);
+    }
+  }
+
+  private teardownScrollSpy(): void {
+    this.sectionObserver?.disconnect();
+    this.sectionObserver = null;
   }
 }

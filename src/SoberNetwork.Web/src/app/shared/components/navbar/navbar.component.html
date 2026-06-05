@@ -1,68 +1,87 @@
-<mat-toolbar color="primary" class="sn-navbar">
-  <!-- Brand -->
-  <a routerLink="/" class="brand" mat-button>
-    <mat-icon>self_improvement</mat-icon>
-    <span class="brand-name">Sober Network</span>
-  </a>
+<!-- ══ SOBER NETWORK NAV ═══════════════════════════════════════════════════ -->
+<nav class="sn-nav">
+  <div class="nav-inner">
 
-  <span class="spacer"></span>
-
-  <!-- Find a Meeting — visible to all users (public, T11/T12 reviewed) -->
-  <a mat-button routerLink="/meetings" routerLinkActive="active-link">
-    <mat-icon>search</mat-icon>
-    Find a Meeting
-  </a>
-
-  <ng-container *ngIf="currentUser$ | async as user; else guestNav">
-    <!-- Group switcher -->
-    <button mat-button [matMenuTriggerFor]="groupMenu" *ngIf="myGroups.length > 0">
-      <mat-icon>groups</mat-icon>
-      My Groups
-      <mat-icon>arrow_drop_down</mat-icon>
-    </button>
-    <mat-menu #groupMenu="matMenu">
-      <button mat-menu-item *ngFor="let g of myGroups" (click)="navigateToGroup(g.slug)">
-        <mat-icon>group</mat-icon>
-        {{ g.name }}
-      </button>
-    </mat-menu>
-
-    <!-- Dashboard -->
-    <a mat-button routerLink="/dashboard" routerLinkActive="active-link">
-      <mat-icon>dashboard</mat-icon>
-      Dashboard
+    <!-- Logo -->
+    <a routerLink="/" class="nav-brand">
+      <span class="nav-logo-ring">
+        <svg viewBox="0 0 30 30" fill="none">
+          <path d="M10 15 C10 11.5 12.3 9 15 9 C17.7 9 20 11.5 20 15 C20 17.3 18.8 19.2 17 20.2 L15 22"
+                stroke="#1a1a18" stroke-width="1.8" stroke-linecap="round"/>
+          <circle cx="15" cy="15" r="2.8" fill="#1a1a18" opacity="0.55"/>
+        </svg>
+      </span>
+      <span class="brand-name">Sober Network</span>
     </a>
 
-    <!-- Admin link -->
-    <a mat-button routerLink="/admin" routerLinkActive="active-link" *ngIf="user.isSuperAdmin">
-      <mat-icon>admin_panel_settings</mat-icon>
-      Admin
-    </a>
-
-    <!-- User menu -->
-    <button mat-icon-button [matMenuTriggerFor]="userMenu" aria-label="User menu">
-      <mat-icon>account_circle</mat-icon>
-    </button>
-    <mat-menu #userMenu="matMenu">
-      <div class="user-menu-header">
-        <span class="user-name">{{ user.displayName }}</span>
-        <span class="user-email">{{ user.email }}</span>
+    <!-- ── GUEST: landing-section pills ──────────────────────────────────── -->
+    <ng-container *ngIf="!(currentUser$ | async); else loggedInPill">
+      <div class="nav-pill">
+        <a href="#about"        class="nav-link" [class.active]="activeAnchor === 'about'">About</a>
+        <a href="#features"     class="nav-link" [class.active]="activeAnchor === 'features'">Features</a>
+        <a href="#how-it-works" class="nav-link" [class.active]="activeAnchor === 'how-it-works'">How It Works</a>
+        <a href="#roadmap"      class="nav-link" [class.active]="activeAnchor === 'roadmap'">Roadmap</a>
+        <a href="#traditions"   class="nav-link" [class.active]="activeAnchor === 'traditions'">12 Traditions</a>
       </div>
-      <mat-divider></mat-divider>
-      <a mat-menu-item routerLink="/profile">
-        <mat-icon>person</mat-icon>
-        My Profile
-      </a>
-      <mat-divider></mat-divider>
-      <button mat-menu-item (click)="logout()">
-        <mat-icon>logout</mat-icon>
-        Sign Out
-      </button>
-    </mat-menu>
-  </ng-container>
+      <div class="nav-actions">
+        <button class="nav-signin" type="button" (click)="openSignIn()">Sign In</button>
+        <button type="button" class="nav-cta" (click)="openRegister()">
+          Join Your Group
+          <span class="arrow-circle">
+            <svg viewBox="0 0 12 12" fill="none">
+              <path d="M1 11L11 1M11 1H4.5M11 1V7.5" stroke="currentColor"
+                    stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </button>
+      </div>
+    </ng-container>
 
-  <ng-template #guestNav>
-    <a mat-button routerLink="/auth/login">Sign In</a>
-    <a mat-raised-button color="accent" routerLink="/auth/register">Join</a>
-  </ng-template>
-</mat-toolbar>
+    <!-- ── LOGGED IN: app nav pills ──────────────────────────────────────── -->
+    <ng-template #loggedInPill>
+      <ng-container *ngIf="currentUser$ | async as user">
+        <div class="nav-pill">
+          <a routerLink="/meetings"  routerLinkActive="active" class="nav-link">Find a Meeting</a>
+          <button class="nav-link nav-link-btn"
+                  [matMenuTriggerFor]="groupMenu"
+                  *ngIf="myGroups.length > 0">
+            My Groups
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <mat-menu #groupMenu="matMenu">
+            <button mat-menu-item *ngFor="let g of myGroups" (click)="navigateToGroup(g.slug)">
+              {{ g.name }}
+            </button>
+          </mat-menu>
+          <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">Dashboard</a>
+          <a routerLink="/admin"     routerLinkActive="active" class="nav-link"
+             *ngIf="user.isSuperAdmin">Admin</a>
+        </div>
+
+        <div class="nav-actions">
+          <button class="user-pill" [matMenuTriggerFor]="userMenu" aria-label="Account menu">
+            <span class="user-display-name">{{ user.displayName }}</span>
+            <span class="user-initial">{{ user.displayName.charAt(0) | uppercase }}</span>
+          </button>
+          <mat-menu #userMenu="matMenu">
+            <div class="user-menu-header">
+              <span class="user-name">{{ user.displayName }}</span>
+              <span class="user-email">{{ user.email }}</span>
+            </div>
+            <mat-divider></mat-divider>
+            <a mat-menu-item routerLink="/profile">
+              <mat-icon>person</mat-icon>My Profile
+            </a>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="logout()">
+              <mat-icon>logout</mat-icon>Sign Out
+            </button>
+          </mat-menu>
+        </div>
+      </ng-container>
+    </ng-template>
+
+  </div>
+</nav>

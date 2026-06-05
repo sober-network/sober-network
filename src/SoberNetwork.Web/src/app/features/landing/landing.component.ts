@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '@app/core/services/auth.service';
 import { GroupService } from '@app/core/services/group.service';
+import { StatsService, PlatformStats } from '@app/core/services/stats.service';
 import { GroupResponse } from '@app/core/models';
 
 @Component({
@@ -16,10 +17,12 @@ import { GroupResponse } from '@app/core/models';
 export class LandingComponent implements OnInit, AfterViewInit {
   readonly auth = inject(AuthService);
   private readonly groupService = inject(GroupService);
+  private readonly statsService = inject(StatsService);
   private readonly dialog = inject(MatDialog);
 
   groups: GroupResponse[] = [];
   loadingGroups = true;
+  stats: PlatformStats = { memberCount: 0, groupCount: 0, meetingCount: 0 };
 
   readonly traditions = [
     { num: 1,  text: 'Our common welfare should come first; personal recovery depends upon A.A. unity.' },
@@ -37,6 +40,11 @@ export class LandingComponent implements OnInit, AfterViewInit {
   ];
 
   ngOnInit(): void {
+    this.statsService.getStats().subscribe({
+      next: stats => (this.stats = stats),
+      error: () => { /* silently keep zeros — stats are decorative */ },
+    });
+
     if (!this.auth.isLoggedIn) {
       this.loadingGroups = false;
       return;

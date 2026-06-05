@@ -222,10 +222,9 @@ builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
 builder.Services.AddScoped<IGroupService, GroupService>();
-
 builder.Services.AddScoped<IMeetingService, MeetingService>();
-
 builder.Services.AddScoped<IMemberService, MemberService>();
+builder.Services.AddScoped<IStatsService, StatsService>();
 
 // Auth service
 builder.Services.AddScoped<SoberNetwork.Core.Interfaces.IAuthService, SoberNetwork.Infrastructure.Services.AuthService>();

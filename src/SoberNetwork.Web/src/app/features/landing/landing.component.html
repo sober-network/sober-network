@@ -3,8 +3,8 @@
   <div class="hero-eyebrow">Private · Secure · Tradition-aligned</div>
 
   <h1 class="hero-h1 fade-up">
-    A private home for your<br>
-    <span class="serif-line">home group to stay close.</span>
+    A private home<br> for your<br>
+    <span class="serif-line">home group.</span>
   </h1>
 
   <p class="hero-sub fade-up delay-1">
@@ -112,15 +112,15 @@
         <img src="https://static.vecteezy.com/system/resources/previews/055/160/636/non_2x/a-colorful-logo-with-people-holding-hand-free-vector.jpg"
              alt="Community holding hands" class="about-img">
         <div class="stat-row">
-          <div class="stat-number"><span class="stat-plus">+</span>240</div>
+          <div class="stat-number"><span class="stat-plus" *ngIf="stats.memberCount > 0">+</span>{{ stats.memberCount }}</div>
           <div class="stat-label">Members enrolled across all groups</div>
         </div>
         <div class="stat-row">
-          <div class="stat-number"><span class="stat-plus">+</span>18</div>
+          <div class="stat-number"><span class="stat-plus" *ngIf="stats.groupCount > 0">+</span>{{ stats.groupCount }}</div>
           <div class="stat-label">Active home groups on the network</div>
         </div>
         <div class="stat-row">
-          <div class="stat-number"><span class="stat-plus">+</span>60</div>
+          <div class="stat-number"><span class="stat-plus" *ngIf="stats.meetingCount > 0">+</span>{{ stats.meetingCount }}</div>
           <div class="stat-label">Meetings listed this week</div>
         </div>
         <div class="stat-row">

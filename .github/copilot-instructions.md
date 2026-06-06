@@ -5,6 +5,37 @@ They are non-negotiable. Always apply them when generating, reviewing, or refact
 
 ---
 
+## Project Overview & Tech Stack
+
+**Sober Network** is a multi-tenant web platform for A.A. home groups. Anonymity (T11/T12) and group
+autonomy (T4) are first-class architectural constraints. **§1 (The 12 Traditions) is the highest-priority
+rule in this document — run its checklist before any feature work.**
+
+| Area | Technology |
+|------|-----------|
+| Backend | ASP.NET Core **.NET 10** (`net10.0`, C# 14), Clean Architecture across 4 projects (see §12) |
+| Application layer | **MediatR** 12 (commands / queries / handlers) + **FluentValidation** 11 |
+| Data | **PostgreSQL 16** via EF Core 10 + **Npgsql**, snake_case naming convention |
+| Auth | ASP.NET **Identity** (`Guid` keys) + **JWT Bearer**; a global `[Authorize]` fallback policy (see §23) |
+| Email / Geocoding | **Resend** (transactional email) · **Nominatim** / OpenStreetMap (geocoding) |
+| Logging | **Serilog** → console + rolling file `logs/app-.log` |
+| Frontend | **Angular 21** (standalone components, Angular Material, Leaflet maps), TypeScript 5.9 |
+| Frontend tests | **Vitest** (`@angular/build:unit-test` builder) |
+| Hosting | Multi-stage **Docker** image → **Fly.io**; GitHub Actions CI (`.github/workflows/deploy.yml`) |
+
+**Canonical deep-dive doc:** `docs/knowledge.md` — project vision, the full 12-Traditions text with design
+implications, architecture decisions, meeting-finder + platform-stats design, and the UI design system. Treat
+it as the source of truth for product and design intent.
+
+**Run locally** (full detail in §21): `docker compose up -d` starts Postgres → set user-secrets → start the
+`SoberNetwork.Api` project, which applies EF migrations, seeds the superuser, and auto-starts the Angular dev
+server (`ng serve`, http://localhost:4200) via the SPA proxy.
+
+Build & test commands live in **§15**; deployment in **§22**; the `Program.cs` middleware/bootstrap wiring that
+enforces several conventions below is documented in **§23**.
+
+---
+
 ## 1. The 12 Traditions of A.A. — Design Constraints
 
 The platform must honor the 12 Traditions at every design decision. Run this checklist
@@ -51,7 +82,7 @@ resolve it before writing code.
 
 ## 3. General C# Standards
 
-- Use **C# 12** features when appropriate.
+- Target framework is **`net10.0`** (C# 14 is available) — use modern C# features when they improve clarity.
 - Prefer **async/await** everywhere; avoid `Task.Run` unless explicitly required. Async all the way down — never generate synchronous I/O or blocking calls.
 - Use **guard clauses** at the start of methods.
 - Use **interfaces** for abstractions; avoid returning concrete types from public APIs.
@@ -281,9 +312,16 @@ dotnet test tests\SoberNetwork.Api.Tests\SoberNetwork.Api.Tests.csproj
 # Run a single test class or method (xUnit filter syntax)
 dotnet test tests\SoberNetwork.Core.Tests\SoberNetwork.Core.Tests.csproj --filter "GetPhoneListQueryHandlerTests"
 
-# Run frontend tests
-cd src\SoberNetwork.Web && npm test
+# Run frontend tests (Angular 21 — Vitest runner via @angular/build:unit-test)
+cd src\SoberNetwork.Web && npm test            # all specs (ng test)
+
+# Run a single frontend spec or a test by name (Vitest CLI)
+cd src\SoberNetwork.Web && npx vitest run src\app\path\to\thing.spec.ts
+cd src\SoberNetwork.Web && npx vitest run -t "renders the login form"
 ```
+
+> Run each test project separately (as above). Solution-level `dotnet test` fails because
+> `SoberNetwork.Web.esproj` is part of the solution.
 
 ### Test Infrastructure
 
@@ -408,6 +446,7 @@ The approved visual design is captured in `docs/knowledge.md § UI Design System
 - `--bg: #f7f5f2` · `--bg-soft: #f0ede8` · `--text: #111110` · `--text-mid: #3d3d3a` · `--text-muted: #7a7a75`
 - Dark CTA: `--cta-bg: #1a1a18`
 - Sections alternate between `white`, `--bg`, and `--cta-bg` (see knowledge.md for full cadence)
+- **In the Angular app these tokens are `--sn-*` prefixed** (`--sn-bg`, `--sn-cta-bg`, … in `styles.scss :root`). The unprefixed names above describe the standalone HTML mockup. In components **always** reference the prefixed token with a literal fallback — `var(--sn-cta-bg, #1a1a18)` — never `var(--cta-bg)`, which is undefined, silently dropped, and previously produced invisible modal buttons.
 
 ### Components
 - **Nav**: white card pill container; active pill = solid black; rainbow conic-gradient logo ring; gradient accent underline
@@ -452,12 +491,12 @@ The approved visual design is captured in `docs/knowledge.md § UI Design System
   ```
 
 ### Modal Dialog Patterns
-- Use `MatDialog` to open modals; pass `panelClass: 'sn-form-modal'` or `'sn-login-panel'` for styling
+- Use `MatDialog` to open modals; pass `panelClass: ['sn-modal-panel', 'sn-<modal>-panel']` — the generic base (`sn-modal-panel`) strips Material's surface styling so the component owns visuals, and the second class is a **per-modal decorator hook**. Every modal has one — `sn-login-panel`, `sn-register-panel`, `sn-group-panel`, `sn-meeting-panel` — defined in `styles.scss`, where each modal's pane **width** lives (the `open()` config only sets `maxWidth: '100vw'`). The legacy `sn-form-modal` panel class has been removed.
 - Global panel overrides in `styles.scss` remove Material defaults and apply custom radius/shadow
 - Auth modals: `LoginModalComponent` and `RegisterModalComponent` cross-open via **dynamic imports** to avoid circular TypeScript dependencies
   ```typescript
   import('../../login-modal/login-modal.component').then(m => 
-    this.dialog.open(m.LoginModalComponent, { panelClass: 'sn-login-panel' })
+    this.dialog.open(m.LoginModalComponent, { panelClass: ['sn-modal-panel', 'sn-login-panel'] })
   );
   ```
 - Modal success state closes dialog and navigates; error state keeps modal open showing validation errors
@@ -505,6 +544,7 @@ The platform uses a **composition-based** modal system (NOT inheritance) for con
 
 **BaseFormModalComponent** (`src/SoberNetwork.Web/src/app/shared/components/base-form-modal/`)
 - Provides the modal wrapper structure: header (icon, title, subtitle), close button, ng-content outlet
+- Caps height at `90vh`; the projected content (`.lm-body`) scrolls while the header and close button stay fixed, so tall forms keep their action buttons reachable
 - No business logic — purely structural and styling
 - Used by composition: child components wrap their forms in `<app-base-form-modal>` tag
 
@@ -716,16 +756,16 @@ export class NewFormModalComponent implements OnInit {
   }
 
   .btn-primary {
-    background-color: var(--cta-bg);
+    background-color: var(--sn-cta-bg, #1a1a18);
     color: #fff;
     &:hover:not(:disabled) { opacity: 0.88; }
   }
 
   .btn-secondary {
     background-color: transparent;
-    color: var(--text-mid);
-    border: 1px solid var(--text-muted);
-    &:hover:not(:disabled) { background-color: var(--bg-soft); }
+    color: var(--sn-text-mid, #3d3d3a);
+    border: 1px solid var(--sn-text-muted, #7a7a75);
+    &:hover:not(:disabled) { background-color: var(--sn-bg-soft, #f0ede8); }
   }
 }
 ```
@@ -736,20 +776,20 @@ import { MatDialog } from '@angular/material/dialog';
 
 openNewModal(): void {
   this.dialog.open(NewFormModalComponent, {
-    panelClass: 'sn-login-panel',  // Use proven panel class
+    panelClass: ['sn-modal-panel', 'sn-newform-panel'],  // generic base + per-modal hook
     maxWidth: '100vw',
-    width: '440px',
     data: { slug: this.slug },
     autoFocus: 'first-tabbable',
   });
 }
+// Pane width lives in the hook in styles.scss, e.g. .sn-newform-panel { width: 440px; }
 ```
 
 ### Key Principles
 
 1. **Composition over inheritance** — wrap in `<app-base-form-modal>`, don't extend it
 2. **CSS class convention** — always use `.lm-form`, `.lm-field`, `.lm-input` etc. for instant consistency
-3. **panelClass: 'sn-login-panel'** — proven to work; provides rounded corners and correct styling
+3. **panelClass: `['sn-modal-panel', 'sn-<modal>-panel']`** — generic base + a per-modal hook in `styles.scss` where the pane width and any future panel tweaks live
 4. **No Material form fields** — use plain `<input>`, `<textarea>`, `<select>` with custom CSS instead
 5. **Two buttons always** — Cancel (secondary) + Action (primary) in `.form-actions` div
 6. **Error handling** — form-level errors in `.error-message`, field-level in `.lm-field-error`
@@ -831,3 +871,72 @@ ALTER USER sober CREATEDB;
 - **"PendingModelChangesWarning"** — rebuild solution after entity changes; EF Core caches the model
 - **Migration already exists** — if two branches create overlapping migrations, rename one and check for conflicts in generated SQL
 - **Timestamp columns** — always use `TIMESTAMPTZ` (timezone-aware) in PostgreSQL, never `TIMESTAMP`
+
+---
+
+## 21. Local Development Setup
+
+**Prerequisites:** .NET 10 SDK · Node 22+ / npm 11 · Docker (for the local PostgreSQL container).
+
+1. **Start the database** — `docker compose up -d` launches PostgreSQL 16 on `localhost:5432`
+   (db `sobernetwork_dev`, user `sober` / `soberdev`). `docker compose down -v` wipes the volume for a clean
+   reset. The `sober` user needs `CREATEDB` because EF's startup migration may create the database:
+   `ALTER USER sober CREATEDB;` (see §20).
+2. **Set user-secrets** on `SoberNetwork.Api` (never commit these): `Jwt:Secret`, `Resend:ApiKey`, and the
+   `Superuser:Email` / `Superuser:Password` / `Superuser:DisplayName` seed values (see §20). The Postgres
+   connection string is `ConnectionStrings:DefaultConnection` (in `appsettings.Development.json` or secrets).
+3. **Run the API** — start the `SoberNetwork.Api` project (normally from your IDE/debugger). On boot it
+   (a) applies pending EF migrations, (b) idempotently seeds the superuser, and (c) auto-starts the Angular dev
+   server via `Microsoft.AspNetCore.SpaProxy` (`npm start` → `ng serve` on http://localhost:4200).
+4. **Frontend only** (optional) — `cd src\SoberNetwork.Web && npm install && npm start`.
+
+---
+
+## 22. CI/CD & Deployment
+
+**CI** — `.github/workflows/deploy.yml` runs on every push and PR to `main`:
+restore → build `SoberNetwork.Api` (Release) → `dotnet test` both test projects → `npm ci` →
+`ng build --configuration production`. (Each test project is run separately; see §15.)
+
+**Deploy** — on push to `main` only, the workflow runs `flyctl deploy --remote-only` to **Fly.io**
+(app `sober-network`, region `iad`). Fly builds the Docker image remotely.
+
+**Container** — the multi-stage `Dockerfile` builds the Angular SPA (Node stage), publishes the .NET API
+(`sdk:10.0` stage), then copies `dist/sober-network-web/browser` into the runtime image's `wwwroot/`
+(`aspnet:10.0`) so ASP.NET Core serves the SPA. The app listens on HTTP **`:8080`** (Fly terminates TLS at the
+edge and forwards via `X-Forwarded-*`).
+
+**Ops** — health probe is `GET /health` (anonymous). Production secrets (connection string, `Jwt:Secret`,
+`Resend:ApiKey`) are set with `flyctl secrets set` and never committed; non-secret env lives in `fly.toml [env]`.
+For local-only Postgres, use `docker-compose.yml` (it is **not** used in production).
+
+---
+
+## 23. Application Bootstrap & Cross-Cutting Middleware (`Program.cs`)
+
+`Program.cs` wires up several behaviors that *enforce* conventions described elsewhere in this document. When
+adding endpoints or services, assume the following are already in effect:
+
+- **Global `[Authorize]` is enforced by a fallback authorization policy** (`RequireAuthenticatedUser`). This is
+  *why* exposing anything requires `[AllowAnonymous]` **plus** a T11/T12 review comment (see §2). Auth endpoints
+  carry that comment (see `AuthController`).
+- **MediatR pipeline** — handlers are auto-registered by scanning `SoberNetwork.Core`; a
+  `LoggingBehavior<,>` (in `SoberNetwork.Core.Behaviors`) wraps every command/query. Never bypass MediatR (§14).
+- **FluentValidation auto-validation** is registered from `SoberNetwork.Core.Validators` — validators run at the
+  API boundary, not inside handlers (see §16).
+- **Identity policy** — passwords ≥10 chars requiring digit + uppercase + non-alphanumeric; lockout after
+  5 failures for 15 min; `RequireConfirmedEmail = true`. JWT validation uses `ClockSkew = TimeSpan.Zero`.
+- **Rate limiting** — a named `"auth"` fixed-window limiter (5 requests/min) protects auth endpoints; rejects
+  with HTTP 429.
+- **Security middleware** — CORS policy `ApiCors` (origins from `Cors:AllowedOrigins`); HSTS in non-Development;
+  response headers `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`;
+  `UseForwardedHeaders` (for Fly's proxy); `AddProblemDetails()` so errors return `application/problem+json` (§7).
+- **Startup side-effects** — `await db.Database.MigrateAsync()` applies pending migrations, then the superuser
+  seed runs. Both are wrapped in try/catch so a failure logs an error but does not stop the app from booting.
+- **SPA hosting** — `UseDefaultFiles()` + `UseStaticFiles()` serve `wwwroot`; `MapFallbackToFile("index.html")`
+  serves the Angular app for non-API routes.
+- **Typed options** — `JwtOptions`, `ResendOptions`, `AppOptions` are bound and consumed via `IOptions<T>` (§5).
+- **External services** — `Resend` (email) and a named `"Nominatim"` `HttpClient` (geocoding, with a required
+  User-Agent) are registered here.
+- `public partial class Program { }` exists so `WebApplicationFactory` can boot the app in integration tests
+  (see §10 and §15).

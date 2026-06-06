@@ -1,18 +1,16 @@
-import { Component, Inject, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Inject, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
-import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatCardModule } from '@angular/material/card';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs';
-import { GroupService } from '../../../core/services/group.service';
-import { MeetingType, CreateMeetingRequest, UpdateMeetingRequest } from '../../../core/models/group.models';
+import { GroupService } from '@app/core/services/group.service';
+import { MeetingType, CreateMeetingRequest, UpdateMeetingRequest } from '@app/core/models/group.models';
+import { BaseFormModalComponent } from '@app/shared/components/base-form-modal/base-form-modal.component';
 
 export interface MeetingFormModalData {
   slug: string;
@@ -25,53 +23,46 @@ export interface MeetingFormModalData {
   selector: 'app-meeting-form-modal',
   standalone: true,
   imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatIconModule,
-    MatSlideToggleModule,
-    MatCheckboxModule,
-    MatCardModule,
+    CommonModule, ReactiveFormsModule, MatButtonModule, MatIconModule,
+    MatSlideToggleModule, MatCheckboxModule, MatProgressSpinnerModule, BaseFormModalComponent,
   ],
   templateUrl: './meeting-form-modal.component.html',
-  styleUrls: ['./meeting-form-modal.component.scss'],
+  styleUrl: './meeting-form-modal.component.scss',
 })
 export class MeetingFormModalComponent implements OnInit {
+  private readonly fb = inject(FormBuilder);
+  private readonly groupService = inject(GroupService);
+  private readonly cdr = inject(ChangeDetectorRef);
+  readonly dialogRef = inject(MatDialogRef<MeetingFormModalComponent>);
+  private readonly data = inject(MAT_DIALOG_DATA) as MeetingFormModalData;
+
   form!: FormGroup;
   saving = false;
   formError = '';
-  slug!: string;
+  slug: string = '';
   editingId: string | undefined;
   meeting: any;
   readonly: any;
-  MeetingType = MeetingType;
 
-  readonly meetingFormats = ['In Person', 'Zoom', 'Phone', 'Hybrid', 'Online'];
+  title = 'Create Meeting';
+  subtitle = 'Set up meeting details, schedule, and location.';
+  icon = 'event';
 
-  constructor(
-    private fb: FormBuilder,
-    private groupService: GroupService,
-    private cdr: ChangeDetectorRef,
-    public dialogRef: MatDialogRef<MeetingFormModalComponent>,
-    @Inject(MAT_DIALOG_DATA) data: MeetingFormModalData,
-  ) {
-    this.slug = data.slug;
-    this.editingId = data.meetingId;
-    this.meeting = data.meeting;
-    this.readonly = data.readonly;
-  }
+  readonly MeetingType = MeetingType;
 
   ngOnInit(): void {
+    this.slug = this.data.slug;
+    this.editingId = this.data.meetingId;
+    this.meeting = this.data.meeting;
+    this.readonly = this.data.readonly;
+    if (this.editingId) {
+      this.title = 'Edit Meeting';
+    }
     this.initForm();
   }
 
   private initForm(): void {
     const isRecurring = this.meeting?.isRecurring ?? true;
-
     this.form = this.fb.group({
       name: new FormControl<string>(this.meeting?.name ?? '', { validators: [Validators.required, Validators.minLength(2)], nonNullable: true }),
       description: new FormControl<string>(this.meeting?.description ?? '', { nonNullable: true }),
@@ -112,22 +103,32 @@ export class MeetingFormModalComponent implements OnInit {
   toggleDay(index: number): void {
     const daysControl = this.form.get('daysOfWeek');
     if (!daysControl) return;
-
     const days = daysControl.value as number[];
     const newDays = [...days];
-
     if (newDays.includes(index)) {
       newDays.splice(newDays.indexOf(index), 1);
     } else {
       newDays.push(index);
     }
-
     daysControl.setValue(newDays);
   }
 
   isDaySelected(index: number): boolean {
     const days = this.form.get('daysOfWeek')?.value as number[];
     return days && days.includes(index);
+  }
+
+  updateFormat(format: string): void {
+    const formatsControl = this.form.get('formats');
+    if (!formatsControl) return;
+    const formats = formatsControl.value as string[];
+    const newFormats = [...formats];
+    if (newFormats.includes(format)) {
+      newFormats.splice(newFormats.indexOf(format), 1);
+    } else {
+      newFormats.push(format);
+    }
+    formatsControl.setValue(newFormats);
   }
 
   save(): void {
@@ -171,19 +172,15 @@ export class MeetingFormModalComponent implements OnInit {
       ? this.groupService.updateMeeting(this.slug, this.editingId, request as UpdateMeetingRequest)
       : this.groupService.createMeeting(this.slug, request as CreateMeetingRequest);
 
-    op$.pipe(
-      finalize(() => {
-        this.saving = false;
-        this.cdr.detectChanges();
-      })
-    ).subscribe({
-      next: () => {
-        this.dialogRef.close(true);
-      },
-      error: (err) => {
-        this.formError = this.getErrorMessage(err, 'Failed to save meeting.');
-      },
-    });
+    op$.pipe(finalize(() => { this.saving = false; this.cdr.detectChanges(); }))
+      .subscribe({
+        next: () => {
+          this.dialogRef.close(true);
+        },
+        error: (err) => {
+          this.formError = this.getErrorMessage(err, 'Failed to save meeting.');
+        },
+      });
   }
 
   cancel(): void {
@@ -191,16 +188,14 @@ export class MeetingFormModalComponent implements OnInit {
   }
 
   private normalizeText(value: string | null | undefined): string | undefined {
-    const trimmed = value?.trim();
-    return trimmed ? trimmed : undefined;
+    return value?.trim() || undefined;
   }
 
   private getErrorMessage(error: unknown, fallback: string): string {
     const err = error as any;
-
     if (err?.error?.errors && typeof err.error.errors === 'object') {
       const messages: string[] = [];
-      for (const [field, fieldErrors] of Object.entries(err.error.errors)) {
+      for (const [, fieldErrors] of Object.entries(err.error.errors)) {
         if (Array.isArray(fieldErrors)) {
           messages.push(...(fieldErrors as string[]));
         }
@@ -209,11 +204,9 @@ export class MeetingFormModalComponent implements OnInit {
         return messages.join('\n');
       }
     }
-
     if (err?.error?.detail) {
       return err.error.detail;
     }
-
     return fallback;
   }
 }

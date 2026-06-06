@@ -1,0 +1,23 @@
+<!-- ══ BASE FORM MODAL — Base Structure ════════════════════════════════════ -->
+<div class="lm-wrap">
+
+  <!-- Close button -->
+  <button class="lm-close" (click)="dialogRef.close()" aria-label="Close">
+    <svg viewBox="0 0 14 14" fill="none">
+      <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <!-- Header -->
+  <div class="lm-header">
+    <mat-icon class="lm-icon">{{ icon }}</mat-icon>
+    <h2 class="lm-title">{{ title }}</h2>
+    <p class="lm-subtitle" *ngIf="subtitle">{{ subtitle }}</p>
+  </div>
+
+  <!-- Form content (to be filled by child component via ng-content) -->
+  <div class="lm-body">
+    <ng-content></ng-content>
+  </div>
+
+</div>

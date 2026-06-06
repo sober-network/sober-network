@@ -20,7 +20,7 @@ public class UpdateGroupCommandHandlerTests
         // Arrange
         var request = new UpdateGroupRequest("Updated Group", null, null, null, null);
         var command = new UpdateGroupCommand("group-slug", request, Guid.Parse("00000000-0000-0000-0000-000000000001"));
-        var response = new GroupResponse(Guid.NewGuid(), "Updated Group", "group-slug", null, null, true, true, true, 5, "GroupAdmin", DateTime.UtcNow, []);
+        var response = new GroupResponse(Guid.NewGuid(), "Updated Group", "group-slug", null, null, true, true, true, 5, "GroupAdmin", "Active", DateTime.UtcNow, []);
 
         _groupService
             .Setup(service => service.UpdateGroupAsync(command.Slug, command.Request, command.UserId))

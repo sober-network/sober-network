@@ -14,6 +14,9 @@ import { MemberDetailResponse, MemberProfileResponse, PhoneListEntryResponse } f
 import { AuthService } from '@app/core/services/auth.service';
 import { GroupService } from '@app/core/services/group.service';
 import { MemberService } from '@app/core/services/member.service';
+import { GroupCardComponent } from '../group-card/group-card.component';
+import { GroupHeroComponent } from '../group-hero/group-hero.component';
+import { GroupPageWrapperComponent } from '../group-page-wrapper/group-page-wrapper.component';
 
 interface PhoneListView extends PhoneListEntryResponse {
   sobrietyDate: string | null;
@@ -34,6 +37,9 @@ interface PhoneListView extends PhoneListEntryResponse {
     MatInputModule,
     MatProgressSpinnerModule,
     MatSlideToggleModule,
+    GroupCardComponent,
+    GroupHeroComponent,
+    GroupPageWrapperComponent,
   ],
   templateUrl: './group-phone-list.component.html',
   styleUrl: './group-phone-list.component.scss',

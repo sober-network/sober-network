@@ -57,26 +57,11 @@ nav.sn-nav {
   }
 }
 
-.nav-logo-ring {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
+.nav-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
   flex-shrink: 0;
-  border-radius: 50%;
-  padding: 2.5px;
-  background: conic-gradient(from 0deg,
-    #f06292, #ff9800, #ffeb3b, #4caf50, #2196f3, #9c27b0, #f06292
-  );
-
-  svg {
-    width: 27px;
-    height: 27px;
-    background: white;
-    border-radius: 50%;
-    padding: 3px;
-  }
 }
 
 /* ── Pill nav container ────────────────────────────────────────────────────── */

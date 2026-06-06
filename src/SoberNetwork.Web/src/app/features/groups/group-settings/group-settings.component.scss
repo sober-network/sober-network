@@ -1,3 +1,5 @@
+@import '../_group-shared.scss';
+
 :host {
   display: block;
 }
@@ -29,6 +31,56 @@
 
 .feedback-card {
   border-left: 4px solid #b3261e;
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.card-avatar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(103, 80, 164, 0.12);
+  color: var(--mat-sys-primary);
+  flex-shrink: 0;
+}
+
+.card-title,
+.card-subtitle {
+  margin: 0;
+}
+
+.card-title {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--sn-text);
+}
+
+.card-subtitle {
+  margin-top: 4px;
+  color: var(--sn-text-mid);
+  line-height: 1.5;
+}
+
+.card-content {
+  display: grid;
+  gap: 20px;
+}
+
+.card-actions {
+  display: flex;
+  margin-top: 24px;
+}
+
+.card-actions-end {
+  justify-content: flex-end;
 }
 
 .loading-state {

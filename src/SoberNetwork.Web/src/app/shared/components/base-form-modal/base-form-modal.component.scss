@@ -1,0 +1,80 @@
+// ── Base Form Modal — Base styling (white background) ────────────────────
+
+:host { display: block; }
+
+.lm-wrap {
+  position: relative;
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+}
+
+// ── Close button ──────────────────────────────────────────────────────────
+.lm-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(17,17,16,0.12);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sn-text-mid, #3d3d3a);
+  padding: 0;
+  transition: background 0.15s;
+
+  svg { width: 14px; height: 14px; }
+
+  &:hover { background: rgba(17,17,16,0.06); }
+}
+
+// ── Header ────────────────────────────────────────────────────────────────
+.lm-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px 36px 0;
+  margin-bottom: 24px;
+}
+
+// Scrollable content region so tall forms keep their action buttons reachable
+// while the header and close button stay fixed.
+.lm-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 36px 32px;
+}
+
+.lm-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: #1a1a18;
+  margin-bottom: 14px;
+}
+
+.lm-title {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--sn-text, #111110);
+  margin: 0 0 4px;
+}
+
+.lm-subtitle {
+  font-size: 0.875rem;
+  color: var(--sn-text-muted, #7a7a75);
+  margin: 0;
+}

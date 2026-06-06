@@ -1,20 +1,17 @@
-<section class="page-container meetings-page">
-  <header class="page-header">
-    <div>
-      <p class="eyebrow"><a [routerLink]="['/groups', slug]">← Back to group</a></p>
-      <h1>Manage Meetings</h1>
-      <p class="description">Add, edit, or remove meetings for this group.</p>
-    </div>
+<app-group-hero
+  eyebrowText="Meetings"
+  [title]="groupName"
+  titleSuffix="Meetings"
+  description="Add, edit, or remove meetings for this group."
+  [backButtonRoute]="['/groups', slug]"
+  backButtonText="← Back to Group"
+></app-group-hero>
 
-    <button mat-raised-button color="primary" type="button" (click)="openCreate()">
-      <mat-icon>add</mat-icon>
-      Add Meeting
-    </button>
-  </header>
+<app-group-page-wrapper>
 
-  <mat-card class="feedback-card" *ngIf="error">
-    <mat-card-content>{{ error }}</mat-card-content>
-  </mat-card>
+  <app-group-card class="feedback-card" *ngIf="error">
+    <div class="card-content">{{ error }}</div>
+  </app-group-card>
 
   <!-- Loading state -->
   <div class="loading-container" *ngIf="loading">
@@ -24,8 +21,12 @@
 
   <!-- Meetings list -->
   <div *ngIf="!loading && meetings.length > 0">
-    <mat-card class="meeting-card" *ngFor="let meeting of meetings">
-      <mat-card-content>
+    <app-group-card class="meeting-card" *ngFor="let meeting of meetings">
+      <div class="card-content">
+        <button mat-icon-button class="meeting-settings-btn" (click)="openEdit(meeting)" title="Edit meeting">
+          <mat-icon>settings</mat-icon>
+        </button>
+
         <div class="meeting-header">
           <div>
             <h3>{{ meeting.name }}</h3>
@@ -60,16 +61,16 @@
             Delete
           </button>
         </div>
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </app-group-card>
   </div>
 
   <!-- Empty state -->
-  <mat-card class="empty-card" *ngIf="!loading && meetings.length === 0">
-    <mat-card-content>
+  <app-group-card class="empty-card" *ngIf="!loading && meetings.length === 0">
+    <div class="card-content">
       <mat-icon>calendar_month</mat-icon>
       <p>No meetings yet.</p>
       <p class="empty-hint">Create your first meeting to get started.</p>
-    </mat-card-content>
-  </mat-card>
-</section>
+    </div>
+  </app-group-card>
+</app-group-page-wrapper>

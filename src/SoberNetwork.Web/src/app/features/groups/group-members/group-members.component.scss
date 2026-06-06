@@ -1,91 +1,15 @@
+@import '../_group-shared.scss';
+
 :host {
   display: block;
 }
 
-/* ═══════════════════════════════════════════════════════ DESIGN TOKENS ═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════ MEMBER CARD GRID ═══════════════════════════════════════════════════════ */
 
-:host {
-  --sn-text: #111110;
-  --sn-text-mid: #3d3d3a;
-  --sn-text-muted: #7a7a75;
-  --sn-bg: #f7f5f2;
-  --sn-bg-soft: #f0ede8;
-  --sn-cta-bg: #1a1a18;
-  --sn-border: rgba(17, 17, 16, 0.08);
-  
-  /* Tint colors */
-  --sn-tint-violet: hsla(260, 70%, 65%, 0.12);
-  --sn-tint-rose: hsla(345, 75%, 65%, 0.12);
-  --sn-tint-sky: hsla(205, 85%, 60%, 0.12);
-  --sn-tint-amber: hsla(38, 90%, 58%, 0.12);
-  --sn-tint-green: hsla(148, 58%, 52%, 0.12);
-  --sn-tint-teal: hsla(183, 62%, 52%, 0.12);
-  --sn-tint-indigo: hsla(230, 70%, 62%, 0.12);
-  --sn-tint-coral: hsla(18, 82%, 62%, 0.12);
-  
-  --sn-icon-violet: #8a4fa3;
-  --sn-icon-rose: #d9359a;
-  --sn-icon-sky: #0ea5e9;
-  --sn-icon-amber: #d97706;
-  --sn-icon-green: #2a9459;
-  --sn-icon-teal: #0f766e;
-  --sn-icon-indigo: #4f46e5;
-  --sn-icon-coral: #ea5e3d;
-}
-
-/* ═══════════════════════════════════════════════════════ UTILITIES ═══════════════════════════════════════════════════════ */
-
-.serif-accent {
-  font-family: 'Instrument Serif', serif;
-  font-style: italic;
-  font-weight: 400;
-}
-
-.fade-up {
-  opacity: 0;
-  transform: translateY(22px);
-  animation: fadeUpIn 0.6s ease forwards;
-}
-
-.fade-up[data-index="0"] { animation-delay: 0s; }
-.fade-up[data-index="1"] { animation-delay: 0.12s; }
-.fade-up[data-index="2"] { animation-delay: 0.24s; }
-.fade-up[data-index="3"] { animation-delay: 0.36s; }
-.fade-up[data-index="4"] { animation-delay: 0.48s; }
-.fade-up[data-index="5"] { animation-delay: 0.60s; }
-
-@keyframes fadeUpIn {
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ═══════════════════════════════════════════════════════ HERO SECTION ═══════════════════════════════════════════════════════ */
-
-.hero-section {
-  background: linear-gradient(135deg,
-    rgba(212, 232, 245, 0.88) 0%,
-    rgba(232, 240, 248, 0.85) 20%,
-    rgba(247, 245, 240, 0.82) 55%,
-    rgba(245, 232, 216, 0.85) 80%,
-    rgba(240, 223, 200, 0.88) 100%),
-  url('https://static.vecteezy.com/system/resources/previews/011/930/314/non_2x/young-friends-staying-together-outdoor-in-the-park-free-photo.jpg');
-  background-size: cover;
-  background-position: center top;
-  padding: 80px 32px;
-  text-align: center;
-  position: relative;
-}
-
-.hero-section .back-button {
-  position: absolute;
-  top: 20px;
-  left: 32px;
-  color: var(--sn-text);
-  font-family: 'Inter Tight', sans-serif;
-  font-weight: 600;
-}
-
-.hero-section .back-button mat-icon {
-  margin-right: 6px;
+/* Component-specific hero overrides */
+.hero-section h1 {
+  font-size: clamp(3rem, 6.5vw, 5.6rem);
+  margin: 0 0 20px;
 }
 
 .hero-section .hero-inner {
@@ -93,58 +17,11 @@
   margin: 0 auto;
 }
 
-.hero-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--sn-text-mid);
-  background: rgba(255, 255, 255, 0.65);
-  border: 1px solid rgba(17, 17, 16, 0.1);
-  padding: 8px 14px;
-  border-radius: 100px;
-  margin-bottom: 24px;
-}
-
-.hero-eyebrow::before {
-  content: '●';
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  background: #2a9459;
-  border-radius: 50%;
-}
-
-.hero-section h1 {
-  font-family: 'Inter Tight', sans-serif;
-  font-size: clamp(3rem, 6.5vw, 5.6rem);
-  font-weight: 900;
-  letter-spacing: -0.04em;
-  margin: 0 0 20px;
-  line-height: 1.1;
-  color: var(--sn-text);
-}
-
 .hero-section p {
   font-size: 1.2rem;
   color: var(--sn-text-mid);
   margin: 0;
   line-height: 1.6;
-}
-
-/* ═══════════════════════════════════════════════════════ CONTENT SECTION ═══════════════════════════════════════════════════════ */
-
-.content-section {
-  background: white;
-  padding: 60px 32px;
-}
-
-.section-wrap {
-  max-width: 1200px;
-  margin: 0 auto;
 }
 
 /* ═══════════════════════════════════════════════════════ ALERTS & STATES ═══════════════════════════════════════════════════════ */
@@ -213,6 +90,10 @@
   p {
     color: var(--sn-text-mid);
   }
+}
+
+.empty-state-card .empty-state {
+  padding: 0;
 }
 
 /* ═══════════════════════════════════════════════════════ MEMBERS SECTION ═══════════════════════════════════════════════════════ */
@@ -426,10 +307,6 @@ button.remove-button:hover:not(:disabled) {
   .hero-section .back-button {
     top: 16px;
     left: 16px;
-  }
-
-  .content-section {
-    padding: 40px 16px;
   }
 
   .members-grid {

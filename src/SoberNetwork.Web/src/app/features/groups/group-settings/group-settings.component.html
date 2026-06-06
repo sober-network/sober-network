@@ -1,19 +1,19 @@
-<section class="page-container settings-page">
-  <div class="page-header">
-    <div>
-      <button mat-button type="button" [routerLink]="['/groups', slug]">
-        <mat-icon>arrow_back</mat-icon>
-        Back to Group
-      </button>
-      <p class="eyebrow">Group settings</p>
-      <h1>{{ group?.name || 'Group settings' }}</h1>
-      <p class="page-copy">Tend the basics here so your online home stays welcoming and clear.</p>
-    </div>
-  </div>
+<app-group-hero
+  eyebrowText="Group settings"
+  [title]="group?.name || ''"
+  titleSuffix="Settings"
+  description="Tend the basics here so your online home stays welcoming and clear."
+  [backButtonRoute]="['/groups', slug]"
+  backButtonText="← Back to Group"
+  [showSettingsButton]="true"
+  (settingsClick)="openSettingsModal()"
+></app-group-hero>
 
-  <mat-card class="feedback-card" *ngIf="error">
-    <mat-card-content>{{ error }}</mat-card-content>
-  </mat-card>
+<app-group-page-wrapper>
+
+  <app-group-card class="feedback-card" *ngIf="error">
+    <div class="card-content">{{ error }}</div>
+  </app-group-card>
 
   <div class="loading-state" *ngIf="loading">
     <mat-spinner diameter="40"></mat-spinner>
@@ -21,14 +21,16 @@
   </div>
 
   <ng-container *ngIf="group && !loading">
-    <mat-card>
-      <mat-card-header>
-        <mat-icon mat-card-avatar>settings</mat-icon>
-        <mat-card-title>Group details</mat-card-title>
-        <mat-card-subtitle>Slug: {{ group.slug }}</mat-card-subtitle>
-      </mat-card-header>
+    <app-group-card>
+      <div class="card-header">
+        <mat-icon class="card-avatar">settings</mat-icon>
+        <div>
+          <h3 class="card-title">Group details</h3>
+          <p class="card-subtitle">Slug: {{ group.slug }}</p>
+        </div>
+      </div>
 
-      <mat-card-content>
+      <div class="card-content">
         <form [formGroup]="form" class="settings-form" novalidate>
           <section>
             <h3>Basics</h3>
@@ -76,32 +78,34 @@
 
           <p class="success-message" *ngIf="saveSuccess">{{ saveSuccess }}</p>
         </form>
-      </mat-card-content>
+      </div>
 
-      <mat-card-actions align="end">
+      <div class="card-actions card-actions-end">
         <button mat-raised-button color="primary" type="button" [disabled]="saving" (click)="save()">
           <mat-icon *ngIf="!saving">save</mat-icon>
           <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
           <span>{{ saving ? 'Saving…' : 'Save Changes' }}</span>
         </button>
-      </mat-card-actions>
-    </mat-card>
+      </div>
+    </app-group-card>
 
-    <mat-card class="danger-card">
-      <mat-card-header>
-        <mat-icon mat-card-avatar>warning</mat-icon>
-        <mat-card-title>Danger zone</mat-card-title>
-        <mat-card-subtitle>This action cannot be undone.</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
+    <app-group-card class="danger-card">
+      <div class="card-header">
+        <mat-icon class="card-avatar">warning</mat-icon>
+        <div>
+          <h3 class="card-title">Danger zone</h3>
+          <p class="card-subtitle">This action cannot be undone.</p>
+        </div>
+      </div>
+      <div class="card-content">
         <p>Delete the group if it is no longer needed. You will be asked to type the group name to confirm.</p>
-      </mat-card-content>
-      <mat-card-actions>
+      </div>
+      <div class="card-actions">
         <button mat-stroked-button class="danger-button" type="button" [disabled]="deleting" (click)="confirmDelete()">
           <mat-icon>delete</mat-icon>
           {{ deleting ? 'Deleting…' : 'Delete Group' }}
         </button>
-      </mat-card-actions>
-    </mat-card>
+      </div>
+    </app-group-card>
   </ng-container>
-</section>
+</app-group-page-wrapper>

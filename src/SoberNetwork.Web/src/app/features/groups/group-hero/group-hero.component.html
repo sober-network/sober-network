@@ -1,0 +1,27 @@
+<section class="hero-section">
+  <img [src]="backgroundImageSrc" alt="Group circle" class="hero-bg" />
+  <a *ngIf="backButtonText" [routerLink]="backButtonRoute" class="back-button">{{ backButtonText }}</a>
+  
+  <button 
+    *ngIf="showSettingsButton" 
+    (click)="onSettingsClick()" 
+    class="settings-button"
+    type="button"
+    aria-label="Settings">
+    <mat-icon>settings</mat-icon>
+  </button>
+
+  <div class="section-wrap">
+    <div class="hero-inner">
+      <div *ngIf="eyebrowText" class="hero-eyebrow">
+        <mat-icon class="eyebrow-icon">{{ eyebrowIcon }}</mat-icon>
+        {{ eyebrowText }}
+      </div>
+      <h1>
+        {{ title }}
+        <span *ngIf="titleSuffix" class="serif-accent"> {{ titleSuffix }}</span>
+      </h1>
+      <p *ngIf="description">{{ description }}</p>
+    </div>
+  </div>
+</section>

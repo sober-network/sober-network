@@ -3,3 +3,7 @@ export * from './components/footer/footer.component';
 export * from './components/loading-spinner/loading-spinner.component';
 export * from './components/confirm-dialog/confirm-dialog.component';
 export * from './components/not-found/not-found.component';
+export * from './components/base-form-modal/base-form-modal.component';
+export * from './components/hero-component/hero.component';
+export * from './components/page-wrapper-component/page-wrapper.component';
+export * from './components/card-component/card.component';

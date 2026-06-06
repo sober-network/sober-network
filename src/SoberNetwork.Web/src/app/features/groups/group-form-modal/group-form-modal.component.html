@@ -1,0 +1,93 @@
+<!-- ══ GROUP SETTINGS FORM MODAL ════════════════════════════════════════════ -->
+<app-base-form-modal
+  [title]="title"
+  [subtitle]="subtitle"
+  [icon]="icon">
+
+  <!-- Loader state -->
+  <div class="form-body" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p class="loading-text">Loading settings…</p>
+  </div>
+
+  <!-- Form state -->
+  <form [formGroup]="form" (ngSubmit)="save()" novalidate class="lm-form" *ngIf="!loading">
+    
+    <!-- Group Name -->
+    <div class="lm-field">
+      <div class="lm-label-row">
+        <label class="lm-label">Group Name</label>
+        <span class="lm-label" style="font-weight: 400; font-size: 0.75rem;">{{ form.get('name')?.value?.length ?? 0 }}/100</span>
+      </div>
+      <input 
+        type="text"
+        class="lm-input"
+        formControlName="name"
+        maxlength="100"
+        placeholder="Enter group name"
+      />
+      <div class="lm-field-error" *ngIf="form.get('name')?.touched && form.get('name')?.hasError('required')">
+        Name is required.
+      </div>
+      <div class="lm-field-error" *ngIf="form.get('name')?.touched && form.get('name')?.hasError('minlength')">
+        At least 2 characters.
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="lm-field">
+      <div class="lm-label-row">
+        <label class="lm-label">Description</label>
+        <span class="lm-label" style="font-weight: 400; font-size: 0.75rem;">{{ form.get('description')?.value?.length ?? 0 }}/500</span>
+      </div>
+      <textarea 
+        class="lm-input lm-textarea"
+        formControlName="description"
+        rows="3"
+        maxlength="500"
+        placeholder="Describe your group"
+      ></textarea>
+    </div>
+
+    <!-- Time Zone -->
+    <div class="lm-field">
+      <label class="lm-label">Time Zone</label>
+      <input 
+        type="text"
+        class="lm-input"
+        formControlName="timeZone"
+        list="tz-list"
+        placeholder="Select time zone"
+      />
+      <datalist id="tz-list">
+        <option *ngFor="let tz of timeZones" [value]="tz"></option>
+      </datalist>
+    </div>
+
+    <!-- Access Settings -->
+    <div class="form-section">
+      <h4>Access Settings</h4>
+      <mat-slide-toggle formControlName="isPublic">
+        Public group page
+      </mat-slide-toggle>
+      <mat-slide-toggle formControlName="requiresApproval">
+        Approve new members
+      </mat-slide-toggle>
+    </div>
+
+    <!-- Error message -->
+    <div class="error-message" *ngIf="error">{{ error }}</div>
+
+    <!-- Action buttons -->
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="cancel()" [disabled]="saving">
+        Cancel
+      </button>
+      <button type="submit" class="btn-primary" [disabled]="saving || form.invalid">
+        {{ saving ? 'Saving…' : 'Save Changes' }}
+      </button>
+    </div>
+
+  </form>
+
+</app-base-form-modal>

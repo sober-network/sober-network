@@ -1,19 +1,17 @@
-<section class="page-container requests-page">
-  <div class="page-header">
-    <div>
-      <button mat-button type="button" [routerLink]="['/groups', slug]">
-        <mat-icon>arrow_back</mat-icon>
-        Back to Group
-      </button>
-      <p class="eyebrow">Join requests</p>
-      <h1>{{ groupName }}</h1>
-      <p class="page-copy">Review the folks waiting at the door and respond with care.</p>
-    </div>
-  </div>
+<app-group-hero
+  eyebrowText="Join requests"
+  [title]="groupName"
+  titleSuffix="Requests"
+  description="Review the folks waiting at the door and respond with care."
+  [backButtonRoute]="['/groups', slug]"
+  backButtonText="← Back to Group"
+></app-group-hero>
 
-  <mat-card class="feedback-card" *ngIf="error">
-    <mat-card-content>{{ error }}</mat-card-content>
-  </mat-card>
+<app-group-page-wrapper>
+
+  <app-group-card class="feedback-card" *ngIf="error">
+    <div class="card-content">{{ error }}</div>
+  </app-group-card>
 
   <div class="loading-state" *ngIf="loading">
     <mat-spinner diameter="40"></mat-spinner>
@@ -21,17 +19,17 @@
   </div>
 
   <ng-container *ngIf="!loading">
-    <mat-card class="empty-card" *ngIf="requests.length === 0">
-      <mat-card-content>
+    <app-group-card class="empty-card" *ngIf="requests.length === 0">
+      <div class="card-content">
         <mat-icon>mark_email_read</mat-icon>
         <h2>No pending requests</h2>
         <p>When someone asks to join, their request will appear here.</p>
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </app-group-card>
 
     <div class="request-list" *ngIf="requests.length > 0">
-      <mat-card class="request-card" *ngFor="let request of requests; trackBy: trackByUserId">
-        <mat-card-content>
+      <app-group-card class="request-card" *ngFor="let request of requests; trackBy: trackByUserId">
+        <div class="card-content">
           <div class="request-header">
             <div>
               <h2>{{ request.displayName }}</h2>
@@ -50,8 +48,8 @@
               Reject
             </button>
           </div>
-        </mat-card-content>
-      </mat-card>
+        </div>
+      </app-group-card>
     </div>
 
     <mat-paginator
@@ -63,4 +61,4 @@
       (page)="onPageChange($event)"
     ></mat-paginator>
   </ng-container>
-</section>
+</app-group-page-wrapper>

@@ -1,23 +1,8 @@
 <!-- ══ SOBER NETWORK — SIGN IN MODAL ══════════════════════════════════════ -->
-<div class="lm-wrap">
-
-  <!-- Close -->
-  <button class="lm-close" (click)="dialogRef.close()" aria-label="Close">
-    <svg viewBox="0 0 14 14" fill="none">
-      <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-    </svg>
-  </button>
-
-  <!-- Header -->
-  <div class="lm-header">
-    <span class="lm-logo-ring">
-      <svg viewBox="0 0 30 30" fill="none">
-        <polygon points="15,0 29,27 1,27" fill="none" stroke="#1a1a18" stroke-width="2" stroke-linejoin="round"/>
-      </svg>
-    </span>
-    <h2 class="lm-title">Welcome back</h2>
-    <p class="lm-subtitle">Sign in to Sober Network</p>
-  </div>
+<app-base-form-modal
+  [title]="title"
+  [subtitle]="subtitle"
+  [useRainbowRing]="useRainbowRing">
 
   <!-- Form -->
   <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="lm-form">
@@ -37,9 +22,7 @@
     <div class="lm-field">
       <div class="lm-label-row">
         <label class="lm-label" for="lm-password">Password</label>
-        <button type="button" class="lm-forgot" (click)="navigateTo('/auth/forgot-password')">
-          Forgot password?
-        </button>
+        <a class="lm-label-link" (click)="navigateTo('/auth/forgot-password')">Forgot?</a>
       </div>
       <div class="lm-input-wrap">
         <input id="lm-password" class="lm-input" [type]="hidePassword ? 'password' : 'text'"
@@ -59,7 +42,7 @@
       </div>
       <span class="lm-field-error"
             *ngIf="form.get('password')?.invalid && form.get('password')?.touched">
-        Password is required.
+        <ng-container *ngIf="form.get('password')?.hasError('required')">Password is required.</ng-container>
       </span>
     </div>
 
@@ -67,7 +50,7 @@
 
     <button class="lm-submit" type="submit" [disabled]="loading">
       <mat-spinner diameter="18" *ngIf="loading"></mat-spinner>
-      <span *ngIf="!loading">Sign In</span>
+      <span *ngIf="!loading">Sign in</span>
     </button>
 
   </form>
@@ -80,4 +63,4 @@
     </button>
   </p>
 
-</div>
+</app-base-form-modal>

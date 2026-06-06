@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { MatDialogRef, MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '@app/core/services/auth.service';
+import { BaseFormModalComponent } from '@app/shared/components/base-form-modal/base-form-modal.component';
 
 @Component({
   selector: 'app-login-modal',
@@ -15,6 +16,7 @@ import { AuthService } from '@app/core/services/auth.service';
     RouterModule,
     MatDialogModule,
     MatProgressSpinnerModule,
+    BaseFormModalComponent,
   ],
   templateUrl: './login-modal.component.html',
   styleUrl:    './login-modal.component.scss',
@@ -25,6 +27,11 @@ export class LoginModalComponent {
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   readonly dialogRef      = inject(MatDialogRef<LoginModalComponent>);
+
+  title = 'Sign in to your account';
+  subtitle = 'Welcome back';
+  icon = 'lock';
+  useRainbowRing = true;
 
   form = this.fb.group({
     email:    ['', [Validators.required, Validators.email]],
@@ -57,9 +64,8 @@ export class LoginModalComponent {
     this.dialogRef.close();
     const { RegisterModalComponent } = await import('../register-modal/register-modal.component');
     this.dialog.open(RegisterModalComponent, {
-      panelClass: 'sn-login-panel',
+      panelClass: ['sn-modal-panel', 'sn-register-panel'],
       maxWidth:   '100vw',
-      width:      '440px',
       autoFocus:  'first-tabbable',
     });
   }

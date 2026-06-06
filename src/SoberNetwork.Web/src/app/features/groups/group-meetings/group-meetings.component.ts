@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { finalize } from 'rxjs';
+import { finalize, forkJoin } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -9,6 +9,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DAYS_OF_WEEK, MEETING_FORMATS, LANGUAGES, US_STATES, COUNTRIES, MeetingType, AdminMeetingResponse } from '@app/core/models';
 import { GroupService } from '@app/core/services/group.service';
+import { GroupCardComponent } from '../group-card/group-card.component';
+import { GroupHeroComponent } from '../group-hero/group-hero.component';
+import { GroupPageWrapperComponent } from '../group-page-wrapper/group-page-wrapper.component';
 import { MeetingFormModalComponent } from '../meeting-form-modal/meeting-form-modal.component';
 
 @Component({
@@ -22,6 +25,9 @@ import { MeetingFormModalComponent } from '../meeting-form-modal/meeting-form-mo
     MatDialogModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    GroupCardComponent,
+    GroupHeroComponent,
+    GroupPageWrapperComponent,
   ],
   templateUrl: './group-meetings.component.html',
   styleUrl: './group-meetings.component.scss',
@@ -40,6 +46,7 @@ export class GroupMeetingsComponent implements OnInit {
   readonly MeetingType = MeetingType;
 
   slug = '';
+  groupName = '';
   meetings: AdminMeetingResponse[] = [];
   loading = true;
   error = '';
@@ -60,13 +67,12 @@ export class GroupMeetingsComponent implements OnInit {
     };
 
     this.dialog.open(MeetingFormModalComponent, {
-      width: '90%',
-      maxWidth: '800px',
+      maxWidth: '100vw',
       data: {
         slug: this.slug,
         readonly,
       },
-      panelClass: 'sn-form-modal',
+      panelClass: ['sn-modal-panel', 'sn-meeting-panel'],
     }).afterClosed().subscribe(result => {
       if (result === true) {
         this.loadMeetings();
@@ -85,8 +91,7 @@ export class GroupMeetingsComponent implements OnInit {
     const occursOn = meeting.occursOn ? new Date(meeting.occursOn).toISOString().substring(0, 10) : null;
 
     this.dialog.open(MeetingFormModalComponent, {
-      width: '90%',
-      maxWidth: '800px',
+      maxWidth: '100vw',
       data: {
         slug: this.slug,
         meetingId: meeting.id,
@@ -96,7 +101,7 @@ export class GroupMeetingsComponent implements OnInit {
         },
         readonly,
       },
-      panelClass: 'sn-form-modal',
+      panelClass: ['sn-modal-panel', 'sn-meeting-panel'],
     }).afterClosed().subscribe(result => {
       if (result === true) {
         this.loadMeetings();
@@ -135,13 +140,17 @@ export class GroupMeetingsComponent implements OnInit {
     this.loading = true;
     this.error = '';
 
-    this.groupService.getAdminMeetings(this.slug).pipe(
+    forkJoin({
+      group: this.groupService.getGroup(this.slug),
+      meetings: this.groupService.getAdminMeetings(this.slug),
+    }).pipe(
       finalize(() => {
         this.loading = false;
         this.cdr.detectChanges();
       })
     ).subscribe({
-      next: meetings => {
+      next: ({ group, meetings }) => {
+        this.groupName = group.name;
         this.meetings = meetings;
       },
       error: err => {

@@ -12,6 +12,9 @@ import { DAYS_OF_WEEK, GroupResponse, MeetingResponse } from '@app/core/models';
 import { GroupService } from '@app/core/services/group.service';
 import { ClientLogService } from '@app/core/services/client-log.service';
 import { ConfirmDialogComponent } from '@app/shared/components/confirm-dialog/confirm-dialog.component';
+import { GroupHeroComponent } from '../group-hero/group-hero.component';
+import { GroupPageWrapperComponent } from '../group-page-wrapper/group-page-wrapper.component';
+import { GroupFormModalComponent } from '../group-form-modal/group-form-modal.component';
 
 @Component({
   selector: 'app-group-hub',
@@ -24,6 +27,8 @@ import { ConfirmDialogComponent } from '@app/shared/components/confirm-dialog/co
     MatChipsModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    GroupHeroComponent,
+    GroupPageWrapperComponent,
   ],
   templateUrl: './group-hub.component.html',
   styleUrl: './group-hub.component.scss',
@@ -50,6 +55,17 @@ export class GroupHubComponent implements OnInit {
       this.slug = params.get('slug') ?? '';
       this.log.info('GroupHub.ngOnInit', { slug: this.slug });
       this.loadGroup();
+    });
+  }
+
+  openSettingsModal(): void {
+    this.dialog.open(GroupFormModalComponent, {
+      panelClass: ['sn-modal-panel', 'sn-group-panel'],
+      maxWidth: '100vw',
+      data: {
+        slug: this.slug,
+      },
+      autoFocus: 'first-tabbable',
     });
   }
 

@@ -1,19 +1,16 @@
-<section class="page-container phone-page">
-  <div class="page-header">
-    <div>
-      <button mat-button type="button" [routerLink]="['/groups', slug]">
-        <mat-icon>arrow_back</mat-icon>
-        Back to Group
-      </button>
-      <p class="eyebrow">Phone list</p>
-      <h1>{{ groupName }}</h1>
-      <p class="page-copy">This list is only visible to group members.</p>
-    </div>
-  </div>
+<app-group-hero
+  eyebrowText="Phone list"
+  [title]="groupName"
+  titleSuffix="Circle"
+  description="This list is only visible to group members."
+  [backButtonRoute]="['/groups', slug]"
+  backButtonText="← Back to Group"
+></app-group-hero>
 
-  <mat-card class="feedback-card" *ngIf="error">
-    <mat-card-content>{{ error }}</mat-card-content>
-  </mat-card>
+<app-group-page-wrapper>
+  <app-group-card class="feedback-card" *ngIf="error">
+    <div class="card-content">{{ error }}</div>
+  </app-group-card>
 
   <div class="loading-state" *ngIf="loading">
     <mat-spinner diameter="40"></mat-spinner>
@@ -21,13 +18,15 @@
   </div>
 
   <ng-container *ngIf="!loading">
-    <mat-card class="settings-card">
-      <mat-card-header>
-        <mat-icon mat-card-avatar>phone_in_talk</mat-icon>
-        <mat-card-title>Share your number</mat-card-title>
-        <mat-card-subtitle>Keep your contact info ready for the people who may need you.</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
+    <app-group-card class="settings-card">
+      <div class="card-header">
+        <mat-icon class="card-avatar">phone_in_talk</mat-icon>
+        <div>
+          <h3 class="card-title">Share your number</h3>
+          <p class="card-subtitle">Keep your contact info ready for the people who may need you.</p>
+        </div>
+      </div>
+      <div class="card-content">
         <form [formGroup]="phoneForm" class="settings-form">
           <mat-slide-toggle formControlName="isPhoneShared">Share my number with this group</mat-slide-toggle>
 
@@ -46,17 +45,19 @@
             <span>{{ saving ? 'Saving…' : 'Save' }}</span>
           </button>
         </form>
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </app-group-card>
 
-    <mat-card class="list-card" *ngIf="entries.length > 0; else emptyState">
-      <mat-card-header>
-        <mat-icon mat-card-avatar>contact_phone</mat-icon>
-        <mat-card-title>Shared phone list</mat-card-title>
-        <mat-card-subtitle>Visible numbers from members who opted in</mat-card-subtitle>
-      </mat-card-header>
+    <app-group-card class="list-card" *ngIf="entries.length > 0; else emptyState">
+      <div class="card-header">
+        <mat-icon class="card-avatar">contact_phone</mat-icon>
+        <div>
+          <h3 class="card-title">Shared phone list</h3>
+          <p class="card-subtitle">Visible numbers from members who opted in</p>
+        </div>
+      </div>
 
-      <mat-card-content class="phone-list">
+      <div class="card-content phone-list">
         <div class="phone-row" *ngFor="let entry of entries; trackBy: trackByUserId" [class.self-row]="entry.isSelf">
           <div>
             <h2>{{ entry.displayName }}</h2>
@@ -68,17 +69,17 @@
             <span>{{ entry.sobrietyDate ? (entry.sobrietyDate | date:'mediumDate') : 'Sobriety date not shared' }}</span>
           </div>
         </div>
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </app-group-card>
 
     <ng-template #emptyState>
-      <mat-card class="empty-card">
-        <mat-card-content>
+      <app-group-card class="empty-card">
+        <div class="card-content">
           <mat-icon>phone_disabled</mat-icon>
           <h2>No shared numbers yet</h2>
           <p>When members choose to share their number, it will show up here.</p>
-        </mat-card-content>
-      </mat-card>
+        </div>
+      </app-group-card>
     </ng-template>
   </ng-container>
-</section>
+</app-group-page-wrapper>

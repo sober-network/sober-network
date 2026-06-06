@@ -87,9 +87,8 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
 
   openSignIn(): void {
     this.dialog.open(LoginModalComponent, {
-      panelClass: 'sn-login-panel',
+      panelClass: ['sn-modal-panel', 'sn-login-panel'],
       maxWidth:   '100vw',
-      width:      '440px',
       autoFocus:  'first-tabbable',
     });
   }

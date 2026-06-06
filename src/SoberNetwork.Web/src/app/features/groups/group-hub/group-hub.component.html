@@ -1,20 +1,13 @@
-<!-- Hero Section with Background Image -->
-<section class="hero-section" *ngIf="group">
-  <a [routerLink]="['/groups']" class="back-button">← Back to Groups</a>
-
-  <div class="section-wrap">
-    <div class="hero-eyebrow">Group Hub</div>
-    <h1>{{ group.name }} <span class="serif-accent">Hub</span></h1>
-    <p>{{ group.description || 'A steady place to connect, support one another, and keep the circle strong.' }}</p>
-
-    <div class="hero-meta">
-      <span class="meta-badge">👥 {{ group.memberCount }} member{{ group.memberCount === 1 ? '' : 's' }}</span>
-      <span class="meta-badge" *ngIf="group.userRole" [ngClass]="group.userRole === 'GroupAdmin' ? 'admin' : ''">
-        {{ group.userRole }}
-      </span>
-    </div>
-  </div>
-</section>
+<app-group-hero
+  eyebrowText="Group Hub"
+  [title]="group?.name || ''"
+  titleSuffix="Hub"
+  description="A steady place to connect, support one another, and keep the circle strong."
+  [backButtonRoute]="['/dashboard']"
+  backButtonText="← Back to Groups"
+  [showSettingsButton]="isAdmin"
+  (settingsClick)="openSettingsModal()"
+></app-group-hero>
 
 <!-- Loading State -->
 <div class="loading-state" *ngIf="loading">
@@ -29,102 +22,93 @@
 </div>
 
 <!-- Main Content -->
-<ng-container *ngIf="group && !loading">
-  <section class="hero-section" style="background: white; padding: 60px 32px;">
-    <div class="section-wrap">
-      <!-- Meeting Details Card -->
-      <div class="meeting-details-card">
-        <div class="meeting-details-header">
-          <div class="meeting-icon">🕐</div>
-          <div>
-            <h3>Meeting Details</h3>
-            <p>Everything members need to get into the room</p>
-          </div>
-        </div>
-
-        <div class="meeting-details-body">
-          <ng-container *ngIf="group.meetings.length === 0">
-            <p style="color: var(--sn-text-muted); font-size: 0.9rem;">No meetings scheduled yet.</p>
-          </ng-container>
-
-          <ng-container *ngFor="let m of group.meetings">
-            <div class="detail-row">
-              <strong>Meeting Name</strong>
-              <span>{{ m.name }}</span>
-            </div>
-            <div class="detail-row" *ngIf="m.description">
-              <strong>Description</strong>
-              <span>{{ m.description }}</span>
-            </div>
-            <div class="detail-row">
-              <strong>When</strong>
-              <span>{{ meetingWhen(m) }}</span>
-            </div>
-            <div class="detail-row">
-              <strong>Duration</strong>
-              <span>{{ m.durationMinutes }} min</span>
-            </div>
-            <div class="detail-row" *ngIf="m.zoomLink">
-              <strong>Zoom</strong>
-              <span><a [href]="m.zoomLink" target="_blank" rel="noreferrer">Join meeting</a></span>
-            </div>
-            <div class="detail-row" *ngIf="m.zoomMeetingId">
-              <strong>Meeting ID</strong>
-              <span>{{ m.zoomMeetingId }}</span>
-            </div>
-            <div class="detail-row" *ngIf="m.zoomPasscode">
-              <strong>Passcode</strong>
-              <span>{{ m.zoomPasscode }}</span>
-            </div>
-          </ng-container>
-        </div>
-
-        <div class="meeting-timezone" *ngIf="group.timeZone">
-          <span class="timezone-icon">🌍</span>
-          <span>{{ group.timeZone }}</span>
-        </div>
-      </div>
-
-      <!-- Hub Grid -->
-      <div class="hub-grid">
-        <a [routerLink]="['/groups', group.slug, 'members']" class="hub-card">
-          <div class="hub-icon icon-violet">👥</div>
-          <h3>Members</h3>
-          <p>See who is here and how everyone is doing.</p>
-        </a>
-
-        <a [routerLink]="['/groups', group.slug, 'phone-list']" class="hub-card">
-          <div class="hub-icon icon-rose">📞</div>
-          <h3>Phone List</h3>
-          <p>Reach out when someone needs a hand.</p>
-        </a>
-
-        <a *ngIf="isAdmin" [routerLink]="['/groups', group.slug, 'meetings']" class="hub-card">
-          <div class="hub-icon icon-sky">📅</div>
-          <h3>Meetings</h3>
-          <p>Manage meeting times, formats, and Zoom details.</p>
-        </a>
-
-        <a *ngIf="isAdmin" [routerLink]="['/groups', group.slug, 'join-requests']" class="hub-card">
-          <div class="hub-icon icon-amber">🚪</div>
-          <h3>Join Requests</h3>
-          <p>Welcome new folks and keep the group door tended.</p>
-        </a>
-
-        <a *ngIf="isAdmin" [routerLink]="['/groups', group.slug, 'settings']" class="hub-card">
-          <div class="hub-icon icon-teal">⚙️</div>
-          <h3>Settings</h3>
-          <p>Adjust the basics and keep things running smoothly.</p>
-        </a>
-      </div>
-
-      <!-- Leave Group Button -->
-      <div class="footer-actions">
-        <button mat-stroked-button color="warn" type="button" [disabled]="leaving" (click)="confirmLeave()">
-          <mat-icon>logout</mat-icon>
-          {{ leaving ? 'Leaving…' : 'Leave Group' }}
-        </button>
+<app-group-page-wrapper *ngIf="group && !loading">
+  <!-- Meeting Details Card -->
+  <div class="meeting-details-card">
+    <div class="meeting-details-header">
+      <div class="meeting-icon">🕐</div>
+      <div>
+        <h3>Meeting Details</h3>
+        <p>Everything members need to get into the room</p>
       </div>
     </div>
-  </section>
-</ng-container>
+
+    <div class="meeting-details-body">
+      <ng-container *ngIf="group.meetings.length === 0">
+        <p style="color: var(--sn-text-muted); font-size: 0.9rem;">No meetings scheduled yet.</p>
+      </ng-container>
+
+      <ng-container *ngFor="let m of group.meetings">
+        <div class="detail-row">
+          <strong>Meeting Name</strong>
+          <span>{{ m.name }}</span>
+        </div>
+        <div class="detail-row" *ngIf="m.description">
+          <strong>Description</strong>
+          <span>{{ m.description }}</span>
+        </div>
+        <div class="detail-row">
+          <strong>When</strong>
+          <span>{{ meetingWhen(m) }}</span>
+        </div>
+        <div class="detail-row">
+          <strong>Duration</strong>
+          <span>{{ m.durationMinutes }} min</span>
+        </div>
+        <div class="detail-row" *ngIf="m.zoomLink">
+          <strong>Zoom</strong>
+          <span><a [href]="m.zoomLink" target="_blank" rel="noreferrer">Join meeting</a></span>
+        </div>
+        <div class="detail-row" *ngIf="m.zoomMeetingId">
+          <strong>Meeting ID</strong>
+          <span>{{ m.zoomMeetingId }}</span>
+        </div>
+        <div class="detail-row" *ngIf="m.zoomPasscode">
+          <strong>Passcode</strong>
+          <span>{{ m.zoomPasscode }}</span>
+        </div>
+      </ng-container>
+    </div>
+
+    <div class="meeting-timezone" *ngIf="group.timeZone">
+      <span class="timezone-icon">🌍</span>
+      <span>{{ group.timeZone }}</span>
+    </div>
+  </div>
+
+  <!-- Hub Grid -->
+  <div class="hub-grid">
+    <a [routerLink]="['/groups', group.slug, 'members']" class="hub-card">
+      <div class="hub-icon icon-violet">👥</div>
+      <h3>Members</h3>
+      <p>See who is here and how everyone is doing.</p>
+    </a>
+
+    <a [routerLink]="['/groups', group.slug, 'phone-list']" class="hub-card">
+      <div class="hub-icon icon-rose">📞</div>
+      <h3>Phone List</h3>
+      <p>Reach out when someone needs a hand.</p>
+    </a>
+
+    <a *ngIf="isAdmin" [routerLink]="['/groups', group.slug, 'meetings']" class="hub-card">
+      <div class="hub-icon icon-sky">📅</div>
+      <h3>Meetings</h3>
+      <p>Manage meeting times, formats, and Zoom details.</p>
+    </a>
+
+    <a *ngIf="isAdmin" [routerLink]="['/groups', group.slug, 'join-requests']" class="hub-card">
+      <div class="hub-icon icon-amber">🚪</div>
+      <h3>Join Requests</h3>
+      <p>Welcome new folks and keep the group door tended.</p>
+    </a>
+  </div>
+
+  <!-- Leave Group Button -->
+  <div class="footer-actions">
+    <button mat-stroked-button color="warn" type="button" [disabled]="leaving" (click)="confirmLeave()">
+      <mat-icon>logout</mat-icon>
+      {{ leaving ? 'Leaving…' : 'Leave Group' }}
+    </button>
+  </div>
+</app-group-page-wrapper>
+

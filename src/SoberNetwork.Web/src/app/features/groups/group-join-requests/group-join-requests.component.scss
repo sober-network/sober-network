@@ -1,3 +1,5 @@
+@import '../_group-shared.scss';
+
 :host {
   display: block;
 }
@@ -32,7 +34,7 @@
 }
 
 .loading-state,
-.empty-card mat-card-content {
+.empty-card .card-content {
   display: grid;
   justify-items: center;
   gap: 12px;
@@ -44,9 +46,7 @@
   opacity: 0.78;
 }
 
-.empty-card mat-card-content {
-  padding: 40px 24px;
-
+.empty-card .card-content {
   mat-icon {
     width: 48px;
     height: 48px;
@@ -65,7 +65,7 @@
   gap: 16px;
 }
 
-.request-card mat-card-content {
+.request-card .card-content {
   display: grid;
   gap: 16px;
 }

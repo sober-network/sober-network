@@ -1,0 +1,141 @@
+@import '../_group-shared.scss';
+
+.hero-section {
+  position: relative;
+  min-height: 280px;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.4;
+}
+
+.hero-section::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(135, 206, 250, 0.12) 0%, rgba(255, 218, 185, 0.12) 100%);
+  z-index: 1;
+}
+
+.section-wrap {
+  position: relative;
+  z-index: 2;
+  padding-top: 60px;
+}
+
+.hero-eyebrow {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  text-transform: capitalize;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.eyebrow-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2a9459;
+}
+
+.hero-eyebrow::before {
+  content: none;
+}
+
+.serif-accent {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 700;
+}
+
+.back-button {
+  position: absolute;
+  top: 32px;
+  left: 32px;
+  z-index: 3;
+  margin-bottom: 0;
+  background: transparent;
+  border-color: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  color: var(--sn-text-mid);
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.back-button:hover {
+  background: rgba(240, 237, 232, 0.5);
+  border-color: rgba(17, 17, 16, 0.12);
+  color: var(--sn-text);
+  transform: translateX(-2px);
+}
+
+.settings-button {
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  z-index: 3;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--sn-text-mid);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.settings-button:hover {
+  background: rgba(240, 237, 232, 0.5);
+  border-color: rgba(17, 17, 16, 0.12);
+  color: var(--sn-text);
+  transform: translateX(2px);
+}
+
+@media (max-width: 680px) {
+  .section-wrap {
+    padding-top: 40px;
+  }
+
+  .hero-section .back-button {
+    top: 16px;
+    left: 16px;
+  }
+
+  .hero-section .settings-button {
+    top: 16px;
+    right: 16px;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.85rem;
+  }
+}

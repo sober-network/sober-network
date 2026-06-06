@@ -15,6 +15,9 @@ import { GroupMemberResponse, MembershipStatus } from '@app/core/models';
 import { AuthService } from '@app/core/services/auth.service';
 import { GroupService } from '@app/core/services/group.service';
 import { ConfirmDialogComponent } from '@app/shared/components/confirm-dialog/confirm-dialog.component';
+import { GroupCardComponent } from '../group-card/group-card.component';
+import { GroupHeroComponent } from '../group-hero/group-hero.component';
+import { GroupPageWrapperComponent } from '../group-page-wrapper/group-page-wrapper.component';
 
 interface GroupMemberView extends GroupMemberResponse {
   sobrietyDate: string | null;
@@ -34,6 +37,9 @@ interface GroupMemberView extends GroupMemberResponse {
     MatPaginatorModule,
     MatProgressSpinnerModule,
     MatSelectModule,
+    GroupCardComponent,
+    GroupHeroComponent,
+    GroupPageWrapperComponent,
   ],
   templateUrl: './group-members.component.html',
   styleUrl: './group-members.component.scss',

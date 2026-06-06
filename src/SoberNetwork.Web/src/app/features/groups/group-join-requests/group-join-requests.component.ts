@@ -11,6 +11,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { JoinRequestResponse } from '@app/core/models';
 import { GroupService } from '@app/core/services/group.service';
 import { ConfirmDialogComponent } from '@app/shared/components/confirm-dialog/confirm-dialog.component';
+import { GroupCardComponent } from '../group-card/group-card.component';
+import { GroupHeroComponent } from '../group-hero/group-hero.component';
+import { GroupPageWrapperComponent } from '../group-page-wrapper/group-page-wrapper.component';
 
 @Component({
   selector: 'app-group-join-requests',
@@ -23,6 +26,9 @@ import { ConfirmDialogComponent } from '@app/shared/components/confirm-dialog/co
     MatIconModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
+    GroupCardComponent,
+    GroupHeroComponent,
+    GroupPageWrapperComponent,
   ],
   templateUrl: './group-join-requests.component.html',
   styleUrl: './group-join-requests.component.scss',

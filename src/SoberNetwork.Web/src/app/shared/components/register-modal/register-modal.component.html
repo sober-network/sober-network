@@ -1,12 +1,8 @@
 <!-- ══ SOBER NETWORK — CREATE ACCOUNT MODAL ════════════════════════════════ -->
-<div class="lm-wrap">
-
-  <!-- Close -->
-  <button class="lm-close" (click)="dialogRef.close()" aria-label="Close">
-    <svg viewBox="0 0 14 14" fill="none">
-      <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-    </svg>
-  </button>
+<app-base-form-modal
+  [title]="title"
+  [subtitle]="subtitle"
+  [useRainbowRing]="useRainbowRing">
 
   <!-- Success state -->
   <div *ngIf="success" class="lm-success">
@@ -24,17 +20,6 @@
 
   <!-- Form -->
   <ng-container *ngIf="!success">
-
-    <!-- Header -->
-    <div class="lm-header">
-      <span class="lm-logo-ring">
-        <svg viewBox="0 0 30 30" fill="none">
-          <polygon points="15,0 29,27 1,27" fill="none" stroke="#1a1a18" stroke-width="2" stroke-linejoin="round"/>
-        </svg>
-      </span>
-      <h2 class="lm-title">Create your account</h2>
-      <p class="lm-subtitle">Join Sober Network — anonymous &amp; free</p>
-    </div>
 
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="lm-form">
 
@@ -135,4 +120,4 @@
 
   </ng-container>
 
-</div>
+</app-base-form-modal>

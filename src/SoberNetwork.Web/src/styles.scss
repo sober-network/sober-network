@@ -61,10 +61,11 @@ body {
   padding: 24px 16px;
 }
 
-// ── Login / Register modal panel — custom MatDialog panel class ───────────────
-// Applied via MatDialog panelClass: 'sn-login-panel' (also reused for register)
-.sn-login-panel {
-  // Remove Material's default dialog padding/shadow so our component owns all styling
+// ── Form modal panels — custom MatDialog panel classes ───────────────────────
+// `sn-modal-panel` is the generic base shared by ALL form modals. It strips
+// Material's default dialog surface styling so the BaseFormModalComponent card
+// (.lm-wrap) owns every visual. Apply via panelClass: 'sn-modal-panel'.
+.sn-modal-panel {
   .mat-mdc-dialog-surface {
     border-radius: 20px !important;
     box-shadow: 0 24px 64px rgba(17,17,16,0.16), 0 4px 12px rgba(17,17,16,0.08) !important;
@@ -73,31 +74,16 @@ body {
   }
 }
 
-// ── Form modal panel — custom MatDialog panel class ────────────────────────────
-// Applied via MatDialog panelClass: 'sn-form-modal'
-.sn-form-modal {
-  .mat-mdc-dialog-surface {
-    border-radius: 12px !important;
-    box-shadow: 0 24px 64px rgba(17,17,16,0.16), 0 4px 12px rgba(17,17,16,0.08) !important;
-    background: var(--sn-bg) !important;
-    padding: 0 !important;
-  }
-
-  .mat-mdc-dialog-title {
-    padding: 1.5rem 1.5rem 1rem !important;
-    border-bottom: 1px solid rgba(17,17,16,0.08);
-  }
-
-  .mat-mdc-dialog-content {
-    padding: 1.5rem !important;
-    font-family: 'Inter', sans-serif !important;
-  }
-
-  .mat-mdc-dialog-actions {
-    padding: 0 1.5rem 1.5rem !important;
-  }
-}
-
+// ── Per-modal decorator hooks ────────────────────────────────────────────────
+// Layered on top of the base via an array, e.g.
+//   panelClass: ['sn-modal-panel', 'sn-login-panel']
+// Each modal owns its pane width (and any future per-modal tweaks) here, so
+// sizing lives with the design system instead of in every open() call. The
+// open() config only sets maxWidth: '100vw' to allow full width on small screens.
+.sn-login-panel    { width: 440px; }
+.sn-register-panel { width: 440px; }
+.sn-group-panel    { width: 440px; }
+.sn-meeting-panel  { width: 560px; }
 
 :root {
   --sn-bg:           #f7f5f2;

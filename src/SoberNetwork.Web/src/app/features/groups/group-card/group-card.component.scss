@@ -1,0 +1,11 @@
+@import '../_group-shared.scss';
+
+:host {
+  display: block;
+}
+
+.card-component {
+  animation: fadeUpIn 0.6s ease forwards;
+  opacity: 0;
+  animation-delay: 0.1s;
+}

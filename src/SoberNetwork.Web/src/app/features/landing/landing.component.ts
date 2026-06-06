@@ -70,9 +70,8 @@ export class LandingComponent implements OnInit, AfterViewInit {
   async openRegister(): Promise<void> {
     const { RegisterModalComponent } = await import('@app/shared/components/register-modal/register-modal.component');
     this.dialog.open(RegisterModalComponent, {
-      panelClass: 'sn-login-panel',
+      panelClass: ['sn-modal-panel', 'sn-register-panel'],
       maxWidth:   '100vw',
-      width:      '440px',
       autoFocus:  'first-tabbable',
     });
   }

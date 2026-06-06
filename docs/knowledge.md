@@ -462,6 +462,7 @@ As more groups join, Supabase/Vercel free tiers may be exceeded. Should each gro
 8. ✅ **Domain name** — `sobernetwork.group` (~$15/yr, Namecheap or Porkbun). Subdomains per group: `earlybird.sobernetwork.group`
 9. ✅ **Cost scaling model** — Voluntary contributions from each group's 7th Tradition donations. Free to start. Transparent pricing page visible to all group admins. 🐾 Future feature: cost dashboard showing platform running costs, per-group usage, and contribution status.
 10. ✅ **Handoff plan** — Use a **GitHub Organization** (`sobernetwork-group` or similar) from day one, not a personal account. Co-admin role for succession. Architecture docs live in the repo. 🐾 Future consideration: define a platform service structure (analogous to AA's GSO) for long-term governance.
+11. 🐾 **Set up Playwright MCP server** — TODO (deferred 2026-06-06): configure the Playwright MCP server for browser automation / end-to-end testing of the Angular frontend. Not yet configured.
 
 ---
 
@@ -555,6 +556,7 @@ The approved visual design is documented in the v1.3 HTML mockup. All Angular co
 --border:    rgba(17,17,16,0.08)
 --cta-bg:    #1a1a18   (dark CTA/button background)
 ```
+> **Angular app:** these are exposed `--sn-*` prefixed (`--sn-bg`, `--sn-cta-bg`, … in `styles.scss :root`). Components must use `var(--sn-cta-bg, #1a1a18)` with a literal fallback; the unprefixed names above are the mockup's. `var(--cta-bg)` resolves to nothing and silently breaks styling.
 
 ### Hero Gradient
 ```css
@@ -642,11 +644,19 @@ C:\Users\scott\.copilot\session-state\dc627e7b-f3a3-4928-8621-16da3c6acb7f\files
   - viewBox `0 0 30 30`; inscribed in the circle
 - Applied consistently to: navbar, login modal, register modal
 
+### Form Modals — BaseFormModalComponent (composition pattern)
+
+- All form modals **wrap** `<app-base-form-modal>` (composition, **not** inheritance) and supply their own form via `ng-content`. See `.github/copilot-instructions.md` §19 for the full copy-paste recipe.
+- `BaseFormModalComponent` (`src/app/shared/components/base-form-modal/`) renders the white card (`.lm-wrap`), close button, rainbow-ring icon, title, and subtitle. The card caps at `90vh` and scrolls its body (`.lm-body`) while the header/close stay fixed, so tall forms keep their buttons reachable.
+- Modals using this pattern: `LoginModalComponent`, `RegisterModalComponent` (`shared/components`), `GroupFormModalComponent`, `MeetingFormModalComponent` (`features/groups`).
+- **Always** open with `MatDialog` `panelClass: ['sn-modal-panel', 'sn-<modal>-panel']` — `sn-modal-panel` is the generic base (in `styles.scss`) that makes the Material surface transparent so the component's `.lm-wrap` owns the styling; the second class is a **per-modal decorator hook**. Each modal has one (`sn-login-panel`, `sn-register-panel`, `sn-group-panel`, `sn-meeting-panel`) and sets its own pane **width** there — the `open()` config only sets `maxWidth: '100vw'`. The older `sn-form-modal` panel class has been removed.
+- Field styling uses the shared `.lm-*` classes (`.lm-form`, `.lm-field`, `.lm-input`, `.lm-field-error`, `.form-actions`, …) — never Material form fields.
+
 ### Login Modal
 
 - Component: `src/app/shared/components/login-modal/login-modal.component.ts`
-- Opened via `MatDialog` from `NavbarComponent.openSignIn()` with `panelClass: 'sn-login-panel'`
-- Global panel override in `styles.scss`: `.sn-login-panel .mat-mdc-dialog-surface` — removes Material padding, applies `border-radius: 20px` and custom shadow. Shared by both auth modals.
+- Opened via `MatDialog` from `NavbarComponent.openSignIn()` with `panelClass: ['sn-modal-panel', 'sn-login-panel']` (generic base + login decorator)
+- Global panel override in `styles.scss`: `.sn-modal-panel .mat-mdc-dialog-surface` — removes Material padding, applies `border-radius: 20px` and custom shadow. Shared by **all** form modals; `.sn-login-panel` is the login decorator and sets the login pane width (`440px`).
 - On success: closes modal, navigates to `/dashboard`
 - "Forgot password?" → closes modal, navigates to `/auth/forgot-password`
 - "Create one" → dynamically imports `RegisterModalComponent` and opens it (no navigation)
@@ -695,4 +705,4 @@ C:\Users\scott\.copilot\session-state\dc627e7b-f3a3-4928-8621-16da3c6acb7f\files
 
 ---
 
-*Last updated: 2026-06-05*
+*Last updated: 2026-06-06*

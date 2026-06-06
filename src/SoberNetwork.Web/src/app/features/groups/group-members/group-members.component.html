@@ -1,19 +1,13 @@
-<!-- Hero Section -->
-<section class="hero-section">
-  <button mat-button class="back-button" [routerLink]="['/groups', slug]">
-    <mat-icon>arrow_back</mat-icon>
-    Back to Group
-  </button>
-  <div class="hero-inner">
-    <div class="hero-eyebrow">Members</div>
-    <h1>{{ groupName }} <span class="serif-accent">Circle</span></h1>
-    <p>Here is the current circle — roles, status, and a few helpful details for staying connected.</p>
-  </div>
-</section>
+<app-group-hero
+  eyebrowText="Members"
+  [title]="groupName"
+  titleSuffix="Circle"
+  description="Here is the current circle — roles, status, and a few helpful details for staying connected."
+  [backButtonRoute]="['/groups', slug]"
+  backButtonText="← Back to Group"
+></app-group-hero>
 
-<!-- Main Content -->
-<section class="content-section">
-  <div class="section-wrap">
+<app-group-page-wrapper>
     <!-- Error Alert -->
     <div class="error-alert" *ngIf="error">
       <mat-icon>error</mat-icon>
@@ -29,11 +23,13 @@
     <!-- Content -->
     <ng-container *ngIf="!loading">
       <!-- Empty State -->
-      <div class="empty-state" *ngIf="members.length === 0">
-        <mat-icon>group_off</mat-icon>
-        <h2>No members found</h2>
-        <p>This group does not have any visible members on this page yet.</p>
-      </div>
+      <app-group-card class="empty-state-card" *ngIf="members.length === 0">
+        <div class="empty-state">
+          <mat-icon>group_off</mat-icon>
+          <h2>No members found</h2>
+          <p>This group does not have any visible members on this page yet.</p>
+        </div>
+      </app-group-card>
 
       <!-- Members Grid -->
       <ng-container *ngIf="members.length > 0">
@@ -102,5 +98,4 @@
         </div>
       </ng-container>
     </ng-container>
-  </div>
-</section>
+</app-group-page-wrapper>

@@ -14,6 +14,10 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { GroupResponse } from '@app/core/models';
 import { GroupService } from '@app/core/services/group.service';
 import { ConfirmDialogComponent } from '@app/shared/components/confirm-dialog/confirm-dialog.component';
+import { GroupCardComponent } from '../group-card/group-card.component';
+import { GroupHeroComponent } from '../group-hero/group-hero.component';
+import { GroupPageWrapperComponent } from '../group-page-wrapper/group-page-wrapper.component';
+import { GroupFormModalComponent } from '../group-form-modal/group-form-modal.component';
 
 const COMMON_TIME_ZONES = [
   'UTC',
@@ -55,6 +59,9 @@ const COMMON_TIME_ZONES = [
     MatInputModule,
     MatProgressSpinnerModule,
     MatSlideToggleModule,
+    GroupCardComponent,
+    GroupHeroComponent,
+    GroupPageWrapperComponent,
   ],
   templateUrl: './group-settings.component.html',
   styleUrl: './group-settings.component.scss',
@@ -89,6 +96,17 @@ export class GroupSettingsComponent implements OnInit {
     this.route.paramMap.subscribe(params => {
       this.slug = params.get('slug') ?? '';
       this.loadGroup();
+    });
+  }
+
+  openSettingsModal(): void {
+    this.dialog.open(GroupFormModalComponent, {
+      panelClass: ['sn-modal-panel', 'sn-group-panel'],
+      maxWidth: '100vw',
+      data: {
+        slug: this.slug,
+      },
+      autoFocus: 'first-tabbable',
     });
   }
 
@@ -211,4 +229,5 @@ export class GroupSettingsComponent implements OnInit {
     return (error as { error?: { message?: string } })?.error?.message ?? fallback;
   }
 }
+
 

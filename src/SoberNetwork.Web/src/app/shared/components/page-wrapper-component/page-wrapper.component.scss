@@ -1,0 +1,19 @@
+:host {
+  display: block;
+}
+
+.content-section {
+  background: white;
+  padding: 60px 32px;
+}
+
+.section-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 680px) {
+  .content-section {
+    padding: 40px 16px;
+  }
+}

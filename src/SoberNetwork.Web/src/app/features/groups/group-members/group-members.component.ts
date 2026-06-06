@@ -117,6 +117,12 @@ export class GroupMembersComponent implements OnInit {
     });
   }
 
+  onStatusChange(event: Event, member: GroupMemberView): void {
+    const target = event.target as HTMLSelectElement;
+    const status = target.value as MembershipStatus;
+    this.updateStatus(member, status);
+  }
+
   confirmRemove(member: GroupMemberView): void {
     if (this.isSelf(member)) {
       return;
@@ -161,6 +167,11 @@ export class GroupMembersComponent implements OnInit {
 
   statusClass(status: MembershipStatus): string {
     return `status-${status.toLowerCase()}`;
+  }
+
+  getIconColor(index: number): string {
+    const colors = ['violet', 'rose', 'sky', 'amber', 'green', 'teal', 'indigo', 'coral'];
+    return colors[index % colors.length];
   }
 
   trackByUserId(_: number, member: GroupMemberView): string {

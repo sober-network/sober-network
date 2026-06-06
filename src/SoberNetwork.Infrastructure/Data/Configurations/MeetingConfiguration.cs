@@ -37,5 +37,8 @@ public class MeetingConfiguration : IEntityTypeConfiguration<Meeting>
 
         // Index for the public meeting finder (cross-group, public groups only)
         builder.HasIndex(m => new { m.IsActive, m.DeletedAt, m.MeetingType });
+
+        // Index created_at for chronological queries
+        builder.HasIndex(m => m.CreatedAt);
     }
 }

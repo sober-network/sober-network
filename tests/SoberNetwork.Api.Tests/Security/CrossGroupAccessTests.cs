@@ -79,7 +79,7 @@ public class CrossGroupAccessTests
     }
 
     [Fact]
-    public async Task outsider_cannot_view_member_list()
+    public async Task GetMembers_AsOutsider_ReturnsForbidden()
     {
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
@@ -90,7 +90,7 @@ public class CrossGroupAccessTests
     }
 
     [Fact]
-    public async Task outsider_cannot_view_join_requests()
+    public async Task GetJoinRequests_AsOutsider_ReturnsForbidden()
     {
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
@@ -101,7 +101,7 @@ public class CrossGroupAccessTests
     }
 
     [Fact]
-    public async Task outsider_cannot_view_phone_list()
+    public async Task GetPhoneList_AsOutsider_ReturnsForbidden()
     {
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
@@ -112,7 +112,7 @@ public class CrossGroupAccessTests
     }
 
     [Fact]
-    public async Task outsider_cannot_view_member_detail()
+    public async Task GetMemberDetail_AsOutsider_ReturnsForbidden()
     {
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
@@ -123,7 +123,7 @@ public class CrossGroupAccessTests
     }
 
     [Fact]
-    public async Task outsider_cannot_change_phone_visibility()
+    public async Task SetPhoneVisibility_AsOutsider_ReturnsForbidden()
     {
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
@@ -134,7 +134,7 @@ public class CrossGroupAccessTests
     }
 
     [Fact]
-    public async Task non_admin_outsider_cannot_approve_member()
+    public async Task ApproveMember_AsNonAdmin_ReturnsForbidden()
     {
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
@@ -145,7 +145,7 @@ public class CrossGroupAccessTests
     }
 
     [Fact]
-    public async Task non_admin_outsider_cannot_reject_member()
+    public async Task RejectMember_AsNonAdmin_ReturnsForbidden()
     {
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
@@ -156,7 +156,7 @@ public class CrossGroupAccessTests
     }
 
     [Fact]
-    public async Task non_admin_outsider_cannot_remove_member()
+    public async Task RemoveMember_AsNonAdmin_ReturnsForbidden()
     {
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
@@ -167,7 +167,7 @@ public class CrossGroupAccessTests
     }
 
     [Fact]
-    public async Task non_admin_outsider_cannot_change_member_role()
+    public async Task ChangeMemberRole_AsNonAdmin_ReturnsForbidden()
     {
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
@@ -178,7 +178,7 @@ public class CrossGroupAccessTests
     }
 
     [Fact]
-    public async Task non_admin_outsider_cannot_change_member_status()
+    public async Task ChangeMemberStatus_AsNonAdmin_ReturnsForbidden()
     {
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
@@ -189,7 +189,7 @@ public class CrossGroupAccessTests
     }
 
     [Fact]
-    public async Task non_admin_outsider_cannot_clear_probation()
+    public async Task ClearProbation_AsNonAdmin_ReturnsForbidden()
     {
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
@@ -200,7 +200,7 @@ public class CrossGroupAccessTests
     }
 
     [Fact]
-    public async Task non_admin_outsider_cannot_update_group()
+    public async Task UpdateGroup_AsNonAdmin_ReturnsForbidden()
     {
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
@@ -212,7 +212,7 @@ public class CrossGroupAccessTests
     }
 
     [Fact]
-    public async Task non_admin_outsider_cannot_delete_group()
+    public async Task DeleteGroup_AsNonAdmin_ReturnsForbidden()
     {
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);
@@ -223,7 +223,7 @@ public class CrossGroupAccessTests
     }
 
     [Fact]
-    public async Task outsider_gets_404_for_group_detail()
+    public async Task GetGroup_AsOutsider_ReturnsNotFound()
     {
         await using var factory = CreateFactory();
         using var client = factory.CreateAuthenticatedClient(OutsiderUserId);

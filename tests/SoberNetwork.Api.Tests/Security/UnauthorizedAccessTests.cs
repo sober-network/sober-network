@@ -52,7 +52,7 @@ public class UnauthorizedAccessTests : IClassFixture<TestWebApplicationFactory>
     [InlineData("GET", "/api/members")]
     [InlineData("GET", "/api/members/some-user")]
     [InlineData("PATCH", "/api/members/some-user/deactivate")]
-    public async Task protected_endpoint_returns_401_without_jwt(string method, string url)
+    public async Task ProtectedEndpoint_WithoutJwt_Returns401(string method, string url)
     {
         // Arrange
         using var request = new HttpRequestMessage(new HttpMethod(method), url);
@@ -69,7 +69,7 @@ public class UnauthorizedAccessTests : IClassFixture<TestWebApplicationFactory>
     }
 
     [Fact]
-    public async Task allow_anonymous_group_info_endpoint_does_not_return_401()
+    public async Task GroupInfoEndpoint_AsAnonymous_DoesNotReturn401()
     {
         // Act
         var response = await _client.GetAsync("/api/groups/any-slug/info");

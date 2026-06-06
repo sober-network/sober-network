@@ -409,7 +409,7 @@ try
             };
             var result = await userManager.CreateAsync(superuser, password);
             if (result.Succeeded)
-                seedLogger.LogInformation("Superuser created: {Email}", email);
+                seedLogger.LogInformation("Superuser seeded (new account created).");
             else
                 seedLogger.LogError("Superuser seed failed: {Errors}",
                     string.Join(", ", result.Errors.Select(e => e.Description)));
@@ -418,11 +418,11 @@ try
         {
             existing.IsSuperAdmin = true;
             await userManager.UpdateAsync(existing);
-            seedLogger.LogInformation("Existing user promoted to superuser: {Email}", email);
+            seedLogger.LogInformation("Existing user promoted to superuser.");
         }
         else
         {
-            seedLogger.LogInformation("Superuser already exists: {Email}", email);
+            seedLogger.LogInformation("Superuser already exists — seed skipped.");
         }
     }
     else

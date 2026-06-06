@@ -12,7 +12,7 @@ public class SuperAdminForbiddenTests : IClassFixture<TestWebApplicationFactory>
     public SuperAdminForbiddenTests(TestWebApplicationFactory factory) => _regularClient = factory.CreateAuthenticatedClient();
 
     [Fact]
-    public async Task get_all_groups_returns_403_for_regular_user()
+    public async Task GetAllGroups_AsRegularUser_ReturnsForbidden()
     {
         // Act
         var response = await _regularClient.GetAsync("/api/groups/all");
@@ -22,7 +22,7 @@ public class SuperAdminForbiddenTests : IClassFixture<TestWebApplicationFactory>
     }
 
     [Fact]
-    public async Task get_all_members_returns_403_for_regular_user()
+    public async Task GetAllMembers_AsRegularUser_ReturnsForbidden()
     {
         // Act
         var response = await _regularClient.GetAsync("/api/members");
@@ -32,7 +32,7 @@ public class SuperAdminForbiddenTests : IClassFixture<TestWebApplicationFactory>
     }
 
     [Fact]
-    public async Task get_user_by_id_returns_403_for_regular_user()
+    public async Task GetUserById_AsRegularUser_ReturnsForbidden()
     {
         // Act
         var response = await _regularClient.GetAsync("/api/members/00000000-0000-0000-0000-000000000099");
@@ -42,7 +42,7 @@ public class SuperAdminForbiddenTests : IClassFixture<TestWebApplicationFactory>
     }
 
     [Fact]
-    public async Task deactivate_user_returns_403_for_regular_user()
+    public async Task DeactivateUser_AsRegularUser_ReturnsForbidden()
     {
         // Act
         var response = await _regularClient.PatchAsync("/api/members/00000000-0000-0000-0000-000000000099/deactivate", null);
@@ -55,7 +55,7 @@ public class SuperAdminForbiddenTests : IClassFixture<TestWebApplicationFactory>
 public class SuperAdminAllowedTests
 {
     [Fact]
-    public async Task get_all_groups_returns_200_for_super_admin()
+    public async Task GetAllGroups_AsSuperAdmin_ReturnsOk()
     {
         // Arrange
         await using var factory = new TestWebApplicationFactory();

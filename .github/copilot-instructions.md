@@ -228,6 +228,11 @@ resolve it before writing code.
 2. A test asserting insufficient role returns `403`
 3. A test asserting cross-group access returns `403` or `404` (no data leakage)
 
+**Exceptions to (2) and (3):**
+- **Self-scoped endpoints** (`/api/members/me/*`) derive identity solely from the JWT `NameIdentifier` claim and only ever touch the caller's own data — there is no role or cross-group dimension, so only the `401` test applies.
+- **Global superadmin endpoints** (`GET /api/members`, `/api/members/{userId}`, deactivate) are platform-wide, not group-scoped — they require `401` + `403`, but cross-group does not apply.
+- All `[AllowAnonymous]` endpoints are exempt from `401`.
+
 **Test naming convention:**
 ```
 MethodName_Scenario_ExpectedResult
@@ -376,9 +381,9 @@ The platform uses a modular monolith with clean separation:
 
 Commands and Queries live in `/src/SoberNetwork.Core/Handlers/{Feature}/`:
 - One file per handler (e.g., `GetPhoneListQueryHandler.cs`)
-- All commands/queries return `Result<T>` with `ResultCode` (Success, Unauthorized, Forbidden, BadRequest, Conflict, etc.)
+- Commands and permission-gated queries return `Result<T>` / `DataResult<T>` / `CommandResult` with a `ResultCode` (Success, Unauthorized, Forbidden, BadRequest, Conflict, etc.); controllers switch on `ResultCode` → HTTP status
+- **Read-query exception:** simple read queries that cannot fail with a domain/permission error (e.g., `GetPlatformStats`, `GetMyGroups`, `GetAllGroups`, `GetMyProfile`, `GetUserById`, `GetMailingAddress`, `SearchPublicMeetings`) may return the DTO/collection directly (or `null` for not-found, which the controller maps to `404`/`NoContent`). This is an accepted convention, not a violation.
 - Handlers **never** return raw domain entities — always map to DTOs
-- Controllers switch on `result.ResultCode` to return HTTP status
 
 ### DTO Mapping Convention
 

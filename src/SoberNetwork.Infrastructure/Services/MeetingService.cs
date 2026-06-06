@@ -82,7 +82,7 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
     public async Task<(AdminMeetingResponse? Meeting, string? Error)> CreateMeetingAsync(
         string slug, CreateMeetingRequest request, Guid userId, CancellationToken ct = default)
     {
-        logger.LogInformation("CreateMeetingAsync: slug={Slug}, userId={UserId}, name={Name}", slug, userId, request.Name);
+        logger.LogInformation("CreateMeetingAsync: slug={Slug}, userId={UserId}", slug, userId);
          
         var group = await db.Groups
             .AsNoTracking()

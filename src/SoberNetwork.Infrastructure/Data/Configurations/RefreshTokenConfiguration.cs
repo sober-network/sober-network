@@ -17,6 +17,7 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
 
         builder.HasIndex(t => t.TokenHash).IsUnique();
         builder.HasIndex(t => t.UserId);
+        builder.HasIndex(t => t.CreatedAt);
 
         builder.HasOne(t => t.User)
             .WithMany()

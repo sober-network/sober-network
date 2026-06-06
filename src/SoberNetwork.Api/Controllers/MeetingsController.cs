@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SoberNetwork.Core.Commands.Groups;
 using SoberNetwork.Core.DTOs.Groups;
@@ -13,6 +14,7 @@ namespace SoberNetwork.Api.Controllers;
 /// All endpoints require authentication — meetings data is never public (T11/T12).
 /// Zoom credentials are returned only to authenticated members; admin Notes only to GroupAdmin.
 /// </summary>
+[Authorize]
 [ApiController]
 [Route("api/groups/{slug}/meetings")]
 public class MeetingsController(IMediator mediator) : ControllerBase

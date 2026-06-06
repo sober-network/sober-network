@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SoberNetwork.Core.Commands.Groups;
+using SoberNetwork.Core.DTOs.Common;
 using SoberNetwork.Core.DTOs.Groups;
 using SoberNetwork.Core.Queries.Groups;
 using SoberNetwork.Core.Results;
@@ -13,6 +14,7 @@ namespace SoberNetwork.Api.Controllers;
 /// Groups API — all endpoints require authentication (global [Authorize] policy).
 /// Slugs are used in URLs, never numeric IDs (T12 — no enumerable identifiers).
 /// </summary>
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class GroupsController(IMediator mediator) : ControllerBase
@@ -99,14 +101,10 @@ public class GroupsController(IMediator mediator) : ControllerBase
     [HttpGet("{slug}/members")]
     public async Task<IActionResult> GetMembers(
         string slug,
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 25,
+        [FromQuery] PaginationQuery pagination,
         CancellationToken cancellationToken = default)
     {
-        if (page < 1 || pageSize is < 1 or > 100)
-            return Problem("page must be >= 1; pageSize must be 1–100.", statusCode: 400);
-
-        var result = await mediator.Send(new GetMembersQuery(slug, UserId, page, pageSize), cancellationToken);
+        var result = await mediator.Send(new GetMembersQuery(slug, UserId, pagination.Page, pagination.PageSize), cancellationToken);
         return result.Code switch
         {
             ResultCode.Ok => Ok(result.Data),
@@ -146,14 +144,10 @@ public class GroupsController(IMediator mediator) : ControllerBase
     [HttpGet("{slug}/join-requests")]
     public async Task<IActionResult> GetJoinRequests(
         string slug,
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 25,
+        [FromQuery] PaginationQuery pagination,
         CancellationToken cancellationToken = default)
     {
-        if (page < 1 || pageSize is < 1 or > 100)
-            return Problem("page must be >= 1; pageSize must be 1–100.", statusCode: 400);
-
-        var result = await mediator.Send(new GetJoinRequestsQuery(slug, UserId, page, pageSize), cancellationToken);
+        var result = await mediator.Send(new GetJoinRequestsQuery(slug, UserId, pagination.Page, pagination.PageSize), cancellationToken);
         return result.Code switch
         {
             ResultCode.Ok => Ok(result.Data),

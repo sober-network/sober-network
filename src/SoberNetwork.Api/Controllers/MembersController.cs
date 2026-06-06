@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SoberNetwork.Core.Commands.Members;
 using SoberNetwork.Core.Queries.Members;
@@ -11,6 +12,7 @@ namespace SoberNetwork.Api.Controllers;
 /// Member profile API — all endpoints require authentication (global [Authorize] policy).
 /// No endpoint exposes PII beyond what the authenticated user has explicitly opted to share (T3, T12).
 /// </summary>
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class MembersController(IMediator mediator) : ControllerBase

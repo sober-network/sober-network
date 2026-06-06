@@ -497,7 +497,274 @@ The approved visual design is captured in `docs/knowledge.md § UI Design System
 
 ---
 
-## 19. Database Migration Workflow
+## 19. Reusable Modal Component Pattern
+
+The platform uses a **composition-based** modal system (NOT inheritance) for consistency and reusability. All form modals wrap their content in `<app-base-form-modal>` and use the same CSS class naming conventions.
+
+### Architecture
+
+**BaseFormModalComponent** (`src/SoberNetwork.Web/src/app/shared/components/base-form-modal/`)
+- Provides the modal wrapper structure: header (icon, title, subtitle), close button, ng-content outlet
+- No business logic — purely structural and styling
+- Used by composition: child components wrap their forms in `<app-base-form-modal>` tag
+
+**Child Modal Components** (e.g., `LoginModalComponent`, `RegisterModalComponent`, `GroupFormModalComponent`, `MeetingFormModalComponent`)
+- Standalone components that wrap their form in `<app-base-form-modal>`
+- Each has its own template, styles, and form logic
+- Do NOT extend BaseFormModalComponent (avoids inheritance gotchas with Angular templates)
+
+### CSS Class Naming Convention
+
+All modals use these classes consistently:
+
+| Class | Purpose | Example |
+|-------|---------|---------|
+| `.lm-form` | Form container | `<form class="lm-form">` |
+| `.lm-field` | Single form field wrapper | `<div class="lm-field">` |
+| `.lm-label-row` | Label + counter row | `<div class="lm-label-row"><label>Name</label><span>0/100</span></div>` |
+| `.lm-label` | Field label | `<label class="lm-label">Email</label>` |
+| `.lm-input` | Text/email/date/time input | `<input class="lm-input" type="text" />` |
+| `.lm-textarea` | Multi-line input | `<textarea class="lm-input lm-textarea"></textarea>` |
+| `.lm-field-error` | Validation error message | `<div class="lm-field-error" *ngIf="...">Error text</div>` |
+| `.form-section` | Logical section header | `<div class="form-section"><h4>Section Title</h4></div>` |
+| `.error-message` | Form-level error alert | `<div class="error-message" *ngIf="error">{{ error }}</div>` |
+| `.form-actions` | Button container | `<div class="form-actions">` |
+| `.btn-primary` | Primary action button | `<button class="btn-primary">Save</button>` |
+| `.btn-secondary` | Secondary/cancel button | `<button class="btn-secondary">Cancel</button>` |
+
+### How to Create a New Modal
+
+**Step 1: Create component directory**
+```
+src/SoberNetwork.Web/src/app/features/groups/new-form-modal/
+  ├── new-form-modal.component.ts
+  ├── new-form-modal.component.html
+  └── new-form-modal.component.scss
+```
+
+**Step 2: Copy TypeScript template**
+```typescript
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { finalize } from 'rxjs';
+import { GroupService } from '@app/core/services/group.service';
+import { BaseFormModalComponent } from '@app/shared/components/base-form-modal/base-form-modal.component';
+
+@Component({
+  selector: 'app-new-form-modal',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatSlideToggleModule,
+    MatCheckboxModule,
+    MatProgressSpinnerModule,
+    BaseFormModalComponent,
+  ],
+  templateUrl: './new-form-modal.component.html',
+  styleUrl: './new-form-modal.component.scss',
+})
+export class NewFormModalComponent implements OnInit {
+  private readonly fb = inject(FormBuilder);
+  private readonly service = inject(GroupService);
+  readonly dialogRef = inject(MatDialogRef<NewFormModalComponent>);
+  private readonly data = inject(MAT_DIALOG_DATA) as { slug: string };
+
+  form = this.fb.group({
+    // Define your form controls here
+  });
+
+  title = 'Modal Title';
+  subtitle = 'Modal subtitle';
+  icon = 'edit';
+  saving = false;
+  error = '';
+
+  ngOnInit(): void {
+    // Initialize form with data if needed
+  }
+
+  save(): void {
+    if (this.form.invalid) return;
+    this.saving = true;
+    // Call service, handle response
+    this.saving = false;
+    this.dialogRef.close(true);
+  }
+
+  cancel(): void {
+    this.dialogRef.close();
+  }
+}
+```
+
+**Step 3: Create HTML template (use class naming convention)**
+```html
+<app-base-form-modal [title]="title" [subtitle]="subtitle" [icon]="icon">
+  
+  <form [formGroup]="form" (ngSubmit)="save()" novalidate class="lm-form">
+    
+    <!-- Example field -->
+    <div class="lm-field">
+      <label class="lm-label">Field Name</label>
+      <input 
+        type="text"
+        class="lm-input"
+        formControlName="fieldName"
+        placeholder="Placeholder text"
+      />
+      <div class="lm-field-error" *ngIf="form.get('fieldName')?.touched && form.get('fieldName')?.hasError('required')">
+        This field is required.
+      </div>
+    </div>
+
+    <!-- Error message -->
+    <div class="error-message" *ngIf="error">{{ error }}</div>
+
+    <!-- Action buttons -->
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="cancel()" [disabled]="saving">
+        Cancel
+      </button>
+      <button type="submit" class="btn-primary" [disabled]="saving || form.invalid">
+        {{ saving ? 'Saving…' : 'Save' }}
+      </button>
+    </div>
+
+  </form>
+
+</app-base-form-modal>
+```
+
+**Step 4: Create SCSS with proven styling**
+```scss
+// ── Form styling ─────────────────────────────────────────────────────────
+.lm-form { display: flex; flex-direction: column; gap: 16px; }
+
+.lm-field { display: flex; flex-direction: column; gap: 6px; }
+
+.lm-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--sn-text-mid, #3d3d3a);
+  letter-spacing: 0.01em;
+}
+
+.lm-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid rgba(17,17,16,0.18);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.7);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9375rem;
+  color: var(--sn-text, #111110);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &::placeholder { color: var(--sn-text-muted, #7a7a75); }
+  &:focus {
+    border-color: rgba(17,17,16,0.4);
+    box-shadow: 0 0 0 3px rgba(17,17,16,0.06);
+  }
+}
+
+.lm-field-error {
+  font-size: 0.8rem;
+  color: #c0392b;
+}
+
+.error-message {
+  font-size: 0.875rem;
+  color: #c0392b;
+  padding: 8px 12px;
+  background: rgba(192,57,43,0.07);
+  border-radius: 8px;
+}
+
+// ── Action buttons ─────────────────────────────────────────────────────────
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+
+  button {
+    flex: 1;
+    height: 46px;
+    border-radius: 100px;
+    border: none;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.15s;
+    padding: 0;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .btn-primary {
+    background-color: var(--cta-bg);
+    color: #fff;
+    &:hover:not(:disabled) { opacity: 0.88; }
+  }
+
+  .btn-secondary {
+    background-color: transparent;
+    color: var(--text-mid);
+    border: 1px solid var(--text-muted);
+    &:hover:not(:disabled) { background-color: var(--bg-soft); }
+  }
+}
+```
+
+**Step 5: Open the modal from a parent component**
+```typescript
+import { MatDialog } from '@angular/material/dialog';
+
+openNewModal(): void {
+  this.dialog.open(NewFormModalComponent, {
+    panelClass: 'sn-login-panel',  // Use proven panel class
+    maxWidth: '100vw',
+    width: '440px',
+    data: { slug: this.slug },
+    autoFocus: 'first-tabbable',
+  });
+}
+```
+
+### Key Principles
+
+1. **Composition over inheritance** — wrap in `<app-base-form-modal>`, don't extend it
+2. **CSS class convention** — always use `.lm-form`, `.lm-field`, `.lm-input` etc. for instant consistency
+3. **panelClass: 'sn-login-panel'** — proven to work; provides rounded corners and correct styling
+4. **No Material form fields** — use plain `<input>`, `<textarea>`, `<select>` with custom CSS instead
+5. **Two buttons always** — Cancel (secondary) + Action (primary) in `.form-actions` div
+6. **Error handling** — form-level errors in `.error-message`, field-level in `.lm-field-error`
+
+### Reference Implementation
+
+- **LoginModalComponent** — simplest example (email + password)
+- **GroupFormModalComponent** — medium (multiple fields, toggles, sections)
+- **MeetingFormModalComponent** — complex (checkboxes, conditionals, many fields)
+
+Copy from one of these when creating a new modal. Time to create: **10 minutes** if following this pattern.
+
+---
+
+## 20. Database Migration Workflow
 
 **Add a migration after entity changes:**
 ```powershell

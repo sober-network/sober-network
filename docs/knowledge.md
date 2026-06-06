@@ -706,4 +706,39 @@ C:\Users\scott\.copilot\session-state\dc627e7b-f3a3-4928-8621-16da3c6acb7f\files
 
 ---
 
+## Security & Performance Audit (2026-06-06)
+
+**Status:** Backlog cleared ✅ (commits `4023c76`, `ed4db4c`)
+
+An audit of the codebase against the standing instructions produced a prioritized
+backlog. All High/Medium/Low findings are resolved.
+
+### Durable facts learned
+- **Global auth fallback policy** — `Program.cs` registers
+  `AddAuthorizationBuilder().SetFallbackPolicy(RequireAuthenticatedUser())`. Authentication
+  is enforced by default; a missing `[Authorize]` is **clarity/defense-in-depth only**, not a
+  vulnerability. Only `[AllowAnonymous]` endpoints are public.
+- **Pagination binding** — bind paging DTOs with `[FromQuery] PaginationQuery`, **never**
+  `[AsParameters]` (minimal-API only; in MVC a complex param defaults to `[FromBody]` and a
+  bodyless GET returns 415). FluentValidation auto-validation then returns 400 for invalid paging.
+  See `PaginationQuery` + `PaginationQueryValidator` (Core) and `PaginationValidationTests`.
+- **`[ApiController]` auto-validates** DataAnnotations → 400 ProblemDetails before the action,
+  so manual `if (!ModelState.IsValid)` checks are redundant.
+
+### Fixes applied
+- **N+1 removed** in `GroupService.GetUserGroupsAsync` / `MemberService.GetAllMembersAsync`
+  (single grouped count via `GroupBy`/`ToDictionaryAsync`).
+- **DB indexes** (migration `AddIndexesForQueryColumns`): `group_memberships(created_at;
+  group_id,status,deleted_at)`, `meetings(created_at)`, `refresh_tokens(created_at)`,
+  `groups(created_at)`. Applied on startup via `MigrateAsync()`.
+- **Log hygiene (T12)** — `ClientLogController` scrubs email/phone before logging; removed
+  email from superuser-seed logs; dropped meeting name from `MeetingService` create log.
+- **Explicit `[Authorize]`** added to Groups/Meetings/Members controllers.
+- **Tests** — `MeetingSecurityTests` (401/403/cross-group for 5 endpoints + client-log 401);
+  `PaginationValidationTests`; security tests renamed to `Method_Scenario_Result`.
+- **Documented exceptions** in copilot-instructions.md: read-query `Result<T>` convention; and
+  self-scoped/global-superadmin endpoints don't need cross-group 403 tests.
+
+---
+
 *Last updated: 2026-06-06*

@@ -45,11 +45,12 @@ export class GroupMembersComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  readonly membershipStatuses: MembershipStatus[] = ['Active', 'Probationary', 'Suspended', 'Banned'];
+  readonly membershipStatuses: MembershipStatus[] = ['PendingApproval', 'Active', 'Probationary', 'Suspended', 'Banned'];
 
   slug = '';
   groupName = '';
   members: GroupMemberView[] = [];
+  pendingMemberCount = 0;
   loading = true;
   isAdmin = false;
   error = '';
@@ -184,6 +185,7 @@ export class GroupMembersComponent implements OnInit {
       }),
       switchMap(response => {
         this.totalCount = response.totalCount;
+        this.pendingMemberCount = response.items.filter(m => m.status === 'PendingApproval').length;
 
         if (response.items.length === 0) {
           return of([] as GroupMemberView[]);

@@ -22,6 +22,8 @@ public record GroupResponse(
     int MemberCount,
     /// <summary>Role of the current caller within the group.</summary>
     string UserRole,
+    /// <summary>Membership status of the current caller (e.g. Active, PendingApproval, Suspended, Banned).</summary>
+    string UserMembershipStatus,
     /// <summary>UTC timestamp when the group was created.</summary>
     DateTime CreatedAt,
     /// <summary>Meetings belonging to this group.</summary>

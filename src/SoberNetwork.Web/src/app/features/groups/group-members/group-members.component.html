@@ -8,6 +8,9 @@
       <p class="eyebrow">Members</p>
       <h1>{{ groupName }}</h1>
       <p class="page-copy">Here is the current circle — roles, status, and a few helpful details for staying connected.</p>
+      <div *ngIf="isAdmin && pendingMemberCount > 0" class="pending-badge">
+        {{ pendingMemberCount }} pending approval{{ pendingMemberCount !== 1 ? 's' : '' }}
+      </div>
     </div>
   </div>
 

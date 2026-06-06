@@ -66,10 +66,10 @@ public class GroupService(
             .ThenBy(m => m.Time)
             .Select(ToPublicMeetingResponse).ToList();
 
-    private static GroupResponse ToGroupResponse(Group g, string userRole, int memberCount) => new(
+    private static GroupResponse ToGroupResponse(Group g, string userRole, string userMembershipStatus, int memberCount) => new(
         g.Id, g.Name, g.Slug, g.Description, g.TimeZone,
         g.IsActive, g.IsPublic, g.RequiresApproval,
-        memberCount, userRole, g.CreatedAt, ActiveMeetings(g));
+        memberCount, userRole, userMembershipStatus, g.CreatedAt, ActiveMeetings(g));
 
     private static GroupSummaryResponse ToGroupSummaryResponse(Group group) => new(
         group.Name, group.Slug, group.Description, group.TimeZone,
@@ -101,7 +101,7 @@ public class GroupService(
                 .ThenInclude(g => g!.Meetings)
             .Where(m =>
                 m.UserId == userId &&
-                m.Status == MemberStatus.Active &&
+                (m.Status == MemberStatus.Active || m.Status == MemberStatus.PendingApproval) &&
                 m.DeletedAt == null &&
                 m.Group != null &&
                 m.Group.DeletedAt == null)
@@ -116,7 +116,7 @@ public class GroupService(
                     x.GroupId == m.GroupId &&
                     x.Status == MemberStatus.Active &&
                     x.DeletedAt == null);
-            result.Add(ToGroupResponse(m.Group!, m.Role.ToString(), count));
+            result.Add(ToGroupResponse(m.Group!, m.Role.ToString(), m.Status.ToString(), count));
         }
         return result;
     }
@@ -157,7 +157,6 @@ public class GroupService(
             .FirstOrDefaultAsync(m =>
                 m.GroupId == group.Id &&
                 m.UserId == userId &&
-                m.Status == MemberStatus.Active &&
                 m.DeletedAt == null);
         if (membership == null) return null;  // not a member — access denied (T4)
 
@@ -167,7 +166,7 @@ public class GroupService(
                 m.GroupId == group.Id &&
                 m.Status == MemberStatus.Active &&
                 m.DeletedAt == null);
-        return ToGroupResponse(group, membership.Role.ToString(), count);
+        return ToGroupResponse(group, membership.Role.ToString(), membership.Status.ToString(), count);
     }
 
     // ── Group mutations ────────────────────────────────────────────────────────
@@ -215,7 +214,7 @@ public class GroupService(
         await audit.LogAsync(SecurityEventType.GroupCreated, creatorUserId,
             $"Created group slug={request.Slug}");
 
-        return (ToGroupResponse(group, GroupRole.GroupAdmin.ToString(), 1), null);
+        return (ToGroupResponse(group, GroupRole.GroupAdmin.ToString(), MemberStatus.Active.ToString(), 1), null);
     }
 
     public async Task<(GroupResponse? Group, string? Error)> UpdateGroupAsync(
@@ -241,7 +240,7 @@ public class GroupService(
         await audit.LogAsync(SecurityEventType.GroupUpdated, userId, $"Updated group slug={slug}");
 
         var count = await GetMemberCountAsync(group.Id);
-        return (ToGroupResponse(group, membership.Role.ToString(), count), null);
+        return (ToGroupResponse(group, membership.Role.ToString(), membership.Status.ToString(), count), null);
     }
 
     public async Task<(bool Success, string? Error)> SoftDeleteGroupAsync(string slug, Guid userId)

@@ -27,6 +27,16 @@
   line-height: 1.6;
 }
 
+.pending-badge {
+  margin-top: 16px;
+  padding: 8px 12px;
+  background-color: #fff3cd;
+  border-left: 4px solid #ff9800;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+}
+
 .feedback-card {
   border-left: 4px solid #b3261e;
 }

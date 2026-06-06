@@ -1,6 +1,6 @@
 // Group models — mirror GroupsController request/response DTOs
 
-export type MembershipStatus = 'Active' | 'Probationary' | 'Suspended' | 'Banned';
+export type MembershipStatus = 'PendingApproval' | 'Active' | 'Probationary' | 'Suspended' | 'Banned';
 export type MemberRole = 'Member' | 'GroupAdmin';
 
 export type MeetingFormat = 'Discussion' | 'Speaker' | 'StepStudy' | 'BigBook' | 'Beginners';
@@ -225,6 +225,7 @@ export interface GroupResponse {
   requiresApproval: boolean;
   memberCount: number;
   userRole: string;
+  userMembershipStatus: string;
   createdAt: string;
   meetings: MeetingResponse[];
 }

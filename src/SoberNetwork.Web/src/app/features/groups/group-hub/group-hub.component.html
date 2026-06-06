@@ -1,121 +1,130 @@
-<section class="page-container hub-page">
-  <div class="loading-state" *ngIf="loading">
-    <mat-spinner diameter="40"></mat-spinner>
-    <p>Opening your group space…</p>
+<!-- Hero Section with Background Image -->
+<section class="hero-section" *ngIf="group">
+  <a [routerLink]="['/groups']" class="back-button">← Back to Groups</a>
+
+  <div class="section-wrap">
+    <div class="hero-eyebrow">Group Hub</div>
+    <h1>{{ group.name }} <span class="serif-accent">Hub</span></h1>
+    <p>{{ group.description || 'A steady place to connect, support one another, and keep the circle strong.' }}</p>
+
+    <div class="hero-meta">
+      <span class="meta-badge">👥 {{ group.memberCount }} member{{ group.memberCount === 1 ? '' : 's' }}</span>
+      <span class="meta-badge" *ngIf="group.userRole" [ngClass]="group.userRole === 'GroupAdmin' ? 'admin' : ''">
+        {{ group.userRole }}
+      </span>
+    </div>
   </div>
+</section>
 
-  <mat-card class="feedback-card" *ngIf="error && !loading">
-    <mat-card-content>{{ error }}</mat-card-content>
-  </mat-card>
+<!-- Loading State -->
+<div class="loading-state" *ngIf="loading">
+  <mat-spinner diameter="40"></mat-spinner>
+  <p>Opening your group space…</p>
+</div>
 
-  <ng-container *ngIf="group && !loading">
-    <header class="page-header">
-      <div>
-        <p class="eyebrow">Group hub</p>
-        <h1>{{ group.name }}</h1>
-        <p class="description">{{ group.description || 'A steady place to connect, support one another, and keep the circle strong.' }}</p>
-      </div>
+<!-- Error State -->
+<div class="error-alert" *ngIf="error && !loading">
+  <mat-icon>error</mat-icon>
+  {{ error }}
+</div>
 
-      <mat-chip-set>
-        <mat-chip>
-          <mat-icon matChipAvatar>groups</mat-icon>
-          {{ group.memberCount }} member{{ group.memberCount === 1 ? '' : 's' }}
-        </mat-chip>
-        <mat-chip *ngIf="group.userRole">{{ group.userRole }}</mat-chip>
-      </mat-chip-set>
-    </header>
-
-    <mat-card class="bulletin-card">
-      <mat-card-header>
-        <mat-icon mat-card-avatar>schedule</mat-icon>
-        <mat-card-title>Meeting details</mat-card-title>
-        <mat-card-subtitle>Everything members need to get into the room</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <p *ngIf="group.timeZone" class="timezone-note"><mat-icon inline>public</mat-icon> {{ group.timeZone }}</p>
-
-        <ng-container *ngIf="group.meetings.length === 0">
-          <p>No meetings scheduled yet.</p>
-        </ng-container>
-
-        <div class="meeting-item" *ngFor="let m of group.meetings">
-          <h3>{{ m.name }}</h3>
-          <p *ngIf="m.description">{{ m.description }}</p>
-          <p><strong>When:</strong> {{ meetingWhen(m) }}</p>
-          <p><strong>Duration:</strong> {{ m.durationMinutes }} min</p>
-          <p *ngIf="m.language"><strong>Language:</strong> {{ m.language }}</p>
-          <p *ngIf="m.location"><strong>Location:</strong> {{ m.location }}</p>
-          <mat-chip-set *ngIf="meetingFormats(m).length > 0">
-            <mat-chip>{{ m.isOpen ? 'Open' : 'Closed' }}</mat-chip>
-            <mat-chip *ngFor="let format of meetingFormats(m)">{{ format }}</mat-chip>
-          </mat-chip-set>
-          <div *ngIf="m.zoomLink || m.zoomMeetingId || m.zoomPasscode" class="zoom-details">
-            <p *ngIf="m.zoomLink"><strong>Zoom:</strong> <a [href]="m.zoomLink" target="_blank" rel="noreferrer">Join meeting</a></p>
-            <p *ngIf="m.zoomMeetingId"><strong>Meeting ID:</strong> {{ m.zoomMeetingId }}</p>
-            <p *ngIf="m.zoomPasscode"><strong>Passcode:</strong> {{ m.zoomPasscode }}</p>
+<!-- Main Content -->
+<ng-container *ngIf="group && !loading">
+  <section class="hero-section" style="background: white; padding: 60px 32px;">
+    <div class="section-wrap">
+      <!-- Meeting Details Card -->
+      <div class="meeting-details-card">
+        <div class="meeting-details-header">
+          <div class="meeting-icon">🕐</div>
+          <div>
+            <h3>Meeting Details</h3>
+            <p>Everything members need to get into the room</p>
           </div>
         </div>
-      </mat-card-content>
-    </mat-card>
 
-    <section class="quick-links">
-      <mat-card class="nav-card">
-        <a class="card-link" [routerLink]="['/groups', group.slug, 'members']">
-          <mat-icon>group</mat-icon>
-          <h2>Members</h2>
+        <div class="meeting-details-body">
+          <ng-container *ngIf="group.meetings.length === 0">
+            <p style="color: var(--sn-text-muted); font-size: 0.9rem;">No meetings scheduled yet.</p>
+          </ng-container>
+
+          <ng-container *ngFor="let m of group.meetings">
+            <div class="detail-row">
+              <strong>Meeting Name</strong>
+              <span>{{ m.name }}</span>
+            </div>
+            <div class="detail-row" *ngIf="m.description">
+              <strong>Description</strong>
+              <span>{{ m.description }}</span>
+            </div>
+            <div class="detail-row">
+              <strong>When</strong>
+              <span>{{ meetingWhen(m) }}</span>
+            </div>
+            <div class="detail-row">
+              <strong>Duration</strong>
+              <span>{{ m.durationMinutes }} min</span>
+            </div>
+            <div class="detail-row" *ngIf="m.zoomLink">
+              <strong>Zoom</strong>
+              <span><a [href]="m.zoomLink" target="_blank" rel="noreferrer">Join meeting</a></span>
+            </div>
+            <div class="detail-row" *ngIf="m.zoomMeetingId">
+              <strong>Meeting ID</strong>
+              <span>{{ m.zoomMeetingId }}</span>
+            </div>
+            <div class="detail-row" *ngIf="m.zoomPasscode">
+              <strong>Passcode</strong>
+              <span>{{ m.zoomPasscode }}</span>
+            </div>
+          </ng-container>
+        </div>
+
+        <div class="meeting-timezone" *ngIf="group.timeZone">
+          <span class="timezone-icon">🌍</span>
+          <span>{{ group.timeZone }}</span>
+        </div>
+      </div>
+
+      <!-- Hub Grid -->
+      <div class="hub-grid">
+        <a [routerLink]="['/groups', group.slug, 'members']" class="hub-card">
+          <div class="hub-icon icon-violet">👥</div>
+          <h3>Members</h3>
           <p>See who is here and how everyone is doing.</p>
         </a>
-      </mat-card>
 
-      <mat-card class="nav-card">
-        <a class="card-link" [routerLink]="['/groups', group.slug, 'phone-list']">
-          <mat-icon>contact_phone</mat-icon>
-          <h2>Phone List</h2>
+        <a [routerLink]="['/groups', group.slug, 'phone-list']" class="hub-card">
+          <div class="hub-icon icon-rose">📞</div>
+          <h3>Phone List</h3>
           <p>Reach out when someone needs a hand.</p>
         </a>
-      </mat-card>
 
-      <mat-card class="nav-card" *ngIf="isAdmin">
-        <a class="card-link" [routerLink]="['/groups', group.slug, 'meetings']">
-          <mat-icon>edit_calendar</mat-icon>
-          <h2>Meetings</h2>
+        <a *ngIf="isAdmin" [routerLink]="['/groups', group.slug, 'meetings']" class="hub-card">
+          <div class="hub-icon icon-sky">📅</div>
+          <h3>Meetings</h3>
           <p>Manage meeting times, formats, and Zoom details.</p>
         </a>
-      </mat-card>
 
-      <mat-card class="nav-card" *ngIf="isAdmin">
-        <a class="card-link" [routerLink]="['/groups', group.slug, 'join-requests']">
-          <mat-icon>how_to_reg</mat-icon>
-          <h2>Join Requests</h2>
+        <a *ngIf="isAdmin" [routerLink]="['/groups', group.slug, 'join-requests']" class="hub-card">
+          <div class="hub-icon icon-amber">🚪</div>
+          <h3>Join Requests</h3>
           <p>Welcome new folks and keep the group door tended.</p>
         </a>
-      </mat-card>
 
-      <mat-card class="nav-card" *ngIf="isAdmin">
-        <a class="card-link" [routerLink]="['/groups', group.slug, 'settings']">
-          <mat-icon>settings</mat-icon>
-          <h2>Settings</h2>
+        <a *ngIf="isAdmin" [routerLink]="['/groups', group.slug, 'settings']" class="hub-card">
+          <div class="hub-icon icon-teal">⚙️</div>
+          <h3>Settings</h3>
           <p>Adjust the basics and keep things running smoothly.</p>
         </a>
-      </mat-card>
-    </section>
+      </div>
 
-    <mat-card class="bulletin-card">
-      <mat-card-header>
-        <mat-icon mat-card-avatar>campaign</mat-icon>
-        <mat-card-title>Bulletin Board</mat-card-title>
-        <mat-card-subtitle>Posts &amp; announcements coming soon</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <p>We are making room for shared updates, reminders, and encouragement from trusted servants.</p>
-      </mat-card-content>
-    </mat-card>
-
-    <div class="footer-actions">
-      <button mat-stroked-button color="warn" type="button" [disabled]="leaving" (click)="confirmLeave()">
-        <mat-icon>logout</mat-icon>
-        {{ leaving ? 'Leaving…' : 'Leave Group' }}
-      </button>
+      <!-- Leave Group Button -->
+      <div class="footer-actions">
+        <button mat-stroked-button color="warn" type="button" [disabled]="leaving" (click)="confirmLeave()">
+          <mat-icon>logout</mat-icon>
+          {{ leaving ? 'Leaving…' : 'Leave Group' }}
+        </button>
+      </div>
     </div>
-  </ng-container>
-</section>
+  </section>
+</ng-container>

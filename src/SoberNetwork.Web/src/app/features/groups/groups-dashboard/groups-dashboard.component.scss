@@ -126,7 +126,7 @@
 
 // ── Groups Section ─────────────────────────────────────────────────────
 .groups-section {
-  background: var(--sn-bg, #f7f5f2);
+  background: white;
 }
 
 .section-wrap {
@@ -170,7 +170,7 @@
 }
 
 .group-card {
-  background: white;
+  background: var(--sn-bg-soft, #f0ede8);
   border: 1px solid var(--sn-border, rgba(17, 17, 16, 0.08));
   border-radius: 20px;
   padding: 28px;

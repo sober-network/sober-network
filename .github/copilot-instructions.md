@@ -247,12 +247,143 @@ Place new files in the correct layer automatically.
 
 ## 15. Build & Validation Commands
 
+### Building
+
 ```powershell
-# Backend
+# Build backend API
 dotnet build src\SoberNetwork.Api\SoberNetwork.Api.csproj
 
-# Frontend
+# Build frontend
 cd src\SoberNetwork.Web && npx ng build --configuration=development
 ```
 
-Always run both after making changes.
+### Testing
+
+```powershell
+# Run all backend tests
+dotnet test tests\SoberNetwork.Core.Tests\SoberNetwork.Core.Tests.csproj
+dotnet test tests\SoberNetwork.Api.Tests\SoberNetwork.Api.Tests.csproj
+
+# Run a single test class or method (xUnit filter syntax)
+dotnet test tests\SoberNetwork.Core.Tests\SoberNetwork.Core.Tests.csproj --filter "GetPhoneListQueryHandlerTests"
+
+# Run frontend tests
+cd src\SoberNetwork.Web && npm test
+```
+
+### Test Infrastructure
+
+**API Integration Tests** use `TestWebApplicationFactory` (tests\SoberNetwork.Api.Tests\Infrastructure\):
+- Creates an authenticated client: `factory.CreateAuthenticatedClient(userId)`
+- Creates a superadmin client: `factory.CreateSuperAdminClient(userId)`
+- Exposes mocked services: `factory.MockGroupService`, `factory.MockMemberService`, etc.
+- Generate test JWTs: `JwtTestHelper.GenerateToken(userId, claims)`
+
+**Backend tests** follow:
+- **File structure:** Handlers in `/tests/SoberNetwork.Core.Tests/Handlers/{Feature}`, Validators in `/tests/SoberNetwork.Core.Tests/Validators/{Feature}`
+- **AAA pattern:** Arrange-Act-Assert
+- **Naming:** `MethodName_Scenario_ExpectedResult` (e.g., `GetPhoneList_AsNonMember_ReturnsForbidden`)
+
+**Result-mapping pattern:** String-contains checks on error messages select ResultCode→HTTP status:
+- "permission" / "not a member" → `Forbidden`
+- "already" / "only admin" → `Conflict`
+- "Incorrect" → `Unauthorized`
+- "match" → `BadRequest`
+
+Always run both backend and frontend tests after making changes.
+
+---
+
+## 16. Key Architecture Patterns & Module Organization
+
+### Module Boundaries
+
+The platform uses a modular monolith with clean separation:
+- **Auth** — Login, registration, password reset, JWT token lifecycle
+- **Groups** — Group CRUD, member management, joining/leaving, admin operations
+- **Members** — Individual member profiles, account settings, sobriety data
+- **Events** — Group events/meetings (CRUD, search, public directory)
+- **Documents** — Group-owned documents and resources
+- **Notifications** — Email and in-app notification delivery
+- **Security** — Audit logging, superadmin operations
+
+### Handler Query Pattern
+
+Commands and Queries live in `/src/SoberNetwork.Core/Handlers/{Feature}/`:
+- One file per handler (e.g., `GetPhoneListQueryHandler.cs`)
+- All commands/queries return `Result<T>` with `ResultCode` (Success, Unauthorized, Forbidden, BadRequest, Conflict, etc.)
+- Handlers **never** return raw domain entities — always map to DTOs
+- Controllers switch on `result.ResultCode` to return HTTP status
+
+### DTO Mapping Convention
+
+- Request DTOs: `{Action}{Entity}Request` (e.g., `CreateGroupRequest`, `UpdateMemberRequest`)
+- Response DTOs: `{Entity}Response` or `{Entity}Dto` (e.g., `GroupResponse`, `MemberDto`)
+- All validation via **FluentValidation** at the API boundary (not in handlers)
+- Mapping: Handlers map domain models to DTOs before returning via `Result<T>`
+
+### Multi-Tenancy (Group Isolation)
+
+Every query for member-scoped data **must** filter by `group_id`:
+```csharp
+var members = await _context.Members
+    .Where(m => m.GroupId == groupId)  // REQUIRED — no cross-tenant leakage
+    .AsNoTracking()
+    .ToListAsync(cancellationToken);
+```
+Violations are security issues (T4). Test with `CrossGroupAccessTests`.
+
+### Entity Soft Deletes
+
+- All entities have `deleted_at: TIMESTAMPTZ NULL`
+- `DELETE` endpoints set `deleted_at` — never hard-delete rows
+- Queries use `.Where(e => e.DeletedAt == null)` or a `IsDeleted` extension method
+
+### Platform Stats & Public Data
+
+Public endpoints (marked `[AllowAnonymous]`):
+- `GET /api/stats` — Platform statistics (MemberCount, GroupCount, MeetingCount) via `StatsService`
+- `GET /api/meetings` — Public meeting finder (Haversine distance, Nominatim geocoding, Leaflet maps)
+- `POST /api/auth/register`, `POST /api/auth/login` — Auth endpoints (generic error messages, no user enumeration)
+- Group join links — shareable but not listed in directory unless `IsPublic = true`
+
+---
+
+## 17. UI Design System (Apply Sitewide)
+
+The approved visual design is captured in `docs/knowledge.md § UI Design System` and the v1.3 HTML mockup. **All Angular components and pages must follow this design system.** When implementing any Angular component, consult the mockup and apply these rules consistently.
+
+### Fonts
+- **Inter Tight** — headings, nav, labels (weights 400–900)
+- **Instrument Serif italic** — display accent lines inside headings
+- **Inter** — body copy
+- Always load via Google Fonts
+
+### Color Palette
+- `--bg: #f7f5f2` · `--bg-soft: #f0ede8` · `--text: #111110` · `--text-mid: #3d3d3a` · `--text-muted: #7a7a75`
+- Dark CTA: `--cta-bg: #1a1a18`
+- Sections alternate between `white`, `--bg`, and `--cta-bg` (see knowledge.md for full cadence)
+
+### Components
+- **Nav**: white card pill container; active pill = solid black; rainbow conic-gradient logo ring; gradient accent underline
+- **Feature cards / icon bubbles**: 8 cheerful tint colors (violet, rose, sky, amber, green, teal, indigo, coral at 12% opacity)
+- **Badges/pills**: same 8 tints applied to category labels and marquee icons
+- **Buttons**: dark gradient pill (primary); ghost outline (secondary); frosted arrow-circle icon on CTAs
+- **Back-to-top buttons**: black circle, `position: absolute` anchored to `.section-wrap` (NOT `section`) at `top: 80px; right: 32px`
+- **Sections**: `max-width: 1200px`, `padding: 100px 32px`, `position: relative` on `.section-wrap`
+
+### Images
+- **Real photos**: background-image behind gradient overlay at ~12–15% opacity (`mix-blend-mode` not needed)
+- **Vector art with white/off-white bg**: `mix-blend-mode: multiply` + `filter: brightness(1.35) contrast(1.05)` to remove backgrounds cleanly
+- Free assets from `static.vecteezy.com` via `non_2x` preview URLs
+
+### Hero Section
+- Gradient overlay (sky→peach) + photo background
+- Large Inter Tight headline (weight 900, `letter-spacing: -0.04em`) with one Instrument Serif italic accent line
+- Centered eyebrow pill, CTA buttons, trust strip
+- Hero `font-size: clamp(3rem, 6.5vw, 5.6rem)`
+
+### Scroll Behaviour
+- `IntersectionObserver` scroll-spy on nav pills (`rootMargin: '-10% 0px -55% 0px'`)
+- Fade-up entrance animation (`.fade-up` → `.visible` via observer, `threshold: 0.1`)
+- Staggered delays: `.delay-1`, `.delay-2`, `.delay-3`

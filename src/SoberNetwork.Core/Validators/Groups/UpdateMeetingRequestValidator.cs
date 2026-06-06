@@ -7,7 +7,23 @@ namespace SoberNetwork.Core.Validators.Groups;
 public class UpdateMeetingRequestValidator : AbstractValidator<UpdateMeetingRequest>
 {
     private static readonly HashSet<string> ValidFormats = new(StringComparer.OrdinalIgnoreCase)
-        { "Discussion", "Speaker", "StepStudy", "BigBook", "Beginners" };
+        {
+            "Discussion",
+            "Speaker",
+            "StepStudy",
+            "TraditionStudy",
+            "BigBook",
+            "Literature",
+            "Topic",
+            "Beginners",
+            "Candlelight",
+            "Meditation",
+            "BirthdayChip",
+            "Men",
+            "Women",
+            "YoungPeople",
+            "LGBTQPlus"
+        };
 
     public UpdateMeetingRequestValidator()
     {
@@ -27,7 +43,7 @@ public class UpdateMeetingRequestValidator : AbstractValidator<UpdateMeetingRequ
             .When(x => x.DaysOfWeek is not null);
         RuleForEach(x => x.Formats)
             .Must(f => ValidFormats.Contains(f))
-            .WithMessage("'{PropertyValue}' is not a valid meeting format. Valid values: Discussion, Speaker, StepStudy, BigBook, Beginners.")
+            .WithMessage("'{PropertyValue}' is not a valid meeting format. Valid values: Discussion, Speaker, Step Study, Tradition Study, Big Book Study, Literature, Topic, Beginners, Candlelight, Meditation, Birthday / Chip, Men's Meeting, Women's Meeting, Young People's Meeting, LGBTQ+.")
             .When(x => x.Formats is not null);
         RuleFor(x => x.Language).MaximumLength(100);
         RuleFor(x => x.VenueName).MaximumLength(200);

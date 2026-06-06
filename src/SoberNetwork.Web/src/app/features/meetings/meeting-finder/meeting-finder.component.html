@@ -91,7 +91,7 @@
               [class.active]="selectedFormats().includes(fmt)"
               (click)="toggleFormat(fmt)"
               type="button"
-            >{{ fmt }}</button>
+            >{{ formatMeetingLabel(fmt) }}</button>
           }
         </div>
       </div>
@@ -158,7 +158,7 @@
                 <span class="badge" [class.bg-success]="m.isOpen" [class.bg-secondary]="!m.isOpen">{{ m.isOpen ? 'Open' : 'Closed' }}</span>
                 <span class="badge bg-light text-dark border">{{ meetingTypeLabel(m.meetingType) }}</span>
                 @for (fmt of m.formats; track fmt) {
-                  <span class="badge bg-light text-dark border">{{ fmt }}</span>
+                  <span class="badge bg-light text-dark border">{{ formatMeetingLabel(fmt) }}</span>
                 }
               </div>
             </div>

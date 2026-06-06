@@ -482,6 +482,7 @@ As more groups join, Supabase/Vercel free tiers may be exceeded. Should each gro
 ### Backend
 - `MeetingType` enum: `InPerson=0, Online=1, Hybrid=2`
 - `TimeBlock` enum: `Morning, Afternoon, Evening, Night`
+- Meeting `Formats` (`text[]`) — 15 canonical values validated by `CreateMeetingRequestValidator`/`UpdateMeetingRequestValidator`: `Discussion`, `Speaker`, `StepStudy`, `TraditionStudy`, `BigBook`, `Literature`, `Topic`, `Beginners`, `Candlelight`, `Meditation`, `BirthdayChip`, `Men`, `Women`, `YoungPeople`, `LGBTQPlus`. Frontend maps these to display labels via `MEETING_FORMAT_LABELS` / `formatMeetingFormat()` in `core/models/group.models.ts`.
 - `Meeting` entity fields added: `MeetingType`, `VenueName`, `Street`, `City`, `State`, `PostalCode`, `Country`, `Lat`, `Lon`, `PublicJoinUrl`
 - `ApplicationUser` fields added: `MailingStreet`, `MailingCity`, `MailingState`, `MailingPostalCode`, `MailingCountry`, `MailingLatitude`, `MailingLongitude` — all opt-in, never required
 - `SearchPublicMeetingsQuery` / `SearchPublicMeetingsQueryHandler` — Haversine distance with bounding-box pre-filter. Earth radius: 3958.8 miles. Default search radius: 25 miles

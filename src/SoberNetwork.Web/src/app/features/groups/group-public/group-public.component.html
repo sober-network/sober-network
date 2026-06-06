@@ -51,7 +51,7 @@
         <p class="description" *ngIf="m.location"><strong>Location:</strong> {{ m.location }}</p>
         <mat-chip-set *ngIf="meetingFormats(m).length > 0">
           <mat-chip>{{ m.isOpen ? 'Open' : 'Closed' }}</mat-chip>
-          <mat-chip *ngFor="let format of meetingFormats(m)">{{ format }}</mat-chip>
+          <mat-chip *ngFor="let format of meetingFormats(m)">{{ formatMeetingLabel(format) }}</mat-chip>
         </mat-chip-set>
       </ng-container>
 

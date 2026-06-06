@@ -7,7 +7,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { DAYS_OF_WEEK, MEETING_FORMATS, LANGUAGES, US_STATES, COUNTRIES, MeetingType, AdminMeetingResponse } from '@app/core/models';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { DAYS_OF_WEEK, MEETING_FORMATS, LANGUAGES, US_STATES, COUNTRIES, MeetingType, AdminMeetingResponse, formatMeetingFormat } from '@app/core/models';
 import { GroupService } from '@app/core/services/group.service';
 import { GroupCardComponent } from '../group-card/group-card.component';
 import { GroupHeroComponent } from '../group-hero/group-hero.component';
@@ -37,9 +38,11 @@ export class GroupMeetingsComponent implements OnInit {
   private readonly groupService = inject(GroupService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly dialog = inject(MatDialog);
+  private readonly sanitizer = inject(DomSanitizer);
 
   readonly daysOfWeek = DAYS_OF_WEEK;
   readonly meetingFormats = MEETING_FORMATS;
+  readonly formatMeetingLabel = formatMeetingFormat;
   readonly languages = LANGUAGES;
   readonly usStates = US_STATES;
   readonly countries = COUNTRIES;
@@ -134,6 +137,66 @@ export class GroupMeetingsComponent implements OnInit {
       parts.push(m.time);
     }
     return parts.join(' at ') || 'Time not set';
+  }
+
+  meetingTypeLabel(type: MeetingType): string {
+    return type === MeetingType.InPerson ? 'In-Person' : type === MeetingType.Online ? 'Online' : 'Hybrid';
+  }
+
+  meetingIcon(meeting: AdminMeetingResponse): string {
+    if (meeting.meetingType === MeetingType.InPerson) return 'location_on';
+    if (meeting.meetingType === MeetingType.Online) return 'video_call';
+    return 'hub';
+  }
+
+  cardAccentClass(meeting: AdminMeetingResponse): string {
+    if (meeting.meetingType === MeetingType.InPerson) return 'accent-green';
+    if (meeting.meetingType === MeetingType.Online) return 'accent-blue';
+    return 'accent-amber';
+  }
+
+  hasPhysicalLocation(meeting: AdminMeetingResponse): boolean {
+    return Boolean(meeting.venueName || meeting.street || meeting.city || meeting.state || meeting.postalCode || meeting.country || meeting.location);
+  }
+
+  hasZoomDetails(meeting: AdminMeetingResponse): boolean {
+    return Boolean(meeting.publicJoinUrl || meeting.zoomLink || meeting.zoomMeetingId || meeting.zoomPasscode);
+  }
+
+  mapPreviewUrl(meeting: AdminMeetingResponse): SafeResourceUrl | null {
+    const query = this.mapQuery(meeting);
+    if (!query) {
+      return null;
+    }
+
+    return this.sanitizer.bypassSecurityTrustResourceUrl(
+      `https://www.google.com/maps?q=${encodeURIComponent(query)}&z=15&output=embed`
+    );
+  }
+
+  mapPreviewCaption(meeting: AdminMeetingResponse): string {
+    return [meeting.venueName, this.addressLine(meeting)].filter(Boolean).join(' • ') || meeting.location || 'Map preview';
+  }
+
+  private mapQuery(meeting: AdminMeetingResponse): string | null {
+    if (meeting.latitude != null && meeting.longitude != null) {
+      return `${meeting.latitude.toFixed(6)},${meeting.longitude.toFixed(6)}`;
+    }
+
+    return [meeting.venueName, meeting.street, meeting.city, meeting.state, meeting.postalCode, meeting.country, meeting.location]
+      .filter(Boolean)
+      .join(', ') || null;
+  }
+
+  addressLine(meeting: AdminMeetingResponse): string {
+    return [meeting.city, meeting.state, meeting.postalCode].filter(Boolean).join(' ');
+  }
+
+  directionsUrl(meeting: AdminMeetingResponse): string {
+    const addr = [meeting.venueName, meeting.street, meeting.city, meeting.state, meeting.postalCode, meeting.country, meeting.location]
+      .filter(Boolean)
+      .join(', ');
+    return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}`;
   }
 
   private loadMeetings(): void {

@@ -12,7 +12,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { DAYS_OF_WEEK, GroupSummaryResponse, PublicMeetingResponse } from '@app/core/models';
+import { DAYS_OF_WEEK, GroupSummaryResponse, PublicMeetingResponse, formatMeetingFormat } from '@app/core/models';
 import { AuthService } from '@app/core/services/auth.service';
 import { GroupService } from '@app/core/services/group.service';
 
@@ -46,6 +46,7 @@ export class GroupPublicComponent implements OnInit {
   @ViewChild('joinDialog') private joinDialog?: TemplateRef<unknown>;
 
   readonly daysOfWeek = DAYS_OF_WEEK;
+  readonly formatMeetingLabel = formatMeetingFormat;
 
   slug = '';
   group: GroupSummaryResponse | null = null;

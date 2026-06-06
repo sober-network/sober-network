@@ -3,11 +3,60 @@
 export type MembershipStatus = 'PendingApproval' | 'Active' | 'Probationary' | 'Suspended' | 'Banned';
 export type MemberRole = 'Member' | 'GroupAdmin';
 
-export type MeetingFormat = 'Discussion' | 'Speaker' | 'StepStudy' | 'BigBook' | 'Beginners';
+export type MeetingFormat =
+  | 'Discussion'
+  | 'Speaker'
+  | 'StepStudy'
+  | 'TraditionStudy'
+  | 'BigBook'
+  | 'Literature'
+  | 'Topic'
+  | 'Beginners'
+  | 'Candlelight'
+  | 'Meditation'
+  | 'BirthdayChip'
+  | 'Men'
+  | 'Women'
+  | 'YoungPeople'
+  | 'LGBTQPlus';
 export enum MeetingType { InPerson = 0, Online = 1, Hybrid = 2 }
 export enum TimeBlock { Morning = 0, Afternoon = 1, Evening = 2, Night = 3 }
 
-export const MEETING_FORMATS: MeetingFormat[] = ['Discussion', 'Speaker', 'StepStudy', 'BigBook', 'Beginners'];
+export const MEETING_FORMATS: MeetingFormat[] = [
+  'Discussion',
+  'Speaker',
+  'StepStudy',
+  'TraditionStudy',
+  'BigBook',
+  'Literature',
+  'Topic',
+  'Beginners',
+  'Candlelight',
+  'Meditation',
+  'BirthdayChip',
+  'Men',
+  'Women',
+  'YoungPeople',
+  'LGBTQPlus',
+];
+export const MEETING_FORMAT_LABELS: Record<MeetingFormat, string> = {
+  Discussion: 'Discussion',
+  Speaker: 'Speaker',
+  StepStudy: 'Step Study',
+  TraditionStudy: 'Tradition Study',
+  BigBook: 'Big Book Study',
+  Literature: 'Literature',
+  Topic: 'Topic',
+  Beginners: 'Beginner / Newcomer',
+  Candlelight: 'Candlelight',
+  Meditation: 'Meditation',
+  BirthdayChip: 'Birthday / Chip',
+  Men: "Men's Meeting",
+  Women: "Women's Meeting",
+  YoungPeople: "Young People's Meeting",
+  LGBTQPlus: 'LGBTQ+',
+};
+export const formatMeetingFormat = (format: string): string => MEETING_FORMAT_LABELS[format as MeetingFormat] ?? format;
 export const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 export const DAY_ABBR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 

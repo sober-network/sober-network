@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, ViewEncapsulation } from '@angular/core';
+import { Component, Input, Output, ViewEncapsulation, EventEmitter } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { HeroComponent } from '@app/shared/components/hero-component/hero.component';
@@ -18,5 +18,11 @@ import { HeroComponent } from '@app/shared/components/hero-component/hero.compon
 export class GroupHeroComponent extends HeroComponent {
   @Input() eyebrowIcon = 'groups';
   @Input() titleSuffix = '';
+  @Output() override plusClick = new EventEmitter<void>();
+  
   readonly backgroundImageSrc = '/circle-sunset.jpg';
+
+  override onPlusClick(): void {
+    this.plusClick.emit();
+  }
 }

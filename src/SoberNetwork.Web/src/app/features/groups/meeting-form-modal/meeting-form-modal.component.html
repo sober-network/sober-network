@@ -61,15 +61,36 @@
       </div>
       
       <div *ngIf="isRecurring" class="days-of-week-container">
-        <div class="checkbox-label">Days of Week (select at least one):</div>
+        <label class="lm-label">Days of Week (select at least one):</label>
         <div class="checkbox-group">
-          <mat-checkbox [checked]="isDaySelected(0)" (change)="toggleDay(0)">Sun</mat-checkbox>
-          <mat-checkbox [checked]="isDaySelected(1)" (change)="toggleDay(1)">Mon</mat-checkbox>
-          <mat-checkbox [checked]="isDaySelected(2)" (change)="toggleDay(2)">Tue</mat-checkbox>
-          <mat-checkbox [checked]="isDaySelected(3)" (change)="toggleDay(3)">Wed</mat-checkbox>
-          <mat-checkbox [checked]="isDaySelected(4)" (change)="toggleDay(4)">Thu</mat-checkbox>
-          <mat-checkbox [checked]="isDaySelected(5)" (change)="toggleDay(5)">Fri</mat-checkbox>
-          <mat-checkbox [checked]="isDaySelected(6)" (change)="toggleDay(6)">Sat</mat-checkbox>
+          <label class="checkbox-item">
+            <input type="checkbox" [checked]="isDaySelected(0)" (change)="toggleDay(0)" />
+            <span>Sun</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" [checked]="isDaySelected(1)" (change)="toggleDay(1)" />
+            <span>Mon</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" [checked]="isDaySelected(2)" (change)="toggleDay(2)" />
+            <span>Tue</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" [checked]="isDaySelected(3)" (change)="toggleDay(3)" />
+            <span>Wed</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" [checked]="isDaySelected(4)" (change)="toggleDay(4)" />
+            <span>Thu</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" [checked]="isDaySelected(5)" (change)="toggleDay(5)" />
+            <span>Fri</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" [checked]="isDaySelected(6)" (change)="toggleDay(6)" />
+            <span>Sat</span>
+          </label>
         </div>
       </div>
 
@@ -108,7 +129,7 @@
       
       <div class="lm-field">
         <label class="lm-label">Type</label>
-        <select class="lm-input" formControlName="meetingType">
+        <select class="lm-input" formControlName="meetingType" [compareWith]="compareMeetingType">
           <option [value]="MeetingType.Online">Online</option>
           <option [value]="MeetingType.InPerson">In Person</option>
           <option [value]="MeetingType.Hybrid">Hybrid</option>
@@ -147,20 +168,97 @@
           placeholder="City name"
         />
       </div>
+
+      <div class="lm-field" *ngIf="isInPersonOrHybrid">
+        <label class="lm-label">State/Province</label>
+        <select class="lm-input" formControlName="state">
+          <option value="">Select state/province</option>
+          <option *ngFor="let state of readonly.states" [value]="state">{{ state }}</option>
+        </select>
+      </div>
+
+      <div class="lm-field" *ngIf="isInPersonOrHybrid">
+        <label class="lm-label">Postal Code</label>
+        <input 
+          type="text"
+          class="lm-input"
+          formControlName="postalCode"
+          maxlength="20"
+          placeholder="ZIP or postal code"
+        />
+      </div>
+
+      <div class="lm-field" *ngIf="isInPersonOrHybrid">
+        <label class="lm-label">Country</label>
+        <select class="lm-input" formControlName="country">
+          <option value="">Select country</option>
+          <option *ngFor="let country of readonly.countries" [value]="country">{{ country }}</option>
+        </select>
+      </div>
     </div>
 
-    <!-- FORMATS SECTION -->
-    <div class="form-section">
+    <!-- ZOOM SECTION (Online/Hybrid) -->
+    <div class="form-section" *ngIf="isOnlineOrHybrid">
+      <h4>Online Details</h4>
+
+      <div class="lm-field">
+        <label class="lm-label">Public Join URL</label>
+        <input 
+          type="url"
+          class="lm-input"
+          formControlName="publicJoinUrl"
+          maxlength="500"
+          placeholder="https://zoom.us/j/..."
+        />
+        <div class="lm-field-error" *ngIf="form.get('publicJoinUrl')?.touched && form.get('publicJoinUrl')?.hasError('pattern')">
+          Must be a valid URL.
+        </div>
+      </div>
+
+      <div class="lm-field">
+        <label class="lm-label">Zoom Link (members-only)</label>
+        <input 
+          type="url"
+          class="lm-input"
+          formControlName="zoomLink"
+          maxlength="500"
+          placeholder="https://zoom.us/j/... (full link with passcode)"
+        />
+        <div class="lm-field-error" *ngIf="form.get('zoomLink')?.touched && form.get('zoomLink')?.hasError('pattern')">
+          Must be a valid URL.
+        </div>
+      </div>
+
+      <div class="lm-field">
+        <label class="lm-label">Zoom Meeting ID</label>
+        <input 
+          type="text"
+          class="lm-input"
+          formControlName="zoomMeetingId"
+          maxlength="20"
+          placeholder="123456789"
+        />
+      </div>
+
+      <div class="lm-field">
+        <label class="lm-label">Zoom Passcode</label>
+        <input 
+          type="text"
+          class="lm-input"
+          formControlName="zoomPasscode"
+          maxlength="20"
+          placeholder="ABC123"
+        />
+      </div>
+    </div>
+    <div class="form-section formats-container">
       <h4>Formats</h4>
+      <label class="checkbox-label">Select all that apply</label>
       <div class="checkbox-group">
-        <mat-checkbox [checked]="form.get('formats')?.value?.includes('In Person')" 
-                     (change)="updateFormat('In Person')">In Person</mat-checkbox>
-        <mat-checkbox [checked]="form.get('formats')?.value?.includes('Zoom')"
-                     (change)="updateFormat('Zoom')">Zoom</mat-checkbox>
-        <mat-checkbox [checked]="form.get('formats')?.value?.includes('Phone')"
-                     (change)="updateFormat('Phone')">Phone</mat-checkbox>
-        <mat-checkbox [checked]="form.get('formats')?.value?.includes('Online')"
-                     (change)="updateFormat('Online')">Online</mat-checkbox>
+        <label class="checkbox-item" *ngFor="let format of meetingFormats">
+          <input type="checkbox" [checked]="form.get('formats')?.value?.includes(format)" (change)="updateFormat(format)" />
+          <span>{{ formatMeetingLabel(format) }}</span>
+        </label>
       </div>
     </div>
 
@@ -173,9 +271,14 @@
         Cancel
       </button>
       <button type="submit" class="btn-primary" [disabled]="saving || form.invalid">
-        {{ saving ? 'Saving…' : (editingId ? 'Update Meeting' : 'Create Meeting') }}
+        {{ saving ? 'Saving…' : (editingId ? 'Update' : 'Create') }}
       </button>
     </div>
+
+    <!-- Delete button (small, secondary, below main actions) -->
+    <button *ngIf="editingId" type="button" class="btn-delete-small" (click)="delete()" [disabled]="saving">
+      Delete Meeting
+    </button>
 
   </form>
 

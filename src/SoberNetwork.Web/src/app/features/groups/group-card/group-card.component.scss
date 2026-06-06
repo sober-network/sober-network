@@ -4,7 +4,15 @@
   display: block;
 }
 
-.card-component {
+.group-card {
+  background: white;
+  border: 1px solid var(--sn-border);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
   animation: fadeUpIn 0.6s ease forwards;
   opacity: 0;
   animation-delay: 0.1s;

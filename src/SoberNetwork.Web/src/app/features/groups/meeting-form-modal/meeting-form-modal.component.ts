@@ -1,7 +1,7 @@
 import { Component, OnInit, Inject, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -9,7 +9,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs';
 import { GroupService } from '@app/core/services/group.service';
-import { MeetingType, CreateMeetingRequest, UpdateMeetingRequest } from '@app/core/models/group.models';
+import { MeetingType, CreateMeetingRequest, UpdateMeetingRequest, MEETING_FORMATS, formatMeetingFormat } from '@app/core/models/group.models';
 import { BaseFormModalComponent } from '@app/shared/components/base-form-modal/base-form-modal.component';
 
 export interface MeetingFormModalData {
@@ -24,7 +24,7 @@ export interface MeetingFormModalData {
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, MatButtonModule, MatIconModule,
-    MatSlideToggleModule, MatCheckboxModule, MatProgressSpinnerModule, BaseFormModalComponent,
+    MatSlideToggleModule, MatProgressSpinnerModule, BaseFormModalComponent,
   ],
   templateUrl: './meeting-form-modal.component.html',
   styleUrl: './meeting-form-modal.component.scss',
@@ -33,6 +33,7 @@ export class MeetingFormModalComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly groupService = inject(GroupService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly dialog = inject(MatDialog);
   readonly dialogRef = inject(MatDialogRef<MeetingFormModalComponent>);
   private readonly data = inject(MAT_DIALOG_DATA) as MeetingFormModalData;
 
@@ -49,6 +50,8 @@ export class MeetingFormModalComponent implements OnInit {
   icon = 'event';
 
   readonly MeetingType = MeetingType;
+  readonly meetingFormats = MEETING_FORMATS;
+  readonly formatMeetingLabel = formatMeetingFormat;
 
   ngOnInit(): void {
     this.slug = this.data.slug;
@@ -89,16 +92,34 @@ export class MeetingFormModalComponent implements OnInit {
       notes: new FormControl<string>(this.meeting?.notes ?? '', { nonNullable: true }),
       isActive: new FormControl<boolean>(this.meeting?.isActive ?? true, { nonNullable: true }),
     });
+
+    // Subscribe to form changes to trigger change detection for conditional fields
+    this.form.get('meetingType')?.valueChanges.subscribe(() => {
+      this.cdr.markForCheck();
+    });
+    
+    this.form.get('isRecurring')?.valueChanges.subscribe(() => {
+      this.cdr.markForCheck();
+    });
   }
 
   get isRecurring(): boolean {
     return this.form.get('isRecurring')?.value === true;
   }
 
-  get isInPersonOrHybrid(): boolean {
-    const type = this.form.get('meetingType')?.value;
-    return type === MeetingType.InPerson || type === MeetingType.Hybrid;
+  get meetingTypeValue(): MeetingType {
+    return Number(this.form.get('meetingType')?.value);
   }
+
+  get isInPersonOrHybrid(): boolean {
+    return this.meetingTypeValue === MeetingType.InPerson || this.meetingTypeValue === MeetingType.Hybrid;
+  }
+
+  get isOnlineOrHybrid(): boolean {
+    return this.meetingTypeValue === MeetingType.Online || this.meetingTypeValue === MeetingType.Hybrid;
+  }
+
+  compareMeetingType = (a: unknown, b: unknown): boolean => Number(a) === Number(b);
 
   toggleDay(index: number): void {
     const daysControl = this.form.get('daysOfWeek');
@@ -138,6 +159,10 @@ export class MeetingFormModalComponent implements OnInit {
     }
 
     const value = this.form.getRawValue();
+    const meetingType = Number(value.meetingType ?? MeetingType.Online);
+    const showAddress = meetingType === MeetingType.InPerson || meetingType === MeetingType.Hybrid;
+    const showZoom = meetingType === MeetingType.Online || meetingType === MeetingType.Hybrid;
+
     const request: CreateMeetingRequest | UpdateMeetingRequest = {
       name: value.name!.trim(),
       description: this.normalizeText(value.description),
@@ -149,18 +174,18 @@ export class MeetingFormModalComponent implements OnInit {
       isOpen: value.isOpen === true,
       language: this.normalizeText(value.language),
       formats: value.formats?.length ? value.formats : undefined,
-      meetingType: value.meetingType ?? MeetingType.Online,
-      venueName: this.normalizeText(value.venueName),
-      street: this.normalizeText(value.street),
-      street2: this.normalizeText(value.street2),
-      city: this.normalizeText(value.city),
-      state: this.normalizeText(value.state),
-      postalCode: this.normalizeText(value.postalCode),
-      country: this.normalizeText(value.country),
-      publicJoinUrl: this.normalizeText(value.publicJoinUrl),
-      zoomLink: this.normalizeText(value.zoomLink),
-      zoomMeetingId: this.normalizeText(value.zoomMeetingId),
-      zoomPasscode: this.normalizeText(value.zoomPasscode),
+      meetingType,
+      venueName: showAddress ? this.normalizeText(value.venueName) : null,
+      street: showAddress ? this.normalizeText(value.street) : null,
+      street2: showAddress ? this.normalizeText(value.street2) : null,
+      city: showAddress ? this.normalizeText(value.city) : null,
+      state: showAddress ? this.normalizeText(value.state) : null,
+      postalCode: showAddress ? this.normalizeText(value.postalCode) : null,
+      country: showAddress ? this.normalizeText(value.country) : null,
+      publicJoinUrl: showZoom ? this.normalizeText(value.publicJoinUrl) : null,
+      zoomLink: showZoom ? this.normalizeText(value.zoomLink) : null,
+      zoomMeetingId: showZoom ? this.normalizeText(value.zoomMeetingId) : null,
+      zoomPasscode: showZoom ? this.normalizeText(value.zoomPasscode) : null,
       notes: this.normalizeText(value.notes),
       isActive: value.isActive === true,
     };
@@ -185,6 +210,28 @@ export class MeetingFormModalComponent implements OnInit {
 
   cancel(): void {
     this.dialogRef.close(false);
+  }
+
+  delete(): void {
+    if (!this.editingId) return;
+
+    // Simple yes/no confirmation
+    const confirmed = confirm(`Delete "${this.meeting?.name}"?\n\nThis cannot be undone.`);
+    if (!confirmed) return;
+
+    this.saving = true;
+    this.formError = '';
+
+    this.groupService.deleteMeeting(this.slug, this.editingId)
+      .pipe(finalize(() => { this.saving = false; this.cdr.detectChanges(); }))
+      .subscribe({
+        next: () => {
+          this.dialogRef.close(true);
+        },
+        error: (err) => {
+          this.formError = this.getErrorMessage(err, 'Failed to delete meeting.');
+        },
+      });
   }
 
   private normalizeText(value: string | null | undefined): string | undefined {

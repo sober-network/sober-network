@@ -68,6 +68,21 @@
   }
 }
 
+.access-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  .lm-label {
+    margin: 0;
+  }
+
+  mat-slide-toggle {
+    flex-shrink: 0;
+  }
+}
+
 // ── Error message ──────────────────────────────────────────────────────────
 .error-message {
   font-size: 0.875rem;

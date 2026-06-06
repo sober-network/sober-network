@@ -2,26 +2,38 @@
   <img [src]="backgroundImageSrc" alt="Group circle" class="hero-bg" />
   <a *ngIf="backButtonText" [routerLink]="backButtonRoute" class="back-button">{{ backButtonText }}</a>
   
-  <button 
-    *ngIf="showSettingsButton" 
-    (click)="onSettingsClick()" 
-    class="settings-button"
+  <button
+    *ngIf="showPlusButton"
+    (click)="onPlusClick()"
+    class="plus-button"
+    [class.has-text]="!!plusButtonText"
     type="button"
-    aria-label="Settings">
-    <mat-icon>settings</mat-icon>
+    [attr.aria-label]="plusButtonText || 'Add meeting'">
+    <mat-icon>add</mat-icon>
+    <span *ngIf="plusButtonText" class="plus-label">{{ plusButtonText }}</span>
   </button>
 
-  <div class="section-wrap">
-    <div class="hero-inner">
-      <div *ngIf="eyebrowText" class="hero-eyebrow">
-        <mat-icon class="eyebrow-icon">{{ eyebrowIcon }}</mat-icon>
-        {{ eyebrowText }}
-      </div>
-      <h1>
-        {{ title }}
-        <span *ngIf="titleSuffix" class="serif-accent"> {{ titleSuffix }}</span>
-      </h1>
-      <p *ngIf="description">{{ description }}</p>
+<button 
+  *ngIf="showSettingsButton" 
+  (click)="onSettingsClick()" 
+  class="settings-button"
+  type="button"
+  [attr.aria-label]="settingsButtonText || 'Settings'">
+  <mat-icon>settings</mat-icon>
+  <span *ngIf="settingsButtonText" class="settings-label">{{ settingsButtonText }}</span>
+</button>
+
+<div class="section-wrap">
+  <div class="hero-inner">
+    <div *ngIf="eyebrowText" class="hero-eyebrow">
+      <mat-icon class="eyebrow-icon">{{ eyebrowIcon }}</mat-icon>
+      {{ eyebrowText }}
     </div>
+    <h1>
+      {{ title }}
+      <span *ngIf="titleSuffix" class="serif-accent"> {{ titleSuffix }}</span>
+    </h1>
+    <p *ngIf="description">{{ description }}</p>
   </div>
+</div>
 </section>

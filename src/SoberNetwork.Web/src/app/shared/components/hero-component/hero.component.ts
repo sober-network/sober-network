@@ -16,10 +16,18 @@ export class HeroComponent {
   @Input() backButtonRoute: string | readonly unknown[] = ['/dashboard'];
   @Input() backButtonText = '';
   @Input() showSettingsButton = false;
+  @Input() settingsButtonText = '';
+  @Input() showPlusButton = false;
+  @Input() plusButtonText = '';
   
   @Output() settingsClick = new EventEmitter<void>();
+  @Output() plusClick = new EventEmitter<void>();
 
   onSettingsClick(): void {
     this.settingsClick.emit();
+  }
+
+  onPlusClick(): void {
+    this.plusClick.emit();
   }
 }

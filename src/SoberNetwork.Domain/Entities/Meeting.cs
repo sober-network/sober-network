@@ -35,7 +35,7 @@ public class Meeting
     /// <summary>True = open meeting (anyone welcome). False = closed (AA members only).</summary>
     public bool IsOpen { get; set; } = true;
 
-    /// <summary>Meeting formats, e.g. Discussion, Speaker, StepStudy, BigBook, Beginners.</summary>
+    /// <summary>Meeting formats, e.g. Discussion, Speaker, Step Study, Tradition Study, Big Book Study, Literature, Topic, Beginners, Candlelight, Meditation, Birthday / Chip, Men's Meeting, Women's Meeting, Young People's Meeting, LGBTQ+.</summary>
     public List<string> Formats { get; set; } = [];
 
     /// <summary>Meeting language. Null defaults to English.</summary>

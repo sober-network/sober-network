@@ -10,7 +10,7 @@ import { MeetingService } from '../../../core/services/meeting.service';
 import { AuthService } from '../../../core/services/auth.service';
 import {
   PublicMeetingSearchResponse, MeetingSearchParams, MeetingType, TimeBlock,
-  MEETING_FORMATS, DAYS_OF_WEEK, DAY_ABBR
+  MEETING_FORMATS, DAYS_OF_WEEK, DAY_ABBR, formatMeetingFormat
 } from '../../../core/models/group.models';
 
 @Component({
@@ -33,6 +33,7 @@ export class MeetingFinderComponent implements OnInit, OnDestroy, AfterViewInit 
 
   // ── Exposed constants for template ───────────────────────────────────────────
   readonly FORMATS = MEETING_FORMATS;
+  readonly formatMeetingLabel = formatMeetingFormat;
   readonly DAYS = DAY_ABBR;
   readonly MeetingType = MeetingType;
   readonly TimeBlock = TimeBlock;

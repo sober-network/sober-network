@@ -354,7 +354,7 @@ Always run both backend and frontend tests after making changes.
 - First-class entity with its own table, service (`IMeetingService/MeetingService`), controller (`MeetingsController`), and Angular components
 - Fields: `Id`, `GroupId`, `Title`, `Description`, `MeetingType` (InPerson=0, Online=1, Hybrid=2), `TimeBlock` (Morning, Afternoon, Evening, Night)
 - Address fields (for InPerson/Hybrid): `VenueName`, `Street`, `City`, `State`, `PostalCode`, `Country`, `Lat`, `Lon`
-- Meeting formats: `Formats` is `text[]` (PostgreSQL array), NOT comma-separated string
+- Meeting formats: `Formats` is `text[]` (PostgreSQL array), NOT comma-separated string. Canonical enum-style values (15 total): `Discussion`, `Speaker`, `StepStudy`, `TraditionStudy`, `BigBook`, `Literature`, `Topic`, `Beginners`, `Candlelight`, `Meditation`, `BirthdayChip`, `Men`, `Women`, `YoungPeople`, `LGBTQPlus`. Stored as the canonical token; the human-readable label (e.g. `StepStudy` → "Step Study", `BirthdayChip` → "Birthday / Chip", `LGBTQPlus` → "LGBTQ+") is resolved on the frontend via `MEETING_FORMAT_LABELS` / `formatMeetingFormat()` in `core/models/group.models.ts`. Backend `CreateMeetingRequestValidator`/`UpdateMeetingRequestValidator` validate against the same canonical set.
 - URLs: `ZoomLink` (members-only, NEVER exposed publicly), `PublicJoinUrl` (safe, admin-curated, used in public meeting finder)
 - `DaysOfWeek` as bitmask for recurring meetings (Monday=1, Tuesday=2, Wednesday=4, Thursday=8, Friday=16, Saturday=32, Sunday=64)
 - Query validation: If `MeetingType` is InPerson or Hybrid, City/Street are **required**; if Online, they are **optional**

@@ -22,7 +22,7 @@ public record CreateMeetingRequest(
     DateTime? OccursOn = null,
     /// <summary>True = open meeting. False = closed.</summary>
     bool IsOpen = true,
-    /// <summary>Meeting formats (e.g. Discussion, Speaker, StepStudy, BigBook, Beginners).</summary>
+    /// <summary>Meeting formats (e.g. Discussion, Speaker, Step Study, Tradition Study, Big Book Study, Literature, Topic, Beginners, Candlelight, Meditation, Birthday / Chip, Men's Meeting, Women's Meeting, Young People's Meeting, LGBTQ+).</summary>
     IReadOnlyList<string>? Formats = null,
     /// <summary>Meeting language. Null = English.</summary>
     string? Language = null,

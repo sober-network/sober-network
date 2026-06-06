@@ -67,12 +67,14 @@
     <!-- Access Settings -->
     <div class="form-section">
       <h4>Access Settings</h4>
-      <mat-slide-toggle formControlName="isPublic">
-        Public group page
-      </mat-slide-toggle>
-      <mat-slide-toggle formControlName="requiresApproval">
-        Approve new members
-      </mat-slide-toggle>
+      <div class="access-toggle">
+        <label class="lm-label">Public group page</label>
+        <mat-slide-toggle formControlName="isPublic"></mat-slide-toggle>
+      </div>
+      <div class="access-toggle">
+        <label class="lm-label">Approve new members</label>
+        <mat-slide-toggle formControlName="requiresApproval"></mat-slide-toggle>
+      </div>
     </div>
 
     <!-- Error message -->

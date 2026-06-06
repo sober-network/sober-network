@@ -7,7 +7,23 @@ namespace SoberNetwork.Core.Validators.Groups;
 public class CreateMeetingRequestValidator : AbstractValidator<CreateMeetingRequest>
 {
     private static readonly HashSet<string> ValidFormats = new(StringComparer.OrdinalIgnoreCase)
-        { "Discussion", "Speaker", "StepStudy", "BigBook", "Beginners" };
+        {
+            "Discussion",
+            "Speaker",
+            "StepStudy",
+            "TraditionStudy",
+            "BigBook",
+            "Literature",
+            "Topic",
+            "Beginners",
+            "Candlelight",
+            "Meditation",
+            "BirthdayChip",
+            "Men",
+            "Women",
+            "YoungPeople",
+            "LGBTQPlus"
+        };
 
     public CreateMeetingRequestValidator()
     {
@@ -32,7 +48,7 @@ public class CreateMeetingRequestValidator : AbstractValidator<CreateMeetingRequ
         
         RuleForEach(x => x.Formats)
             .Must(f => ValidFormats.Contains(f))
-            .WithMessage("Invalid meeting format '{PropertyValue}'. Valid formats: Discussion, Speaker, Step Study, Big Book Study, Beginners.");
+            .WithMessage("Invalid meeting format '{PropertyValue}'. Valid formats: Discussion, Speaker, Step Study, Tradition Study, Big Book Study, Literature, Topic, Beginners, Candlelight, Meditation, Birthday / Chip, Men's Meeting, Women's Meeting, Young People's Meeting, LGBTQ+.");
         
         RuleFor(x => x.Language)
             .MaximumLength(100).WithMessage("Language must not exceed 100 characters.");

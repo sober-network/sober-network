@@ -22,7 +22,7 @@ public record MeetingResponse(
     DateTime? OccursOn,
     /// <summary>True = open meeting (anyone welcome). False = closed (AA members only).</summary>
     bool IsOpen,
-    /// <summary>Meeting formats (e.g. Discussion, Speaker, StepStudy, BigBook, Beginners).</summary>
+    /// <summary>Meeting formats (e.g. Discussion, Speaker, Step Study, Tradition Study, Big Book Study, Literature, Topic, Beginners, Candlelight, Meditation, Birthday / Chip, Men's Meeting, Women's Meeting, Young People's Meeting, LGBTQ+).</summary>
     IReadOnlyList<string> Formats,
     /// <summary>Meeting language. Null = English.</summary>
     string? Language,

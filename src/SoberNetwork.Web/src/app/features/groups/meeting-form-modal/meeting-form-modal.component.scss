@@ -97,13 +97,25 @@ select.lm-input {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  padding: 1rem;
-  background: var(--sn-bg-soft, #f0ede8);
-  border: 1px solid rgba(17,17,16,0.08);
-  border-radius: 8px;
+}
 
-  mat-checkbox {
-    font-size: 0.9rem;
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  color: var(--sn-text, #111110);
+
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--sn-cta-bg, #1a1a18);
+  }
+
+  span {
+    user-select: none;
   }
 }
 
@@ -120,7 +132,8 @@ select.lm-input {
 .days-of-week-container {
   margin: 0.5rem 0;
 
-  .checkbox-label {
+  .lm-label {
+    display: block;
     margin-bottom: 0.75rem;
   }
 
@@ -128,6 +141,34 @@ select.lm-input {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
     gap: 0.75rem;
+  }
+}
+
+.formats-container {
+  margin: 0.5rem 0;
+
+  .checkbox-label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--sn-text-mid);
+    margin-bottom: 0.75rem;
+  }
+
+  .checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.75rem;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+  }
+
+  .checkbox-item {
+    margin: 0;
   }
 }
 
@@ -180,5 +221,33 @@ select.lm-input {
     color: var(--sn-text-mid, #3d3d3a);
     border: 1px solid var(--sn-text-muted, #7a7a75);
     &:hover:not(:disabled) { background-color: var(--sn-bg-soft, #f0ede8); }
+  }
+}
+
+.btn-delete-small {
+  width: 100%;
+  height: 38px;
+  margin-top: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background-color: transparent;
+  color: #c0392b;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s, border-color 0.15s;
+
+  &:hover:not(:disabled) {
+    background-color: rgba(192,57,43,0.06);
+    border-color: #d0d0d0;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }

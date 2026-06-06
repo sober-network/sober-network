@@ -39,7 +39,7 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
   activeAnchor: string | null = null;
 
   private sectionObserver: IntersectionObserver | null = null;
-  private readonly sectionIds = ['about', 'features', 'how-it-works', 'roadmap', 'traditions'];
+  private readonly sectionIds = ['about', 'features', 'how-it-works', 'principles', 'traditions'];
 
   constructor() {
     const nav$ = this.router.events.pipe(
@@ -92,6 +92,10 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
       width:      '440px',
       autoFocus:  'first-tabbable',
     });
+  }
+
+  scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   private setupScrollSpy(): void {

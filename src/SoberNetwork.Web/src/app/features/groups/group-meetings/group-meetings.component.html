@@ -138,7 +138,15 @@
           <mat-slide-toggle formControlName="isActive">Meeting is active</mat-slide-toggle>
         </section>
 
-        <p class="form-error" *ngIf="formError">{{ formError }}</p>
+        <mat-card class="form-error-card" *ngIf="formError">
+          <mat-card-content>
+            <div class="error-header">
+              <mat-icon>error_outline</mat-icon>
+              <span>Validation Error</span>
+            </div>
+            <div class="error-message" [innerHTML]="formError | nl2br"></div>
+          </mat-card-content>
+        </mat-card>
       </form>
     </mat-card-content>
 

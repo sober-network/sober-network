@@ -12,8 +12,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { DAYS_OF_WEEK, MEETING_FORMATS, AdminMeetingResponse, CreateMeetingRequest, UpdateMeetingRequest } from '@app/core/models';
+import { DAYS_OF_WEEK, MEETING_FORMATS, MeetingType, AdminMeetingResponse, CreateMeetingRequest, UpdateMeetingRequest } from '@app/core/models';
 import { GroupService } from '@app/core/services/group.service';
+import { Nl2brPipe } from '@app/shared/pipes/nl2br.pipe';
 
 @Component({
   selector: 'app-group-meetings',
@@ -31,6 +32,7 @@ import { GroupService } from '@app/core/services/group.service';
     MatProgressSpinnerModule,
     MatSelectModule,
     MatSlideToggleModule,
+    Nl2brPipe,
   ],
   templateUrl: './group-meetings.component.html',
   styleUrl: './group-meetings.component.scss',
@@ -159,7 +161,12 @@ export class GroupMeetingsComponent implements OnInit {
       zoomPasscode: this.normalizeText(value.zoomPasscode),
       notes: this.normalizeText(value.notes),
       isActive: value.isActive === true,
+      meetingType: MeetingType.Online,
     };
+
+    console.log('Form value:', value);
+    console.log('Meeting request to send:', request);
+    console.log('Editing ID:', this.editingId);
 
     this.saving = true;
     this.formError = '';
@@ -235,6 +242,31 @@ export class GroupMeetingsComponent implements OnInit {
   }
 
   private getErrorMessage(error: unknown, fallback: string): string {
-    return (error as { error?: { message?: string } })?.error?.message ?? fallback;
+    const err = error as any;
+
+    // Check for FluentValidation error structure (ProblemDetails with errors object)
+    if (err?.error?.errors && typeof err.error.errors === 'object') {
+      const messages: string[] = [];
+      for (const [field, fieldErrors] of Object.entries(err.error.errors)) {
+        if (Array.isArray(fieldErrors)) {
+          messages.push(...(fieldErrors as string[]));
+        }
+      }
+      if (messages.length > 0) {
+        return messages.join('\n');
+      }
+    }
+
+    // Check for single message field
+    if (err?.error?.message) {
+      return err.error.message;
+    }
+
+    // Check for title (ProblemDetails)
+    if (err?.error?.title) {
+      return err.error.title;
+    }
+
+    return fallback;
   }
 }

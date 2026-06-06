@@ -190,8 +190,11 @@
   }
 
   <!-- ── Map view ────────────────────────────────────────────────────────── -->
-  @if (!loading() && view() === 'map') {
-    <div #mapContainer class="map-container" style="height: 520px; border-radius: 8px; overflow: hidden;"></div>
-    <p class="small text-muted mt-1">Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</p>
-  }
+  <!-- Container is always in the DOM so Leaflet is never re-created from scratch.
+       d-none hides it while loading or in list view; invalidateSize() is called
+       each time it becomes visible so Leaflet remeasures the 520px height. -->
+  <div #mapContainer class="map-container"
+       [class.d-none]="loading() || view() !== 'map'"
+       style="height: 520px; border-radius: 8px; overflow: hidden;"></div>
+  <p class="small text-muted mt-1" [class.d-none]="loading() || view() !== 'map'">Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</p>
 </section>

@@ -65,7 +65,7 @@ export class AuthService {
       this.http.post(`${this.base}/logout`, body).subscribe({ error: () => {} });
     }
     this.clearSession();
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/']);
   }
 
   /** Attempt silent token refresh on app startup using stored refresh token. */

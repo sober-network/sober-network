@@ -1,5 +1,5 @@
 import {
-  Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, signal, computed, effect
+  Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, signal, computed
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -25,25 +25,6 @@ export class MeetingFinderComponent implements OnInit, OnDestroy, AfterViewInit 
   private readonly authService = inject(AuthService);
   private readonly destroy$ = new Subject<void>();
   private readonly search$ = new Subject<void>();
-
-  constructor() {
-    // Reactive map lifecycle: destroy the L.Map instance whenever the container
-    // is hidden (loading OR list view), and re-initialise once it's visible again.
-    // This is needed because the Angular @if control flow destroys/recreates the
-    // #mapContainer div on every search, invalidating any prior L.Map reference.
-    effect(() => {
-      const mapVisible = !this.loading() && this.view() === 'map';
-      if (!mapVisible) {
-        this.map?.remove();
-        this.map = null;
-      } else {
-        // 100ms gives the browser time to paint the newly-created #mapContainer div
-        // before Leaflet reads its dimensions. Without this, Leaflet measures the
-        // container as 0×0 and renders the map collapsed around the centre pin.
-        setTimeout(() => this.initMap(), 100);
-      }
-    });
-  }
 
   @ViewChild('mapContainer') mapContainerRef!: ElementRef<HTMLDivElement>;
   private map: L.Map | null = null;
@@ -75,7 +56,7 @@ export class MeetingFinderComponent implements OnInit, OnDestroy, AfterViewInit 
   results = signal<PublicMeetingSearchResponse[]>([]);
   loading = signal(false);
   error = signal('');
-  view = signal<'list' | 'map'>('list');
+  view = signal<'list' | 'map'>('map');
 
   // ── Derived ───────────────────────────────────────────────────────────────────
   grouped = computed(() => {
@@ -94,7 +75,12 @@ export class MeetingFinderComponent implements OnInit, OnDestroy, AfterViewInit 
     this.tryLoadUserAddress();
   }
 
-  ngAfterViewInit(): void { /* map lifecycle handled by constructor effect */ }
+  ngAfterViewInit(): void {
+    // Initialize map on component load
+    requestAnimationFrame(() => {
+      if (!this.map) this.initMap();
+    });
+  }
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -188,7 +174,16 @@ export class MeetingFinderComponent implements OnInit, OnDestroy, AfterViewInit 
   // ── View toggle ───────────────────────────────────────────────────────────────
 
   switchView(v: 'list' | 'map'): void {
-    this.view.set(v); // effect() reacts and calls initMap() when map becomes visible
+    this.view.set(v);
+    if (v === 'map') {
+      // The map container uses [class.d-none] rather than @if, so the DOM element
+      // is always present. Angular removes d-none during change detection; by the
+      // next animation frame the element is visible and Leaflet can measure it.
+      requestAnimationFrame(() => {
+        if (!this.map) this.initMap();
+        else { this.map.invalidateSize(); this.updateMapMarkers(); }
+      });
+    }
   }
 
   // ── Google Maps directions URL ────────────────────────────────────────────────
@@ -233,7 +228,20 @@ export class MeetingFinderComponent implements OnInit, OnDestroy, AfterViewInit 
     this.meetingService.searchPublicMeetings(params)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: r => { this.results.set(r); this.loading.set(false); this.updateMapMarkers(); },
+        next: r => {
+          this.results.set(r);
+          this.loading.set(false);
+          if (this.view() === 'map') {
+            // d-none was present during the search; now that loading is done
+            // the container is visible again — force Leaflet to remeasure it.
+            requestAnimationFrame(() => {
+              if (!this.map) this.initMap();
+              else { this.map.invalidateSize(); this.updateMapMarkers(); }
+            });
+          } else {
+            this.updateMapMarkers();
+          }
+        },
         error: () => { this.error.set('Failed to load meetings. Please try again.'); this.loading.set(false); },
       });
   }
@@ -262,7 +270,6 @@ export class MeetingFinderComponent implements OnInit, OnDestroy, AfterViewInit 
       maxZoom: 18,
     }).addTo(this.map);
     this.markers.addTo(this.map);
-    // Force Leaflet to recalculate container dimensions after any CSS transitions/layouts settle
     this.map.invalidateSize();
     this.updateMapMarkers();
   }

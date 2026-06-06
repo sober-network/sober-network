@@ -40,3 +40,37 @@
     opacity: 0.4;
   }
 }
+
+.form-error-card {
+  background-color: #ffebee;
+  border-left: 4px solid #c62828;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+
+  mat-card-content {
+    padding: 1rem;
+
+    .error-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      color: #c62828;
+      margin-bottom: 0.5rem;
+
+      mat-icon {
+        font-size: 1.25rem;
+        width: 1.25rem;
+        height: 1.25rem;
+      }
+    }
+
+    .error-message {
+      font-size: 0.9rem;
+      color: #b71c1c;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      line-height: 1.5;
+    }
+  }
+}

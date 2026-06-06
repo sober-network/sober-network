@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SoberNetwork.Core.DTOs.Groups;
 using SoberNetwork.Core.Interfaces;
 using SoberNetwork.Domain.Entities;
@@ -11,7 +12,7 @@ namespace SoberNetwork.Infrastructure.Services;
 /// Meeting management service. All operations are scoped to a single group (T4 isolation).
 /// Read operations require active membership. Write operations require GroupAdmin role.
 /// </summary>
-public sealed class MeetingService(AppDbContext db) : IMeetingService
+public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logger) : IMeetingService
 {
     /// <inheritdoc/>
     public async Task<(IReadOnlyList<MeetingResponse>? Meetings, string? Error)> GetGroupMeetingsAsync(
@@ -79,10 +80,16 @@ public sealed class MeetingService(AppDbContext db) : IMeetingService
     public async Task<(AdminMeetingResponse? Meeting, string? Error)> CreateMeetingAsync(
         string slug, CreateMeetingRequest request, Guid userId, CancellationToken ct = default)
     {
+        logger.LogInformation("CreateMeetingAsync: slug={Slug}, userId={UserId}, name={Name}", slug, userId, request.Name);
+         
         var group = await db.Groups
             .AsNoTracking()
             .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null, ct);
-        if (group == null) return (null, "Group not found.");
+        if (group == null)
+        {
+            logger.LogWarning("CreateMeetingAsync: Group not found. slug={Slug}", slug);
+            return (null, "Group not found.");
+        }
 
         var isAdmin = await db.GroupMemberships
             .AsNoTracking()
@@ -92,7 +99,11 @@ public sealed class MeetingService(AppDbContext db) : IMeetingService
                 m.Role == GroupRole.GroupAdmin &&
                 m.Status == MemberStatus.Active &&
                 m.DeletedAt == null, ct);
-        if (!isAdmin) return (null, "You do not have permission to create meetings.");
+        if (!isAdmin)
+        {
+            logger.LogWarning("CreateMeetingAsync: User not admin. userId={UserId}, groupId={GroupId}", userId, group.Id);
+            return (null, "You do not have permission to create meetings.");
+        }
 
         var meeting = new Meeting
         {
@@ -128,8 +139,17 @@ public sealed class MeetingService(AppDbContext db) : IMeetingService
             UpdatedAt = DateTime.UtcNow
         };
 
-        db.Meetings.Add(meeting);
-        await db.SaveChangesAsync(ct);
+        try
+        {
+            db.Meetings.Add(meeting);
+            await db.SaveChangesAsync(ct);
+            logger.LogInformation("CreateMeetingAsync: Success. meetingId={MeetingId}", meeting.Id);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "CreateMeetingAsync: SaveChangesAsync failed. meetingId={MeetingId}, groupId={GroupId}", meeting.Id, group.Id);
+            return (null, $"Failed to save meeting: {ex.Message}");
+        }
 
         return (ToAdminResponse(meeting), null);
     }

@@ -3,10 +3,10 @@
   <div class="nav-inner">
 
     <!-- Logo -->
-    <a routerLink="/" class="nav-brand">
+    <a routerLink="/" (click)="scrollToTop()" class="nav-brand">
       <span class="nav-logo-ring">
         <svg viewBox="0 0 30 30" fill="none">
-          <polygon points="15,3 25,21 5,21" fill="none" stroke="#1a1a18" stroke-width="2" stroke-linejoin="round"/>
+          <polygon points="15,0 29,27 1,27" fill="none" stroke="#1a1a18" stroke-width="2" stroke-linejoin="round"/>
         </svg>
       </span>
       <span class="brand-name">Sober Network</span>
@@ -18,7 +18,7 @@
         <a href="#about"        class="nav-link" [class.active]="activeAnchor === 'about'">About</a>
         <a href="#features"     class="nav-link" [class.active]="activeAnchor === 'features'">Features</a>
         <a href="#how-it-works" class="nav-link" [class.active]="activeAnchor === 'how-it-works'">How It Works</a>
-        <a href="#roadmap"      class="nav-link" [class.active]="activeAnchor === 'roadmap'">Roadmap</a>
+        <a href="#principles"   class="nav-link" [class.active]="activeAnchor === 'principles'">Roadmap</a>
         <a href="#traditions"   class="nav-link" [class.active]="activeAnchor === 'traditions'">12 Traditions</a>
       </div>
       <div class="nav-actions">

@@ -11,6 +11,66 @@ export const MEETING_FORMATS: MeetingFormat[] = ['Discussion', 'Speaker', 'StepS
 export const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 export const DAY_ABBR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+export const LANGUAGES = [
+  'English',
+  'Spanish',
+  'French',
+  'German',
+  'Italian',
+  'Portuguese',
+  'Russian',
+  'Chinese (Mandarin)',
+  'Japanese',
+  'Korean',
+  'Arabic',
+  'Vietnamese',
+];
+
+export const US_STATES = [
+  'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
+  'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
+  'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
+  'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
+  'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
+  'DC', 'PR', 'VI', 'GU', 'AS', 'MP',
+];
+
+export const COUNTRIES = [
+  'United States',
+  'Canada',
+  'Mexico',
+  'United Kingdom',
+  'Ireland',
+  'France',
+  'Germany',
+  'Spain',
+  'Italy',
+  'Netherlands',
+  'Belgium',
+  'Switzerland',
+  'Austria',
+  'Portugal',
+  'Denmark',
+  'Sweden',
+  'Norway',
+  'Finland',
+  'Poland',
+  'Czech Republic',
+  'Hungary',
+  'Romania',
+  'Greece',
+  'Australia',
+  'New Zealand',
+  'Japan',
+  'South Korea',
+  'China',
+  'India',
+  'Brazil',
+  'Argentina',
+  'South Africa',
+  'Other',
+];
+
 // ── Meeting DTOs ──────────────────────────────────────────────────────────────
 
 /** Publicly-safe meeting detail (no Zoom, no Notes). Used on public group pages (T11/T12). */
@@ -19,10 +79,10 @@ export interface PublicMeetingResponse {
   name: string;
   description: string | null;
   isRecurring: boolean;
-  dayOfWeek: number | null;       // 0=Sun..6=Sat
-  time: string;                   // "HH:mm"
+  daysOfWeek: number[];              // Array of 0-6 for recurring; empty array for one-off
+  time: string;                      // "HH:mm"
   durationMinutes: number;
-  occursOn: string | null;        // ISO date for one-off meetings
+  occursOn: string | null;           // ISO date for one-off meetings
   isOpen: boolean;
   formats: string[];
   language: string | null;
@@ -66,7 +126,7 @@ export interface CreateMeetingRequest {
   description?: string | null;
   notes?: string | null;
   isRecurring?: boolean;
-  dayOfWeek?: number | null;
+  daysOfWeek?: number[] | null;       // Array of 0-6 for recurring meetings
   time: string;
   durationMinutes?: number;
   occursOn?: string | null;
@@ -77,6 +137,7 @@ export interface CreateMeetingRequest {
   venueName?: string | null;
   location?: string | null;
   street?: string | null;
+  street2?: string | null;
   city?: string | null;
   state?: string | null;
   postalCode?: string | null;
@@ -94,7 +155,7 @@ export interface UpdateMeetingRequest {
   description?: string | null;
   notes?: string | null;
   isRecurring?: boolean;
-  dayOfWeek?: number | null;
+  daysOfWeek?: number[] | null;       // Array of 0-6 for recurring meetings
   time?: string;
   durationMinutes?: number;
   occursOn?: string | null;
@@ -105,6 +166,7 @@ export interface UpdateMeetingRequest {
   venueName?: string | null;
   location?: string | null;
   street?: string | null;
+  street2?: string | null;
   city?: string | null;
   state?: string | null;
   postalCode?: string | null;

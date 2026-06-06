@@ -14,12 +14,13 @@ public class MeetingConfiguration : IEntityTypeConfiguration<Meeting>
         builder.Property(m => m.Time).IsRequired().HasMaxLength(5);
         builder.Property(m => m.DurationMinutes).HasDefaultValue(60);
         builder.Property(m => m.Formats).HasColumnType("text[]").HasDefaultValueSql("ARRAY[]::text[]");
+        builder.Property(m => m.DaysOfWeek).HasColumnType("integer[]").HasDefaultValueSql("ARRAY[]::integer[]");
 
         builder.Property(m => m.MeetingType)
             .HasConversion<int>()
             .HasDefaultValue(SoberNetwork.Domain.Enums.MeetingType.InPerson);
         builder.Property(m => m.VenueName).HasMaxLength(200);
-        builder.Property(m => m.Street).HasMaxLength(200);
+        builder.Property(m => m.Street).HasMaxLength(300);
         builder.Property(m => m.City).HasMaxLength(100);
         builder.Property(m => m.State).HasMaxLength(100);
         builder.Property(m => m.PostalCode).HasMaxLength(20);
@@ -35,6 +36,6 @@ public class MeetingConfiguration : IEntityTypeConfiguration<Meeting>
         builder.HasIndex(m => new { m.GroupId, m.IsActive, m.DeletedAt });
 
         // Index for the public meeting finder (cross-group, public groups only)
-        builder.HasIndex(m => new { m.IsActive, m.DeletedAt, m.MeetingType, m.DayOfWeek });
+        builder.HasIndex(m => new { m.IsActive, m.DeletedAt, m.MeetingType });
     }
 }

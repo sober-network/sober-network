@@ -14,8 +14,8 @@ public record AdminMeetingResponse(
     string? Notes,
     /// <summary>True = weekly recurring. False = one-off.</summary>
     bool IsRecurring,
-    /// <summary>DayOfWeek 0=Sun..6=Sat. Null for one-off meetings.</summary>
-    int? DayOfWeek,
+    /// <summary>Days of week 0=Sun..6=Sat. Empty array for one-off meetings.</summary>
+    IReadOnlyList<int> DaysOfWeek,
     /// <summary>Meeting start time in "HH:mm" 24-hour format.</summary>
     string Time,
     /// <summary>Duration in minutes.</summary>

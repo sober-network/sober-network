@@ -105,8 +105,9 @@ export class GroupPublicComponent implements OnInit {
 
   meetingWhen(m: PublicMeetingResponse): string {
     const parts: string[] = [];
-    if (m.isRecurring && m.dayOfWeek !== null && m.dayOfWeek !== undefined) {
-      parts.push(this.daysOfWeek[m.dayOfWeek] ?? 'Scheduled meeting');
+    if (m.isRecurring && m.daysOfWeek && m.daysOfWeek.length > 0) {
+      const dayNames = m.daysOfWeek.map(d => this.daysOfWeek[d] ?? 'Unknown').join(', ');
+      parts.push(dayNames);
     } else if (!m.isRecurring && m.occursOn) {
       parts.push(new Date(m.occursOn).toLocaleDateString());
     }

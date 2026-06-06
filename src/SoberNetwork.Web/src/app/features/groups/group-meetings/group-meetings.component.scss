@@ -41,6 +41,41 @@
   }
 }
 
+.days-of-week-container {
+  margin-bottom: 1rem;
+
+  .checkbox-label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--mat-sys-on-surface);
+    font-size: 0.875rem;
+  }
+
+  .checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--mat-sys-surface-dim);
+    border-radius: 4px;
+  }
+}
+
+.row-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.half-width {
+  width: 100%;
+}
+
 .form-error-card {
   background-color: #ffebee;
   border-left: 4px solid #c62828;

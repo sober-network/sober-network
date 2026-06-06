@@ -35,16 +35,17 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
         var meetings = await db.Meetings
             .AsNoTracking()
             .Where(m => m.GroupId == group.Id && m.DeletedAt == null && m.IsActive)
-            .OrderBy(m => m.IsRecurring ? 0 : 1).ThenBy(m => m.DayOfWeek).ThenBy(m => m.Time)
-            .Select(m => new MeetingResponse(
-                m.Id, m.Name, m.Description, m.IsRecurring, m.DayOfWeek, m.Time,
-                m.DurationMinutes, m.OccursOn, m.IsOpen, m.Formats, m.Language,
-                m.MeetingType, m.VenueName, m.Location, m.Street, m.City, m.State,
-                m.PostalCode, m.Country, m.Latitude, m.Longitude,
-                m.ZoomLink, m.ZoomMeetingId, m.ZoomPasscode, m.PublicJoinUrl, m.IsActive, m.CreatedAt))
+            .OrderBy(m => m.IsRecurring ? 0 : 1)
+            .ThenBy(m => m.DaysOfWeek == null || m.DaysOfWeek.Length == 0 ? int.MaxValue : m.DaysOfWeek[0])
+            .ThenBy(m => m.Time)
             .ToListAsync(ct);
 
-        return (meetings, null);
+        return (meetings.Select(m => new MeetingResponse(
+            m.Id, m.Name, m.Description, m.IsRecurring, m.DaysOfWeek ?? new int[] { }, m.Time,
+            m.DurationMinutes, m.OccursOn, m.IsOpen, m.Formats, m.Language,
+            m.MeetingType, m.VenueName, m.Location, m.Street, m.City, m.State,
+            m.PostalCode, m.Country, m.Latitude, m.Longitude,
+            m.ZoomLink, m.ZoomMeetingId, m.ZoomPasscode, m.PublicJoinUrl, m.IsActive, m.CreatedAt)).ToList(), null);
     }
 
     /// <inheritdoc/>
@@ -69,11 +70,12 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
         var meetings = await db.Meetings
             .AsNoTracking()
             .Where(m => m.GroupId == group.Id && m.DeletedAt == null)
-            .OrderBy(m => m.IsRecurring ? 0 : 1).ThenBy(m => m.DayOfWeek).ThenBy(m => m.Time)
-            .Select(m => ToAdminResponse(m))
+            .OrderBy(m => m.IsRecurring ? 0 : 1)
+            .ThenBy(m => m.DaysOfWeek == null || m.DaysOfWeek.Length == 0 ? int.MaxValue : m.DaysOfWeek[0])
+            .ThenBy(m => m.Time)
             .ToListAsync(ct);
 
-        return (meetings, null);
+        return (meetings.Select(ToAdminResponse).ToList(), null);
     }
 
     /// <inheritdoc/>
@@ -113,7 +115,7 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
             Description = NullIfWhiteSpace(request.Description),
             Notes = NullIfWhiteSpace(request.Notes),
             IsRecurring = request.IsRecurring,
-            DayOfWeek = request.DayOfWeek,
+            DaysOfWeek = request.DaysOfWeek?.ToArray(),
             Time = request.Time.Trim(),
             DurationMinutes = request.DurationMinutes,
             OccursOn = request.OccursOn,
@@ -181,7 +183,7 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
         if (request.Description != null) meeting.Description = NullIfWhiteSpace(request.Description);
         if (request.Notes != null) meeting.Notes = NullIfWhiteSpace(request.Notes);
         if (request.IsRecurring != null) meeting.IsRecurring = request.IsRecurring.Value;
-        if (request.DayOfWeek != null) meeting.DayOfWeek = request.DayOfWeek;
+        if (request.DaysOfWeek != null) meeting.DaysOfWeek = request.DaysOfWeek.ToArray();
         if (request.Time != null) meeting.Time = request.Time.Trim();
         if (request.DurationMinutes != null) meeting.DurationMinutes = request.DurationMinutes.Value;
         if (request.OccursOn != null) meeting.OccursOn = request.OccursOn;
@@ -241,7 +243,7 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
     }
 
     private static AdminMeetingResponse ToAdminResponse(Meeting m) => new(
-        m.Id, m.Name, m.Description, m.Notes, m.IsRecurring, m.DayOfWeek, m.Time,
+        m.Id, m.Name, m.Description, m.Notes, m.IsRecurring, m.DaysOfWeek ?? [], m.Time,
         m.DurationMinutes, m.OccursOn, m.IsOpen, m.Formats, m.Language,
         m.MeetingType, m.VenueName, m.Location, m.Street, m.City, m.State,
         m.PostalCode, m.Country, m.Latitude, m.Longitude,
@@ -275,7 +277,7 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
                 m.Group.IsPublic);
 
         if (days?.Length > 0)
-            query = query.Where(m => m.DayOfWeek != null && days.Contains(m.DayOfWeek.Value));
+            query = query.Where(m => m.DaysOfWeek != null && m.DaysOfWeek.Any(d => days.Contains(d)));
 
         if (timeBlock.HasValue)
         {
@@ -314,7 +316,7 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
         }
 
         var meetings = await query
-            .OrderBy(m => m.DayOfWeek)
+            .OrderBy(m => m.DaysOfWeek == null || m.DaysOfWeek.Length == 0 ? int.MaxValue : m.DaysOfWeek[0])
             .ThenBy(m => m.Time)
             .ThenBy(m => m.Name)
             .ToListAsync(ct);
@@ -328,7 +330,7 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
             return new PublicMeetingSearchResponse(
                 m.Id, m.Name, m.Description,
                 m.Group.Name, m.Group.Slug,
-                m.MeetingType, m.IsRecurring, m.DayOfWeek, m.Time, m.DurationMinutes, m.OccursOn,
+                m.MeetingType, m.IsRecurring, m.DaysOfWeek ?? new int[] { }, m.Time, m.DurationMinutes, m.OccursOn,
                 m.IsOpen, m.Formats, m.Language,
                 m.VenueName, m.Location, m.Street, m.City, m.State, m.PostalCode, m.Country,
                 m.Latitude, m.Longitude, m.PublicJoinUrl, distanceMiles);

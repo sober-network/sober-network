@@ -38,14 +38,14 @@ public class GroupService(
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     private static MeetingResponse ToMeetingResponse(Meeting m) => new(
-        m.Id, m.Name, m.Description, m.IsRecurring, m.DayOfWeek, m.Time,
+        m.Id, m.Name, m.Description, m.IsRecurring, m.DaysOfWeek ?? new int[] { }, m.Time,
         m.DurationMinutes, m.OccursOn, m.IsOpen, m.Formats, m.Language,
         m.MeetingType, m.VenueName, m.Location, m.Street, m.City, m.State,
         m.PostalCode, m.Country, m.Latitude, m.Longitude,
         m.ZoomLink, m.ZoomMeetingId, m.ZoomPasscode, m.PublicJoinUrl, m.IsActive, m.CreatedAt);
 
     private static PublicMeetingResponse ToPublicMeetingResponse(Meeting m) => new(
-        m.Id, m.Name, m.Description, m.IsRecurring, m.DayOfWeek, m.Time,
+        m.Id, m.Name, m.Description, m.IsRecurring, m.DaysOfWeek ?? new int[] { }, m.Time,
         m.DurationMinutes, m.OccursOn, m.IsOpen, m.Formats, m.Language,
         m.MeetingType, m.VenueName, m.Location, m.Street, m.City, m.State,
         m.PostalCode, m.Country, m.Latitude, m.Longitude, m.PublicJoinUrl);
@@ -53,13 +53,17 @@ public class GroupService(
     private static IReadOnlyList<MeetingResponse> ActiveMeetings(Group g) =>
         g.Meetings
             .Where(m => m.DeletedAt == null && m.IsActive)
-            .OrderBy(m => m.IsRecurring ? 0 : 1).ThenBy(m => m.DayOfWeek).ThenBy(m => m.Time)
+            .OrderBy(m => m.IsRecurring ? 0 : 1)
+            .ThenBy(m => m.DaysOfWeek != null && m.DaysOfWeek.Length > 0 ? m.DaysOfWeek[0] : int.MaxValue)
+            .ThenBy(m => m.Time)
             .Select(ToMeetingResponse).ToList();
 
     private static IReadOnlyList<PublicMeetingResponse> ActivePublicMeetings(Group g) =>
         g.Meetings
             .Where(m => m.DeletedAt == null && m.IsActive)
-            .OrderBy(m => m.IsRecurring ? 0 : 1).ThenBy(m => m.DayOfWeek).ThenBy(m => m.Time)
+            .OrderBy(m => m.IsRecurring ? 0 : 1)
+            .ThenBy(m => m.DaysOfWeek != null && m.DaysOfWeek.Length > 0 ? m.DaysOfWeek[0] : int.MaxValue)
+            .ThenBy(m => m.Time)
             .Select(ToPublicMeetingResponse).ToList();
 
     private static GroupResponse ToGroupResponse(Group g, string userRole, int memberCount) => new(

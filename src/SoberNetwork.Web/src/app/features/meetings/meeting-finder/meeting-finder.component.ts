@@ -62,9 +62,18 @@ export class MeetingFinderComponent implements OnInit, OnDestroy, AfterViewInit 
   grouped = computed(() => {
     const byDay = new Map<number | null, PublicMeetingSearchResponse[]>();
     for (const m of this.results()) {
-      const key = m.dayOfWeek ?? null;
-      if (!byDay.has(key)) byDay.set(key, []);
-      byDay.get(key)!.push(m);
+      if (m.isRecurring && m.daysOfWeek && m.daysOfWeek.length > 0) {
+        // For recurring meetings with multiple days, add the meeting to each day
+        for (const day of m.daysOfWeek) {
+          if (!byDay.has(day)) byDay.set(day, []);
+          byDay.get(day)!.push(m);
+        }
+      } else {
+        // For one-off meetings or meetings with no specific day, group under null
+        const key = null;
+        if (!byDay.has(key)) byDay.set(key, []);
+        byDay.get(key)!.push(m);
+      }
     }
     return byDay;
   });
@@ -194,7 +203,10 @@ export class MeetingFinderComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   dayLabel(m: PublicMeetingSearchResponse): string {
-    if (m.isRecurring && m.dayOfWeek !== null) return DAYS_OF_WEEK[m.dayOfWeek];
+    if (m.isRecurring && m.daysOfWeek && m.daysOfWeek.length > 0) {
+      const dayNames = m.daysOfWeek.map(d => DAYS_OF_WEEK[d] ?? 'Unknown').join(', ');
+      return dayNames;
+    }
     if (m.occursOn) return new Date(m.occursOn).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
     return '';
   }

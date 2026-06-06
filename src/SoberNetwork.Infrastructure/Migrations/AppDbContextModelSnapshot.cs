@@ -393,8 +393,9 @@ namespace SoberNetwork.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("DayOfWeek")
-                        .HasColumnType("integer");
+                    b.PrimitiveCollection<List<int>>("DaysOfWeek")
+                        .HasColumnType("integer[]")
+                        .HasDefaultValueSql("ARRAY[]::integer[]");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
@@ -494,7 +495,7 @@ namespace SoberNetwork.Infrastructure.Migrations
 
                     b.HasIndex("GroupId", "IsActive", "DeletedAt");
 
-                    b.HasIndex("IsActive", "DeletedAt", "MeetingType", "DayOfWeek");
+                    b.HasIndex("IsActive", "DeletedAt", "MeetingType");
 
                     b.ToTable("meetings", "public");
                 });

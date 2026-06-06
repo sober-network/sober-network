@@ -21,10 +21,10 @@ public class UpdateMeetingRequestValidator : AbstractValidator<UpdateMeetingRequ
         RuleFor(x => x.DurationMinutes)
             .InclusiveBetween(1, 480)
             .When(x => x.DurationMinutes.HasValue);
-        RuleFor(x => x.DayOfWeek)
+        RuleForEach(x => x.DaysOfWeek)
             .InclusiveBetween(0, 6)
-            .WithMessage("DayOfWeek must be between 0 (Sunday) and 6 (Saturday).")
-            .When(x => x.DayOfWeek.HasValue);
+            .WithMessage("Each day of week must be between 0 (Sunday) and 6 (Saturday).")
+            .When(x => x.DaysOfWeek is not null);
         RuleForEach(x => x.Formats)
             .Must(f => ValidFormats.Contains(f))
             .WithMessage("'{PropertyValue}' is not a valid meeting format. Valid values: Discussion, Speaker, StepStudy, BigBook, Beginners.")
@@ -64,8 +64,8 @@ public class UpdateMeetingRequestValidator : AbstractValidator<UpdateMeetingRequ
 
         When(x => x.IsRecurring == false, () =>
         {
-            RuleFor(x => x.DayOfWeek)
-                .Null().WithMessage("DayOfWeek must be null when setting a meeting to one-off.");
+            RuleFor(x => x.DaysOfWeek)
+                .Null().WithMessage("Days of week must be null when setting a meeting to one-off.");
         });
     }
 }

@@ -1,0 +1,12 @@
+[33mΓ¥»[39m Building...
+[32mΓ£ö[39m Building...
+Application bundle generation failed. [2.733 seconds] - 2026-06-06T03:32:05.060Z
+
+Γ£ÿ [ERROR] TS2322: Type 'MeetingType | null' is not assignable to type 'MeetingType'.
+  Type 'null' is not assignable to type 'MeetingType'. [plugin angular-compiler]
+
+    src/app/features/groups/group-meetings/group-meetings.component.ts:95:4:
+      95 Γöé     return this.form.controls.meetingType.value;
+         Γò╡     ~~~~~~
+
+

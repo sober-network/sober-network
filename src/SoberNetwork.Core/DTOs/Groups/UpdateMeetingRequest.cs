@@ -12,8 +12,8 @@ public record UpdateMeetingRequest(
     string? Notes = null,
     /// <summary>Optional replacement recurring flag.</summary>
     bool? IsRecurring = null,
-    /// <summary>Optional replacement day of week 0=Sun..6=Sat.</summary>
-    int? DayOfWeek = null,
+    /// <summary>Optional replacement days of week 0=Sun..6=Sat.</summary>
+    IReadOnlyList<int>? DaysOfWeek = null,
     /// <summary>Optional replacement start time in "HH:mm" 24-hour format.</summary>
     string? Time = null,
     /// <summary>Optional replacement duration in minutes.</summary>

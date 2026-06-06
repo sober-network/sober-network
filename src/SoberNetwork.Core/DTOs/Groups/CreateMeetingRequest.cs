@@ -10,10 +10,10 @@ public record CreateMeetingRequest(
     string? Description = null,
     /// <summary>Admin-only notes. Maximum 2000 characters.</summary>
     string? Notes = null,
-    /// <summary>True = weekly recurring (requires DayOfWeek). False = one-off (requires OccursOn).</summary>
+    /// <summary>True = weekly recurring (requires DaysOfWeek). False = one-off (requires OccursOn).</summary>
     bool IsRecurring = true,
-    /// <summary>Day of week 0=Sun..6=Sat. Required when IsRecurring=true.</summary>
-    int? DayOfWeek = null,
+    /// <summary>Days of week for recurring meetings (array of 0=Sun..6=Sat). Required when IsRecurring=true.</summary>
+    IReadOnlyList<int>? DaysOfWeek = null,
     /// <summary>Meeting start time in "HH:mm" 24-hour format. Required.</summary>
     string Time = "",
     /// <summary>Duration in minutes. Defaults to 60.</summary>
@@ -32,8 +32,10 @@ public record CreateMeetingRequest(
     string? VenueName = null,
     /// <summary>Legacy combined location/address string.</summary>
     string? Location = null,
-    /// <summary>Street address for in-person or hybrid meetings.</summary>
+    /// <summary>Street address line 1 for in-person or hybrid meetings.</summary>
     string? Street = null,
+    /// <summary>Street address line 2 (apt, suite, etc.) for in-person or hybrid meetings.</summary>
+    string? Street2 = null,
     /// <summary>City for in-person or hybrid meetings.</summary>
     string? City = null,
     /// <summary>State or province.</summary>
@@ -52,6 +54,6 @@ public record CreateMeetingRequest(
     string? ZoomMeetingId = null,
     /// <summary>Online meeting passcode — member-visible only, never public.</summary>
     string? ZoomPasscode = null,
-    /// <summary>Explicitly public join URL for the meeting finder (no embedded credentials).</summary>
+    /// <summary>Public join URL for the meeting finder (no embedded credentials).</summary>
     string? PublicJoinUrl = null
 );

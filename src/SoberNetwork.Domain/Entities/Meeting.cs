@@ -20,8 +20,8 @@ public class Meeting
     /// <summary>True = weekly recurring. False = one-off.</summary>
     public bool IsRecurring { get; set; } = true;
 
-    /// <summary>DayOfWeek 0=Sun..6=Sat. Required when IsRecurring=true, must be null for one-off.</summary>
-    public int? DayOfWeek { get; set; }
+    /// <summary>Days of week for recurring meetings (array of 0=Sun..6=Sat). Required when IsRecurring=true, must be null for one-off.</summary>
+    public int[]? DaysOfWeek { get; set; }
 
     /// <summary>Meeting start time in "HH:mm" 24-hour format.</summary>
     public string Time { get; set; } = string.Empty;

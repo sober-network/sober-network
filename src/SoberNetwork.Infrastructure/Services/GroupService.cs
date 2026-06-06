@@ -107,18 +107,24 @@ public class GroupService(
                 m.Group.DeletedAt == null)
             .ToListAsync();
 
-        var result = new List<GroupResponse>();
-        foreach (var m in memberships)
-        {
-            var count = await db.GroupMemberships
-                .AsNoTracking()
-                .CountAsync(x =>
-                    x.GroupId == m.GroupId &&
-                    x.Status == MemberStatus.Active &&
-                    x.DeletedAt == null);
-            result.Add(ToGroupResponse(m.Group!, m.Role.ToString(), m.Status.ToString(), count));
-        }
-        return result;
+        var groupIds = memberships.Select(m => m.GroupId).ToList();
+        var counts = await db.GroupMemberships
+            .AsNoTracking()
+            .Where(x =>
+                groupIds.Contains(x.GroupId) &&
+                x.Status == MemberStatus.Active &&
+                x.DeletedAt == null)
+            .GroupBy(x => x.GroupId)
+            .Select(g => new { GroupId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(g => g.GroupId, g => g.Count);
+
+        return memberships
+            .Select(m => ToGroupResponse(
+                m.Group!,
+                m.Role.ToString(),
+                m.Status.ToString(),
+                counts.GetValueOrDefault(m.GroupId)))
+            .ToList();
     }
 
     public async Task<IReadOnlyList<GroupSummaryResponse>> GetAllGroupsAsync()

@@ -352,12 +352,18 @@ public class MemberService(
             .OrderBy(u => u.DisplayName)
             .ToListAsync();
 
+        var userIds = users.Select(u => u.Id).ToList();
+        var groupCounts = await db.GroupMemberships
+            .AsNoTracking()
+            .Where(m => userIds.Contains(m.UserId) && m.Status == MemberStatus.Active && m.DeletedAt == null)
+            .GroupBy(m => m.UserId)
+            .Select(g => new { UserId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(g => g.UserId, g => g.Count);
+
         var result = new List<AdminMemberResponse>();
         foreach (var user in users)
         {
-            var groupCount = await db.GroupMemberships
-                .AsNoTracking()
-                .CountAsync(m => m.UserId == user.Id && m.Status == MemberStatus.Active && m.DeletedAt == null);
+            var groupCount = groupCounts.GetValueOrDefault(user.Id);
             var isLockedOut = await userManager.IsLockedOutAsync(user);
             var daysSober = user.SobrietyDate.HasValue
                 ? (DateTime.UtcNow.Date - user.SobrietyDate.Value.ToDateTime(TimeOnly.MinValue)).Days

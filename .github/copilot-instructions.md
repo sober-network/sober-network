@@ -168,6 +168,20 @@ resolve it before writing code.
 - Always index foreign keys
 - Index columns used in `WHERE` clauses: `group_id`, `user_id`, `created_at`, `slug`
 
+**userId Type: Guid**
+- `ApplicationUser : IdentityUser<Guid>` — all Identity tables store uuid columns
+- `AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>`
+- **JWT boundary rule (firm):** JWT claims are `string` by spec. Conversion points only:
+  - `TokenService`: `new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())`
+  - Controllers: `private Guid UserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!)`
+- `UserManager<TUser>` methods (`FindByIdAsync`, etc.) still take `string` — call `.ToString()` at those call sites only
+- `IAuditService.LogAsync` takes `Guid? userId` — callers pass Guid directly
+- `ResetPasswordRequest.UserId` is `Guid` — ASP.NET JSON binding handles string→Guid automatically
+- `[FromQuery] Guid userId` — model binding handles string→Guid conversion
+- Moq setups for userId args: `It.IsAny<Guid>()` not `It.IsAny<string>()`
+- Test URLs with userId in route segments must use valid Guid strings (e.g., `"00000000-0000-0000-0000-000000000001"`) or model binding returns 400
+- `TestWebApplicationFactory.CreateAuthenticatedClient(Guid userId = default)` — `default(Guid)` is `Guid.Empty` (valid)
+
 ---
 
 ## 10. Testing Standards
@@ -296,6 +310,19 @@ Always run both backend and frontend tests after making changes.
 
 ## 16. Key Architecture Patterns & Module Organization
 
+### Entity-Specific Patterns
+
+**Meeting Entity**
+- First-class entity with its own table, service (`IMeetingService/MeetingService`), controller (`MeetingsController`), and Angular components
+- Fields: `Id`, `GroupId`, `Title`, `Description`, `MeetingType` (InPerson=0, Online=1, Hybrid=2), `TimeBlock` (Morning, Afternoon, Evening, Night)
+- Address fields (for InPerson/Hybrid): `VenueName`, `Street`, `City`, `State`, `PostalCode`, `Country`, `Lat`, `Lon`
+- Meeting formats: `Formats` is `text[]` (PostgreSQL array), NOT comma-separated string
+- URLs: `ZoomLink` (members-only, NEVER exposed publicly), `PublicJoinUrl` (safe, admin-curated, used in public meeting finder)
+- `DaysOfWeek` as bitmask for recurring meetings (Monday=1, Tuesday=2, Wednesday=4, Thursday=8, Friday=16, Saturday=32, Sunday=64)
+- Query validation: If `MeetingType` is InPerson or Hybrid, City/Street are **required**; if Online, they are **optional**
+- Soft delete: `deleted_at` never exposed; queries include `.Where(m => m.DeletedAt == null)`
+- Permissions: Only `group_admin` can create/edit/delete meetings; authenticated members can view their group's meetings; public endpoint shows only public meetings from public groups
+
 ### Module Boundaries
 
 The platform uses a modular monolith with clean separation:
@@ -341,9 +368,27 @@ Violations are security issues (T4). Test with `CrossGroupAccessTests`.
 
 ### Platform Stats & Public Data
 
-Public endpoints (marked `[AllowAnonymous]`):
-- `GET /api/stats` — Platform statistics (MemberCount, GroupCount, MeetingCount) via `StatsService`
-- `GET /api/meetings` — Public meeting finder (Haversine distance, Nominatim geocoding, Leaflet maps)
+**Platform Statistics Endpoint**
+- `GET /api/stats` [AllowAnonymous] — Returns `PlatformStatsResponse(MemberCount, GroupCount, MeetingCount)`
+- Member count = distinct `UserId` in `GroupMemberships` where `Status=Active` and `DeletedAt=null`
+- Group count = `Groups` where `DeletedAt=null`
+- Meeting count = `Meetings` where both meeting and its group have `DeletedAt=null`
+- Backend: `IStatsService/StatsService` (Infrastructure) with three `AsNoTracking` COUNT queries
+- Query: `GetPlatformStatsQuery` → `GetPlatformStatsQueryHandler` → `IStatsService`
+- Angular: `StatsService` loads on `LandingComponent.ngOnInit()`; errors silently fall back to zero
+
+**Public Meeting Finder**
+- `GET /api/meetings` [AllowAnonymous] — Cross-group public meeting search (Haversine distance, Nominatim geocoding)
+- Only groups with `IsPublic = true` appear in results
+- `SearchPublicMeetingsQuery` / `SearchPublicMeetingsQueryHandler` — Haversine with bounding-box pre-filter
+- Earth radius: 3958.8 miles; default search radius: 25 miles
+- `Meeting` entity fields: `MeetingType`, `VenueName`, `Street`, `City`, `State`, `PostalCode`, `Country`, `Lat`, `Lon`, `PublicJoinUrl`
+- `ApplicationUser` mailing address fields: `MailingStreet`, `MailingCity`, `MailingState`, `MailingPostalCode`, `MailingCountry`, `MailingLatitude`, `MailingLongitude` (all opt-in)
+- Angular: `MeetingFinderComponent` — day chips, time-block and format filters, GPS geocoding address input, Leaflet map with markers, list view
+- "Get Directions" links to Google Maps; "Join Online" opens `PublicJoinUrl` only for Online/Hybrid meetings with URL set
+- Route: `/meetings` (no auth guard)
+
+**Other Public Endpoints**
 - `POST /api/auth/register`, `POST /api/auth/login` — Auth endpoints (generic error messages, no user enumeration)
 - Group join links — shareable but not listed in directory unless `IsPublic = true`
 
@@ -387,3 +432,135 @@ The approved visual design is captured in `docs/knowledge.md § UI Design System
 - `IntersectionObserver` scroll-spy on nav pills (`rootMargin: '-10% 0px -55% 0px'`)
 - Fade-up entrance animation (`.fade-up` → `.visible` via observer, `threshold: 0.1`)
 - Staggered delays: `.delay-1`, `.delay-2`, `.delay-3`
+
+---
+
+## 18. Angular-Specific Patterns
+
+### Form Control Typing
+- Use `FormControl<T>` with explicit type parameter to avoid TS4111 binding errors
+- Always pass `{ validators, nonNullable: true }` in constructor for typed controls
+- Template accesses controls via `form.get('name')` instead of `form.controls.name` to maintain type safety
+- Example:
+  ```typescript
+  this.meetingForm = new FormGroup({
+    title: new FormControl<string>('', { 
+      validators: Validators.required, 
+      nonNullable: true 
+    })
+  });
+  ```
+
+### Modal Dialog Patterns
+- Use `MatDialog` to open modals; pass `panelClass: 'sn-form-modal'` or `'sn-login-panel'` for styling
+- Global panel overrides in `styles.scss` remove Material defaults and apply custom radius/shadow
+- Auth modals: `LoginModalComponent` and `RegisterModalComponent` cross-open via **dynamic imports** to avoid circular TypeScript dependencies
+  ```typescript
+  import('../../login-modal/login-modal.component').then(m => 
+    this.dialog.open(m.LoginModalComponent, { panelClass: 'sn-login-panel' })
+  );
+  ```
+- Modal success state closes dialog and navigates; error state keeps modal open showing validation errors
+- Use `enterAnimationDuration: 0, exitAnimationDuration: 0` if animations cause timing issues
+
+### Service Patterns
+- `AuthService` handles all auth workflows (Register, Login, ForgotPassword, ResetPassword, Refresh, Logout)
+- `logout()` navigates to `/` (landing page), NOT `/auth/login`
+- Expired token flow: `APP_INITIALIZER` → `tryRestoreSession()` → 401 → `errorInterceptor` → `auth.logout()` → `/`
+- Protected routes (`/dashboard`, `/groups`, etc.) redirect to `/auth/login` via `authGuard` when unauthenticated
+- `StatsService` loads platform stats; errors silently fall back to zero to avoid blocking the UI
+- Services should follow the `IService` interface pattern; use dependency injection via constructor
+
+### Component Lifecycle
+- Use `OnInit` for async data loading (queries, service calls)
+- Use `ChangeDetectionStrategy.OnPush` with `ChangeDetectorRef.markForCheck()` in scroll-spy and observer callbacks
+- Unsubscribe from observables in `OnDestroy` to prevent memory leaks (or use `takeUntilDestroyed(destroyRef)`)
+- Wrap `IntersectionObserver` callbacks in `NgZone.run()` to ensure change detection runs
+
+### Page Styling Convention
+- Pages use `.page-container` (global class) with white background, `border-radius: 8px`, `padding: 2rem`
+- Override in component SCSS if needed:
+  ```scss
+  .page-container {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+  }
+  ```
+
+### Routing
+- Landing page: `/` (no auth guard, LandingComponent)
+- Auth flows: `/auth/login`, `/auth/register`, `/auth/forgot-password`, `/auth/reset-password/:token`
+- Protected app routes: `/dashboard`, `/groups`, `/groups/:slug/*` (guarded by `authGuard`)
+- Public routes: `/meetings` (meeting finder, no auth guard)
+- Modal-driven auth (Sign In, Create Account) accessed from navbar; full-page routes remain for `authGuard` redirects and email confirmation links
+
+---
+
+## 19. Database Migration Workflow
+
+**Add a migration after entity changes:**
+```powershell
+dotnet ef migrations add MigrationName --project src\SoberNetwork.Infrastructure --startup-project src\SoberNetwork.Api
+```
+
+**Apply migrations to the database:**
+```powershell
+dotnet ef database update --project src\SoberNetwork.Infrastructure --startup-project src\SoberNetwork.Api
+```
+
+**Remove the last migration (before pushing):**
+```powershell
+dotnet ef migrations remove --project src\SoberNetwork.Infrastructure --startup-project src\SoberNetwork.Api
+```
+
+### Migration Requirements
+
+- **All schema changes** must go through migrations — never modify the database manually
+- Migrations are applied on app startup via `MigrateAsync()` in `Program.cs`
+- **Every table must have:** `created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`, `updated_at TIMESTAMPTZ`, `deleted_at TIMESTAMPTZ NULL`
+- Use `HasDefaultValueSql("NOW()")` for timestamp defaults (not `HasDefaultValue(new DateTime(...))`)
+- For array/collection column defaults, use `HasDefaultValueSql` (e.g., `HasDefaultValueSql("'{}'::text[]")` for PostgreSQL empty array)
+
+### Superuser Setup & Secrets
+
+**Set up user secrets before running the app:**
+```powershell
+dotnet user-secrets set "Superuser:Email" "admin@example.com" --project src\SoberNetwork.Api
+dotnet user-secrets set "Superuser:Password" "YourSecurePassword123!" --project src\SoberNetwork.Api
+dotnet user-secrets set "Superuser:DisplayName" "Platform Admin" --project src\SoberNetwork.Api
+```
+
+**Superuser seed block runs on every startup:**
+- Skips if superuser already exists
+- Creates user and assigns `superadmin` role
+- Sets `EmailConfirmed = true`
+- Reads from user secrets (`Superuser:Email`, `Superuser:Password`, `Superuser:DisplayName`)
+
+### Database User Permissions
+
+**PostgreSQL user requires CREATEDB privilege:**
+```sql
+ALTER USER sober CREATEDB;
+```
+- EF Core's `MigrateAsync` checks for DB existence and attempts `CREATE DATABASE`
+- Requires `CREATEDB` even if the DB already exists
+- Run this once during initial setup
+
+### Development Workflow
+
+1. Create entity or modify existing entity in `SoberNetwork.Domain/Entities/`
+2. Update `DbContext` configuration in `SoberNetwork.Infrastructure/Data/Configurations/`
+3. Run `dotnet ef migrations add MigrationName ...`
+4. Review generated migration file — ensure naming conventions are correct (snake_case in SQL, PascalCase in C#)
+5. Run `dotnet ef database update ...` to apply to local database
+6. Test the changes locally
+7. Commit migration file(s) to git
+8. Verify migration applies cleanly after fresh clone: drop local DB, pull latest, run `dotnet ef database update`
+
+### Common Issues
+
+- **"No database provider found"** — ensure `--startup-project` points to `SoberNetwork.Api`
+- **"PendingModelChangesWarning"** — rebuild solution after entity changes; EF Core caches the model
+- **Migration already exists** — if two branches create overlapping migrations, rename one and check for conflicts in generated SQL
+- **Timestamp columns** — always use `TIMESTAMPTZ` (timezone-aware) in PostgreSQL, never `TIMESTAMP`

@@ -1,0 +1,205 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon>{{ editingId ? 'edit_calendar' : 'add_event' }}</mat-icon>
+  {{ editingId ? 'Edit Meeting' : 'New Meeting' }}
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <!-- Error card -->
+  <mat-card class="form-error-card" *ngIf="formError">
+    <mat-card-content>
+      <div class="error-header">
+        <mat-icon>error_outline</mat-icon>
+        <span>Error</span>
+      </div>
+      <p class="error-message">{{ formError }}</p>
+    </mat-card-content>
+  </mat-card>
+
+  <form [formGroup]="form" class="meeting-form" novalidate>
+    <section>
+      <h3>Basics</h3>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" maxlength="100" />
+        <mat-hint align="end">{{ form.get('name')?.value?.length ?? 0 }}/100</mat-hint>
+        <mat-error *ngIf="form.get('name')?.hasError('required')">Name is required.</mat-error>
+        <mat-error *ngIf="form.get('name')?.hasError('minlength')">Name must be at least 2 characters.</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" rows="3" maxlength="500"></textarea>
+        <mat-hint align="end">{{ form.get('description')?.value?.length ?? 0 }}/500</mat-hint>
+      </mat-form-field>
+    </section>
+
+    <section>
+      <h3>Schedule</h3>
+
+      <mat-slide-toggle formControlName="isRecurring" class="field-row">Recurring meeting</mat-slide-toggle>
+
+      <ng-container *ngIf="isRecurring">
+        <div class="days-of-week-container">
+          <label class="checkbox-label">Days of week (select at least one):</label>
+          <div class="checkbox-group">
+            <mat-checkbox *ngFor="let day of readonly.daysOfWeekLabels; let index = index"
+              (change)="toggleDay(index)"
+              [checked]="isDaySelected(index)">
+              {{ day }}
+            </mat-checkbox>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="!isRecurring">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Date</mat-label>
+          <input matInput type="date" formControlName="occursOn" />
+        </mat-form-field>
+      </ng-container>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Time (HH:mm, 24-hour)</mat-label>
+        <input matInput type="time" formControlName="time" />
+        <mat-error *ngIf="form.get('time')?.hasError('required')">Time is required.</mat-error>
+        <mat-error *ngIf="form.get('time')?.hasError('pattern')">Enter time as HH:mm (e.g. 19:30).</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Duration (minutes)</mat-label>
+        <input matInput type="number" formControlName="durationMinutes" min="1" max="480" />
+      </mat-form-field>
+    </section>
+
+    <section>
+      <h3>Location & Type</h3>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Meeting type</mat-label>
+        <mat-select formControlName="meetingType">
+          <mat-option [value]="MeetingType.Online">Online</mat-option>
+          <mat-option [value]="MeetingType.InPerson">In Person</mat-option>
+          <mat-option [value]="MeetingType.Hybrid">Hybrid</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width" *ngIf="isInPersonOrHybrid">
+        <mat-label>Venue name</mat-label>
+        <input matInput formControlName="venueName" maxlength="200" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width" *ngIf="isInPersonOrHybrid">
+        <mat-label>Address 1</mat-label>
+        <input matInput formControlName="street" maxlength="200" />
+        <mat-error *ngIf="form.get('street')?.hasError('required')">Address is required for in-person meetings.</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width" *ngIf="isInPersonOrHybrid">
+        <mat-label>Address 2 (optional)</mat-label>
+        <input matInput formControlName="street2" maxlength="200" />
+      </mat-form-field>
+
+      <div class="row-group" *ngIf="isInPersonOrHybrid">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>City</mat-label>
+          <input matInput formControlName="city" maxlength="100" />
+          <mat-error *ngIf="form.get('city')?.hasError('required')">City is required for in-person meetings.</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>State/Province</mat-label>
+          <mat-select formControlName="state">
+            <mat-option value="">Choose state/province</mat-option>
+            <mat-option *ngFor="let state of readonly.states" [value]="state">{{ state }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="row-group" *ngIf="isInPersonOrHybrid">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Postal Code</mat-label>
+          <input matInput formControlName="postalCode" maxlength="20" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Country</mat-label>
+          <mat-select formControlName="country">
+            <mat-option value="">Choose country</mat-option>
+            <mat-option *ngFor="let country of readonly.countries" [value]="country">{{ country }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </section>
+
+    <section>
+      <h3>General Info</h3>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Language</mat-label>
+        <mat-select formControlName="language">
+          <mat-option value="">English (default)</mat-option>
+          <mat-option *ngFor="let lang of readonly.languages" [value]="lang">{{ lang }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Formats</mat-label>
+        <mat-select formControlName="formats" multiple>
+          <mat-option *ngFor="let f of meetingFormats" [value]="f">{{ f }}</mat-option>
+        </mat-select>
+        <mat-hint>Select all formats that apply.</mat-hint>
+      </mat-form-field>
+    </section>
+
+    <section>
+      <h3>Zoom</h3>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Public Join URL</mat-label>
+        <input matInput formControlName="publicJoinUrl" maxlength="500" placeholder="https://zoom.us/j/..." />
+        <mat-hint>Public-facing join link for the meeting finder (without passcode).</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Zoom link (admin)</mat-label>
+        <input matInput formControlName="zoomLink" maxlength="500" />
+        <mat-hint>Admin-only link (may include passcode).</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Zoom meeting ID</mat-label>
+        <input matInput formControlName="zoomMeetingId" maxlength="100" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Zoom passcode</mat-label>
+        <input matInput formControlName="zoomPasscode" maxlength="100" />
+      </mat-form-field>
+    </section>
+
+    <section>
+      <h3>Admin notes</h3>
+      <p class="field-hint">These notes are only visible to group admins.</p>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Notes</mat-label>
+        <textarea matInput formControlName="notes" rows="4" maxlength="2000"></textarea>
+        <mat-hint align="end">{{ form.get('notes')?.value?.length ?? 0 }}/2000</mat-hint>
+      </mat-form-field>
+    </section>
+
+    <section>
+      <mat-slide-toggle formControlName="isActive">Meeting is active</mat-slide-toggle>
+      <mat-slide-toggle formControlName="isOpen" class="field-row">Meeting is open to newcomers</mat-slide-toggle>
+    </section>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="modal-actions">
+  <button mat-stroked-button (click)="cancel()" [disabled]="saving">Cancel</button>
+  <button mat-raised-button color="primary" (click)="save()" [disabled]="saving">
+    <mat-icon *ngIf="saving">hourglass_top</mat-icon>
+    <span>{{ saving ? 'Saving...' : editingId ? 'Update Meeting' : 'Create Meeting' }}</span>
+  </button>
+</mat-dialog-actions>

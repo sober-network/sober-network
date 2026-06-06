@@ -13,8 +13,8 @@ using SoberNetwork.Infrastructure.Data;
 namespace SoberNetwork.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260606033507_MigrateToMultipleDaysOfWeek_v2")]
-    partial class MigrateToMultipleDaysOfWeek_v2
+    [Migration("20260606033821_AddDaysOfWeekColumn")]
+    partial class AddDaysOfWeekColumn
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

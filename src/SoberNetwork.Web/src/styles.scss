@@ -73,6 +73,32 @@ body {
   }
 }
 
+// ── Form modal panel — custom MatDialog panel class ────────────────────────────
+// Applied via MatDialog panelClass: 'sn-form-modal'
+.sn-form-modal {
+  .mat-mdc-dialog-surface {
+    border-radius: 12px !important;
+    box-shadow: 0 24px 64px rgba(17,17,16,0.16), 0 4px 12px rgba(17,17,16,0.08) !important;
+    background: var(--sn-bg) !important;
+    padding: 0 !important;
+  }
+
+  .mat-mdc-dialog-title {
+    padding: 1.5rem 1.5rem 1rem !important;
+    border-bottom: 1px solid rgba(17,17,16,0.08);
+  }
+
+  .mat-mdc-dialog-content {
+    padding: 1.5rem !important;
+    font-family: 'Inter', sans-serif !important;
+  }
+
+  .mat-mdc-dialog-actions {
+    padding: 0 1.5rem 1.5rem !important;
+  }
+}
+
+
 :root {
   --sn-bg:           #f7f5f2;
   --sn-bg-soft:      #f0ede8;

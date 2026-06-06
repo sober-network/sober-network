@@ -195,6 +195,11 @@ export class GroupsDashboardComponent implements OnInit {
     return parts.length > 0 ? parts.join(' • ') + suffix : null;
   }
 
+  getGroupIconColor(index: number): string {
+    const colors = ['violet', 'rose', 'sky', 'amber', 'green', 'teal', 'indigo', 'coral'];
+    return colors[index % colors.length];
+  }
+
   private loadGroups(): void {
     this.loading = true;
     this.error = '';

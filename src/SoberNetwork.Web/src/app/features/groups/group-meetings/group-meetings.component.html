@@ -6,7 +6,7 @@
       <p class="description">Add, edit, or remove meetings for this group.</p>
     </div>
 
-    <button mat-raised-button color="primary" type="button" (click)="openCreate()" *ngIf="editingId === null">
+    <button mat-raised-button color="primary" type="button" (click)="openCreate()">
       <mat-icon>add</mat-icon>
       Add Meeting
     </button>
@@ -16,250 +16,60 @@
     <mat-card-content>{{ error }}</mat-card-content>
   </mat-card>
 
-  <!-- Meeting form (create or edit) -->
-  <mat-card class="form-card" *ngIf="editingId !== null">
-    <mat-card-header>
-      <mat-icon mat-card-avatar>edit_calendar</mat-icon>
-      <mat-card-title>{{ editingId === undefined ? 'New Meeting' : 'Edit Meeting' }}</mat-card-title>
-    </mat-card-header>
-
-    <mat-card-content>
-      <form [formGroup]="form" class="meeting-form" novalidate>
-        <section>
-          <h3>Basics</h3>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Name</mat-label>
-            <input matInput formControlName="name" maxlength="100" />
-            <mat-hint align="end">{{ form.controls.name.value?.length ?? 0 }}/100</mat-hint>
-            <mat-error *ngIf="form.controls.name.hasError('required')">Name is required.</mat-error>
-            <mat-error *ngIf="form.controls.name.hasError('minlength')">Name must be at least 2 characters.</mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Description</mat-label>
-            <textarea matInput formControlName="description" rows="3" maxlength="500"></textarea>
-            <mat-hint align="end">{{ form.controls.description.value?.length ?? 0 }}/500</mat-hint>
-          </mat-form-field>
-        </section>
-
-        <section>
-          <h3>Schedule</h3>
-
-          <mat-slide-toggle formControlName="isRecurring" class="field-row">Recurring meeting</mat-slide-toggle>
-
-          <ng-container *ngIf="isRecurring">
-            <div class="days-of-week-container">
-              <label class="checkbox-label">Days of week (select at least one):</label>
-              <div class="checkbox-group">
-                <mat-checkbox *ngFor="let day of readonly.daysOfWeekLabels; let index = index" 
-                  (change)="toggleDay(index)" 
-                  [checked]="isDaySelected(index)">
-                  {{ day }}
-                </mat-checkbox>
-              </div>
-            </div>
-          </ng-container>
-
-          <ng-container *ngIf="!isRecurring">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Date</mat-label>
-              <input matInput type="date" formControlName="occursOn" />
-            </mat-form-field>
-          </ng-container>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Time (HH:mm, 24-hour)</mat-label>
-            <input matInput type="time" formControlName="time" />
-            <mat-error *ngIf="form.controls.time.hasError('required')">Time is required.</mat-error>
-            <mat-error *ngIf="form.controls.time.hasError('pattern')">Enter time as HH:mm (e.g. 19:30).</mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Duration (minutes)</mat-label>
-            <input matInput type="number" formControlName="durationMinutes" min="1" max="480" />
-            <mat-error *ngIf="form.controls.durationMinutes.hasError('min')">Must be at least 1 minute.</mat-error>
-            <mat-error *ngIf="form.controls.durationMinutes.hasError('max')">Maximum 480 minutes.</mat-error>
-          </mat-form-field>
-        </section>
-
-        <section>
-          <h3>Meeting Type & Address</h3>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Meeting Type</mat-label>
-            <mat-select formControlName="meetingType">
-              <mat-option [value]="MeetingType.InPerson">In Person</mat-option>
-              <mat-option [value]="MeetingType.Online">Online</mat-option>
-              <mat-option [value]="MeetingType.Hybrid">Hybrid</mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <ng-container *ngIf="isInPersonOrHybrid">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Venue Name</mat-label>
-              <input matInput formControlName="venueName" maxlength="200" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Street Address</mat-label>
-              <input matInput formControlName="street" maxlength="300" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Street Address Line 2 (optional)</mat-label>
-              <input matInput formControlName="street2" maxlength="300" />
-            </mat-form-field>
-
-            <div class="row-group">
-              <mat-form-field appearance="outline" class="half-width">
-                <mat-label>City</mat-label>
-                <input matInput formControlName="city" maxlength="100" />
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="half-width">
-                <mat-label>State / Province</mat-label>
-                <mat-select formControlName="state">
-                  <mat-option value="">Select state</mat-option>
-                  <mat-option *ngFor="let state of readonly.usStates" [value]="state">{{ state }}</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-
-            <div class="row-group">
-              <mat-form-field appearance="outline" class="half-width">
-                <mat-label>Postal Code</mat-label>
-                <input matInput formControlName="postalCode" maxlength="20" />
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="half-width">
-                <mat-label>Country</mat-label>
-                <mat-select formControlName="country">
-                  <mat-option value="">Select country</mat-option>
-                  <mat-option *ngFor="let country of readonly.countries" [value]="country">{{ country }}</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-          </ng-container>
-        </section>
-
-        <section>
-          <h3>Details</h3>
-
-          <mat-slide-toggle formControlName="isOpen" class="field-row">Open meeting (anyone can attend)</mat-slide-toggle>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Language</mat-label>
-            <mat-select formControlName="language">
-              <mat-option value="">English (default)</mat-option>
-              <mat-option *ngFor="let lang of readonly.languages" [value]="lang">{{ lang }}</mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Formats</mat-label>
-            <mat-select formControlName="formats" multiple>
-              <mat-option *ngFor="let f of meetingFormats" [value]="f">{{ f }}</mat-option>
-            </mat-select>
-            <mat-hint>Select all formats that apply.</mat-hint>
-          </mat-form-field>
-        </section>
-
-        <section>
-          <h3>Zoom</h3>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Zoom link</mat-label>
-            <input matInput formControlName="zoomLink" maxlength="500" />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Zoom meeting ID</mat-label>
-            <input matInput formControlName="zoomMeetingId" maxlength="100" />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Zoom passcode</mat-label>
-            <input matInput formControlName="zoomPasscode" maxlength="100" />
-          </mat-form-field>
-        </section>
-
-        <section>
-          <h3>Admin notes</h3>
-          <p class="field-hint">These notes are only visible to group admins.</p>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Notes</mat-label>
-            <textarea matInput formControlName="notes" rows="4" maxlength="2000"></textarea>
-            <mat-hint align="end">{{ form.controls.notes.value?.length ?? 0 }}/2000</mat-hint>
-          </mat-form-field>
-        </section>
-
-        <section>
-          <mat-slide-toggle formControlName="isActive">Meeting is active</mat-slide-toggle>
-        </section>
-
-        <mat-card class="form-error-card" *ngIf="formError">
-          <mat-card-content>
-            <div class="error-header">
-              <mat-icon>error_outline</mat-icon>
-              <span>Validation Error</span>
-            </div>
-            <div class="error-message" [innerHTML]="formError | nl2br"></div>
-          </mat-card-content>
-        </mat-card>
-      </form>
-    </mat-card-content>
-
-    <mat-card-actions align="end">
-      <button mat-button type="button" (click)="cancelEdit()">Cancel</button>
-      <button mat-raised-button color="primary" type="button" [disabled]="saving" (click)="save()">
-        <mat-icon *ngIf="!saving">save</mat-icon>
-        <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
-        {{ saving ? 'Saving…' : 'Save Meeting' }}
-      </button>
-    </mat-card-actions>
-  </mat-card>
-
-  <!-- Meetings list -->
-  <div class="loading-state" *ngIf="loading">
+  <!-- Loading state -->
+  <div class="loading-container" *ngIf="loading">
     <mat-spinner diameter="40"></mat-spinner>
-    <p>Loading meetings…</p>
+    <p>Loading meetings...</p>
   </div>
 
-  <ng-container *ngIf="!loading && editingId === null">
-    <mat-card class="empty-card" *ngIf="meetings.length === 0">
-      <mat-card-content>
-        <mat-icon>event_busy</mat-icon>
-        <h2>No meetings yet</h2>
-        <p>Add your first meeting above.</p>
-      </mat-card-content>
-    </mat-card>
-
+  <!-- Meetings list -->
+  <div *ngIf="!loading && meetings.length > 0">
     <mat-card class="meeting-card" *ngFor="let meeting of meetings">
-      <mat-card-header>
-        <mat-icon mat-card-avatar>{{ meeting.isActive ? 'event_available' : 'event_busy' }}</mat-icon>
-        <mat-card-title>{{ meeting.name }}</mat-card-title>
-        <mat-card-subtitle>{{ formatWhen(meeting) }} · {{ meeting.durationMinutes }} min · {{ meeting.isOpen ? 'Open' : 'Closed' }}</mat-card-subtitle>
-      </mat-card-header>
-
       <mat-card-content>
-        <p *ngIf="meeting.description">{{ meeting.description }}</p>
-        <p *ngIf="meeting.location"><mat-icon inline>place</mat-icon> {{ meeting.location }}</p>
-        <p *ngIf="meeting.zoomLink"><mat-icon inline>video_call</mat-icon> <a [href]="meeting.zoomLink" target="_blank" rel="noreferrer">Zoom link</a></p>
-        <p *ngIf="!meeting.isActive" class="inactive-badge">Inactive</p>
-      </mat-card-content>
+        <div class="meeting-header">
+          <div>
+            <h3>{{ meeting.name }}</h3>
+            <p class="meeting-when">{{ formatWhen(meeting) }}</p>
+            <p class="meeting-description" *ngIf="meeting.description">{{ meeting.description }}</p>
+          </div>
+          <span class="inactive-badge" *ngIf="!meeting.isActive">Inactive</span>
+        </div>
 
-      <mat-card-actions>
-        <button mat-button type="button" (click)="openEdit(meeting)">
-          <mat-icon>edit</mat-icon>
-          Edit
-        </button>
-        <button mat-button color="warn" type="button" (click)="delete(meeting)">
-          <mat-icon>delete</mat-icon>
-          Delete
-        </button>
-      </mat-card-actions>
+        <div class="meeting-details">
+          <p *ngIf="meeting.meetingType === MeetingType.InPerson || meeting.meetingType === MeetingType.Hybrid">
+            <mat-icon inline>location_on</mat-icon>
+            <span>{{ meeting.venueName || meeting.street || 'Location not set' }}</span>
+          </p>
+          <p *ngIf="meeting.publicJoinUrl">
+            <mat-icon inline>video_call</mat-icon>
+            <a [href]="meeting.publicJoinUrl" target="_blank" rel="noreferrer">Zoom link</a>
+          </p>
+          <p *ngIf="!meeting.isOpen">
+            <mat-icon inline>lock</mat-icon>
+            <span>By invitation only</span>
+          </p>
+        </div>
+
+        <div class="meeting-actions">
+          <button mat-stroked-button (click)="openEdit(meeting)">
+            <mat-icon>edit</mat-icon>
+            Edit
+          </button>
+          <button mat-stroked-button color="warn" (click)="delete(meeting)">
+            <mat-icon>delete</mat-icon>
+            Delete
+          </button>
+        </div>
+      </mat-card-content>
     </mat-card>
-  </ng-container>
+  </div>
+
+  <!-- Empty state -->
+  <mat-card class="empty-card" *ngIf="!loading && meetings.length === 0">
+    <mat-card-content>
+      <mat-icon>calendar_month</mat-icon>
+      <p>No meetings yet.</p>
+      <p class="empty-hint">Create your first meeting to get started.</p>
+    </mat-card-content>
+  </mat-card>
 </section>

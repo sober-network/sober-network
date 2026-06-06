@@ -1,0 +1,25 @@
+[33mΓ¥»[39m Building...
+[32mΓ£ö[39m Building...
+Application bundle generation failed. [2.799 seconds] - 2026-06-06T03:54:33.174Z
+
+Γ£ÿ [ERROR] NG1010: 'imports' must be an array of components, directives, pipes, or NgModules.
+  Value could not be determined statically. [plugin angular-compiler]
+
+    src/app/features/groups/group-meetings/group-meetings.component.ts:25:4:
+      25 Γöé     Nl2brPipe,
+         Γò╡     ~~~~~~~~~
+
+  Unknown reference.
+
+    src/app/features/groups/group-meetings/group-meetings.component.ts:25:4:
+      25 Γöé     Nl2brPipe,
+         Γò╡     ~~~~~~~~~
+
+
+Γ£ÿ [ERROR] TS2304: Cannot find name 'Nl2brPipe'. [plugin angular-compiler]
+
+    src/app/features/groups/group-meetings/group-meetings.component.ts:25:4:
+      25 Γöé     Nl2brPipe,
+         Γò╡     ~~~~~~~~~
+
+

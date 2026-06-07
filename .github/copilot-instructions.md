@@ -245,6 +245,82 @@ Login_WithInvalidPassword_ReturnsUnauthorized
 
 ---
 
+## 10b. End-to-End Testing with Playwright
+
+**E2E tests** validate complete user workflows across frontend and backend. Use [Playwright](https://playwright.dev/) for browser automation.
+
+### Running E2E Tests
+
+```powershell
+cd src\SoberNetwork.Web
+
+# Run all tests (headless)
+npm run e2e
+
+# Interactive UI mode — **recommended for development**
+npm run e2e:ui
+
+# Debug mode — step through tests
+npm run e2e:debug
+
+# View HTML report
+npm run e2e:report
+
+# Single browser or mobile
+npx playwright test --project=chromium
+npx playwright test --project="Mobile Chrome"
+
+# Single file or test by name
+npx playwright test e2e/landing.spec.ts
+npx playwright test -g "Auth Flow"
+```
+
+### Test Structure
+
+Tests live in `src/SoberNetwork.Web/e2e/`:
+- **`landing.spec.ts`** — Landing page, hero, header
+- **`auth.spec.ts`** — Login/register modals, form validation
+- **`e2e/README.md`** — Full guide on writing E2E tests
+
+### Writing E2E Tests
+
+**Template:**
+```typescript
+import { test, expect } from '@playwright/test';
+
+test.describe('Feature Name', () => {
+  test('should do X when Y happens', async ({ page }) => {
+    // Arrange
+    await page.goto('/');
+    
+    // Act
+    await page.locator('button', { hasText: /Sign In/i }).click();
+    
+    // Assert
+    await expect(page.locator('[role="dialog"]')).toBeVisible();
+  });
+});
+```
+
+### Best Practices
+
+- Use **semantic locators** — `[role="dialog"]`, `button`, `[aria-label]` over CSS classes
+- Use **`{ hasText: /pattern/i }`** for accessibility (case-insensitive text matching)
+- **Don't test implementation details** — test user workflows
+- **One assertion per section** — use `test.describe` for grouping
+- **Playwright waits automatically** — up to 30s for element visibility
+- **Mobile testing included** — tests run on Pixel 5, iPhone 12 by default
+
+### Configuration
+
+`playwright.config.ts`:
+- Auto-starts `npm start` (dev server) before tests
+- Runs on Chrome, Firefox, Safari, and mobile viewports
+- Captures screenshots on failure
+- Traces on first retry (helpful for debugging)
+
+---
+
 ## 11. Code Generation Preferences
 
 When generating code:
@@ -323,6 +399,11 @@ cd src\SoberNetwork.Web && npm test            # all specs (ng test)
 # Run a single frontend spec or a test by name (Vitest CLI)
 cd src\SoberNetwork.Web && npx vitest run src\app\path\to\thing.spec.ts
 cd src\SoberNetwork.Web && npx vitest run -t "renders the login form"
+
+# Run E2E tests (Playwright — requires dev server running)
+cd src\SoberNetwork.Web && npm run e2e        # headless
+cd src\SoberNetwork.Web && npm run e2e:ui     # interactive UI mode (recommended)
+cd src\SoberNetwork.Web && npm run e2e:debug  # step through with debugger
 ```
 
 > Run each test project separately (as above). Solution-level `dotnet test` fails because

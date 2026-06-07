@@ -33,11 +33,10 @@
       {{ title }}
       <span *ngIf="titleSuffix" class="serif-accent"> {{ titleSuffix }}</span>
     </h1>
-    <p *ngIf="description">{{ description }}</p>
+    <p *ngIf="description" [class.description-italic]="descriptionItalic">{{ description }}</p>
   </div>
 
   <div *ngIf="tags.length" class="hero-tags-card">
-    <span class="tags-label">TAGS</span>
     <div class="tags-row">
       <span *ngFor="let tag of tags" class="tag-pill tag-{{ tag.color }}">{{ tag.label }}</span>
     </div>

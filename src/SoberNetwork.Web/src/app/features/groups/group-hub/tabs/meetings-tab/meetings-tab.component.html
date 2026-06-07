@@ -41,7 +41,7 @@
   </div>
 
   <div class="meeting-list" *ngIf="!loading && filteredMeetings.length > 0">
-    <div class="meeting-card" [ngClass]="[cardAccentClass(meeting), !meeting.isActive ? 'inactive' : '']" *ngFor="let meeting of filteredMeetings; trackBy: trackById">
+    <div class="meeting-card" [attr.id]="'meeting-' + meeting.id" [ngClass]="[cardAccentClass(meeting), !meeting.isActive ? 'inactive' : '']" *ngFor="let meeting of filteredMeetings; trackBy: trackById">
       <div class="card-inner">
         <div class="meeting-header-row">
           <div class="meeting-title-group">

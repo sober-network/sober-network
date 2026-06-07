@@ -2,8 +2,9 @@
   eyebrowText="Group Hub"
   [title]="group?.name || ''"
   titleSuffix="Hub"
-  description="Your group hub for meetings, members, and more."
-  backButtonText="← Back to Groups"
+  description="Your group's hub for meetings, members, and more."
+  [descriptionItalic]="true"
+  backButtonText="← Back to My Groups"
   [backButtonRoute]="['/dashboard']"
   [showPlusButton]="activeTab === 'meetings' && isAdmin"
   (plusClick)="openCreateMeeting()"
@@ -43,7 +44,7 @@
         (click)="switchTab('members')"
       >
         Members
-        <span class="tab-badge" style="background:rgba(138,79,163,.12);color:#8a4fa3;">{{ group.memberCount }}</span>
+        <span class="tab-badge tab-badge-violet">{{ group.memberCount }}</span>
       </button>
 
       <button
@@ -54,7 +55,7 @@
         (click)="switchTab('meetings')"
       >
         Meetings
-        <span class="tab-badge" style="background:rgba(14,165,233,.12);color:#0ea5e9;">{{ group.meetings.length }}</span>
+        <span class="tab-badge tab-badge-sky">{{ group.meetings.length }}</span>
       </button>
 
       <button
@@ -66,7 +67,7 @@
         (click)="switchTab('requests')"
       >
         Join Requests
-        <span class="tab-admin-badge">Admin</span>
+        <span class="tab-admin-badge tab-badge-green">Admin</span>
       </button>
 
       <button
@@ -78,7 +79,7 @@
         (click)="switchTab('settings')"
       >
         Settings
-        <span class="tab-admin-badge">Admin</span>
+        <span class="tab-admin-badge tab-badge-amber">Admin</span>
       </button>
 
     </div><!-- /tab-rail -->
@@ -91,7 +92,6 @@
         [group]="group"
         [slug]="slug"
         [isAdmin]="isAdmin"
-        (switchToMeetings)="switchTab('meetings')"
         (leaveGroup)="onLeaveGroup()"
       ></app-overview-tab>
 
@@ -107,6 +107,7 @@
         [slug]="slug"
         [isAdmin]="isAdmin"
         [reloadToken]="meetingsReloadToken"
+        [selectedMeetingId]="selectedMeetingId"
       ></app-meetings-tab>
 
       <app-requests-tab

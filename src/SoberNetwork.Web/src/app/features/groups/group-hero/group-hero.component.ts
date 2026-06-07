@@ -23,6 +23,7 @@ export interface HeroTag {
 export class GroupHeroComponent extends HeroComponent {
   @Input() eyebrowIcon = 'groups';
   @Input() titleSuffix = '';
+  @Input() descriptionItalic = false;
   @Input() tags: HeroTag[] = [];
   @Output() override plusClick = new EventEmitter<void>();
   

@@ -4,16 +4,18 @@
 
 /* ── Next meeting banner ──────────────────────────────────────────────── */
 .next-meeting-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
   background: linear-gradient(120deg, rgba(14,165,233,.1) 0%, rgba(42,148,89,.1) 100%);
   border: 1px solid rgba(14,165,233,.18);
   border-radius: 20px;
   padding: 18px 22px;
-  display: flex;
-  align-items: center;
-  gap: 18px;
   flex-wrap: wrap;
   margin-bottom: 20px;
-  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
   transition: box-shadow .18s, transform .15s;
   width: 100%;
   text-align: left;
@@ -61,18 +63,45 @@
 .banner-cta {
   text-align: right;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
 }
 
-.banner-days {
+.banner-countdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.countdown-unit {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.74);
+  border: 1px solid rgba(17,17,16,.08);
   font-family: 'Inter Tight', sans-serif;
-  font-size: 1.5rem;
-  font-weight: 900;
-  color: #0ea5e9;
-}
+  color: var(--sn-text, #111110);
 
-.banner-days-label {
-  color: var(--sn-text-muted, #7a7a75);
-  font-size: .8rem;
+  strong {
+    font-size: .95rem;
+    font-weight: 900;
+    line-height: 1;
+    font-family: 'Roboto Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  }
+
+  small {
+    font-size: .7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--sn-text-muted, #7a7a75);
+  }
 }
 
 .banner-link {
@@ -263,19 +292,43 @@
   word-break: break-word;
 }
 
-.toggle-pill {
-  width: 40px;
-  height: 22px;
+.toggle-button {
+  min-width: 72px;
+  height: 36px;
+  padding: 0 14px;
   border-radius: 999px;
-  border: 0;
-  display: inline-block;
-  cursor: pointer;
+  border: 1px solid rgba(17,17,16,.12);
+  background: white;
+  color: var(--sn-text-mid, #3d3d3a);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   flex-shrink: 0;
-  transition: background .2s;
+  cursor: pointer;
+  font-family: 'Inter Tight', sans-serif;
+  font-size: .85rem;
+  font-weight: 800;
+  transition: background .15s, border-color .15s, color .15s, box-shadow .15s, opacity .15s;
 
-  &.on  { background: #2a9459; }
-  &:not(.on) { background: rgba(17,17,16,.15); }
-  &:disabled { cursor: not-allowed; }
+  &.on {
+    background: rgba(42,148,89,.12);
+    border-color: rgba(42,148,89,.28);
+    color: #166534;
+  }
+
+  &:not(.on) {
+    background: rgba(17,17,16,.04);
+  }
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 4px 14px rgba(17,17,16,.06);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: .55;
+  }
 }
 
 .profile-link-row {
@@ -436,4 +489,3 @@
 @media (max-width: 860px) {
   .overview-grid { grid-template-columns: 1fr; }
 }
-

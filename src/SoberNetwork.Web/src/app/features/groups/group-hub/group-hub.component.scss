@@ -84,12 +84,30 @@
   font-family: 'Inter Tight', sans-serif;
 }
 
+.tab-badge-violet {
+  background: rgba(138,79,163,.12);
+  color: #8a4fa3;
+}
+
+.tab-badge-sky {
+  background: rgba(14,165,233,.12);
+  color: #0ea5e9;
+}
+
+.tab-badge-green {
+  background: rgba(42,148,89,.12);
+  color: #2a9459;
+}
+
+.tab-badge-amber {
+  background: rgba(217,119,6,.12);
+  color: #d97706;
+}
+
 .tab-admin-badge {
   font-size: .68rem;
   padding: 2px 7px;
   border-radius: 999px;
-  background: rgba(138,79,163,.12);
-  color: #8a4fa3;
   font-weight: 800;
 }
 

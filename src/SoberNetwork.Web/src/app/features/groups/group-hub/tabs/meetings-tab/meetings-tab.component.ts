@@ -52,6 +52,7 @@ export class MeetingsTabComponent implements OnInit, OnChanges {
   @Input({ required: true }) slug!: string;
   @Input() isAdmin = false;
   @Input() reloadToken = 0;
+  @Input() selectedMeetingId: string | null = null;
 
   allMeetings: HubMeeting[] = [];
   filteredMeetings: HubMeeting[] = [];
@@ -70,6 +71,10 @@ export class MeetingsTabComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if ((changes['slug'] && !changes['slug'].firstChange) || (changes['reloadToken'] && !changes['reloadToken'].firstChange)) {
       this.loadMeetings();
+    }
+
+    if (changes['selectedMeetingId'] && !changes['selectedMeetingId'].firstChange) {
+      this.scrollToSelectedMeeting();
     }
   }
 
@@ -280,6 +285,7 @@ export class MeetingsTabComponent implements OnInit, OnChanges {
       next: response => {
         this.allMeetings = response.items as HubMeeting[];
         this.applyFilter();
+        this.scrollToSelectedMeeting();
       },
       error: err => {
         this.allMeetings = [];
@@ -298,6 +304,21 @@ export class MeetingsTabComponent implements OnInit, OnChanges {
             .toLowerCase()
             .includes(query))
       : [...this.allMeetings];
+  }
+
+  private scrollToSelectedMeeting(): void {
+    if (!this.selectedMeetingId) {
+      return;
+    }
+
+    const element = document.getElementById(this.selectedMeetingId);
+    if (!element) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   }
 
   private getErrorMessage(error: unknown, fallback: string): string {

@@ -27,6 +27,7 @@ using Serilog;
 using Serilog.Events;
 
 using SoberNetwork.Domain.Entities;
+using SoberNetwork.Domain.Enums;
 
 using SoberNetwork.Core.Interfaces;
 
@@ -407,6 +408,7 @@ try
 {
     using var scope = app.Services.CreateScope();
     var cfg         = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+    var db          = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
     var seedLogger  = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
@@ -456,11 +458,173 @@ catch (Exception ex)
     seedLogger.LogError(ex, $"Superuser seed failed unexpectedly.");
 }
 
+// Seed a non-admin test user for manual verification.
+try
+{
+    using var scope = app.Services.CreateScope();
+    var cfg         = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+    var db          = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var seedLogger  = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    var email       = "scottycouturier@gmail.com";
+    var password    = cfg["Superuser:Password"];
+    var displayName = "Tess C.";
+
+    if (!string.IsNullOrWhiteSpace(password))
+    {
+        var existing = await userManager.FindByEmailAsync(email);
+        if (existing is null)
+        {
+            var testUser = new ApplicationUser
+            {
+                UserName       = email,
+                Email          = email,
+                EmailConfirmed = true,
+                DisplayName    = displayName,
+                IsSuperAdmin   = false,
+            };
+
+            var result = await userManager.CreateAsync(testUser, password);
+            if (result.Succeeded)
+                seedLogger.LogInformation("Test user seeded (new account created).");
+            else
+                seedLogger.LogError("Test user seed failed: {Errors}",
+                    string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+        else
+        {
+            var changed = false;
+
+            if (existing.IsSuperAdmin)
+            {
+                existing.IsSuperAdmin = false;
+                changed = true;
+            }
+
+            if (!string.Equals(existing.DisplayName, displayName, StringComparison.Ordinal))
+            {
+                existing.DisplayName = displayName;
+                changed = true;
+            }
+
+            if (!existing.EmailConfirmed)
+            {
+                existing.EmailConfirmed = true;
+                changed = true;
+            }
+
+            if (changed)
+            {
+                await userManager.UpdateAsync(existing);
+                seedLogger.LogInformation("Existing test user normalized.");
+            }
+            else
+            {
+                seedLogger.LogInformation("Test user already exists — seed skipped.");
+            }
+        }
+    }
+    else
+    {
+        seedLogger.LogWarning("Superuser:Password not configured — skipping test user seed.");
+    }
+
+    var group = await db.Groups.FirstOrDefaultAsync(g =>
+        g.DeletedAt == null &&
+        (g.Slug == "earlybird" || g.Slug == "early-bird-zoom"));
+
+    if (group is null)
+    {
+        seedLogger.LogWarning("Test user group seed skipped — no seed group found.");
+    }
+    else
+    {
+        var user = await userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            seedLogger.LogWarning("Test user group seed skipped — user not found.");
+        }
+        else
+        {
+            var membership = await db.GroupMemberships.FirstOrDefaultAsync(m =>
+                m.GroupId == group.Id &&
+                m.UserId == user.Id &&
+                m.DeletedAt == null);
+
+            if (membership is null)
+            {
+                db.GroupMemberships.Add(new GroupMembership
+                {
+                    UserId = user.Id,
+                    GroupId = group.Id,
+                    Role = GroupRole.Member,
+                    Status = MemberStatus.Active,
+                    IsProbationary = false,
+                    IsPhoneShared = false,
+                    IsEmailShared = false,
+                    JoinedAt = DateTime.UtcNow,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    ApprovedAt = DateTime.UtcNow,
+                    ApprovedByUserId = user.Id,
+                });
+                await db.SaveChangesAsync();
+                seedLogger.LogInformation("Test user added to seed group.");
+            }
+            else
+            {
+                var changed = false;
+
+                if (membership.Status != MemberStatus.Active)
+                {
+                    membership.Status = MemberStatus.Active;
+                    changed = true;
+                }
+
+                if (membership.Role != GroupRole.Member)
+                {
+                    membership.Role = GroupRole.Member;
+                    changed = true;
+                }
+
+                if (membership.IsProbationary)
+                {
+                    membership.IsProbationary = false;
+                    changed = true;
+                }
+
+                if (membership.DeletedAt != null)
+                {
+                    membership.DeletedAt = null;
+                    changed = true;
+                }
+
+                if (changed)
+                {
+                    membership.UpdatedAt = DateTime.UtcNow;
+                    membership.ApprovedAt ??= DateTime.UtcNow;
+                    membership.ApprovedByUserId ??= user.Id;
+                    await db.SaveChangesAsync();
+                    seedLogger.LogInformation("Existing test user membership normalized.");
+                }
+                else
+                {
+                    seedLogger.LogInformation("Test user membership already exists — seed skipped.");
+                }
+            }
+        }
+    }
+}
+catch (Exception ex)
+{
+    var seedLogger = app.Services.GetRequiredService<ILogger<Program>>();
+    seedLogger.LogError(ex, "Test user seed failed unexpectedly.");
+}
+
 
 
 app.Run();
 
 // Required for WebApplicationFactory in integration tests
 public partial class Program { }
-
-

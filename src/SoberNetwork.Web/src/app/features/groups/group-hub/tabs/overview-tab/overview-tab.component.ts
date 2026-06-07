@@ -4,6 +4,7 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
+  OnDestroy,
   Input,
   OnChanges,
   OnInit,
@@ -46,16 +47,17 @@ export class OverviewTabComponent implements OnInit, OnChanges {
   private readonly authService = inject(AuthService);
   private readonly dialog = inject(MatDialog);
   private readonly cdr = inject(ChangeDetectorRef);
+  private countdownTimer: ReturnType<typeof setInterval> | null = null;
 
   @Input({ required: true }) group!: GroupResponse;
   @Input({ required: true }) slug!: string;
   @Input() isAdmin = false;
-  @Output() switchToMeetings = new EventEmitter<void>();
   @Output() leaveGroup = new EventEmitter<void>();
 
   admins: GroupAdminContactResponse[] = [];
   serviceRoles: GroupServiceRoleResponse[] = [];
   myProfile: MemberProfileResponse | null = null;
+  nextMeetingCountdown = { days: 0, hours: 0, minutes: 0, seconds: 0 };
 
   phoneShared = false;
   emailShared = false;
@@ -65,12 +67,14 @@ export class OverviewTabComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.loadTabData();
+    this.syncNextMeetingCountdown();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (this.group) {
       this.phoneShared = this.group.userIsPhoneShared;
       this.emailShared = this.group.userIsEmailShared;
+      this.syncNextMeetingCountdown();
     }
 
     if (changes['slug'] && !changes['slug'].firstChange) {
@@ -125,10 +129,12 @@ export class OverviewTabComponent implements OnInit, OnChanges {
     });
   }
 
-  daysUntilNextMeeting(): string {
-    if (!this.group?.nextMeeting) return '0';
-    const diff = new Date(this.group.nextMeeting.nextOccurrence).getTime() - Date.now();
-    return String(Math.max(0, Math.ceil(diff / 86400000)));
+  get meetingAnchorId(): string | undefined {
+    return this.group?.nextMeeting ? `meeting-${this.group.nextMeeting.id}` : undefined;
+  }
+
+  padUnit(value: number): string {
+    return String(value).padStart(2, '0');
   }
 
   currentUserInitial(): string {
@@ -259,6 +265,13 @@ export class OverviewTabComponent implements OnInit, OnChanges {
     });
   }
 
+  ngOnDestroy(): void {
+    if (this.countdownTimer) {
+      clearInterval(this.countdownTimer);
+      this.countdownTimer = null;
+    }
+  }
+
   trackByUserId(_: number, item: GroupAdminContactResponse | GroupServiceRoleResponse): string {
     return item.userId;
   }
@@ -316,5 +329,40 @@ export class OverviewTabComponent implements OnInit, OnChanges {
         this.cdr.markForCheck();
       },
     });
+  }
+
+  private syncNextMeetingCountdown(): void {
+    this.updateNextMeetingCountdown();
+
+    if (this.countdownTimer) {
+      clearInterval(this.countdownTimer);
+      this.countdownTimer = null;
+    }
+
+    if (!this.group?.nextMeeting) {
+      return;
+    }
+
+    this.countdownTimer = setInterval(() => {
+      this.updateNextMeetingCountdown();
+      this.cdr.markForCheck();
+    }, 1000);
+  }
+
+  private updateNextMeetingCountdown(): void {
+    if (!this.group?.nextMeeting) {
+      this.nextMeetingCountdown = { days: 0, hours: 0, minutes: 0, seconds: 0 };
+      return;
+    }
+
+    const nextOccurrence = new Date(this.group.nextMeeting.nextOccurrence).getTime();
+    const totalSeconds = Math.max(0, Math.floor((nextOccurrence - Date.now()) / 1000));
+
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    this.nextMeetingCountdown = { days, hours, minutes, seconds };
   }
 }

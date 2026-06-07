@@ -54,6 +54,7 @@ export class GroupHubComponent implements OnInit, OnDestroy {
   error = '';
   activeTab: HubTab = 'overview';
   meetingsReloadToken = 0;
+  selectedMeetingId: string | null = null;
 
   get heroTags(): HeroTag[] {
     if (!this.group) return [];
@@ -97,6 +98,11 @@ export class GroupHubComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       }
     });
+
+    this.route.fragment.pipe(takeUntil(this.destroy$)).subscribe(fragment => {
+      this.selectedMeetingId = fragment ? decodeURIComponent(fragment) : null;
+      this.cdr.markForCheck();
+    });
   }
 
   ngOnDestroy(): void {
@@ -104,16 +110,18 @@ export class GroupHubComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  switchTab(tab: HubTab): void {
+  switchTab(tab: HubTab, fragment: string | null = null): void {
     if (!this.isAdmin && (tab === 'requests' || tab === 'settings')) {
       return;
     }
 
     this.activeTab = tab;
+    this.selectedMeetingId = fragment;
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { tab: tab === 'overview' ? null : tab },
       queryParamsHandling: 'merge',
+      fragment: fragment ?? undefined,
       replaceUrl: true,
     });
     this.cdr.markForCheck();

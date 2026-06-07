@@ -1,14 +1,12 @@
 <div class="panel-inner">
 
   <!-- ── Next Meeting Banner ──────────────────────────────────────────── -->
-  <div
+  <a
     class="next-meeting-banner"
-    role="button"
-    tabindex="0"
     *ngIf="group.nextMeeting; else noMeeting"
-    (click)="switchToMeetings.emit()"
-    (keydown.enter)="switchToMeetings.emit()"
-    (keydown.space)="switchToMeetings.emit()"
+    [routerLink]="['/groups', slug]"
+    [queryParams]="{ tab: 'meetings' }"
+    [fragment]="meetingAnchorId"
   >
     <div class="banner-icon">📅</div>
     <div class="banner-copy">
@@ -17,11 +15,15 @@
       <div class="banner-when">{{ formatNextMeetingDate() }} · {{ group.nextMeeting.durationMinutes }} min · {{ group.nextMeeting.meetingType }}</div>
     </div>
     <div class="banner-cta">
-      <div class="banner-days">{{ daysUntilNextMeeting() }}</div>
-      <div class="banner-days-label">{{ daysUntilNextMeeting() === '1' ? 'day' : 'days' }} away</div>
-      <div class="banner-link">View meetings →</div>
+      <div class="banner-countdown" aria-label="Time until next meeting">
+        <span class="countdown-unit"><strong>{{ nextMeetingCountdown.days }}</strong><small>d</small></span>
+        <span class="countdown-unit"><strong>{{ padUnit(nextMeetingCountdown.hours) }}</strong><small>h</small></span>
+        <span class="countdown-unit"><strong>{{ padUnit(nextMeetingCountdown.minutes) }}</strong><small>m</small></span>
+        <span class="countdown-unit"><strong>{{ padUnit(nextMeetingCountdown.seconds) }}</strong><small>s</small></span>
+      </div>
+      <div class="banner-link">Go to meeting →</div>
     </div>
-  </div>
+  </a>
   <ng-template #noMeeting>
     <div class="no-meeting-card">
       <span style="font-size:1.4rem;">📅</span>
@@ -133,13 +135,15 @@
               <div class="sharing-value">{{ currentUserEmail }}</div>
             </div>
             <button
-              class="toggle-pill"
+              class="toggle-button"
               [class.on]="emailShared"
               [disabled]="togglingEmail"
               type="button"
               (click)="toggleEmail(!emailShared)"
               [attr.aria-label]="emailShared ? 'Stop sharing email' : 'Share email'"
-            ></button>
+            >
+              {{ emailShared ? 'On' : 'Off' }}
+            </button>
           </div>
 
           <!-- Phone toggle -->
@@ -152,14 +156,16 @@
               </ng-template>
             </div>
             <button
-              class="toggle-pill"
+              class="toggle-button"
               [class.on]="phoneShared"
               [disabled]="togglingPhone || !myProfile?.phoneNumber"
               type="button"
               (click)="myProfile?.phoneNumber && togglePhone(!phoneShared)"
               [attr.aria-label]="phoneShared ? 'Stop sharing phone' : 'Share phone'"
               [style.cursor]="myProfile?.phoneNumber ? 'pointer' : 'not-allowed'"
-            ></button>
+            >
+              {{ phoneShared ? 'On' : 'Off' }}
+            </button>
           </div>
         </div>
 

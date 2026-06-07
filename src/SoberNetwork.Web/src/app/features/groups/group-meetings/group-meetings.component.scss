@@ -1,4 +1,4 @@
-@import '../_group-shared.scss';
+@use '../group-shared' as shared;
 
 .meetings-page {
   max-width: 1100px;

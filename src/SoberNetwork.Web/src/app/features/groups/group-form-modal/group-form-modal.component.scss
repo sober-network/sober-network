@@ -1,4 +1,4 @@
-@import '../_group-shared.scss';
+@use '../group-shared' as shared;
 
 // ── Form styling (same as login-modal) ────────────────────────────────────
 .lm-form { display: flex; flex-direction: column; gap: 16px; }

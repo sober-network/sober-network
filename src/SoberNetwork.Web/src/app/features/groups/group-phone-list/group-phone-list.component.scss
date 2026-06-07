@@ -1,4 +1,4 @@
-@import '../_group-shared.scss';
+@use '../group-shared' as shared;
 
 :host {
   display: block;

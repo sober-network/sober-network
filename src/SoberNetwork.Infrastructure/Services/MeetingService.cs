@@ -33,16 +33,16 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
                 m.DeletedAt == null, ct);
         if (!isMember) return (null, "You are not a member of this group.");
 
-        var query = db.Meetings
+        var baseQuery = db.Meetings
             .AsNoTracking()
             .Where(m => m.GroupId == group.Id && m.DeletedAt == null && m.IsActive)
             .OrderBy(m => m.IsRecurring ? 0 : 1)
             .ThenBy(m => m.DaysOfWeek == null || m.DaysOfWeek.Length == 0 ? int.MaxValue : m.DaysOfWeek[0])
             .ThenBy(m => m.Time);
 
-        var totalCount = await query.CountAsync(ct);
+        var totalCount = await baseQuery.CountAsync(ct);
 
-        var meetings = await query
+        var meetings = await baseQuery
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(ct);
@@ -76,16 +76,16 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
                 m.DeletedAt == null, ct);
         if (!isAdmin) return (null, "You do not have permission to view admin meetings.");
 
-        var query = db.Meetings
+        var baseQuery = db.Meetings
             .AsNoTracking()
             .Where(m => m.GroupId == group.Id && m.DeletedAt == null)
             .OrderBy(m => m.IsRecurring ? 0 : 1)
             .ThenBy(m => m.DaysOfWeek == null || m.DaysOfWeek.Length == 0 ? int.MaxValue : m.DaysOfWeek[0])
             .ThenBy(m => m.Time);
 
-        var totalCount = await query.CountAsync(ct);
+        var totalCount = await baseQuery.CountAsync(ct);
 
-        var meetings = await query
+        var meetings = await baseQuery
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(ct);

@@ -11,7 +11,7 @@ public class GetMembersQueryHandler(IGroupService groupService) : IRequestHandle
 {
     public async Task<DataResult<PagedResponse<MemberResponse>>> Handle(GetMembersQuery request, CancellationToken cancellationToken)
     {
-        var (members, error) = await groupService.GetMembersAsync(request.Slug, request.UserId, request.Page, request.PageSize);
+        var (members, error) = await groupService.GetMembersAsync(request.Slug, request.UserId, request.Page, request.PageSize, cancellationToken);
         if (error is not null)
             return DataResult<PagedResponse<MemberResponse>>.Fail(error.Contains("not a member") ? ResultCode.Forbidden : ResultCode.NotFound, error);
         return DataResult<PagedResponse<MemberResponse>>.Ok(members!);

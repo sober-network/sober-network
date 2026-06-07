@@ -433,7 +433,7 @@ try
 catch (Exception ex)
 {
     var seedLogger = app.Services.GetRequiredService<ILogger<Program>>();
-    seedLogger.LogError(ex, "Superuser seed failed unexpectedly.");
+    seedLogger.LogError(ex, $"Superuser seed failed unexpectedly.");
 }
 
 

@@ -61,16 +61,14 @@ public interface IGroupService
     /// <summary>Returns a paged list of active members for a group.</summary>
 
     Task<(PagedResponse<MemberResponse>? Members, string? Error)> GetMembersAsync(
-
-        string slug, Guid userId, int page = 1, int pageSize = 25);
+        string slug, Guid userId, int page = 1, int pageSize = 25, CancellationToken ct = default);
 
 
 
     /// <summary>Returns a paged list of pending join requests for a group.</summary>
 
     Task<(PagedResponse<JoinRequestResponse>? Requests, string? Error)> GetJoinRequestsAsync(
-
-        string slug, Guid userId, int page = 1, int pageSize = 25);
+        string slug, Guid userId, int page = 1, int pageSize = 25, CancellationToken ct = default);
 
 
 

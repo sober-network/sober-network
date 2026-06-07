@@ -240,3 +240,13 @@ nav.sn-nav {
     opacity: 0.65;
   }
 }
+
+/* ── User menu panel — ensure visibility and z-index ──────────────────────── */
+.user-menu-panel {
+  z-index: 1001 !important;
+}
+
+/* ── Groups menu panel — ensure visibility and z-index ──────────────────────── */
+.groups-menu-panel {
+  z-index: 1001 !important;
+}

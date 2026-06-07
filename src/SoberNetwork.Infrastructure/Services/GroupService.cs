@@ -95,7 +95,7 @@ public class GroupService(
 
     public async Task<(PagedResponse<GroupResponse>? Groups, string? Error)> GetUserGroupsAsync(Guid userId, int page = 1, int pageSize = 25, CancellationToken ct = default)
     {
-        var query = db.GroupMemberships
+        var baseQuery = db.GroupMemberships
             .AsNoTracking()
             .Include(m => m.Group)
                 .ThenInclude(g => g!.Meetings)
@@ -106,9 +106,9 @@ public class GroupService(
                 m.Group != null &&
                 m.Group.DeletedAt == null);
 
-        var totalCount = await query.CountAsync(ct);
+        var totalCount = await baseQuery.CountAsync(ct);
 
-        var memberships = await query
+        var memberships = await baseQuery
             .OrderBy(m => m.Group!.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
@@ -138,14 +138,14 @@ public class GroupService(
 
     public async Task<(PagedResponse<GroupSummaryResponse>? Groups, string? Error)> GetAllGroupsAsync(int page = 1, int pageSize = 25, CancellationToken ct = default)
     {
-        var query = db.Groups
+        var baseQuery = db.Groups
             .AsNoTracking()
             .Include(g => g.Meetings)
             .Where(g => g.DeletedAt == null);
 
-        var totalCount = await query.CountAsync(ct);
+        var totalCount = await baseQuery.CountAsync(ct);
 
-        var groups = await query
+        var groups = await baseQuery
             .OrderBy(g => g.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
@@ -288,11 +288,11 @@ public class GroupService(
     // ── Member queries ─────────────────────────────────────────────────────────
 
     public async Task<(PagedResponse<MemberResponse>? Members, string? Error)> GetMembersAsync(
-        string slug, Guid userId, int page = 1, int pageSize = 25)
+        string slug, Guid userId, int page = 1, int pageSize = 25, CancellationToken ct = default)
     {
         var group = await db.Groups
             .AsNoTracking()
-            .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null);
+            .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null, ct);
         if (group == null) return (null, "Group not found.");
 
         var callerMembership = await db.GroupMemberships
@@ -301,10 +301,10 @@ public class GroupService(
                 m.GroupId == group.Id &&
                 m.UserId == userId &&
                 m.Status == MemberStatus.Active &&
-                m.DeletedAt == null);
+                m.DeletedAt == null, ct);
         if (callerMembership == null) return (null, "You are not a member of this group.");
 
-        var query = db.GroupMemberships
+        var baseQuery = db.GroupMemberships
             .AsNoTracking()
             .Include(m => m.User)
             .Where(m =>
@@ -313,22 +313,22 @@ public class GroupService(
                 m.DeletedAt == null)
             .OrderBy(m => m.JoinedAt);
 
-        var total = await query.CountAsync();
-        var items = await query
+        var total = await baseQuery.CountAsync(ct);
+        var items = await baseQuery
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(m => ToMemberResponse(m))
-            .ToListAsync();
+            .ToListAsync(ct);
 
         return (new PagedResponse<MemberResponse>(items, page, pageSize, total), null);
     }
 
     public async Task<(PagedResponse<JoinRequestResponse>? Requests, string? Error)> GetJoinRequestsAsync(
-        string slug, Guid userId, int page = 1, int pageSize = 25)
+        string slug, Guid userId, int page = 1, int pageSize = 25, CancellationToken ct = default)
     {
         var group = await db.Groups
             .AsNoTracking()
-            .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null);
+            .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null, ct);
         if (group == null) return (null, "Group not found.");
 
         var callerMembership = await db.GroupMemberships
@@ -337,11 +337,11 @@ public class GroupService(
                 m.GroupId == group.Id &&
                 m.UserId == userId &&
                 m.Status == MemberStatus.Active &&
-                m.DeletedAt == null);
+                m.DeletedAt == null, ct);
         if (callerMembership == null || callerMembership.Role != GroupRole.GroupAdmin)
             return (null, "You do not have permission to view join requests.");
 
-        var query = db.GroupMemberships
+        var baseQuery = db.GroupMemberships
             .AsNoTracking()
             .Include(m => m.User)
             .Where(m =>
@@ -350,12 +350,12 @@ public class GroupService(
                 m.DeletedAt == null)
             .OrderBy(m => m.JoinedAt);
 
-        var total = await query.CountAsync();
-        var items = await query
+        var total = await baseQuery.CountAsync(ct);
+        var items = await baseQuery
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(m => new JoinRequestResponse(m.UserId, m.User!.DisplayName, m.JoinedAt))
-            .ToListAsync();
+            .ToListAsync(ct);
 
         return (new PagedResponse<JoinRequestResponse>(items, page, pageSize, total), null);
     }

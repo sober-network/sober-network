@@ -43,7 +43,7 @@
               <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
-          <mat-menu #groupMenu="matMenu">
+          <mat-menu #groupMenu="matMenu" panelClass="groups-menu-panel">
             <button mat-menu-item *ngFor="let g of myGroups" (click)="navigateToGroup(g.slug)">
               {{ g.name }}
             </button>
@@ -57,7 +57,7 @@
           <button class="user-pill" [matMenuTriggerFor]="userMenu" aria-label="Account menu">
             <span class="user-display-name">{{ user.displayName }}&nbsp;</span>
           </button>
-          <mat-menu #userMenu="matMenu">
+          <mat-menu #userMenu="matMenu" panelClass="user-menu-panel">
             <div class="user-menu-header">
               <span class="user-name">{{ user.displayName }}</span>
               <span class="user-email">{{ user.email }}</span>

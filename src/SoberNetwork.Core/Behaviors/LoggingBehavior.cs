@@ -23,6 +23,12 @@ public class LoggingBehavior<TRequest, TResponse>(ILogger<LoggingBehavior<TReque
             logger.LogDebug("Handled {RequestName} in {ElapsedMs}ms", requestName, sw.ElapsedMilliseconds);
             return response;
         }
+        catch (OperationCanceledException)
+        {
+            sw.Stop();
+            logger.LogDebug("Request {RequestName} was cancelled by the client after {ElapsedMs}ms", requestName, sw.ElapsedMilliseconds);
+            throw;
+        }
         catch (Exception ex)
         {
             sw.Stop();

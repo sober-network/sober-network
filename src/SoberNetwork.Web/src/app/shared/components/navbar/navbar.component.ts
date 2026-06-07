@@ -7,7 +7,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog } from '@angular/material/dialog';
 import { NavigationEnd } from '@angular/router';
 import { LoginModalComponent } from '../login-modal/login-modal.component';
-import { catchError, combineLatest, distinctUntilChanged, filter, map, Observable, of, startWith, switchMap } from 'rxjs';
+import { catchError, combineLatest, debounceTime, distinctUntilChanged, filter, map, Observable, of, startWith, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '@app/core/services/auth.service';
 import { GroupService } from '@app/core/services/group.service';
@@ -49,6 +49,7 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
 
     combineLatest([this.auth.currentUser$.pipe(distinctUntilChanged((a, b) => a?.userId === b?.userId)), nav$]).pipe(
       map(([user]) => user),
+      debounceTime(100), // Coalesce rapid emissions (e.g. auth restore + NavigationEnd) to avoid cancelling in-flight requests
       switchMap(user => user ? this.groupService.getMyGroups().pipe(catchError(() => of([]))) : of([])),
       takeUntilDestroyed(),
     ).subscribe(groups => (this.myGroups = groups));

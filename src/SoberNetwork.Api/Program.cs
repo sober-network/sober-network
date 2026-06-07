@@ -320,6 +320,25 @@ app.Use(async (ctx, next) =>
 
 
 
+// Handle client-cancelled requests gracefully — don't return 500 when the browser aborts.
+app.Use(async (ctx, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (OperationCanceledException) when (ctx.RequestAborted.IsCancellationRequested)
+    {
+        // Client disconnected before response was sent — this is normal (e.g. navigation away).
+        // Log at Debug level only; returning 499 is advisory (client is already gone).
+        Serilog.Log.Debug("Request aborted by client: {Method} {Path}", ctx.Request.Method, ctx.Request.Path.Value);
+        if (!ctx.Response.HasStarted)
+            ctx.Response.StatusCode = 499;
+    }
+});
+
+
+
 if (app.Environment.IsDevelopment())
 
 {

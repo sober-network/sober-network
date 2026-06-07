@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard, superAdminGuard } from './core/guards/auth.guard';
-import { groupMemberGuard, groupAdminGuard } from './core/guards/group.guards';
+import { groupMemberGuard } from './core/guards/group.guards';
 
 export const routes: Routes = [
   // ── Public ──────────────────────────────────────────────────────────────────
@@ -30,36 +30,12 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./features/groups/groups-dashboard/groups-dashboard.component').then(m => m.GroupsDashboardComponent)
   },
-  {
-    path: 'groups/:slug/members',
-    pathMatch: 'full',
-    canActivate: [authGuard, groupMemberGuard],
-    redirectTo: 'groups/:slug'
-  },
-  {
-    path: 'groups/:slug/phone-list',
-    pathMatch: 'full',
-    canActivate: [authGuard, groupMemberGuard],
-    redirectTo: 'groups/:slug'
-  },
-  {
-    path: 'groups/:slug/join-requests',
-    pathMatch: 'full',
-    canActivate: [authGuard, groupAdminGuard],
-    redirectTo: 'groups/:slug'
-  },
-  {
-    path: 'groups/:slug/meetings',
-    pathMatch: 'full',
-    canActivate: [authGuard, groupMemberGuard],
-    redirectTo: 'groups/:slug'
-  },
-  {
-    path: 'groups/:slug/settings',
-    pathMatch: 'full',
-    canActivate: [authGuard, groupAdminGuard],
-    redirectTo: 'groups/:slug'
-  },
+  // Legacy sub-routes → hub (guards run on the destination groups/:slug route)
+  { path: 'groups/:slug/members',       redirectTo: 'groups/:slug', pathMatch: 'full' },
+  { path: 'groups/:slug/phone-list',    redirectTo: 'groups/:slug', pathMatch: 'full' },
+  { path: 'groups/:slug/join-requests', redirectTo: 'groups/:slug', pathMatch: 'full' },
+  { path: 'groups/:slug/meetings',      redirectTo: 'groups/:slug', pathMatch: 'full' },
+  { path: 'groups/:slug/settings',      redirectTo: 'groups/:slug', pathMatch: 'full' },
   {
     path: 'groups/:slug',
     canActivate: [authGuard, groupMemberGuard],

@@ -105,6 +105,40 @@ These are non-negotiable constraints. Every feature, endpoint, data model, and U
 
 ## Architecture
 
+### Contextual Admin — Not a Separate Interface
+
+Admin and superadmin affordances surface **in context**, not in a separate control room. This is a deliberate design principle rooted in Tradition 2: the trusted servant is *in the room*, not above it.
+
+**Rules:**
+- `group_admin` features (Join Requests, Settings, Chair Schedule, etc.) appear as extra tabs in the Group Hub — invisible to regular members, visible to admins. No separate admin route for group management.
+- `superadmin` visiting a group hub sees all group admin tabs plus a quiet **Platform** overlay tab (suspend group, reassign admin). Same page, elevated view.
+- `superadmin` visiting a member profile sees an elevated inline action bar (force-confirm email, deactivate, role management). Same profile page, no detour.
+- The **only** dedicated `/admin` page is for things with no contextual home: audit log, cost dashboard, health/uptime, platform-wide announcements. It is accessed via a quiet link in the user dropdown — not a nav pill, not a mega-menu.
+- The nav pill bar is **identical** for members and superadmins. Power is contextual, not architectural.
+
+### UI Mocks — Design Source of Truth
+
+Self-contained navigable HTML files live in `docs/mocks/`. They are **committed to the repository** and serve as the authoritative design spec for all Angular components and pages.
+
+| File | Purpose |
+|------|---------|
+| `sn-interactive-mock.html` | **Primary reference.** Navigable: guest/member nav states, Community mega-menu, group hub with all tabs, breadcrumbs, and all major pages. |
+| `sn-nav-mock.html` | Site hierarchy tree · nav states · breadcrumb patterns |
+| `sn-pages-mock.html` | Guest landing · member community dashboard |
+
+**Workflow:**
+1. **Mock is updated first** when a design decision changes — open in browser, iterate in HTML, then implement in Angular.
+2. **Components implement to match** — "refer to the mock" is a complete instruction.
+3. The mock defines **appearance and UX behaviour** — not implementation. Changes to template structure and CSS are surgical. All existing Angular bindings, `@Input()`/`@Output()` contracts, form controls, service calls, validators, error handling, and business logic are **preserved** unless the mock explicitly shows a behaviour change. Never do a wholesale rewrite of a working component just to match mock styling.
+4. **Mock quality = implementation quality.** A vague mock leaves room for interpretation. The more precisely the mock is designed, the less ambiguity there is in code. Invest in the mock first.
+5. **When a mock is ambiguous, underspecified, or silent on a detail — stop and ask before implementing.** Don't interpolate. A clarifying question costs one turn; a wrong implementation costs a revert and a rewrite.
+
+**Token naming:** Mocks use unprefixed tokens (`--bg`, `--cta-bg`). Angular components use `--sn-*` prefix (`--sn-bg`, `--sn-cta-bg`) with literal fallbacks. The translation is mechanical.
+
+**Component annotations in the interactive mock** mark Angular component boundaries as HTML comments (`<!-- ════ <app-hero> ════ -->`) so the mock maps directly to the component tree.
+
+---
+
 ### Multi-Tenancy Model
 - Each home group = one **tenant**
 - Groups get a subdomain: `earlybird.sobernetwork.org`, `groupname.sobernetwork.org`
@@ -179,10 +213,44 @@ Anonymity and member responsibility are both honored.
 
 ### 🐾 Nice-to-Have (discuss priority)
 - [ ] Meeting schedule page (public)
+- [ ] Daily Readings
+- [ ] Bulletin board
 - [ ] Speaker meeting audio archive
 - [ ] Sobriety chip tracker / anniversary recognition
 - [ ] Links to AA literature and resources
 - [ ] Multi-language support
+
+### Additional feature ideas
+
+- [ ] Member directory (authenticated only)
+  - Define group-scoped visibility and anonymity rules.
+  - Add browse/search/filter views for active members.
+  - Link member cards to existing profile pages.
+
+- [ ] Meeting signup / chair schedule
+  - Let admins publish open service slots for meetings.
+  - Allow members to volunteer or request a slot.
+  - Show upcoming assignments in the group hub.
+
+- [ ] Service roles tracker
+  - Store elected roles with terms and display order.
+  - Show current trusted servants on the group hub.
+  - Add role history for succession planning.
+
+- [ ] Newcomer welcome resources
+  - Add a newcomer-friendly resource page for each group.
+  - Let groups list local contacts, readings, and starter info.
+  - Surface the resource link prominently in public and member areas.
+
+- [ ] Group conscience / voting tools
+  - Create proposals and record votes or consensus outcomes.
+  - Support admin review and group discussion before decisions.
+  - Keep an audit trail for approved motions and outcomes.
+
+- [ ] Group archives (minutes, history, format docs)
+  - Add a private archive library for meeting notes and docs.
+  - Support organized folders or tags by document type.
+  - Allow admins to upload, update, and retire archived items.
 
 ---
 

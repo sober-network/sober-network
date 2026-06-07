@@ -668,7 +668,15 @@ Violations are security issues (T4). Test with `CrossGroupAccessTests`.
 
 ## 17. UI Design System (Apply Sitewide)
 
-The approved visual design is captured in `docs/knowledge.md § UI Design System` and the v1.3 HTML mockup. **All Angular components and pages must follow this design system.** When implementing any Angular component, consult the mockup and apply these rules consistently.
+The approved visual design is captured in `docs/knowledge.md § UI Design System` and the interactive mock at `docs/mocks/sn-interactive-mock.html`. **All Angular components and pages must follow this design system.** When implementing any Angular component, consult the mock and apply these rules consistently.
+
+### Mock-first workflow
+
+- **`docs/mocks/sn-interactive-mock.html`** is the primary living design spec. Open it in a browser to see the intended UX. "Refer to the mock" is a complete instruction.
+- **Mock is updated first** when a design decision changes — iterate in HTML, then implement in Angular.
+- **Changes are surgical.** The mock defines appearance and UX behaviour — not implementation. Preserve all existing Angular bindings, `@Input()`/`@Output()` contracts, form controls, service calls, validators, error handling, and business logic unless the mock explicitly shows a behaviour change. Never do a wholesale rewrite of a working component just to match mock styling.
+- **Mock quality = implementation quality.** A vague mock leaves room for interpretation. Invest in the mock first.
+- **When a mock is ambiguous, underspecified, or silent on a detail — stop and ask before implementing.** Don't interpolate. A clarifying question costs one turn; a wrong implementation costs a revert and a rewrite.
 
 There are **two design contexts**:
 - **Landing page** (public, `/`) — hero gradient, marquee, section cadence, modals

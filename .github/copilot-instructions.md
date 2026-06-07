@@ -475,39 +475,137 @@ Commands and Queries live in `/src/SoberNetwork.Core/Handlers/{Feature}/`:
 
 ### Validation Auto-Response Pattern
 
-**All request DTOs are automatically validated.** FluentValidation auto-discovery and ASP.NET auto-validation middleware handle it:
+**All request DTOs are automatically validated.** FluentValidation auto-discovery and ASP.NET auto-validation middleware handle it without controller code.
 
-1. **Create DTO:** `{Action}{Entity}Request` in `SoberNetwork.Core/DTOs/{Feature}/`
-2. **Create Validator:** `{Action}{Entity}RequestValidator : AbstractValidator<{DTO}>` in `SoberNetwork.Core/Validators/{Feature}/`
-3. **Define rules:** In validator constructor, use `RuleFor(x => x.Property).NotEmpty()...`
-4. **Controller:** Just accept the DTO — validation runs automatically before your method is called
-5. **Invalid requests:** Return **400 Bad Request** with validation errors (automatic, no code needed)
-
-**Example:**
+**Setup** (already in `Program.cs`):
 ```csharp
-// DTO
-public record LoginRequest(string Email, string Password);
+builder.Services.AddFluentValidationAutoValidation();  // Enable middleware
+builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();  // Auto-discover
+```
 
-// Validator (auto-discovered by Program.cs)
+**How it works:**
+1. Create DTO in `SoberNetwork.Core/DTOs/{Feature}/`
+2. Create matching validator in `SoberNetwork.Core/Validators/{Feature}/`
+3. ASP.NET automatically validates incoming requests **before controller methods are called**
+4. Invalid requests → **400 Bad Request** with ProblemDetails error response (automatic, no code)
+5. Valid requests → Controller receives validated DTO
+
+**Naming Convention** (auto-pairing):
+| DTO Name | Validator Name | Location |
+|----------|----------------|----------|
+| `LoginRequest` | `LoginRequestValidator` | `Validators/Auth/` |
+| `CreateGroupRequest` | `CreateGroupRequestValidator` | `Validators/Groups/` |
+| `UpdateMeetingRequest` | `UpdateMeetingRequestValidator` | `Validators/Groups/` |
+
+**Complete Example:**
+
+DTO:
+```csharp
+// src/SoberNetwork.Core/DTOs/Auth/LoginRequest.cs
+public record LoginRequest(string Email, string Password);
+```
+
+Validator (auto-discovered):
+```csharp
+// src/SoberNetwork.Core/Validators/Auth/LoginRequestValidator.cs
 public class LoginRequestValidator : AbstractValidator<LoginRequest>
 {
     public LoginRequestValidator()
     {
-        RuleFor(x => x.Email).NotEmpty().EmailAddress();
-        RuleFor(x => x.Password).NotEmpty();
-    }
-}
+        RuleFor(x => x.Email)
+            .NotEmpty().WithMessage("Email is required.")
+            .EmailAddress().WithMessage("Invalid email format.")
+            .MaximumLength(256);
 
-// Controller (validation happens BEFORE this method is called)
-[HttpPost("login")]
-public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
-{
-    // If we're here, request is GUARANTEED valid
-    // No if (!ModelState.IsValid) checks needed
+        RuleFor(x => x.Password)
+            .NotEmpty().WithMessage("Password is required.")
+            .MaximumLength(256);
+    }
 }
 ```
 
-See `docs/validation-auto-response.md` for detailed guide, testing examples, and troubleshooting.
+Controller (validation is automatic):
+```csharp
+[HttpPost("login")]
+public async Task<IActionResult> Login(
+    [FromBody] LoginRequest request,  // Automatically validated before this line
+    CancellationToken cancellationToken = default
+)
+{
+    // If we're here, request is 100% guaranteed to be valid
+    // No if (!ModelState.IsValid) checks needed
+    
+    var result = await _mediator.Send(
+        new LoginQuery(request.Email, request.Password),
+        cancellationToken
+    );
+    
+    return result.ResultCode switch
+    {
+        ResultCode.Success => Ok(result.Data),
+        ResultCode.Unauthorized => Unauthorized(),
+        _ => BadRequest()
+    };
+}
+```
+
+Invalid Request → Automatic Response:
+```json
+POST /api/auth/login
+{ "email": "not-an-email", "password": "" }
+
+HTTP 400 Bad Request
+{
+  "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+  "title": "One or more validation errors occurred.",
+  "status": 400,
+  "errors": {
+    "email": ["Invalid email format."],
+    "password": ["Password is required."]
+  }
+}
+```
+
+**Special Cases:**
+
+GET with `[FromQuery]` (also auto-validated):
+```csharp
+public record PaginationQuery(int Page = 1, int PageSize = 10);
+
+public class PaginationQueryValidator : AbstractValidator<PaginationQuery>
+{
+    public PaginationQueryValidator()
+    {
+        RuleFor(x => x.Page).GreaterThanOrEqualTo(1);
+        RuleFor(x => x.PageSize).GreaterThan(0).LessThanOrEqualTo(100);
+    }
+}
+
+[HttpGet("members")]
+public async Task<IActionResult> GetMembers([FromQuery] PaginationQuery pagination, CancellationToken cancellationToken)
+{
+    // pagination is auto-validated before this line
+}
+```
+
+Nested objects:
+```csharp
+public class CreateGroupRequestValidator : AbstractValidator<CreateGroupRequest>
+{
+    public CreateGroupRequestValidator()
+    {
+        RuleFor(x => x.Address).SetValidator(new AddressValidator());
+    }
+}
+```
+
+**Benefits:**
+- Controllers stay clean (no `if (!ModelState.IsValid)` boilerplate)
+- Consistent responses across all endpoints
+- Validators are simple, testable classes
+- New validators auto-discovered automatically
+
+**For comprehensive guide, testing examples, and troubleshooting:** See `docs/validation-auto-response.md`
 
 ### Multi-Tenancy (Group Isolation)
 

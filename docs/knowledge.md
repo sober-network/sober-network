@@ -2,6 +2,8 @@
 
 > Living document. Topics marked 🐾 are "dog-ears" — open questions to be discussed and resolved.
 
+> 📖 **Related Guides:** See `.github/copilot-instructions.md` for engineering standards, build commands, and patterns. See `docs/validation-auto-response.md` for FluentValidation auto-response pattern details.
+
 ---
 
 ## Vision

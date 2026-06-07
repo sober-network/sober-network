@@ -1,6 +1,7 @@
 using System.Net;
 using Moq;
 using SoberNetwork.Api.Tests.Infrastructure;
+using SoberNetwork.Core.DTOs;
 using SoberNetwork.Core.DTOs.Groups;
 
 namespace SoberNetwork.Api.Tests.Security;
@@ -60,8 +61,8 @@ public class SuperAdminAllowedTests
         // Arrange
         await using var factory = new TestWebApplicationFactory();
         factory.GroupService
-            .Setup(service => service.GetAllGroupsAsync())
-            .ReturnsAsync(new List<GroupSummaryResponse>());
+            .Setup(service => service.GetAllGroupsAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.FromResult(((PagedResponse<GroupSummaryResponse>?)new PagedResponse<GroupSummaryResponse>([], 1, 10, 0), (string?)null)));
         using var client = factory.CreateSuperAdminClient();
 
         // Act

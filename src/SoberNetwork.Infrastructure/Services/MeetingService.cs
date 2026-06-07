@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SoberNetwork.Core.DTOs;
 using SoberNetwork.Core.DTOs.Groups;
 using SoberNetwork.Core.Interfaces;
 using SoberNetwork.Domain.Entities;
@@ -15,8 +16,8 @@ namespace SoberNetwork.Infrastructure.Services;
 public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logger) : IMeetingService
 {
     /// <inheritdoc/>
-    public async Task<(IReadOnlyList<MeetingResponse>? Meetings, string? Error)> GetGroupMeetingsAsync(
-        string slug, Guid userId, CancellationToken ct = default)
+    public async Task<(PagedResponse<MeetingResponse>? Meetings, string? Error)> GetGroupMeetingsAsync(
+        string slug, Guid userId, int page = 1, int pageSize = 25, CancellationToken ct = default)
     {
         var group = await db.Groups
             .AsNoTracking()
@@ -32,25 +33,33 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
                 m.DeletedAt == null, ct);
         if (!isMember) return (null, "You are not a member of this group.");
 
-        var meetings = await db.Meetings
+        var query = db.Meetings
             .AsNoTracking()
             .Where(m => m.GroupId == group.Id && m.DeletedAt == null && m.IsActive)
             .OrderBy(m => m.IsRecurring ? 0 : 1)
             .ThenBy(m => m.DaysOfWeek == null || m.DaysOfWeek.Length == 0 ? int.MaxValue : m.DaysOfWeek[0])
-            .ThenBy(m => m.Time)
+            .ThenBy(m => m.Time);
+
+        var totalCount = await query.CountAsync(ct);
+
+        var meetings = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync(ct);
 
-        return (meetings.Select(m => new MeetingResponse(
+        var items = meetings.Select(m => new MeetingResponse(
             m.Id, m.Name, m.Description, m.IsRecurring, m.DaysOfWeek ?? new int[] { }, m.Time,
             m.DurationMinutes, m.OccursOn, m.IsOpen, m.Formats, m.Language,
             m.MeetingType, m.VenueName, m.Location, m.Street, m.City, m.State,
             m.PostalCode, m.Country, m.Latitude, m.Longitude,
-            m.ZoomLink, m.ZoomMeetingId, m.ZoomPasscode, m.PublicJoinUrl, m.IsActive, m.CreatedAt)).ToList(), null);
+            m.ZoomLink, m.ZoomMeetingId, m.ZoomPasscode, m.PublicJoinUrl, m.IsActive, m.CreatedAt)).ToList();
+
+        return (new PagedResponse<MeetingResponse>(items, page, pageSize, totalCount), null);
     }
 
     /// <inheritdoc/>
-    public async Task<(IReadOnlyList<AdminMeetingResponse>? Meetings, string? Error)> GetAdminMeetingsAsync(
-        string slug, Guid userId, CancellationToken ct = default)
+    public async Task<(PagedResponse<AdminMeetingResponse>? Meetings, string? Error)> GetAdminMeetingsAsync(
+        string slug, Guid userId, int page = 1, int pageSize = 25, CancellationToken ct = default)
     {
         var group = await db.Groups
             .AsNoTracking()
@@ -67,15 +76,22 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
                 m.DeletedAt == null, ct);
         if (!isAdmin) return (null, "You do not have permission to view admin meetings.");
 
-        var meetings = await db.Meetings
+        var query = db.Meetings
             .AsNoTracking()
             .Where(m => m.GroupId == group.Id && m.DeletedAt == null)
             .OrderBy(m => m.IsRecurring ? 0 : 1)
             .ThenBy(m => m.DaysOfWeek == null || m.DaysOfWeek.Length == 0 ? int.MaxValue : m.DaysOfWeek[0])
-            .ThenBy(m => m.Time)
+            .ThenBy(m => m.Time);
+
+        var totalCount = await query.CountAsync(ct);
+
+        var meetings = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync(ct);
 
-        return (meetings.Select(ToAdminResponse).ToList(), null);
+        return (new PagedResponse<AdminMeetingResponse>(
+            meetings.Select(ToAdminResponse).ToList(), page, pageSize, totalCount), null);
     }
 
     /// <inheritdoc/>

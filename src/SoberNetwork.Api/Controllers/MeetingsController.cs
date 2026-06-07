@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SoberNetwork.Core.Commands.Groups;
+using SoberNetwork.Core.DTOs.Common;
 using SoberNetwork.Core.DTOs.Groups;
 using SoberNetwork.Core.Queries.Groups;
 using SoberNetwork.Core.Results;
@@ -26,9 +27,9 @@ public class MeetingsController(IMediator mediator) : ControllerBase
     /// Caller must be an active member. Includes Zoom credentials; excludes admin Notes.
     /// </summary>
     [HttpGet]
-    public async Task<IActionResult> GetMeetings(string slug, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetMeetings(string slug, [FromQuery] PaginationQuery pagination, CancellationToken cancellationToken = default)
     {
-        var result = await mediator.Send(new GetGroupMeetingsQuery(slug, UserId), cancellationToken);
+        var result = await mediator.Send(new GetGroupMeetingsQuery(slug, UserId, pagination.Page, pagination.PageSize), cancellationToken);
         return result.Code switch
         {
             ResultCode.Ok => Ok(result.Data),
@@ -43,9 +44,9 @@ public class MeetingsController(IMediator mediator) : ControllerBase
     /// Caller must be a GroupAdmin.
     /// </summary>
     [HttpGet("admin")]
-    public async Task<IActionResult> GetAdminMeetings(string slug, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetAdminMeetings(string slug, [FromQuery] PaginationQuery pagination, CancellationToken cancellationToken = default)
     {
-        var result = await mediator.Send(new GetAdminMeetingsQuery(slug, UserId), cancellationToken);
+        var result = await mediator.Send(new GetAdminMeetingsQuery(slug, UserId, pagination.Page, pagination.PageSize), cancellationToken);
         return result.Code switch
         {
             ResultCode.Ok => Ok(result.Data),

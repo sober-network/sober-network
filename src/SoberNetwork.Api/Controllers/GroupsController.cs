@@ -24,8 +24,15 @@ public class GroupsController(IMediator mediator) : ControllerBase
 
     /// <summary>Returns all groups the current user is an active member of.</summary>
     [HttpGet]
-    public async Task<IActionResult> GetMyGroups(CancellationToken cancellationToken = default)
-        => Ok(await mediator.Send(new GetMyGroupsQuery(UserId), cancellationToken));
+    public async Task<IActionResult> GetMyGroups([FromQuery] PaginationQuery pagination, CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(new GetMyGroupsQuery(UserId, pagination.Page, pagination.PageSize), cancellationToken);
+        return result.Code switch
+        {
+            ResultCode.Ok => Ok(result.Data),
+            _ => Problem(result.Error, statusCode: 400)
+        };
+    }
 
     /// <summary>
     /// Returns all groups on the platform. SuperAdmin only.
@@ -34,10 +41,15 @@ public class GroupsController(IMediator mediator) : ControllerBase
     /// [AllowAnonymous] not applicable — this is superadmin-gated, not public.
     /// </summary>
     [HttpGet("all")]
-    public async Task<IActionResult> GetAllGroups(CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetAllGroups([FromQuery] PaginationQuery pagination, CancellationToken cancellationToken = default)
     {
         if (!IsSuperAdmin) return Forbid();
-        return Ok(await mediator.Send(new GetAllGroupsQuery(), cancellationToken));
+        var result = await mediator.Send(new GetAllGroupsQuery(pagination.Page, pagination.PageSize), cancellationToken);
+        return result.Code switch
+        {
+            ResultCode.Ok => Ok(result.Data),
+            _ => Problem(result.Error, statusCode: 400)
+        };
     }
 
     /// <summary>Creates a new group. Caller becomes the initial GroupAdmin.</summary>

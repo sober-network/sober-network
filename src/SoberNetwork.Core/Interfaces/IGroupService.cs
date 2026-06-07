@@ -18,13 +18,13 @@ public interface IGroupService
 
     /// <summary>Returns all groups the specified user is currently an active member of.</summary>
 
-    Task<IReadOnlyList<GroupResponse>> GetUserGroupsAsync(Guid userId);
+    Task<(PagedResponse<GroupResponse>? Groups, string? Error)> GetUserGroupsAsync(Guid userId, int page = 1, int pageSize = 25, CancellationToken ct = default);
 
 
 
     /// <summary>Returns a summary listing of all active groups for SuperAdmin use.</summary>
 
-    Task<IReadOnlyList<GroupSummaryResponse>> GetAllGroupsAsync();
+    Task<(PagedResponse<GroupSummaryResponse>? Groups, string? Error)> GetAllGroupsAsync(int page = 1, int pageSize = 25, CancellationToken ct = default);
 
 
 

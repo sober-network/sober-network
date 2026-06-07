@@ -93,9 +93,9 @@ public class GroupService(
 
     // ── Group queries ──────────────────────────────────────────────────────────
 
-    public async Task<IReadOnlyList<GroupResponse>> GetUserGroupsAsync(Guid userId)
+    public async Task<(PagedResponse<GroupResponse>? Groups, string? Error)> GetUserGroupsAsync(Guid userId, int page = 1, int pageSize = 25, CancellationToken ct = default)
     {
-        var memberships = await db.GroupMemberships
+        var query = db.GroupMemberships
             .AsNoTracking()
             .Include(m => m.Group)
                 .ThenInclude(g => g!.Meetings)
@@ -104,8 +104,15 @@ public class GroupService(
                 (m.Status == MemberStatus.Active || m.Status == MemberStatus.PendingApproval) &&
                 m.DeletedAt == null &&
                 m.Group != null &&
-                m.Group.DeletedAt == null)
-            .ToListAsync();
+                m.Group.DeletedAt == null);
+
+        var totalCount = await query.CountAsync(ct);
+
+        var memberships = await query
+            .OrderBy(m => m.Group!.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
 
         var groupIds = memberships.Select(m => m.GroupId).ToList();
         var counts = await db.GroupMemberships
@@ -116,26 +123,36 @@ public class GroupService(
                 x.DeletedAt == null)
             .GroupBy(x => x.GroupId)
             .Select(g => new { GroupId = g.Key, Count = g.Count() })
-            .ToDictionaryAsync(g => g.GroupId, g => g.Count);
+            .ToDictionaryAsync(g => g.GroupId, g => g.Count, ct);
 
-        return memberships
+        var items = memberships
             .Select(m => ToGroupResponse(
                 m.Group!,
                 m.Role.ToString(),
                 m.Status.ToString(),
                 counts.GetValueOrDefault(m.GroupId)))
             .ToList();
+
+        return (new PagedResponse<GroupResponse>(items, page, pageSize, totalCount), null);
     }
 
-    public async Task<IReadOnlyList<GroupSummaryResponse>> GetAllGroupsAsync()
+    public async Task<(PagedResponse<GroupSummaryResponse>? Groups, string? Error)> GetAllGroupsAsync(int page = 1, int pageSize = 25, CancellationToken ct = default)
     {
-        var groups = await db.Groups
+        var query = db.Groups
             .AsNoTracking()
             .Include(g => g.Meetings)
-            .Where(g => g.DeletedAt == null)
-            .ToListAsync();
+            .Where(g => g.DeletedAt == null);
 
-        return groups.Select(ToGroupSummaryResponse).ToList();
+        var totalCount = await query.CountAsync(ct);
+
+        var groups = await query
+            .OrderBy(g => g.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        var items = groups.Select(ToGroupSummaryResponse).ToList();
+        return (new PagedResponse<GroupSummaryResponse>(items, page, pageSize, totalCount), null);
     }
 
     public async Task<GroupSummaryResponse?> GetGroupInfoAsync(string slug)

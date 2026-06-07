@@ -447,6 +447,20 @@ Always run both backend and frontend tests after making changes.
 - Soft delete: `deleted_at` never exposed; queries include `.Where(m => m.DeletedAt == null)`
 - Permissions: Only `group_admin` can create/edit/delete meetings; authenticated members can view their group's meetings; public endpoint shows only public meetings from public groups
 
+**Group Entity — district/area fields**
+- `DistrictName`, `AreaName`, `State`, `DistrictWebsiteUrl`, `AreaWebsiteUrl`, `DistrictLatitude`, `DistrictLongitude` are stored **directly on the `Group` entity** (flat columns, no separate areas/districts tables)
+- Shown in the group hub Overview tab district map section (via `MiniMapComponent`); district/area website links render next to each other
+- Optional fields — leave null if a group hasn't configured them
+
+**GroupServiceRole Entity**
+- First-class entity with its own table, service (`IGroupServiceRoleService`/`GroupServiceRoleService`), and Angular UI in the group hub Overview tab
+- `GroupServiceRoleType` enum: `GSR`, `Secretary`, `Treasurer`, `IntergroupRep`, `LiteratureRep`, `GrapevineRep`, `MeetingChair`, `ChipsPerson`, `Other`
+- Display labels: `GSR` → "G.S.R.", `IntergroupRep` → "Intergroup Rep", `LiteratureRep` → "Literature Rep", `GrapevineRep` → "Grapevine Rep", `MeetingChair` → "Meeting Chair", `ChipsPerson` → "Chips Person"
+- `CustomTitle` is used only when `RoleType == Other`; `DisplayOrder` controls sort order
+- API endpoints: `GET /api/groups/{slug}/service-roles`, `POST /api/groups/{slug}/service-roles`, `DELETE /api/groups/{slug}/service-roles/{roleId:guid}`
+- Permissions: only `group_admin` can assign/remove; active members can view
+- Handlers: `GetGroupServiceRolesQueryHandler`, `AssignServiceRoleCommandHandler`, `RemoveServiceRoleCommandHandler`
+
 ### Module Boundaries
 
 The platform uses a modular monolith with clean separation:
@@ -462,7 +476,7 @@ The platform uses a modular monolith with clean separation:
 
 Commands and Queries live in `/src/SoberNetwork.Core/Handlers/{Feature}/`:
 - One file per handler (e.g., `GetPhoneListQueryHandler.cs`)
-- Commands and permission-gated queries return `Result<T>` / `DataResult<T>` / `CommandResult` with a `ResultCode` (Success, Unauthorized, Forbidden, BadRequest, Conflict, etc.); controllers switch on `ResultCode` → HTTP status
+- Commands and permission-gated queries return `DataResult<T>` / `CommandResult` with a `ResultCode` (`Ok`, `BadRequest`, `Unauthorized`, `Forbidden`, `NotFound`, `Conflict`). Access via `.Code` property (e.g. `result.Code switch { ResultCode.Ok => Ok(result.Data), ... }`). `.Success` is a bool convenience property (`Code == ResultCode.Ok`).
 - **Read-query exception:** simple read queries that cannot fail with a domain/permission error (e.g., `GetPlatformStats`, `GetMyGroups`, `GetAllGroups`, `GetMyProfile`, `GetUserById`, `GetMailingAddress`, `SearchPublicMeetings`) may return the DTO/collection directly (or `null` for not-found, which the controller maps to `404`/`NoContent`). This is an accepted convention, not a violation.
 - Handlers **never** return raw domain entities — always map to DTOs
 
@@ -656,6 +670,12 @@ Violations are security issues (T4). Test with `CrossGroupAccessTests`.
 
 The approved visual design is captured in `docs/knowledge.md § UI Design System` and the v1.3 HTML mockup. **All Angular components and pages must follow this design system.** When implementing any Angular component, consult the mockup and apply these rules consistently.
 
+There are **two design contexts**:
+- **Landing page** (public, `/`) — hero gradient, marquee, section cadence, modals
+- **App interior** (authenticated pages — `/dashboard`, `/groups/:slug`, `/profile`, `/admin`) — group hub design system (see §17b)
+
+Both share the same fonts, color tokens, chip palette, and avatar palette.
+
 ### Fonts
 - **Inter Tight** — headings, nav, labels (weights 400–900)
 - **Instrument Serif italic** — display accent lines inside headings
@@ -691,6 +711,60 @@ The approved visual design is captured in `docs/knowledge.md § UI Design System
 - `IntersectionObserver` scroll-spy on nav pills (`rootMargin: '-10% 0px -55% 0px'`)
 - Fade-up entrance animation (`.fade-up` → `.visible` via observer, `threshold: 0.1`)
 - Staggered delays: `.delay-1`, `.delay-2`, `.delay-3`
+
+---
+
+## 17b. App Interior Design System (Group Hub Theme)
+
+All authenticated pages use the **group hub design language**. Full reference: `docs/knowledge.md § Group Hub Design System`.
+
+### Page Shell
+
+```scss
+.hub-shell { max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; }
+
+.page {
+  background: rgba(255,255,255,.9);
+  border: 1px solid rgba(17,17,16,.09);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 16px 52px rgba(17,17,16,.07);
+  margin-top: 12px;
+}
+```
+
+### Content Cards
+
+- **Standard card**: `background: white; border: 1px solid rgba(17,17,16,.09); border-radius: 18px; box-shadow: 0 6px 20px rgba(17,17,16,.04)`
+- **Warm/about card**: `background: linear-gradient(135deg, rgba(248,246,241,.9), rgba(240,237,232,.95))`
+- **Entity rows** (person/role items): `background: var(--sn-bg-soft); border-radius: 14px; padding: 14px`
+- **Section heading**: `font-size: .7rem; font-weight: 900; text-transform: uppercase; letter-spacing: .09em; color: var(--sn-text-muted)`
+
+### Accent Card Gradients (semantic)
+
+| Purpose | Gradient |
+|---------|---------|
+| Sky/time/meeting | `rgba(14,165,233,.1)` → `rgba(42,148,89,.1)` |
+| Membership/role | `rgba(138,79,163,.07)` → `rgba(79,70,229,.06)` |
+| Destructive/leave | `rgba(220,38,38,.1)` bg, `#b91c1c` text |
+
+### Avatar Palette (hash `userId` → `index % 7`)
+
+`.av-violet` `.av-sky` `.av-green` `.av-rose` `.av-amber` `.av-teal` `.av-coral` — 18–22% opacity backgrounds, `border-radius: 12px`, `42×42px`, `font-weight: 900`. Exact values in `overview-tab.component.scss`.
+
+### Chip Palette (9 colors)
+
+`.chip-violet` `.chip-sky` `.chip-green` `.chip-amber` `.chip-rose` `.chip-teal` `.chip-indigo` `.chip-coral` `.chip-muted` — 12% opacity. Base: `padding: 5px 10px; border-radius: 999px; font-size: .78rem; font-weight: 800`. Small: `.chip-small`. Exact values in `overview-tab.component.scss`.
+
+### Hero Serif Accent
+
+`titleSuffix` in hero components renders as `.serif-accent`: `display: block; text-align: right; transform: translateX(3rem)` — drops to its own line, floats right, creating a deliberate stagger with the bold left-anchored title.
+
+### Reference Files
+
+- Shell + tabs: `group-hub.component.scss`
+- Cards, avatars, chips: `group-hub/tabs/overview-tab/overview-tab.component.scss`
+- Hero serif accent: `group-hero/group-hero.component.scss`
 
 ---
 
@@ -730,6 +804,17 @@ The approved visual design is captured in `docs/knowledge.md § UI Design System
 - `StatsService` loads platform stats; errors silently fall back to zero to avoid blocking the UI
 - Services should follow the `IService` interface pattern; use dependency injection via constructor
 
+### Key Shared Components (`src/app/shared/components/`)
+
+| Component | Purpose |
+|-----------|---------|
+| `BaseFormModalComponent` | Modal wrapper — header, close button, scrollable body (see §19) |
+| `MiniMapComponent` | Leaflet map used in group hub Overview tab for district location |
+| `ConfirmDialogComponent` | Confirmation dialog — pass `{ title, message, confirmLabel, dangerous }` via `MAT_DIALOG_DATA` |
+| `NavbarComponent` | Global nav with plain CSS dropdowns (`userMenuOpen`/`groupsMenuOpen` booleans, NOT mat-menu) |
+| `LoadingSpinnerComponent` | Reusable spinner |
+| `NotFoundComponent` | 404 fallback |
+
 ### Component Lifecycle
 - Use `OnInit` for async data loading (queries, service calls)
 - Use `ChangeDetectionStrategy.OnPush` with `ChangeDetectorRef.markForCheck()` in scroll-spy and observer callbacks
@@ -749,9 +834,12 @@ The approved visual design is captured in `docs/knowledge.md § UI Design System
 
 ### Routing
 - Landing page: `/` (no auth guard, LandingComponent)
+- Public group info / join page: `/group/:slug` (no auth guard, GroupPublicComponent) — note singular `group`, no auth required (T5/T4 join-link autonomy)
 - Auth flows: `/auth/login`, `/auth/register`, `/auth/forgot-password`, `/auth/reset-password/:token`
-- Protected app routes: `/dashboard`, `/groups`, `/groups/:slug/*` (guarded by `authGuard`)
+- Protected app routes: `/dashboard`, `/groups/:slug` (guarded by `authGuard` + `groupMemberGuard`), `/profile`, `/profile/:userId`
 - Public routes: `/meetings` (meeting finder, no auth guard)
+- SuperAdmin: `/admin/**` (guarded by `authGuard` + `superAdminGuard`)
+- **Group hub is a single route `/groups/:slug`** — tab switching is in-component state (`HubTab` = `'overview' | 'members' | 'meetings' | 'requests' | 'settings'`). Old sub-path routes (`/groups/:slug/members`, `/meetings`, etc.) now redirect to `/groups/:slug`.
 - Modal-driven auth (Sign In, Create Account) accessed from navbar; full-page routes remain for `authGuard` redirects and email confirmation links
 
 ---

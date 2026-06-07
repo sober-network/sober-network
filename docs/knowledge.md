@@ -743,4 +743,156 @@ backlog. All High/Medium/Low findings are resolved.
 
 ---
 
-*Last updated: 2026-06-06*
+## Group Hub Design System (v1.0 — Apply to All Authenticated Pages)
+
+**Status:** Live ✅ (group hub is the reference implementation — extend this theme to all inner-app pages)
+
+The group hub established a distinct "app interior" design language that differs from the landing page. All authenticated pages (`/dashboard`, `/profile`, `/groups/:slug`, `/admin`) should use this system.
+
+### Page Shell
+
+```scss
+// Outer shell — max-width container
+.hub-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+// Primary page card
+.page {
+  background: rgba(255,255,255,.9);
+  border: 1px solid rgba(17,17,16,.09);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 16px 52px rgba(17,17,16,.07);
+  margin-top: 12px;
+}
+```
+
+### Tab Rail
+
+```scss
+.tab-rail {
+  padding: 16px 20px 0;
+  border-bottom: 1px solid rgba(17,17,16,.09);
+  background: rgba(247,245,242,.8);
+  display: flex; flex-wrap: wrap; gap: 4px;
+}
+.tab-btn {
+  border-radius: 14px 14px 0 0;
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 800;
+  font-size: .88rem;
+  &.active { background: white; border-color: rgba(17,17,16,.09); border-bottom-color: white; }
+}
+```
+
+### Content Cards
+
+```scss
+// Standard card
+.card {
+  background: white;
+  border: 1px solid rgba(17,17,16,.09);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 6px 20px rgba(17,17,16,.04);
+}
+
+// Warm neutral card (descriptive/about content)
+.about-card {
+  background: linear-gradient(135deg, rgba(248,246,241,.9), rgba(240,237,232,.95));
+}
+
+// Entity rows (person/role list items)
+.entity-row {
+  background: var(--sn-bg-soft, #f0ede8);
+  border: 1px solid rgba(17,17,16,.06);
+  border-radius: 14px;
+  padding: 14px;
+}
+```
+
+### Section Headings
+
+```scss
+.section-heading {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: .7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: var(--sn-text-muted, #7a7a75);
+}
+```
+
+### Accent Colors (Semantic Card Gradients)
+
+Each card type gets a tinted gradient drawn from the landing page's 8-tint palette:
+
+| Purpose | Gradient |
+|---------|---------|
+| Next meeting / time / sky | `rgba(14,165,233,.1)` → `rgba(42,148,89,.1)` |
+| Membership / role / violet-indigo | `rgba(138,79,163,.07)` → `rgba(79,70,229,.06)` |
+| Admin / warning tab badge | `rgba(138,79,163,.12)` bg, `#8a4fa3` text |
+| Destructive / leave | `rgba(220,38,38,.1)` bg, `#b91c1c` text |
+
+### Avatar Palette (7 deterministic colors)
+
+Assign by hashing `userId` → `index % 7`:
+
+```scss
+.av-violet { background: rgba(138,79,163,.22);  color: #6d3e86; }
+.av-sky    { background: rgba(14,165,233,.18);  color: #0369a1; }
+.av-green  { background: rgba(42,148,89,.18);   color: #166534; }
+.av-rose   { background: rgba(244,63,94,.16);   color: #be185d; }
+.av-amber  { background: rgba(217,119,6,.18);   color: #92400e; }
+.av-teal   { background: rgba(15,118,110,.18);  color: #0f766e; }
+.av-coral  { background: rgba(249,115,22,.16);  color: #c2410c; }
+```
+
+Border-radius: `12px`. Size: `42×42px`. Single initial, `font-weight: 900`.
+
+### Chip Palette (9 colors + muted)
+
+```scss
+.chip-violet { background: rgba(138,79,163,.12); color: #8a4fa3; }
+.chip-sky    { background: rgba(14,165,233,.12);  color: #0ea5e9; }
+.chip-green  { background: rgba(42,148,89,.12);   color: #2a9459; }
+.chip-amber  { background: rgba(217,119,6,.12);   color: #d97706; }
+.chip-rose   { background: rgba(217,53,154,.12);  color: #d9359a; }
+.chip-teal   { background: rgba(15,118,110,.12);  color: #0f766e; }
+.chip-indigo { background: rgba(79,70,229,.12);   color: #4f46e5; }
+.chip-coral  { background: rgba(234,94,61,.12);   color: #ea5e3d; }
+.chip-muted  { background: rgba(17,17,16,.06);    color: #7a7a75; }
+```
+
+Base chip: `padding: 5px 10px; border-radius: 999px; font-size: .78rem; font-weight: 800; font-family: 'Inter Tight'`. Small variant (`.chip-small`): `font-size: .68rem; padding: 2px 8px`.
+
+### Hero Serif Accent (Group/Page Suffix)
+
+The `titleSuffix` in `GroupHeroComponent` (and any hero using `<span class="serif-accent">`) renders on its own line, right-aligned and nudged right:
+
+```scss
+.serif-accent {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 700;
+  display: block;
+  text-align: right;
+  transform: translateX(3rem);
+}
+```
+
+This creates a visual "stagger" where the bold group name anchors left and the italic suffix floats right — intentional and designed.
+
+### Reference Implementation
+
+- **Hub shell + tabs**: `src/app/features/groups/group-hub/group-hub.component.scss`
+- **Overview cards, avatars, chips**: `src/app/features/groups/group-hub/tabs/overview-tab/overview-tab.component.scss`
+- **Hero serif accent**: `src/app/features/groups/group-hero/group-hero.component.scss`
+
+---
+
+*Last updated: 2026-06-07*

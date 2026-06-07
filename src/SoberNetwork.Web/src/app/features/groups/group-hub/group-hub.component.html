@@ -1,6 +1,9 @@
 <app-group-hero
   eyebrowText="Group Hub"
   [title]="group?.name || ''"
+  titleSuffix="Hub"
+  description="Your group hub for meetings, members, and more."
+  backButtonText="← Back to Groups"
   [backButtonRoute]="['/dashboard']"
   [showPlusButton]="activeTab === 'meetings' && isAdmin"
   (plusClick)="openCreateMeeting()"

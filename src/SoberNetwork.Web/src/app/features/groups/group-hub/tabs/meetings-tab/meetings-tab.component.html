@@ -1,7 +1,16 @@
-<section class="meetings-tab">
-  <div class="meetings-toolbar">
+<div class="panel-inner">
+
+  <div class="admin-bar" *ngIf="isAdmin">
+    <div class="admin-notice">
+      <span class="tab-admin-badge">Admin</span>
+      <span>You can edit, add, and retire meetings for this group.</span>
+    </div>
+    <button type="button" class="add-meeting-btn" (click)="openCreate()">＋ Add Meeting</button>
+  </div>
+
+  <div class="toolbar">
     <div class="search-wrap">
-      <mat-icon class="search-icon">search</mat-icon>
+      <span class="search-icon">🔍</span>
       <input
         class="search-input"
         type="search"
@@ -12,11 +21,16 @@
       <button *ngIf="searchQuery" type="button" class="clear-btn" (click)="clearSearch()" aria-label="Clear meeting search">✕</button>
     </div>
 
-    <select class="sort-select" [ngModel]="sortBy" (ngModelChange)="onSortChange($event)">
-      <option *ngFor="let option of sortOptions" [ngValue]="option">Sort by {{ option }}</option>
-    </select>
-
-    <div class="count-pill">{{ filteredMeetings.length }} meetings</div>
+    <div class="sort-strip">
+      <span class="sort-label">Sort:</span>
+      <button
+        *ngFor="let option of sortOptions"
+        class="sort-pill"
+        [class.active]="sortBy === option"
+        type="button"
+        (click)="onSortChange(option)"
+      >{{ option }}</button>
+    </div>
   </div>
 
   <div class="error-card" *ngIf="error && !loading">{{ error }}</div>
@@ -26,98 +40,73 @@
     <p>Loading meetings…</p>
   </div>
 
-  <div *ngIf="!loading && filteredMeetings.length > 0">
-    <article class="meeting-card" [ngClass]="cardAccentClass(meeting)" *ngFor="let meeting of filteredMeetings; trackBy: trackById">
-      <div class="meeting-card-grid">
-        <div class="meeting-main">
-          <div class="meeting-header">
-            <div class="meeting-icon">
-              <mat-icon>{{ meetingIcon(meeting) }}</mat-icon>
-            </div>
-
-            <div class="meeting-title-block">
-              <h3>{{ meeting.name }}</h3>
-              <p class="meeting-when">{{ formatWhen(meeting) }}</p>
-            </div>
-
-            <span class="inactive-badge" *ngIf="!meeting.isActive">Inactive</span>
-
-            <div class="meeting-actions" *ngIf="isAdmin">
-              <button class="meeting-settings-btn" type="button" (click)="openEdit(meeting)">
-                <mat-icon>settings</mat-icon>
-                <span class="settings-label">Settings</span>
-              </button>
-              <button class="meeting-delete-btn" type="button" (click)="delete(meeting)">
-                <mat-icon>delete</mat-icon>
-              </button>
+  <div class="meeting-list" *ngIf="!loading && filteredMeetings.length > 0">
+    <div class="meeting-card" [ngClass]="[cardAccentClass(meeting), !meeting.isActive ? 'inactive' : '']" *ngFor="let meeting of filteredMeetings; trackBy: trackById">
+      <div class="card-inner">
+        <div class="meeting-header-row">
+          <div class="meeting-title-group">
+            <div class="meeting-icon" [ngClass]="meetingIconClass(meeting)">{{ meetingEmoji(meeting) }}</div>
+            <div>
+              <div class="meeting-name">{{ meeting.name }} <span class="chip chip-muted" style="font-size:.72rem;padding:2px 9px;margin-left:4px;" *ngIf="!meeting.isActive">Inactive</span></div>
+              <div class="meeting-when">{{ formatWhen(meeting) }}</div>
             </div>
           </div>
-
-          <p class="meeting-description" *ngIf="meeting.description">{{ meeting.description }}</p>
-
-          <div class="meeting-meta">
-            <span class="meta-pill">{{ meetingTypeLabel(meeting.meetingType) }}</span>
-            <span class="meta-pill">{{ meeting.durationMinutes }} min</span>
-            <span class="meta-pill" *ngIf="meeting.isRecurring">Recurring</span>
-            <span class="meta-pill" *ngIf="!meeting.isRecurring">One-time</span>
-            <span class="meta-pill state-pill closed" *ngIf="!meeting.isOpen">Closed</span>
-            <span class="meta-pill state-pill open" *ngIf="meeting.isOpen">Open</span>
-          </div>
-
-          <div class="meeting-formats" *ngIf="meeting.formats.length > 0">
-            <span class="format-chip" *ngFor="let format of meeting.formats">{{ formatMeetingLabel(format) }}</span>
-          </div>
+          <button *ngIf="isAdmin" class="edit-btn" type="button" (click)="openEdit(meeting)">⚙ Edit</button>
         </div>
 
-        <div class="meeting-side">
-          <div class="info-panel" *ngIf="hasPhysicalLocation(meeting)">
-            <h4>Location</h4>
-            <p class="panel-line strong" *ngIf="meeting.location && !meeting.venueName && !meeting.street">{{ meeting.location }}</p>
-            <p class="panel-line strong" *ngIf="meeting.venueName">{{ meeting.venueName }}</p>
-            <p class="panel-line" *ngIf="meeting.street">{{ meeting.street }}</p>
-            <p class="panel-line" *ngIf="addressLine(meeting)">{{ addressLine(meeting) }}</p>
-            <p class="panel-line" *ngIf="meeting.country">{{ meeting.country }}</p>
-            <a class="panel-link" [href]="directionsUrl(meeting)" target="_blank" rel="noreferrer">Get directions</a>
+        <p class="meeting-description" *ngIf="meeting.description">{{ meeting.description }}</p>
+
+        <div class="chip-strip">
+          <span class="chip" [ngClass]="meeting.meetingType === 1 ? 'chip-sky' : meeting.meetingType === 2 ? 'chip-teal' : 'chip-green'">{{ meetingTypeLabel(meeting.meetingType) }}</span>
+          <span class="chip chip-amber">{{ meeting.durationMinutes }} min</span>
+          <span class="chip chip-violet" *ngIf="meeting.isRecurring">Recurring</span>
+          <span class="chip chip-muted" *ngIf="!meeting.isRecurring">One-time</span>
+          <span class="chip" [ngClass]="meeting.isOpen ? 'chip-green' : 'chip-muted'">{{ meeting.isOpen ? 'Open' : 'Closed' }}</span>
+          <span class="chip chip-violet" *ngFor="let format of meeting.formats">{{ formatMeetingLabel(format) }}</span>
+        </div>
+
+        <div class="info-panels" *ngIf="hasPhysicalLocation(meeting) || hasZoomDetails(meeting)">
+          <div class="info-panel info-panel-amber" *ngIf="hasPhysicalLocation(meeting)">
+            <div class="info-panel-heading">Location</div>
+            <div class="info-text">
+              <div *ngIf="meeting.location && !meeting.venueName && !meeting.street"><strong>{{ meeting.location }}</strong></div>
+              <div *ngIf="meeting.venueName"><strong>{{ meeting.venueName }}</strong></div>
+              <div *ngIf="meeting.street">{{ meeting.street }}</div>
+              <div *ngIf="addressLine(meeting)">{{ addressLine(meeting) }}</div>
+              <div *ngIf="meeting.country">{{ meeting.country }}</div>
+              <a [href]="directionsUrl(meeting)" target="_blank" rel="noreferrer">Get directions</a>
+            </div>
           </div>
 
-          <div class="mini-map" *ngIf="hasPhysicalLocation(meeting)">
-            <ng-container *ngIf="mapPreviewUrl(meeting) as mapUrl; else mapFallback">
-              <iframe
-                class="mini-map-frame"
-                [src]="mapUrl"
-                [title]="mapPreviewCaption(meeting)"
-                loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade"
-              ></iframe>
-              <div class="mini-map-overlay">
-                <span class="mini-map-label">{{ mapPreviewCaption(meeting) }}</span>
+          <div class="info-panel info-panel-sky" *ngIf="hasZoomDetails(meeting)">
+            <div class="info-panel-heading">Zoom</div>
+            <div class="zoom-grid">
+              <div *ngIf="meeting.publicJoinUrl">
+                <span class="zoom-label">Public link</span>
+                <div class="info-text"><a [href]="meeting.publicJoinUrl" target="_blank" rel="noreferrer">Join meeting</a></div>
               </div>
-            </ng-container>
-            <ng-template #mapFallback>
-              <div class="mini-map-empty">
-                <span class="mini-map-empty-title">Map unavailable</span>
-                <span class="mini-map-empty-copy">{{ mapPreviewCaption(meeting) }}</span>
+              <div *ngIf="meeting.zoomMeetingId">
+                <span class="zoom-label">Meeting ID</span>
+                <div class="info-text">{{ meeting.zoomMeetingId }}</div>
               </div>
-            </ng-template>
-          </div>
-
-          <div class="info-panel" *ngIf="hasZoomDetails(meeting)">
-            <h4>Zoom</h4>
-            <p class="panel-line" *ngIf="meeting.publicJoinUrl">
-              <a [href]="meeting.publicJoinUrl" target="_blank" rel="noreferrer">Join meeting</a>
-            </p>
-            <p class="panel-line" *ngIf="meeting.zoomLink"><strong>Members link:</strong> {{ meeting.zoomLink }}</p>
-            <p class="panel-line" *ngIf="meeting.zoomMeetingId"><strong>Meeting ID:</strong> {{ meeting.zoomMeetingId }}</p>
-            <p class="panel-line" *ngIf="meeting.zoomPasscode"><strong>Passcode:</strong> {{ meeting.zoomPasscode }}</p>
+              <div *ngIf="meeting.zoomPasscode">
+                <span class="zoom-label">Passcode</span>
+                <div class="info-text">{{ meeting.zoomPasscode }}</div>
+              </div>
+              <div *ngIf="meeting.zoomLink">
+                <span class="zoom-label">Members link</span>
+                <div class="info-text">{{ meeting.zoomLink }}</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </article>
+    </div>
   </div>
 
   <div class="empty-state" *ngIf="!loading && !error && filteredMeetings.length === 0">
-    <mat-icon>calendar_month</mat-icon>
-    <h3>No meetings yet</h3>
-    <p>{{ isAdmin ? 'Use the plus button above to add your first meeting.' : 'This group has not published any meetings yet.' }}</p>
+    <div style="font-size:1.6rem;margin-bottom:8px;">📅</div>
+    <div class="empty-title">No meetings yet</div>
+    <div class="empty-sub">{{ isAdmin ? 'Use the add button above to create the first meeting.' : 'This group has not published any meetings yet.' }}</div>
   </div>
-</section>
+</div>

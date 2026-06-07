@@ -14,6 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs';
 import { MemberResponse, MemberSortBy } from '@app/core/models';
+import { AuthService } from '@app/core/services/auth.service';
 import { GroupService } from '@app/core/services/group.service';
 
 @Component({
@@ -26,6 +27,7 @@ import { GroupService } from '@app/core/services/group.service';
 })
 export class MembersTabComponent implements OnInit, OnChanges {
   private readonly groupService = inject(GroupService);
+  private readonly authService = inject(AuthService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   @Input({ required: true }) slug!: string;
@@ -71,8 +73,10 @@ export class MembersTabComponent implements OnInit, OnChanges {
     this.cdr.markForCheck();
   }
 
-  applySortOption(label: string): void {
-    const option = this.sortOptions.find(opt => opt.label === label);
+  applySortOption(optionOrLabel: { label: string; sortBy: MemberSortBy; sortDescending: boolean } | string): void {
+    const option = typeof optionOrLabel === 'string'
+      ? this.sortOptions.find(opt => opt.label === optionOrLabel)
+      : optionOrLabel;
     if (!option) {
       return;
     }
@@ -110,6 +114,46 @@ export class MembersTabComponent implements OnInit, OnChanges {
   phoneHref(phone: string): string | null {
     const normalized = phone.replace(/[^\d+]/g, '');
     return normalized ? `tel:${normalized}` : null;
+  }
+
+  isSelf(member: MemberResponse): boolean {
+    return member.userId === this.authService.currentUser?.userId;
+  }
+
+  humanizeStatus(status: string): string {
+    return status.replace(/([a-z])([A-Z])/g, '$1 $2');
+  }
+
+  formatSobriety(date: string): string {
+    return new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  avatarClass(userId: string): string {
+    const colors = ['av-violet', 'av-sky', 'av-green', 'av-rose', 'av-amber', 'av-teal', 'av-coral'];
+    const hash = userId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    return colors[hash % colors.length];
+  }
+
+  makeAdmin(member: MemberResponse): void {
+    this.groupService.updateMemberRole(this.slug, member.userId, { role: 'GroupAdmin' }).subscribe({
+      next: () => this.loadMembers(),
+      error: () => {}
+    });
+  }
+
+  changeStatus(member: MemberResponse, status: string): void {
+    this.groupService.updateMemberStatus(this.slug, member.userId, { status: status as any }).subscribe({
+      next: () => this.loadMembers(),
+      error: () => {}
+    });
+  }
+
+  removeMember(member: MemberResponse): void {
+    if (!confirm(`Remove ${member.displayName} from this group?`)) return;
+    this.groupService.removeMember(this.slug, member.userId).subscribe({
+      next: () => this.loadMembers(),
+      error: () => {}
+    });
   }
 
   trackById(_: number, member: MemberResponse): string {

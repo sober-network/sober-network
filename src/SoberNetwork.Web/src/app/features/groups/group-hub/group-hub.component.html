@@ -1,72 +1,125 @@
 <app-group-hero
-  eyebrowText="Home Group"
+  eyebrowText="Group Hub"
   [title]="group?.name || ''"
   [backButtonRoute]="['/dashboard']"
   [showPlusButton]="activeTab === 'meetings' && isAdmin"
   (plusClick)="openCreateMeeting()"
 ></app-group-hero>
 
-<div class="hub-loading" *ngIf="loading">
-  <mat-spinner diameter="40"></mat-spinner>
-  <p>Loading group…</p>
-</div>
+<div class="hub-shell">
 
-<div class="hub-error" *ngIf="error && !loading">
-  <mat-icon>error_outline</mat-icon>
-  {{ error }}
-</div>
-
-<div class="hub-shell" *ngIf="group && !loading">
-  <div class="tab-rail">
-    <button class="tab-btn" [class.active]="activeTab === 'overview'" (click)="switchTab('overview')">Overview</button>
-
-    <button class="tab-btn" [class.active]="activeTab === 'members'" (click)="switchTab('members')">
-      Members
-      <span class="tab-badge badge-violet">{{ group.memberCount }}</span>
-    </button>
-
-    <button class="tab-btn" [class.active]="activeTab === 'meetings'" (click)="switchTab('meetings')">
-      Meetings
-      <span class="tab-badge badge-sky">{{ group.meetings.length }}</span>
-    </button>
-
-    <button *ngIf="isAdmin" class="tab-btn admin-tab" [class.active]="activeTab === 'requests'" (click)="switchTab('requests')">Join Requests</button>
-
-    <button *ngIf="isAdmin" class="tab-btn admin-tab" [class.active]="activeTab === 'settings'" (click)="switchTab('settings')">Settings</button>
+  <div class="hub-loading" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading group…</p>
   </div>
 
-  <div class="tab-content">
-    <app-overview-tab
-      *ngIf="activeTab === 'overview'"
-      [group]="group"
-      [slug]="slug"
-      [isAdmin]="isAdmin"
-      (switchToMeetings)="switchTab('meetings')"
-      (leaveGroup)="onLeaveGroup()"
-    ></app-overview-tab>
-
-    <app-members-tab
-      *ngIf="activeTab === 'members'"
-      [slug]="slug"
-      [isAdmin]="isAdmin"
-      [memberCount]="group.memberCount"
-    ></app-members-tab>
-
-    <app-meetings-tab
-      *ngIf="activeTab === 'meetings'"
-      [slug]="slug"
-      [isAdmin]="isAdmin"
-      [reloadToken]="meetingsReloadToken"
-    ></app-meetings-tab>
-
-    <app-requests-tab *ngIf="isAdmin && activeTab === 'requests'" [slug]="slug"></app-requests-tab>
-
-    <app-settings-tab
-      *ngIf="isAdmin && activeTab === 'settings'"
-      [slug]="slug"
-      [group]="group"
-      (groupUpdated)="onGroupUpdated($event)"
-      (groupDeleted)="onGroupDeleted()"
-    ></app-settings-tab>
+  <div class="hub-error" *ngIf="error && !loading">
+    <mat-icon>error_outline</mat-icon>
+    {{ error }}
   </div>
-</div>
+
+  <div class="page" *ngIf="group && !loading">
+
+    <!-- Tab Rail -->
+    <div class="tab-rail" role="tablist">
+
+      <button
+        class="tab-btn"
+        role="tab"
+        [attr.aria-selected]="activeTab === 'overview'"
+        [class.active]="activeTab === 'overview'"
+        (click)="switchTab('overview')"
+      >Overview</button>
+
+      <button
+        class="tab-btn"
+        role="tab"
+        [attr.aria-selected]="activeTab === 'members'"
+        [class.active]="activeTab === 'members'"
+        (click)="switchTab('members')"
+      >
+        Members
+        <span class="tab-badge" style="background:rgba(138,79,163,.12);color:#8a4fa3;">{{ group.memberCount }}</span>
+      </button>
+
+      <button
+        class="tab-btn"
+        role="tab"
+        [attr.aria-selected]="activeTab === 'meetings'"
+        [class.active]="activeTab === 'meetings'"
+        (click)="switchTab('meetings')"
+      >
+        Meetings
+        <span class="tab-badge" style="background:rgba(14,165,233,.12);color:#0ea5e9;">{{ group.meetings.length }}</span>
+      </button>
+
+      <button
+        *ngIf="isAdmin"
+        class="tab-btn admin-tab"
+        role="tab"
+        [attr.aria-selected]="activeTab === 'requests'"
+        [class.active]="activeTab === 'requests'"
+        (click)="switchTab('requests')"
+      >
+        Join Requests
+        <span class="tab-admin-badge">Admin</span>
+      </button>
+
+      <button
+        *ngIf="isAdmin"
+        class="tab-btn admin-tab"
+        role="tab"
+        [attr.aria-selected]="activeTab === 'settings'"
+        [class.active]="activeTab === 'settings'"
+        (click)="switchTab('settings')"
+      >
+        Settings
+        <span class="tab-admin-badge">Admin</span>
+      </button>
+
+    </div><!-- /tab-rail -->
+
+    <!-- Tab Panels -->
+    <div class="tab-panel">
+
+      <app-overview-tab
+        *ngIf="activeTab === 'overview'"
+        [group]="group"
+        [slug]="slug"
+        [isAdmin]="isAdmin"
+        (switchToMeetings)="switchTab('meetings')"
+        (leaveGroup)="onLeaveGroup()"
+      ></app-overview-tab>
+
+      <app-members-tab
+        *ngIf="activeTab === 'members'"
+        [slug]="slug"
+        [isAdmin]="isAdmin"
+        [memberCount]="group.memberCount"
+      ></app-members-tab>
+
+      <app-meetings-tab
+        *ngIf="activeTab === 'meetings'"
+        [slug]="slug"
+        [isAdmin]="isAdmin"
+        [reloadToken]="meetingsReloadToken"
+      ></app-meetings-tab>
+
+      <app-requests-tab
+        *ngIf="isAdmin && activeTab === 'requests'"
+        [slug]="slug"
+      ></app-requests-tab>
+
+      <app-settings-tab
+        *ngIf="isAdmin && activeTab === 'settings'"
+        [slug]="slug"
+        [group]="group"
+        (groupUpdated)="onGroupUpdated($event)"
+        (groupDeleted)="onGroupDeleted()"
+      ></app-settings-tab>
+
+    </div><!-- /tab-panel -->
+
+  </div><!-- /page -->
+
+</div><!-- /hub-shell -->

@@ -12,11 +12,8 @@ import {
   inject,
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { finalize } from 'rxjs';
 import {
   GroupAdminContactResponse,
@@ -36,10 +33,7 @@ import { ConfirmDialogComponent } from '@app/shared/components/confirm-dialog/co
   imports: [
     CommonModule,
     RouterModule,
-    MatButtonModule,
-    MatIconModule,
     MatProgressSpinnerModule,
-    MatSlideToggleModule,
   ],
   templateUrl: './overview-tab.component.html',
   styleUrl: './overview-tab.component.scss',
@@ -127,6 +121,40 @@ export class OverviewTabComponent implements OnInit, OnChanges {
       hour: 'numeric',
       minute: '2-digit',
     });
+  }
+
+  daysUntilNextMeeting(): string {
+    if (!this.group?.nextMeeting) return '0';
+    const diff = new Date(this.group.nextMeeting.nextOccurrence).getTime() - Date.now();
+    return String(Math.max(0, Math.ceil(diff / 86400000)));
+  }
+
+  currentUserInitial(): string {
+    return (this.authService.currentUser?.displayName?.[0] ?? '?').toUpperCase();
+  }
+
+  currentUserDisplayName(): string {
+    return this.authService.currentUser?.displayName ?? '';
+  }
+
+  avatarClass(userId: string): string {
+    const colors = ['av-violet', 'av-sky', 'av-green', 'av-rose', 'av-amber', 'av-teal', 'av-coral'];
+    const hash = userId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    return colors[hash % colors.length];
+  }
+
+  roleChipClass(roleType: string): string {
+    const map: Record<string, string> = {
+      GSR: 'chip-amber', Secretary: 'chip-teal', Treasurer: 'chip-coral',
+      IntergroupRep: 'chip-rose', LiteratureRep: 'chip-sky',
+      GrapevineRep: 'chip-violet', MeetingChair: 'chip-green',
+      ChipsPerson: 'chip-indigo', Other: 'chip-muted'
+    };
+    return map[roleType] ?? 'chip-muted';
+  }
+
+  trackByRoleId(_: number, role: GroupServiceRoleResponse): string {
+    return role.id;
   }
 
   roleLabel(roleType: string, customTitle: string | null): string {

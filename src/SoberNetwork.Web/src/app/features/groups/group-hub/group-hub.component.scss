@@ -1,7 +1,12 @@
 :host { display: block; }
 
-.hub-loading,
-.hub-error {
+.hub-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+.hub-loading, .hub-error {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -9,65 +14,57 @@
   padding: 60px 32px;
   color: var(--sn-text-muted, #7a7a75);
 }
+.hub-error { color: #b91c1c; }
 
-.hub-error {
-  color: #c0392b;
+/* ── Page card ──────────────────────────────────────────────────────── */
+.page {
+  background: rgba(255,255,255,.9);
+  border: 1px solid rgba(17,17,16,.09);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 16px 52px rgba(17,17,16,.07);
+  margin-top: 12px;
 }
 
-.hub-shell {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 32px 60px;
-}
-
+/* ── Tab rail ───────────────────────────────────────────────────────── */
 .tab-rail {
+  padding: 16px 20px 0;
+  border-bottom: 1px solid rgba(17,17,16,.09);
+  background: rgba(247,245,242,.8);
   display: flex;
+  flex-wrap: wrap;
   gap: 4px;
-  padding: 16px 0 0;
-  border-bottom: 2px solid var(--sn-border, rgba(17, 17, 16, 0.1));
-  margin-bottom: 32px;
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-
   &::-webkit-scrollbar { display: none; }
 }
 
 .tab-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  border: none;
+  appearance: none;
+  border: 1px solid transparent;
+  border-bottom: 0;
   background: transparent;
+  padding: 12px 18px 14px;
   font-family: 'Inter Tight', sans-serif;
-  font-weight: 600;
-  font-size: 0.9375rem;
-  color: var(--sn-text-mid, #3d3d3a);
+  font-weight: 800;
+  font-size: .88rem;
+  color: var(--sn-text-muted, #7a7a75);
+  border-radius: 14px 14px 0 0;
+  margin-bottom: -1px;
+  transition: color .15s, background .15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   cursor: pointer;
-  border-radius: 8px 8px 0 0;
-  position: relative;
   white-space: nowrap;
-  transition: color 0.15s, background 0.15s;
 
-  &:hover {
-    background: var(--sn-bg-soft, #f0ede8);
-    color: var(--sn-text, #111110);
-  }
+  &:hover { color: var(--sn-text, #111110); }
 
   &.active {
+    background: white;
     color: var(--sn-text, #111110);
-
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: var(--sn-cta-bg, #1a1a18);
-      border-radius: 2px 2px 0 0;
-    }
+    border-color: rgba(17,17,16,.09);
+    border-bottom-color: white;
   }
 
   &.admin-tab { color: var(--sn-text-muted, #7a7a75); }
@@ -81,26 +78,26 @@
   min-width: 20px;
   height: 20px;
   padding: 0 6px;
-  border-radius: 100px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  font-family: 'Inter', sans-serif;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 900;
+  font-family: 'Inter Tight', sans-serif;
 }
 
-.badge-violet { background: rgba(139, 92, 246, 0.15); color: #6d28d9; }
-.badge-sky { background: rgba(14, 165, 233, 0.15); color: #0369a1; }
-.badge-amber { background: rgba(245, 158, 11, 0.15); color: #b45309; }
-
-.tab-content {
-  animation: fadeIn 0.2s ease;
+.tab-admin-badge {
+  font-size: .68rem;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(138,79,163,.12);
+  color: #8a4fa3;
+  font-weight: 800;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+.tab-panel {
+  // panels set their own padding
 }
 
 @media (max-width: 768px) {
-  .hub-shell { padding: 0 16px 40px; }
-  .tab-btn { padding: 10px 12px; font-size: 0.875rem; }
+  .hub-shell { padding: 0 12px 48px; }
+  .tab-btn { padding: 10px 13px 12px; font-size: .82rem; }
 }

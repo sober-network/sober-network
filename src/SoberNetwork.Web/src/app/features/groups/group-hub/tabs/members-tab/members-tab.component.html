@@ -1,68 +1,95 @@
-<section class="members-tab">
-  <div class="members-toolbar">
-    <div>
-      <h2>Members</h2>
-      <p>{{ filteredMembers.length }} of {{ memberCount || allMembers.length }} in this home group</p>
-    </div>
+<div class="panel-inner">
 
-    <label class="sort-label">
-      <span>Sort</span>
-      <select class="sort-select" [ngModel]="selectedSortLabel()" (ngModelChange)="applySortOption($event)">
-        <option *ngFor="let option of sortOptions" [ngValue]="option.label">{{ option.label }}</option>
-      </select>
-    </label>
-  </div>
-
-  <div class="search-row">
+  <!-- Search + Sort bar -->
+  <div class="toolbar">
     <div class="search-wrap">
-      <mat-icon class="search-icon">search</mat-icon>
+      <span class="search-icon">🔍</span>
       <input
         class="search-input"
         type="search"
+        placeholder="Search members…"
+        autocomplete="off"
         [(ngModel)]="searchQuery"
         (input)="onSearch()"
-        placeholder="Search members by display name"
       />
-      <button *ngIf="searchQuery" type="button" class="clear-btn" (click)="clearSearch()" aria-label="Clear member search">✕</button>
+      <button
+        *ngIf="searchQuery"
+        type="button"
+        class="clear-btn"
+        (click)="clearSearch()"
+        aria-label="Clear search"
+      >✕</button>
+    </div>
+
+    <div class="sort-strip">
+      <span class="sort-label">Sort:</span>
+      <button
+        *ngFor="let opt of sortOptions"
+        class="sort-pill"
+        [class.active]="sortBy === opt.sortBy && sortDescending === opt.sortDescending"
+        type="button"
+        (click)="applySortOption(opt)"
+      >{{ opt.label }}</button>
     </div>
   </div>
 
+  <!-- Loading -->
   <div class="loading-state" *ngIf="loading">
     <mat-spinner diameter="36"></mat-spinner>
     <p>Loading members…</p>
   </div>
 
+  <!-- Error -->
   <div class="error-card" *ngIf="error && !loading">{{ error }}</div>
 
+  <!-- Member list -->
   <div class="member-list" *ngIf="!loading && filteredMembers.length > 0">
-    <article class="member-card" *ngFor="let member of filteredMembers; trackBy: trackById">
-      <div class="member-avatar">{{ memberInitial(member) }}</div>
-      <div class="member-main">
-        <div class="member-topline">
-          <div>
-            <div class="member-name">{{ member.displayName }}</div>
-            <div class="member-meta">Joined {{ joinedDate(member) }}</div>
+    <div
+      class="card member-card"
+      *ngFor="let member of filteredMembers; trackBy: trackById"
+      [class.self-card]="isSelf(member)"
+    >
+      <div class="member-row">
+        <div class="avatar" [ngClass]="avatarClass(member.userId)">{{ memberInitial(member) }}</div>
+        <div class="member-body">
+          <div class="member-headline">
+            <span class="member-name">{{ member.displayName }}</span>
+            <span *ngIf="isSelf(member)" class="self-label">(you)</span>
+            <span class="chip chip-green chip-sm">{{ humanizeStatus(member.status) }}</span>
+            <span class="chip chip-sm" [ngClass]="member.role === 'GroupAdmin' ? 'chip-violet' : 'chip-muted'">{{ member.role === 'GroupAdmin' ? 'Group Admin' : 'Member' }}</span>
           </div>
-          <span class="role-badge-pill" [ngClass]="roleClass(member.role)">{{ roleLabel(member.role) }}</span>
-        </div>
+          <div class="member-meta">
+            Joined {{ joinedDate(member) }}
+            <ng-container *ngIf="member.sobrietyDate"> · Sobriety: {{ formatSobriety(member.sobrietyDate) }}</ng-container>
+            <ng-container *ngIf="!member.sobrietyDate"> · Sobriety: not shared</ng-container>
+          </div>
+          <div class="contact-strip" *ngIf="member.email || member.phoneNumber">
+            <a *ngIf="member.email" [href]="emailHref(member.email)" class="contact-link">{{ member.email }}</a>
+            <a *ngIf="member.phoneNumber && phoneHref(member.phoneNumber) as ph" [href]="ph" class="contact-link">{{ member.phoneNumber }}</a>
+            <span *ngIf="!member.phoneNumber && member.email" class="muted-small">Phone not shared</span>
+          </div>
 
-        <div class="contact-links" *ngIf="member.email || member.phoneNumber">
-          <a *ngIf="member.email" [href]="emailHref(member.email)">
-            <mat-icon>mail</mat-icon>
-            <span>{{ member.email }}</span>
-          </a>
-          <a *ngIf="member.phoneNumber && phoneHref(member.phoneNumber) as phoneHrefValue" [href]="phoneHrefValue">
-            <mat-icon>call</mat-icon>
-            <span>{{ member.phoneNumber }}</span>
-          </a>
+          <!-- Admin controls -->
+          <div class="admin-controls" *ngIf="isAdmin && !isSelf(member)">
+            <span class="tab-admin-badge">Admin</span>
+            <button type="button" class="btn-ghost-sm" (click)="makeAdmin(member)" *ngIf="member.role !== 'GroupAdmin'">Make Admin</button>
+            <select class="status-select" [ngModel]="member.status" (ngModelChange)="changeStatus(member, $event)">
+              <option value="Active">Active</option>
+              <option value="Suspended">Suspended</option>
+              <option value="Banned">Banned</option>
+            </select>
+            <button type="button" class="btn-warn-xs" (click)="removeMember(member)">Remove</button>
+          </div>
         </div>
       </div>
-    </article>
+    </div>
   </div>
 
+  <!-- Empty state -->
   <div class="empty-state" *ngIf="!loading && !error && filteredMembers.length === 0">
-    <mat-icon>search_off</mat-icon>
-    <h3>No members found</h3>
-    <p>Try another name or clear your search to see everyone in the group.</p>
+    <div style="font-size:1.6rem;margin-bottom:8px;">🔍</div>
+    <div class="empty-title">No members match</div>
+    <div class="empty-sub">Try a different name, email, or phone number.</div>
   </div>
-</section>
+
+</div>

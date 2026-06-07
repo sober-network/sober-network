@@ -1,93 +1,92 @@
-<section class="settings-tab">
-  <div class="section-header">
-    <h2>Settings</h2>
-    <p>Tend the basics here so your online home stays welcoming and clear.</p>
-  </div>
-
+<div class="panel-inner" *ngIf="group">
   <div class="feedback-card" *ngIf="error">{{ error }}</div>
+  <div class="success-card" *ngIf="saveSuccess">{{ saveSuccess }}</div>
 
-  <ng-container *ngIf="group">
-    <section class="settings-card">
-      <div class="card-header">
-        <mat-icon class="card-avatar">settings</mat-icon>
+  <form [formGroup]="form" class="settings-grid" novalidate>
+    <section class="card form-card">
+      <div class="card-heading">
         <div>
-          <h3 class="card-title">Group details</h3>
-          <p class="card-subtitle">Slug: {{ group.slug }}</p>
+          <div class="eyebrow">Group details</div>
+          <h2>Shape the group hub</h2>
         </div>
+        <div class="slug-pill">{{ group.slug }}</div>
       </div>
 
-      <form [formGroup]="form" class="settings-form" novalidate>
-        <section>
-          <h3>Basics</h3>
+      <div class="field-grid">
+        <div class="field full-span">
+          <div class="label-row">
+            <label for="group-name">Group name</label>
+            <span>{{ form.get('name')?.value?.length ?? 0 }}/100</span>
+          </div>
+          <input id="group-name" class="text-input" type="text" formControlName="name" maxlength="100" />
+          <div class="field-error" *ngIf="form.get('name')?.touched && form.get('name')?.invalid">Enter a name between 2 and 100 characters.</div>
+        </div>
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Name</mat-label>
-            <input matInput formControlName="name" maxlength="100" />
-            <mat-hint align="end">{{ form.get('name')?.value?.length ?? 0 }}/100</mat-hint>
-            <mat-error *ngIf="form.get('name')?.hasError('required')">Name is required.</mat-error>
-            <mat-error *ngIf="form.get('name')?.hasError('minlength')">Name must be at least 2 characters.</mat-error>
-            <mat-error *ngIf="form.get('name')?.hasError('maxlength')">Name must be 100 characters or less.</mat-error>
-          </mat-form-field>
+        <div class="field full-span">
+          <div class="label-row">
+            <label for="group-description">Description</label>
+            <span>{{ form.get('description')?.value?.length ?? 0 }}/500</span>
+          </div>
+          <textarea id="group-description" class="text-input textarea-input" formControlName="description" rows="6" maxlength="500"></textarea>
+        </div>
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Description</mat-label>
-            <textarea matInput formControlName="description" rows="5" maxlength="500"></textarea>
-            <mat-hint align="end">{{ form.get('description')?.value?.length ?? 0 }}/500</mat-hint>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Time zone</mat-label>
-            <input matInput formControlName="timeZone" list="settings-timezones" maxlength="100" placeholder="e.g. America/New_York" />
-          </mat-form-field>
+        <div class="field full-span">
+          <div class="label-row">
+            <label for="group-timezone">Time zone</label>
+          </div>
+          <input id="group-timezone" class="text-input" type="text" formControlName="timeZone" list="settings-timezones" maxlength="100" placeholder="e.g. America/New_York" />
           <datalist id="settings-timezones">
             <option *ngFor="let zone of timeZones" [value]="zone"></option>
           </datalist>
-        </section>
-
-        <section>
-          <h3>Meetings</h3>
-          <p>Meeting times and details are managed separately.</p>
-          <a class="manage-link" [routerLink]="['/groups', slug]" [queryParams]="{ tab: 'meetings' }">
-            <mat-icon>edit_calendar</mat-icon>
-            <span>Manage Meetings</span>
-          </a>
-        </section>
-
-        <section>
-          <h3>Access</h3>
-          <div class="toggle-list">
-            <mat-slide-toggle formControlName="isPublic">Public group page</mat-slide-toggle>
-            <mat-slide-toggle formControlName="requiresApproval">Approve new members before they join</mat-slide-toggle>
-          </div>
-        </section>
-
-        <p class="success-message" *ngIf="saveSuccess">{{ saveSuccess }}</p>
-      </form>
-
-      <div class="card-actions card-actions-end">
-        <button mat-raised-button color="primary" type="button" [disabled]="saving" (click)="save()">
-          <mat-icon *ngIf="!saving">save</mat-icon>
-          <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
-          <span>{{ saving ? 'Saving…' : 'Save Changes' }}</span>
-        </button>
-      </div>
-    </section>
-
-    <section class="settings-card danger-card">
-      <div class="card-header">
-        <mat-icon class="card-avatar">warning</mat-icon>
-        <div>
-          <h3 class="card-title">Danger zone</h3>
-          <p class="card-subtitle">This action cannot be undone.</p>
         </div>
       </div>
-      <p>Delete the group if it is no longer needed. You will be asked to type the group name to confirm.</p>
-      <div class="card-actions">
-        <button mat-stroked-button class="danger-button" type="button" [disabled]="deleting" (click)="confirmDelete()">
-          <mat-icon>delete</mat-icon>
-          {{ deleting ? 'Deleting…' : 'Delete Group' }}
-        </button>
+    </section>
+
+    <section class="card side-card">
+      <div class="eyebrow">Access & meetings</div>
+      <h3 class="side-title">Visibility and joining</h3>
+
+      <label class="toggle-row">
+        <div>
+          <div class="toggle-title">Public group page</div>
+          <div class="toggle-copy">Anyone signed in can discover this group.</div>
+        </div>
+        <input type="checkbox" formControlName="isPublic" />
+      </label>
+
+      <label class="toggle-row">
+        <div>
+          <div class="toggle-title">Approval required</div>
+          <div class="toggle-copy">New members wait for a trusted servant to review.</div>
+        </div>
+        <input type="checkbox" formControlName="requiresApproval" />
+      </label>
+
+      <div class="meetings-card">
+        <div class="meetings-label">Meetings</div>
+        <p>Meeting times and details are managed in the meetings tab.</p>
+        <a class="manage-link" [routerLink]="['/groups', slug]" [queryParams]="{ tab: 'meetings' }">Manage Meetings →</a>
       </div>
     </section>
-  </ng-container>
-</section>
+
+    <div class="actions-row">
+      <button class="save-btn" type="button" [disabled]="saving" (click)="save()">
+        <mat-spinner *ngIf="saving" diameter="18"></mat-spinner>
+        <span>{{ saving ? 'Saving…' : 'Save Changes' }}</span>
+      </button>
+    </div>
+  </form>
+
+  <section class="card danger-card">
+    <div class="eyebrow danger-eyebrow">Danger zone</div>
+    <div class="danger-grid">
+      <div>
+        <h3 class="danger-title">Delete this group</h3>
+        <p class="danger-copy">Delete the group if it is no longer needed. You will be asked to type the group name to confirm.</p>
+      </div>
+      <button class="danger-btn" type="button" [disabled]="deleting" (click)="confirmDelete()">
+        {{ deleting ? 'Deleting…' : 'Delete Group' }}
+      </button>
+    </div>
+  </section>
+</div>

@@ -179,6 +179,19 @@ export class MeetingsTabComponent implements OnInit, OnChanges {
     return type === MeetingType.InPerson ? 'In-Person' : type === MeetingType.Online ? 'Online' : 'Hybrid';
   }
 
+  meetingEmoji(meeting: HubMeeting): string {
+    if (meeting.meetingType === MeetingType.Online) return '💻';
+    if (meeting.meetingType === MeetingType.Hybrid) return '🪜';
+    return '📖';
+  }
+
+  meetingIconClass(meeting: HubMeeting): string {
+    if (!meeting.isActive) return 'icon-gray';
+    if (meeting.meetingType === MeetingType.Online) return 'icon-sky';
+    if (meeting.meetingType === MeetingType.Hybrid) return 'icon-teal';
+    return 'icon-green';
+  }
+
   meetingIcon(meeting: HubMeeting): string {
     if (meeting.meetingType === MeetingType.InPerson) return 'location_on';
     if (meeting.meetingType === MeetingType.Online) return 'video_call';

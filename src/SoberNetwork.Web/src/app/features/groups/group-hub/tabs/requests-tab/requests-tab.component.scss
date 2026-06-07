@@ -1,103 +1,141 @@
-:host {
-  display: block;
-}
+.panel-inner { padding: 24px; }
 
-.requests-tab {
-  display: grid;
-  gap: 18px;
-}
-
-.section-header h2,
-.section-header p,
-.request-header h3,
-.request-header p,
-.request-header span {
-  margin: 0;
-}
-
-.section-header h2 {
-  font-family: 'Inter Tight', sans-serif;
-  font-size: 1.35rem;
-  font-weight: 800;
-  color: var(--sn-text, #111110);
-}
-
-.section-header p {
-  margin-top: 0.35rem;
-  color: var(--sn-text-muted, #7a7a75);
-}
-
-.error-card {
-  padding: 14px 16px;
+.alert-admin {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  background: rgba(138,79,163,.12);
+  border: 1px solid rgba(138,79,163,.18);
   border-radius: 12px;
-  background: rgba(192, 57, 43, 0.08);
-  color: #c0392b;
+  padding: 10px 14px;
+  color: #8a4fa3;
+  font-size: .84rem;
+  font-weight: 700;
+  margin-bottom: 14px;
 }
 
-.loading-state,
-.empty-state {
-  display: grid;
-  justify-items: center;
-  gap: 12px;
-  padding: 32px 12px;
-  text-align: center;
-  color: var(--sn-text-muted, #7a7a75);
+.admin-pill {
+  font-size: .68rem;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(138,79,163,.16);
+  color: #8a4fa3;
+  font-weight: 800;
 }
 
-.empty-state mat-icon {
-  font-size: 40px;
-  width: 40px;
-  height: 40px;
+.card {
+  background: white;
+  border: 1px solid rgba(17,17,16,.09);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 6px 20px rgba(17,17,16,.04);
 }
 
 .request-list {
-  display: grid;
-  gap: 16px;
-}
-
-.request-card {
-  padding: 20px;
-  border: 1px solid var(--sn-border, rgba(17, 17, 16, 0.08));
-  border-radius: 16px;
-  background: #fff;
-}
-
-.request-header {
   display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 12px;
+}
 
-  h3 {
-    font-family: 'Inter Tight', sans-serif;
-    font-size: 1.02rem;
-    font-weight: 800;
-    color: var(--sn-text, #111110);
-  }
+.request-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
 
-  p,
-  span {
-    color: var(--sn-text-muted, #7a7a75);
-  }
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 900;
+  font-size: 1rem;
+  color: white;
+  flex-shrink: 0;
+  background: linear-gradient(135deg,#9b63b4,#6d3e86);
+  box-shadow: 0 6px 16px rgba(17,17,16,.14);
+}
+
+.request-meta { min-width: 0; }
+.request-name {
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 900;
+  font-size: 1rem;
+  color: #111110;
+}
+.request-email,
+.request-date {
+  color: #7a7a75;
+  font-size: .84rem;
+  margin-top: 2px;
 }
 
 .request-message {
-  margin: 16px 0 0;
-  line-height: 1.6;
+  margin: 14px 0 0;
+  line-height: 1.7;
   padding: 14px 16px;
-  border-radius: 16px;
-  background: var(--sn-bg-soft, #f0ede8);
-  color: var(--sn-text-mid, #3d3d3a);
+  border-radius: 14px;
+  background: rgba(240,237,232,.9);
+  border: 1px solid rgba(17,17,16,.06);
+  color: #3d3d3a;
+  font-style: italic;
 }
 
 .request-actions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
   margin-top: 16px;
 }
 
-.approve-button {
-  background: #1b5e20;
-  color: #fff;
+.btn-approve,
+.btn-reject {
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 800;
+  font-size: .84rem;
+  cursor: pointer;
+}
+
+.btn-approve {
+  border: 1px solid #1a1a18;
+  background: #1a1a18;
+  color: white;
+}
+
+.btn-reject {
+  border: 1px solid rgba(220,38,38,.2);
+  background: rgba(220,38,38,.1);
+  color: #b91c1c;
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 16px;
+  color: #7a7a75;
+}
+
+.error-card {
+  background: rgba(220,38,38,.07);
+  border: 1px solid rgba(220,38,38,.2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  color: #b91c1c;
+  font-size: .9rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 32px 16px;
+  background: #f0ede8;
+  border-radius: 14px;
+  border: 1px solid rgba(17,17,16,.09);
+  color: #7a7a75;
 }

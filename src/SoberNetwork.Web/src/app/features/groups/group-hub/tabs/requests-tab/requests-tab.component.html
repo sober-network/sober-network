@@ -1,7 +1,7 @@
-<section class="requests-tab">
-  <div class="section-header">
-    <h2>Join Requests</h2>
-    <p>Review the folks waiting at the door and respond with care.</p>
+<div class="panel-inner">
+  <div class="alert-admin">
+    <span class="admin-pill">Admin</span>
+    <span>Approve or decline incoming requests privately and with care.</span>
   </div>
 
   <div class="error-card" *ngIf="error && !loading">{{ error }}</div>
@@ -13,28 +13,29 @@
 
   <ng-container *ngIf="!loading">
     <div class="empty-state" *ngIf="requests.length === 0">
-      <mat-icon>mark_email_read</mat-icon>
+      <div style="font-size:1.6rem;margin-bottom:8px;">✉️</div>
       <h3>No pending requests</h3>
       <p>When someone asks to join, their request will appear here.</p>
     </div>
 
     <div class="request-list" *ngIf="requests.length > 0">
-      <article class="request-card" *ngFor="let request of requests; trackBy: trackByUserId">
-        <div class="request-header">
-          <div>
-            <h3>{{ request.displayName }}</h3>
-            <p>{{ request.email }}</p>
+      <article class="card request-card" *ngFor="let request of requests; trackBy: trackByUserId">
+        <div class="request-head">
+          <div class="avatar">{{ request.displayName.charAt(0).toUpperCase() }}</div>
+          <div class="request-meta">
+            <div class="request-name">{{ request.displayName }}</div>
+            <div class="request-email">{{ request.email }}</div>
+            <div class="request-date">Requested {{ request.requestedAt | date:'medium' }}</div>
           </div>
-          <span>Requested {{ request.requestedAt | date:'medium' }}</span>
         </div>
 
         <p class="request-message" *ngIf="request.message">“{{ request.message }}”</p>
 
         <div class="request-actions">
-          <button mat-raised-button class="approve-button" type="button" [disabled]="actionUserId === request.userId" (click)="approve(request)">
+          <button class="btn-approve" type="button" [disabled]="actionUserId === request.userId" (click)="approve(request)">
             Approve
           </button>
-          <button mat-stroked-button color="warn" type="button" [disabled]="actionUserId === request.userId" (click)="confirmReject(request)">
+          <button class="btn-reject" type="button" [disabled]="actionUserId === request.userId" (click)="confirmReject(request)">
             Reject
           </button>
         </div>
@@ -50,4 +51,4 @@
       (page)="onPageChange($event)"
     ></mat-paginator>
   </ng-container>
-</section>
+</div>

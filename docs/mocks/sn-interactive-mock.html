@@ -54,15 +54,17 @@
       gap: 24px;
     }
     .nav-brand {
-      display: flex; align-items: center; gap: 10px;
+      display: flex; align-items: center; gap: 9px;
       text-decoration: none; flex-shrink: 0; cursor: pointer;
     }
-    .nav-logo-ring {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: conic-gradient(from 0deg, #e11d48, #f97316, #eab308, #22c55e, #0ea5e9, #8a4fa3, #e11d48);
+    .nav-logo-badge {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: #1a1a18;
       display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 1px rgba(56,189,248,.18), 0 4px 14px rgba(56,189,248,.18), 0 1px 3px rgba(0,0,0,.2);
     }
-    .nav-logo-ring svg { width: 18px; height: 18px; }
+    .nav-logo-badge svg { width: 32px; height: 32px; }
     .brand-name { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: 1rem; color: var(--text); letter-spacing: -0.02em; }
     .nav-center { display: flex; justify-content: center; }
     .nav-pill {
@@ -82,11 +84,11 @@
     .nlink[aria-expanded="true"] .caret-svg { transform: rotate(180deg); }
     .nav-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .nav-cta {
-      display: flex; align-items: center; gap: 8px; padding: 8px 16px 8px 20px;
-      background: linear-gradient(135deg, #1a1a18 0%, #2d2d2a 100%);
+      display: inline-flex; align-items: center; gap: 8px; padding: 7px 7px 7px 16px;
+      background: #1a1a18;
       color: white; border: none; border-radius: 100px;
-      font-family: 'Inter Tight', sans-serif; font-size: 0.875rem; font-weight: 700;
-      cursor: pointer; letter-spacing: -0.01em;
+      font-family: 'Inter Tight', sans-serif; font-size: 0.88rem; font-weight: 600;
+      cursor: pointer; white-space: nowrap;
       transition: opacity .15s;
     }
     .nav-cta:hover { opacity: .9; }
@@ -455,48 +457,94 @@
     }
     .hero-ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
     .landing-hero {
-      min-height: 560px; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; text-align: center;
-      background: linear-gradient(135deg, #dbeafe 0%, #fde8d8 60%, #fef3c7 100%);
-      padding: 100px 32px 80px; position: relative; overflow: hidden;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-start; text-align: center;
+      background-image:
+        linear-gradient(135deg,
+          rgba(212,232,245,0.88) 0%,
+          rgba(232,240,248,0.85) 20%,
+          rgba(247,245,240,0.82) 55%,
+          rgba(245,232,216,0.85) 80%,
+          rgba(240,223,200,0.88) 100%),
+        url('https://static.vecteezy.com/system/resources/previews/011/930/314/non_2x/young-friends-staying-together-outdoor-in-the-park-free-photo.jpg');
+      background-size: cover; background-position: center top;
+      padding: 110px 32px 90px; position: relative; overflow: hidden;
     }
-    .landing-hero::before {
-      content: ''; position: absolute; inset: 0;
-      background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1400&q=80') center/cover;
-      opacity: .06;
-    }
-    .landing-hero-inner { position: relative; max-width: 720px; }
+    .landing-hero-inner { position: relative; max-width: 880px; }
     .landing-eyebrow {
       display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(255,255,255,.8); backdrop-filter: blur(8px);
-      border: 1px solid rgba(17,17,16,.08); border-radius: 100px;
-      padding: 6px 14px; margin-bottom: 18px;
-      font-family: 'Inter Tight', sans-serif; font-size: .75rem; font-weight: 800;
-      color: var(--text-mid); letter-spacing: .04em; text-transform: uppercase;
+      background: rgba(255,255,255,.65); border: 1px solid rgba(17,17,16,.10);
+      border-radius: 100px; padding: 5px 14px; margin-bottom: 36px;
+      font-family: 'Inter Tight', sans-serif; font-size: .75rem; font-weight: 600;
+      color: var(--text-mid); letter-spacing: .08em; text-transform: uppercase;
+    }
+    .landing-eyebrow::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%; background: #38b86a;
     }
     .landing-title {
       font-family: 'Inter Tight', sans-serif;
-      font-size: clamp(2.5rem, 6vw, 4.2rem);
-      font-weight: 900; letter-spacing: -0.045em; line-height: 1.05; margin-bottom: 18px;
+      font-size: clamp(3rem, 6.5vw, 5.6rem);
+      font-weight: 900; letter-spacing: -0.04em; line-height: 1.12; margin-bottom: 20px;
+      color: var(--text); overflow: visible;
+    }
+    /* Block lines for stagger control */
+    .title-line { display: block; }
+    /* Inline serif word — gradient, italic, Instrument Serif */
+    .serif-inline {
+      font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400;
+      background: linear-gradient(120deg, #0ea5e9 0%, #fb923c 55%, #e11d48 100%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     .landing-title .serif {
+      display: block;
       font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400;
+      font-size: 1.05em; letter-spacing: -0.03em;
     }
     .landing-lead {
-      font-size: 1.1rem; color: var(--text-mid); line-height: 1.6;
-      margin-bottom: 32px; max-width: 540px; margin-left: auto; margin-right: auto;
+      font-size: 1.05rem; color: var(--text-mid); line-height: 1.7;
+      margin-bottom: 40px; max-width: 500px; margin-left: auto; margin-right: auto;
     }
-    .landing-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .landing-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; align-items: center; }
     .trust-strip {
-      display: flex; align-items: center; justify-content: center; gap: 28px; flex-wrap: wrap;
-      margin-top: 32px;
+      display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
+      margin-top: 48px;
     }
     .trust-item {
-      font-size: 0.82rem; color: var(--text-muted);
-      font-family: 'Inter Tight', sans-serif; font-weight: 600;
       display: flex; align-items: center; gap: 6px;
+      font-size: 0.8rem; color: var(--text-muted);
+      font-family: 'Inter Tight', sans-serif; font-weight: 500;
     }
-    .trust-icon { font-size: 0.9rem; }
+    .trust-icon {
+      width: 22px; height: 22px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .trust-icon svg { width: 12px; height: 12px; }
+    .trust-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text-muted); opacity: 0.4; display: inline-block; }
+    /* Marquee */
+    .sn-marquee {
+      background: white; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      overflow: hidden; padding: 20px 0;
+    }
+    .marquee-track {
+      display: flex; width: max-content;
+      animation: marquee 32s linear infinite;
+    }
+    .marquee-item {
+      display: flex; align-items: center; gap: 9px; padding: 4px 20px 4px 16px;
+      font-family: 'Inter Tight', sans-serif; font-size: 0.78rem; font-weight: 600;
+      letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-muted);
+      white-space: nowrap; border-right: 1px solid var(--border);
+    }
+    .mi-icon {
+      width: 28px; height: 28px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .mi-icon svg { width: 13px; height: 13px; }
+    @keyframes marquee {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
     .stats-row {
       display: flex; gap: 40px; justify-content: center; flex-wrap: wrap;
       padding: 28px 32px; background: white; border-bottom: 1px solid var(--border);
@@ -504,6 +552,21 @@
     .stat-item { text-align: center; }
     .stat-num { font-family: 'Inter Tight', sans-serif; font-size: 1.75rem; font-weight: 900; color: var(--text); }
     .stat-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-top: 3px; }
+
+    /* Back-to-top anchor — absolute top-right of each section-wrap */
+    .back-to-top {
+      position: absolute; top: 80px; right: 32px;
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1px solid rgba(17,17,16,.14);
+      background: rgba(255,255,255,.6);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-mid); text-decoration: none;
+      transition: background .15s, border-color .15s, transform .15s;
+    }
+    .back-to-top svg { width: 12px; height: 12px; }
+    .back-to-top:hover { background: rgba(255,255,255,.9); border-color: rgba(17,17,16,.28); transform: translateY(-2px); }
+    .section-dark .back-to-top { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.2); color: white; }
+    .section-dark .back-to-top:hover { background: rgba(255,255,255,.18); }
 
     /* Landing sections */
     .section { padding: 0; }
@@ -555,15 +618,126 @@
     .section-dark .section-lead { color: rgba(255,255,255,.7); }
     /* How It Works */
     .how-it-works-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 32px; }
-    .step-card { text-align: center; }
-    .step-num { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: var(--t-violet); color: var(--violet); font-family: 'Inter Tight', sans-serif; font-size: 1rem; font-weight: 900; margin-bottom: 16px; }
+    .step-card {
+      background: var(--bg-soft); border-radius: 20px; padding: 36px 28px;
+      display: flex; flex-direction: column; gap: 12px;
+      transition: box-shadow .18s, transform .12s;
+    }
+    .step-card:hover { box-shadow: 0 12px 36px rgba(17,17,16,.07); transform: translateY(-3px); }
+    .step-num { font-family: 'Inter Tight', sans-serif; font-size: 3rem; font-weight: 900; letter-spacing: -0.06em; color: rgba(17,17,16,.08); line-height: 1; }
+    /* (removed duplicate pill-style step-num) */
     .step-title { font-family: 'Inter Tight', sans-serif; font-size: 1.05rem; font-weight: 800; margin-bottom: 8px; }
     .step-desc { font-size: .88rem; color: var(--text-muted); line-height: 1.5; }
+    /* ── Beauty pass ────────────────────────────────────────────────────────── */
+
+    /* Gradient text utility */
+    .grad-text {
+      background: linear-gradient(120deg, #8a4fa3 0%, #e11d48 90%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    /* Hero serif line: warmer sky→rose matches the hero gradient — also applies to .serif-inline */
+    .landing-title .serif,
+    .serif-inline {
+      background: linear-gradient(120deg, #0ea5e9 0%, #fb923c 55%, #e11d48 100%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    /* The full serif line is slightly bigger */
+    .landing-title .serif { font-size: 1.05em; padding-bottom: 0.12em; }
+    /* Section serif accents: violet→rose throughout */
+    .section-title .serif-accent {
+      background: linear-gradient(120deg, #8a4fa3 0%, #e11d48 90%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    /* Don't clip text on dark backgrounds */
+    .section-dark .section-title .serif-accent {
+      background: none; -webkit-text-fill-color: rgba(255,255,255,.65);
+    }
+
+    /* Section eyebrow color per section */
+    #about    .section-eyebrow { color: var(--violet); }
+    #features .section-eyebrow { color: var(--sky); }
+    #how-it-works .section-eyebrow { color: var(--teal); }
+    #traditions .section-eyebrow { color: var(--amber); }
+    #final-cta .section-eyebrow { color: rgba(255,255,255,.5); }
+
+    /* Feature cards — colored top stripe + lifted shadow on hover */
+    .feature-card { position: relative; overflow: hidden; }
+    .feature-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--card-accent, var(--violet));
+      opacity: 0; transition: opacity .2s;
+    }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-card:hover {
+      box-shadow: 0 16px 48px rgba(17,17,16,.1), 0 2px 8px rgba(17,17,16,.04);
+      transform: translateY(-4px);
+    }
+    /* Step cards — left accent bar */
+    .step-card { position: relative; border-left: 3px solid transparent; }
+    .step-card:nth-child(1) { border-left-color: var(--violet); }
+    .step-card:nth-child(2) { border-left-color: var(--sky); }
+    .step-card:nth-child(3) { border-left-color: var(--green); }
+    .step-card:hover {
+      box-shadow: 0 16px 48px rgba(17,17,16,.09), 0 2px 8px rgba(17,17,16,.03);
+      transform: translateY(-4px);
+    }
+    /* Step number: ghost gradient */
+    .step-num {
+      background: linear-gradient(135deg, var(--violet), var(--sky));
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 3.2rem; font-weight: 900; letter-spacing: -0.06em;
+      opacity: .18; line-height: 1;
+    }
+
     /* Traditions */
     .traditions-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 28px; }
-    .tradition-card { background: white; border: 1px solid rgba(17,17,16,.08); border-radius: 14px; padding: 18px; }
-    .tradition-num { display: inline-block; padding: 3px 10px; border-radius: 999px; background: var(--t-violet); color: var(--violet); font-family: 'Inter Tight', sans-serif; font-size: .72rem; font-weight: 900; margin-bottom: 10px; }
-    .tradition-text { font-size: .85rem; color: var(--text-mid); line-height: 1.5; }
+    .tradition-card {
+      background: white; border: 1px solid rgba(17,17,16,.08);
+      border-radius: 16px; padding: 20px;
+      border-left: 4px solid var(--tcard-color, var(--violet));
+      transition: box-shadow .18s, transform .12s;
+    }
+    .tradition-card:hover { box-shadow: 0 10px 32px rgba(17,17,16,.08); transform: translateY(-2px); }
+    .tradition-num {
+      display: inline-block; padding: 3px 10px; border-radius: 999px;
+      background: var(--tcard-color, var(--violet));
+      color: white;
+      font-family: 'Inter Tight', sans-serif; font-size: .72rem; font-weight: 900; margin-bottom: 10px;
+      opacity: .85;
+    }
+    .tradition-text { font-size: .85rem; color: var(--text-mid); line-height: 1.6; }
+
+    /* Final CTA — mesh gradient */
+    .section-dark {
+      background: #1a1a18;
+      background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(138,79,163,.35) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 40%, rgba(14,165,233,.22) 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 90%, rgba(251,146,60,.15) 0%, transparent 50%);
+    }
+
+    /* Stat number: already colored via inline — just size-up */
+    .stat-num { font-size: 2.2rem; }
+
+    /* About section: very subtle pastel wash */
+    #about.section-white {
+      background-image: radial-gradient(ellipse at 90% 10%, rgba(138,79,163,.06) 0%, transparent 50%),
+                        radial-gradient(ellipse at 10% 80%, rgba(14,165,233,.05) 0%, transparent 50%);
+    }
+
+    /* Features section: soft warm bg */
+    #features { background: var(--bg-soft); }
+
+    /* How-it-works section: paper texture feel */
+    #how-it-works { background: white; }
+    #how-it-works .step-card { background: var(--bg-soft); }
+
+    /* Traditions section: same bg-soft */
+    #traditions { background: var(--bg-soft); }
 
     /* Dashboard card grid */
     .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
@@ -927,9 +1101,21 @@
   <div class="nav-inner">
 
     <a class="nav-brand" onclick="navigate('/')">
-      <div class="nav-logo-ring">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
-          <circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/>
+      <div class="nav-logo-badge">
+        <svg viewBox="0 0 3720 2593" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%"   stop-color="#38bdf8"/>
+              <stop offset="48%"  stop-color="#fb923c"/>
+              <stop offset="100%" stop-color="#fbbf24"/>
+            </linearGradient>
+          </defs>
+          <path fill="url(#logoGrad)" fill-rule="nonzero" d="M 1184.050781 1939.40625 C 1152.871094 1903.46875 1124.929688 1865.261719 1100.359375 1825.25 L 1058.839844 1825.234375 L 1079.539062 1789.476562 C 1074.121094 1779.621094 1068.890625 1769.671875 1063.871094 1759.632812 L 1063.859375 1759.625 C 1068.890625 1769.664062 1074.121094 1779.609375 1079.539062 1789.457031 L 1160.160156 1650.179688 L 1160.160156 1650.167969 C 1160.160156 1650.164062 1160.160156 1650.160156 1160.160156 1650.152344 L 1160.148438 1650.152344 L 1744.710938 640.210938 L 1744.699219 640.210938 C 1692.410156 647.109375 1640.988281 659.609375 1591.390625 677.421875 L 1116.070312 1498.679688 C 1116.328125 1500.179688 1116.601562 1501.671875 1116.878906 1503.160156 L 1116.871094 1503.160156 C 1116.601562 1501.679688 1116.328125 1500.191406 1116.058594 1498.691406 L 1021.96875 1661.269531 C 1022.230469 1662.015625 1022.488281 1662.757812 1022.761719 1663.5 L 1022.75 1663.503906 C 1022.488281 1662.761719 1022.21875 1662.019531 1021.960938 1661.273438 L 910.65625 1853.589844 C 900.449219 1871.222656 900.425781 1892.960938 910.59375 1910.613281 C 920.761719 1928.269531 939.574219 1939.15625 959.949219 1939.179688 L 1184.039062 1939.417969 Z"/>
+          <path fill="url(#logoGrad)" fill-rule="nonzero" d="M 2524.101562 1642.488281 C 2544.269531 1592.109375 2558.480469 1540.449219 2566.96875 1488.410156 L 2102.589844 682.089844 L 2007.410156 516.839844 L 1895.570312 322.628906 C 1885.398438 304.980469 1866.589844 294.089844 1846.21875 294.070312 C 1825.839844 294.050781 1807 304.890625 1796.800781 322.53125 L 1685.5 514.839844 C 1731.53125 506.460938 1778.300781 501.78125 1825.320312 500.910156 L 1846.03125 465.140625 L 1866.761719 501.128906 C 1867.679688 501.160156 1868.609375 501.191406 1869.53125 501.21875 C 1870.789062 501.261719 1872.039062 501.300781 1873.289062 501.351562 C 1871.109375 501.269531 1868.929688 501.199219 1866.75 501.140625 L 1947.660156 641.609375 C 1948.660156 641.761719 1949.660156 641.910156 1950.660156 642.058594 C 1949.660156 641.910156 1948.660156 641.761719 1947.660156 641.621094 L 2524.089844 1642.492188 Z"/>
+          <path fill="url(#logoGrad)" fill-rule="nonzero" d="M 2778.371094 1912.605469 C 2788.578125 1894.976562 2788.601562 1873.238281 2778.429688 1855.582031 L 2662.019531 1653.460938 C 2650.320312 1687.253906 2636.398438 1720.636719 2620.230469 1753.425781 L 2620.21875 1753.425781 C 2615.351562 1763.316406 2610.269531 1773.148438 2604.980469 1782.921875 L 2604.980469 1782.917969 L 2630.308594 1826.910156 L 2579.550781 1826.859375 L 2417.5 1826.683594 L 1262.488281 1825.453125 C 1295.171875 1866.945312 1332.671875 1905.296875 1374.75 1939.609375 L 2305.238281 1940.613281 C 2307.691406 1938.621094 2310.121094 1936.613281 2312.550781 1934.585938 L 2312.539062 1934.589844 C 2310.128906 1936.617188 2307.691406 1938.621094 2305.25 1940.613281 L 2495.710938 1940.816406 C 2498.960938 1937.078125 2502.179688 1933.308594 2505.378906 1929.503906 L 2505.371094 1929.503906 C 2502.179688 1933.308594 2498.960938 1937.078125 2495.71875 1940.8125 L 2728.960938 1941.066406 C 2749.328125 1941.089844 2768.160156 1930.238281 2778.371094 1912.605469 Z"/>
+          <path fill="url(#logoGrad)" fill-rule="nonzero" d="M 2459.460938 1952.777344 L 2320.320312 1952.628906 C 2084.109375 2147.03125 1742.820312 2185.246094 1462.5 2023.003906 C 1425.691406 2001.699219 1391.359375 1977.765625 1359.601562 1951.574219 C 1309.871094 1910.5625 1266.449219 1864.023438 1229.730469 1813.386719 L 1229.71875 1813.382812 C 1200.210938 1772.703125 1175.03125 1729.375 1154.359375 1684.15625 L 1097.339844 1782.675781 C 1103.050781 1792.984375 1108.980469 1803.183594 1115.128906 1813.265625 L 1173.390625 1813.34375 L 1115.148438 1813.296875 C 1145.109375 1862.394531 1180.230469 1908.734375 1220.300781 1951.425781 L 1290.890625 1951.515625 L 1220.328125 1951.457031 C 1275.859375 2010.632812 1340.878906 2062.789062 1414.730469 2105.53125 C 1763.121094 2307.171875 2195.101562 2233.917969 2459.449219 1952.804688 Z"/>
+          <path fill="url(#logoGrad)" fill-rule="nonzero" d="M 1920.910156 619.199219 L 1863.71875 519.898438 C 1851.890625 519.609375 1840.089844 519.539062 1828.308594 519.71875 C 1770.589844 520.609375 1713.25 527.371094 1657.199219 539.769531 C 1432.761719 589.410156 1229.058594 729.371094 1104.828125 944 C 980.609375 1158.628906 960.71875 1404.988281 1029.480469 1624.328125 L 1098.140625 1505.691406 C 1066.910156 1335.320312 1093.808594 1153.410156 1187.359375 991.769531 C 1280.910156 830.128906 1425.25 716.179688 1588.519531 658.429688 L 1657.179688 539.800781 L 1588.53125 658.421875 C 1647.480469 637.570312 1708.890625 624.050781 1771.28125 618.238281 L 1828.289062 519.75 L 1828.28125 519.75 L 1771.289062 618.238281 C 1820.800781 613.640625 1870.921875 613.898438 1920.898438 619.21875 Z"/>
+          <path fill="url(#logoGrad)" fill-rule="nonzero" d="M 2576.261719 1795.628906 C 2580.011719 1789.148438 2583.660156 1782.636719 2587.230469 1776.101562 L 2587.230469 1776.070312 C 2615.5 1724.183594 2637.808594 1670.574219 2654.351562 1616.050781 C 2766.421875 1246.808594 2614.75 835.738281 2266.359375 634.101562 C 2192.5 591.359375 2114.890625 560.960938 2035.921875 542.289062 L 2105.429688 662.980469 C 2143.949219 677.488281 2181.789062 695.339844 2218.589844 716.628906 C 2498.921875 878.878906 2635.789062 1193.839844 2584.910156 1495.480469 L 2619.28125 1555.179688 L 2584.910156 1495.519531 C 2574.539062 1556.96875 2556.378906 1617.871094 2530.039062 1676.816406 L 2558.378906 1726.027344 L 2530.03125 1676.84375 C 2519.300781 1700.875 2507.199219 1724.578125 2493.730469 1747.863281 C 2480.25 1771.148438 2465.71875 1793.441406 2450.230469 1814.722656 L 2564.800781 1814.84375 C 2568.679688 1808.523438 2572.5 1802.109375 2576.261719 1795.628906 Z"/>
         </svg>
       </div>
       <span class="brand-name">Sober Network</span>
@@ -1025,56 +1211,103 @@ const PAGES = {
   // LANDING PAGE — matches Angular landing.component.html
   // ───────────────────────────────────────────────────────────────────────────
   '/': () => `
-<!-- ════ HERO SECTION ════ -->
-<section class="hero-section">
-  <div class="hero-wrap">
-    <div class="hero-eyebrow">A.A. home groups, online</div>
-    <h1 class="hero-title">
-      A place to stay<br>
-      <span class="serif-accent">close</span> to your program.
+<!-- ════ HERO ════ -->
+<section class="landing-hero">
+  <div class="landing-hero-inner">
+    <div class="landing-eyebrow">Private · Secure · Tradition-aligned</div>
+    <h1 class="landing-title">
+      <span class="title-line" style="margin-left:-1.8rem">A private <span class="serif-inline">home</span></span>
+      <span class="title-line" style="margin-left:2.4rem">for <span class="serif-inline">you</span> and</span>
+      <span class="serif" style="margin-left:0.4rem">your home group.</span>
     </h1>
-    <p class="hero-lead">Sober Network gives home groups a simple, private space for meetings, members, and connection between gatherings. Built around the 12 Traditions.</p>
-    <div class="hero-ctas">
-      <button class="btn primary" onclick="navigate('/meetings')">Find a Meeting<span class="arrow-circle"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M1 11L11 1M11 1H4.5M11 1V7.5"/></svg></span></button>
-      <button class="btn ghost" onclick="scrollToSection('how-it-works')">How It Works</button>
+    <p class="landing-lead">Sober Network gives home groups a simple, private space for meetings, members, and connection between gatherings. Built around the 12 Traditions.</p>
+    <div class="landing-actions">
+      <button class="btn dark" onclick="signIn()">
+        Join Your Group
+        <span class="arrow-circle"><svg viewBox="0 0 12 12" fill="none"><path d="M1 11L11 1M11 1H4.5M11 1V7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </button>
+      <button class="btn outline" onclick="navigate('/meetings')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 7.5L7 5L9 7.5M7 5V10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Find a Meeting Near You
+      </button>
     </div>
     <div class="trust-strip">
-      <span class="trust-item"><span class="trust-icon">🔒</span> No public member rosters</span>
-      <span class="trust-item"><span class="trust-icon">📖</span> Built on the 12 Traditions</span>
-      <span class="trust-item"><span class="trust-icon">🌐</span> Free for home groups</span>
+      <span class="trust-item">
+        <span class="trust-icon" style="background:var(--t-indigo)"><svg viewBox="0 0 12 12" fill="none" stroke="var(--indigo)" stroke-width="1.4"><path d="M6 1.5L2 3.5V6.5C2 8.8 4 10.7 6 11C8 10.7 10 8.8 10 6.5V3.5L6 1.5Z" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        No public member data
+      </span>
+      <span class="trust-dot"></span>
+      <span class="trust-item">
+        <span class="trust-icon" style="background:var(--t-green)"><svg viewBox="0 0 12 12" fill="none" stroke="var(--green)" stroke-width="1.6"><path d="M2 6L5 9L10 3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        Free
+      </span>
+      <span class="trust-dot"></span>
+      <span class="trust-item">
+        <span class="trust-icon" style="background:var(--t-amber)"><svg viewBox="0 0 12 12" fill="none" stroke="var(--amber)" stroke-width="1.4"><rect x="2" y="1.5" width="8" height="9" rx="1.5"/><path d="M4 4.5H8M4 6.5H7M4 8.5H6" stroke-linecap="round"/></svg></span>
+        Built on the 12 Traditions
+      </span>
     </div>
   </div>
 </section>
 
-<!-- ════ STATS ROW ════ -->
-<div class="stats-row">
-  <div class="stat-item"><div class="stat-num">142</div><div class="stat-label">Active Members</div></div>
-  <div class="stat-item"><div class="stat-num">18</div><div class="stat-label">Home Groups</div></div>
-  <div class="stat-item"><div class="stat-num">74</div><div class="stat-label">Weekly Meetings</div></div>
+<!-- ════ MARQUEE ════ -->
+<div class="sn-marquee">
+  <div class="marquee-track">
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-sky)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--sky)" stroke-width="1.3"><circle cx="7" cy="7" r="4.5"/><path d="M7 4.5V7L9 8.5" stroke-linecap="round"/></svg></span>Meeting Finder</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-violet)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--violet)" stroke-width="1.3"><rect x="2" y="2" width="10" height="10" rx="2"/><path d="M5 5H9M5 7H9M5 9H7" stroke-linecap="round"/></svg></span>Group Hub</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-rose)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--rose)" stroke-width="1.3"><path d="M7 2C4.8 2 3 3.8 3 6C3 8.2 4.8 10 7 10C7.8 10 8.5 9.8 9.1 9.3L11.5 11.5M9.1 9.3C9.7 8.6 10 7.8 10 7" stroke-linecap="round"/></svg></span>Phone List</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-green)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--green)" stroke-width="1.3"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M5 1V4M9 1V4M2 6H12" stroke-linecap="round"/></svg></span>Meeting Schedule</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-indigo)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--indigo)" stroke-width="1.3"><circle cx="5" cy="4.5" r="2"/><circle cx="9.5" cy="4.5" r="2"/><path d="M1 12C1 9.8 2.8 8 5 8" stroke-linecap="round"/><path d="M7 10C7.7 9 8.7 8 9.5 8C11.5 8 13 9.7 13 11.5" stroke-linecap="round"/></svg></span>Members-Only Access</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-amber)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--amber)" stroke-width="1.3"><path d="M7 1C3.7 1 1 3.7 1 7C1 10.3 3.7 13 7 13" stroke-linecap="round"/><path d="M13 9L11 7L9 9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>No Ads. No Tracking.</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-teal)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--teal)" stroke-width="1.3"><path d="M3.5 7L5.5 9.5L10.5 4.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Group Autonomy (T4)</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-coral)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--coral)" stroke-width="1.3"><path d="M4 10H3C2.4 10 2 9.6 2 9V3C2 2.4 2.4 2 3 2H11C11.6 2 12 2.4 12 3V9C12 9.6 11.6 10 11 10H8L7 12.5L6 10H4Z" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Bulletin Board · Soon</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-violet)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--violet)" stroke-width="1.3"><rect x="2" y="1.5" width="10" height="11" rx="2"/><path d="M5 5H9M5 7H9M5 9H7" stroke-linecap="round"/></svg></span>Documents · Soon</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-rose)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--rose)" stroke-width="1.3"><circle cx="7" cy="5" r="2.5"/><path d="M2 12C2 9.8 4.2 8 7 8C9.8 8 12 9.8 12 12" stroke-linecap="round"/></svg></span>Service Roles · Soon</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-amber)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--amber)" stroke-width="1.3"><path d="M7 2L8.5 5.5H12.5L9.5 7.7L10.5 11.5L7 9.3L3.5 11.5L4.5 7.7L1.5 5.5H5.5L7 2Z"/></svg></span>Anonymity First (T11)</div>
+    <!-- duplicate for seamless loop -->
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-sky)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--sky)" stroke-width="1.3"><circle cx="7" cy="7" r="4.5"/><path d="M7 4.5V7L9 8.5" stroke-linecap="round"/></svg></span>Meeting Finder</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-violet)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--violet)" stroke-width="1.3"><rect x="2" y="2" width="10" height="10" rx="2"/><path d="M5 5H9M5 7H9M5 9H7" stroke-linecap="round"/></svg></span>Group Hub</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-rose)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--rose)" stroke-width="1.3"><path d="M7 2C4.8 2 3 3.8 3 6C3 8.2 4.8 10 7 10C7.8 10 8.5 9.8 9.1 9.3L11.5 11.5M9.1 9.3C9.7 8.6 10 7.8 10 7" stroke-linecap="round"/></svg></span>Phone List</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-green)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--green)" stroke-width="1.3"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M5 1V4M9 1V4M2 6H12" stroke-linecap="round"/></svg></span>Meeting Schedule</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-indigo)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--indigo)" stroke-width="1.3"><circle cx="5" cy="4.5" r="2"/><circle cx="9.5" cy="4.5" r="2"/><path d="M1 12C1 9.8 2.8 8 5 8" stroke-linecap="round"/><path d="M7 10C7.7 9 8.7 8 9.5 8C11.5 8 13 9.7 13 11.5" stroke-linecap="round"/></svg></span>Members-Only Access</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-amber)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--amber)" stroke-width="1.3"><path d="M7 1C3.7 1 1 3.7 1 7C1 10.3 3.7 13 7 13" stroke-linecap="round"/><path d="M13 9L11 7L9 9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>No Ads. No Tracking.</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-teal)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--teal)" stroke-width="1.3"><path d="M3.5 7L5.5 9.5L10.5 4.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Group Autonomy (T4)</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-coral)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--coral)" stroke-width="1.3"><path d="M4 10H3C2.4 10 2 9.6 2 9V3C2 2.4 2.4 2 3 2H11C11.6 2 12 2.4 12 3V9C12 9.6 11.6 10 11 10H8L7 12.5L6 10H4Z" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Bulletin Board · Soon</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-violet)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--violet)" stroke-width="1.3"><rect x="2" y="1.5" width="10" height="11" rx="2"/><path d="M5 5H9M5 7H9M5 9H7" stroke-linecap="round"/></svg></span>Documents · Soon</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-rose)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--rose)" stroke-width="1.3"><circle cx="7" cy="5" r="2.5"/><path d="M2 12C2 9.8 4.2 8 7 8C9.8 8 12 9.8 12 12" stroke-linecap="round"/></svg></span>Service Roles · Soon</div>
+    <div class="marquee-item"><span class="mi-icon" style="background:var(--t-amber)"><svg viewBox="0 0 14 14" fill="none" stroke="var(--amber)" stroke-width="1.3"><path d="M7 2L8.5 5.5H12.5L9.5 7.7L10.5 11.5L7 9.3L3.5 11.5L4.5 7.7L1.5 5.5H5.5L7 2Z"/></svg></span>Anonymity First (T11)</div>
+  </div>
 </div>
 
-<!-- ════ ABOUT SECTION ════ -->
-<section class="section" id="about">
+<!-- ════ ABOUT ════ -->
+<section class="section section-white" id="about">
   <div class="section-wrap">
-    <div class="section-eyebrow">About</div>
-    <h2 class="section-title">Meetings, members,<br><span class="serif-accent">connection.</span></h2>
-    <p class="section-lead">Every A.A. home group needs a place to stay organized between meetings. Sober Network provides that — without advertising, gamification, or public member rosters.</p>
+    <a class="back-to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" aria-label="Back to top"><svg viewBox="0 0 12 12" fill="none"><path d="M1 9L6 4L11 9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <div style="display:flex;align-items:flex-start;gap:60px;flex-wrap:wrap;margin-bottom:40px;">
+      <div style="flex:1;min-width:260px;">
+        <div class="section-eyebrow">About Sober Network</div>
+        <h2 class="section-title">Meetings, members,<br><span class="serif-accent">connection.</span></h2>
+        <p class="section-lead">Every A.A. home group needs a place to stay organized between meetings. Sober Network provides that — without advertising, gamification, or public member rosters.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:20px;flex-shrink:0;padding-top:8px;margin-right:52px;">
+        <div class="stat-item">
+          <div class="stat-num" style="color:var(--violet)">142</div>
+          <div class="stat-label">Active Members</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" style="color:var(--sky)">18</div>
+          <div class="stat-label">Home Groups</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" style="color:var(--green)">74</div>
+          <div class="stat-label">Meetings</div>
+        </div>
+      </div>
+    </div>
     <div class="card-grid three-col">
-      <div class="feature-card">
-        <div class="feature-icon" style="background:var(--t-violet)">🏘️</div>
-        <h3 class="feature-title">Home Groups</h3>
-        <p class="feature-desc">Each group gets its own private hub — meetings, members, documents, and more.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon" style="background:var(--t-sky)">🗓️</div>
-        <h3 class="feature-title">Meeting Schedule</h3>
-        <p class="feature-desc">Online, in-person, or hybrid. Publish your meetings to the public finder.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon" style="background:var(--t-green)">📞</div>
-        <h3 class="feature-title">Phone List</h3>
-        <p class="feature-desc">Members share their number with their group — opt-in, never public.</p>
-      </div>
+      <div class="feature-card" style="--card-accent:var(--violet)"><div class="feature-icon" style="background:var(--t-violet)">🏘️</div><h3 class="feature-title">Home Groups</h3><p class="feature-desc">Each group gets its own private hub — meetings, members, documents, and more.</p></div>
+      <div class="feature-card" style="--card-accent:var(--sky)"><div class="feature-icon" style="background:var(--t-sky)">🗓️</div><h3 class="feature-title">Meeting Schedule</h3><p class="feature-desc">Online, in-person, or hybrid. Publish your meetings to the public finder.</p></div>
+      <div class="feature-card" style="--card-accent:var(--rose)"><div class="feature-icon" style="background:var(--t-rose)">📞</div><h3 class="feature-title">Phone List</h3><p class="feature-desc">Members share their number with their group — opt-in, never public.</p></div>
     </div>
   </div>
 </section>
@@ -1082,36 +1315,37 @@ const PAGES = {
 <!-- ════ FEATURES SECTION ════ -->
 <section class="section bg-soft" id="features">
   <div class="section-wrap">
+    <a class="back-to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" aria-label="Back to top"><svg viewBox="0 0 12 12" fill="none"><path d="M1 9L6 4L11 9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     <div class="section-eyebrow">Features</div>
     <h2 class="section-title">Everything a<br><span class="serif-accent">home group</span> needs.</h2>
     <p class="section-lead">Features designed with the 12 Traditions in mind — autonomy, anonymity, and simplicity at every layer.</p>
     <div class="card-grid three-col">
-      <div class="feature-card">
+      <div class="feature-card" style="--card-accent:var(--amber)">
         <div class="feature-icon" style="background:var(--t-amber)">📖</div>
         <h3 class="feature-title">Daily Readings <span class="pill-cs">Soon</span></h3>
         <p class="feature-desc">A daily reflection to start the day grounded in recovery.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card" style="--card-accent:var(--rose)">
         <div class="feature-icon" style="background:var(--t-rose)">📌</div>
         <h3 class="feature-title">Bulletin Board <span class="pill-cs">Soon</span></h3>
         <p class="feature-desc">Post announcements and important news to your group.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card" style="--card-accent:var(--teal)">
         <div class="feature-icon" style="background:var(--t-teal)">🏅</div>
         <h3 class="feature-title">Service Roles <span class="pill-cs">Soon</span></h3>
         <p class="feature-desc">Track GSR, secretary, treasurer, and other trusted servants.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card" style="--card-accent:var(--indigo)">
         <div class="feature-icon" style="background:var(--t-indigo)">🪑</div>
         <h3 class="feature-title">Chair Schedule <span class="pill-cs">Soon</span></h3>
         <p class="feature-desc">See who's chairing upcoming meetings at a glance.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card" style="--card-accent:var(--coral)">
         <div class="feature-icon" style="background:var(--t-coral)">🗳️</div>
         <h3 class="feature-title">Group Conscience <span class="pill-cs">Soon</span></h3>
         <p class="feature-desc">Conduct business with T2-compliant voting and minutes.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card" style="--card-accent:var(--violet)">
         <div class="feature-icon" style="background:var(--t-violet)">📄</div>
         <h3 class="feature-title">Documents <span class="pill-cs">Soon</span></h3>
         <p class="feature-desc">Store group files, guidelines, and shared resources.</p>
@@ -1123,24 +1357,25 @@ const PAGES = {
 <!-- ════ HOW IT WORKS SECTION ════ -->
 <section class="section" id="how-it-works">
   <div class="section-wrap">
+    <a class="back-to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" aria-label="Back to top"><svg viewBox="0 0 12 12" fill="none"><path d="M1 9L6 4L11 9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     <div class="section-eyebrow">How It Works</div>
     <h2 class="section-title">Start simple,<br><span class="serif-accent">grow together.</span></h2>
     <p class="section-lead">Getting your home group started takes minutes. No credit card required, ever.</p>
-    <div class="steps-grid">
+    <div class="how-it-works-grid">
       <div class="step-card">
-        <div class="step-number">1</div>
-        <h3 class="step-title">Create a group</h3>
-        <p class="step-desc">Name your group, set a meeting schedule, and invite your members.</p>
+        <div class="step-num">01</div>
+        <h3 class="step-title">A trusted servant creates the group</h3>
+        <p class="step-desc">An admin registers the home group with a private slug. They set whether new members require approval — group conscience decides (T2). Admin is a trusted servant role, not a ruler.</p>
       </div>
       <div class="step-card">
-        <div class="step-number">2</div>
-        <h3 class="step-title">Invite members</h3>
-        <p class="step-desc">Share a private link. Members join with their first name only — no public roster.</p>
+        <div class="step-num">02</div>
+        <h3 class="step-title">Members join with a private invite link</h3>
+        <p class="step-desc">Members register with first name only. Last name, phone, sobriety date, and location are always optional — never required. One account can belong to multiple groups (T3).</p>
       </div>
       <div class="step-card">
-        <div class="step-number">3</div>
-        <h3 class="step-title">Stay connected</h3>
-        <p class="step-desc">Phone list, announcements, daily readings, and more — between meetings.</p>
+        <div class="step-num">03</div>
+        <h3 class="step-title">Stay connected between meetings</h3>
+        <p class="step-desc">Access the phone list, check the meeting schedule, read announcements, and reach out to other members — all inside a private, members-only group space.</p>
       </div>
     </div>
   </div>
@@ -1149,23 +1384,24 @@ const PAGES = {
 <!-- ════ 12 TRADITIONS SECTION ════ -->
 <section class="section bg-soft" id="traditions">
   <div class="section-wrap">
+    <a class="back-to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" aria-label="Back to top"><svg viewBox="0 0 12 12" fill="none"><path d="M1 9L6 4L11 9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     <div class="section-eyebrow">Principles</div>
     <h2 class="section-title">Built around the<br><span class="serif-accent">12 Traditions.</span></h2>
     <p class="section-lead">The 12 Traditions of A.A. guide everything we build. Anonymity (T11/T12) and group autonomy (T4) are non-negotiable architectural constraints.</p>
     <div class="traditions-grid">
-      <div class="tradition-card">
+      <div class="tradition-card" style="--tcard-color:var(--violet)">
         <span class="tradition-num">T11</span>
         <span class="tradition-text">No public member directories. First names only by default.</span>
       </div>
-      <div class="tradition-card">
+      <div class="tradition-card" style="--tcard-color:var(--sky)">
         <span class="tradition-num">T4</span>
         <span class="tradition-text">Each group is autonomous. Data never leaks between groups.</span>
       </div>
-      <div class="tradition-card">
+      <div class="tradition-card" style="--tcard-color:var(--amber)">
         <span class="tradition-num">T5</span>
         <span class="tradition-text">No advertising, sponsorships, or engagement mechanics.</span>
       </div>
-      <div class="tradition-card">
+      <div class="tradition-card" style="--tcard-color:var(--green)">
         <span class="tradition-num">T7</span>
         <span class="tradition-text">Fully self-supporting. Free for home groups, forever.</span>
       </div>
@@ -1176,9 +1412,9 @@ const PAGES = {
 <!-- ════ FINAL CTA SECTION ════ -->
 <section class="section section-dark" id="final-cta">
   <div class="section-wrap" style="text-align:center;">
+    <a class="back-to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" aria-label="Back to top"><svg viewBox="0 0 12 12" fill="none"><path d="M1 9L6 4L11 9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     <div class="section-eyebrow" style="color:var(--text-muted);">Ready?</div>
     <h2 class="section-title" style="color:white;">Find a meeting<br><span class="serif-accent" style="color:rgba(255,255,255,.7);">or start your group.</span></h2>
-    <p class="section-lead" style="color:rgba(255,255,255,.7);">Join thousands of home groups using Sober Network.</p>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:32px;">
       <button class="btn primary" onclick="navigate('/meetings')">Find a Meeting<span class="arrow-circle"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M1 11L11 1M11 1H4.5M11 1V7.5"/></svg></span></button>
       <button class="btn ghost" onclick="signIn()">Create Account</button>
@@ -1616,9 +1852,8 @@ function renderNav() {
         <a class="nlink ${currentRoute==='/meetings'?'active':''}" onclick="navigate('/meetings')">Find a Meeting</a>
       </div>`;
     actions.innerHTML = `
-      <button class="btn ghost sm" onclick="signIn()">Sign In</button>
-      <button class="nav-cta" onclick="signIn()">Create Account
-        <span class="arrow-circle"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M1 11L11 1M11 1H4.5M11 1V7.5"/></svg></span>
+      <button class="nav-cta" onclick="signIn()">Sign In
+        <span class="arrow-circle"><svg viewBox="0 0 12 12" fill="none"><path d="M1 11L11 1M11 1H4.5M11 1V7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </button>`;
   } else {
     // Member: Find a Meeting, My Groups dropdown, user pill

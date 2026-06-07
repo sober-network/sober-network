@@ -3,8 +3,9 @@
   <div class="hero-eyebrow">Private · Secure · Tradition-aligned</div>
 
   <h1 class="hero-h1 fade-up">
-    A private home<br> for your<br>
-    <span class="serif-line">home group.</span>
+    <span class="title-line" style="margin-left:-1.8rem">A private <span class="serif-inline">home</span></span>
+    <span class="title-line" style="margin-left:2.4rem">for <span class="serif-inline">you</span> and</span>
+    <span class="serif-line" style="margin-left:0.4rem">your home group.</span>
   </h1>
 
   <p class="hero-sub fade-up delay-1">
@@ -36,13 +37,26 @@
   </div>
 
   <div class="hero-trust fade-up delay-3">
-    <span>Anonymous by design</span>
+    <span class="trust-item">
+      <span class="trust-icon" style="background:rgba(79,70,229,.12)">
+        <svg viewBox="0 0 12 12" fill="none" stroke="#4f46e5" stroke-width="1.4"><path d="M6 1.5L2 3.5V6.5C2 8.8 4 10.7 6 11C8 10.7 10 8.8 10 6.5V3.5L6 1.5Z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      No public member data
+    </span>
     <span class="trust-dot"></span>
-    <span>No ads, no tracking</span>
+    <span class="trust-item">
+      <span class="trust-icon" style="background:rgba(42,148,89,.12)">
+        <svg viewBox="0 0 12 12" fill="none" stroke="#2a9459" stroke-width="1.6"><path d="M2 6L5 9L10 3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      Free
+    </span>
     <span class="trust-dot"></span>
-    <span>Fully self-supporting (T7)</span>
-    <span class="trust-dot"></span>
-    <span>Free to join</span>
+    <span class="trust-item">
+      <span class="trust-icon" style="background:rgba(217,119,6,.12)">
+        <svg viewBox="0 0 12 12" fill="none" stroke="#d97706" stroke-width="1.4"><rect x="2" y="1.5" width="8" height="9" rx="1.5"/><path d="M4 4.5H8M4 6.5H7M4 8.5H6" stroke-linecap="round"/></svg>
+      </span>
+      Built on the 12 Traditions
+    </span>
   </div>
 </section>
 
@@ -78,55 +92,50 @@
     <div class="about-layout">
       <div>
         <p class="section-eyebrow">About Sober Network</p>
-        <h2 class="section-h2 fade-up">
-          Built around your group,<br>guided by <em class="serif-accent">tradition.</em>
-        </h2>
+        <h2 class="section-h2 fade-up">Meetings, members,<br><em class="serif-accent">connection.</em></h2>
         <p class="section-body fade-up delay-1">
-          We help A.A. home groups stay connected between meetings — phone lists,
-          schedules, bulletin boards, shared documents — all without compromising
-          anyone's anonymity or crossing group boundaries.
-          No ads. No engagement tricks. No outside contributions.
-          Just the tools your group actually needs.
+          Every A.A. home group needs a place to stay organized between meetings.
+          Sober Network provides that — without advertising, gamification, or public member rosters.
         </p>
-        <div class="about-badges fade-up delay-2">
-          <span class="badge badge-violet">
-            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="4" y="7" width="6" height="6" rx="1.5"/><path d="M5 7V5C5 3.9 5.9 3 7 3C8.1 3 9 3.9 9 5V7" stroke-linecap="round"/></svg>
-            Anonymous by design
-          </span>
-          <span class="badge badge-green">
-            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3.5 7L5.5 9.5L10.5 4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            12-Tradition compliant
-          </span>
-          <span class="badge badge-amber">
-            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7" cy="7" r="5.5"/><path d="M7 4V7L9 9" stroke-linecap="round"/></svg>
-            No outside funding
-          </span>
-          <span class="badge badge-sky">
-            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M7 2C4.2 2 2 4.2 2 7C2 9.8 4.2 12 7 12C9.8 12 12 9.8 12 7"/><path d="M10 2L12 4L10 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Multi-group membership
-          </span>
-        </div>
       </div>
 
       <div class="stats-col fade-up delay-1">
-        <img src="https://static.vecteezy.com/system/resources/previews/055/160/636/non_2x/a-colorful-logo-with-people-holding-hand-free-vector.jpg"
-             alt="Community holding hands" class="about-img">
         <div class="stat-row">
           <div class="stat-number"><span class="stat-plus" *ngIf="stats.memberCount > 0">+</span>{{ stats.memberCount }}</div>
-          <div class="stat-label">Members enrolled across all groups</div>
+          <div class="stat-label">Active Members</div>
         </div>
         <div class="stat-row">
           <div class="stat-number"><span class="stat-plus" *ngIf="stats.groupCount > 0">+</span>{{ stats.groupCount }}</div>
-          <div class="stat-label">Active home groups on the network</div>
+          <div class="stat-label">Home Groups</div>
         </div>
         <div class="stat-row">
           <div class="stat-number"><span class="stat-plus" *ngIf="stats.meetingCount > 0">+</span>{{ stats.meetingCount }}</div>
-          <div class="stat-label">Meetings listed this week</div>
+          <div class="stat-label">Meetings</div>
         </div>
-        <div class="stat-row">
-          <div class="stat-number">12</div>
-          <div class="stat-label">Traditions guiding every design decision</div>
+      </div>
+    </div>
+
+    <div class="about-cards fade-up delay-2">
+      <div class="about-card" style="--card-accent:var(--sn-icon-violet)">
+        <div class="feature-icon" style="background:var(--sn-tint-violet)">
+          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-violet)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="14" height="14" rx="3"/><path d="M7 8H13M7 11H13M7 14H10"/></svg>
         </div>
+        <div class="about-card-title">Home Groups</div>
+        <div class="about-card-desc">Each group gets its own private hub — meetings, members, documents, and more.</div>
+      </div>
+      <div class="about-card" style="--card-accent:var(--sn-icon-sky)">
+        <div class="feature-icon" style="background:var(--sn-tint-sky)">
+          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-sky)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8H17M7 4V6M13 4V6"/></svg>
+        </div>
+        <div class="about-card-title">Meeting Schedule</div>
+        <div class="about-card-desc">Online, in-person, or hybrid. Publish your meetings to the public finder.</div>
+      </div>
+      <div class="about-card" style="--card-accent:var(--sn-icon-rose)">
+        <div class="feature-icon" style="background:var(--sn-tint-rose)">
+          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-rose)" stroke-width="1.5" stroke-linecap="round"><path d="M5 4.5C5.5 4 6.5 3.5 7.5 4L9 5.5C9.5 6 9.5 7 9 7.5L8.5 8C9.3 9 10.8 10.5 12 11.5L12.5 11C13 10.5 14 10.5 14.5 11L16 12.5C16.5 13.5 16 14.5 15.5 15C13 17.5 3 10.5 5 4.5Z" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="about-card-title">Phone List</div>
+        <div class="about-card-desc">Members share their number with their group — opt-in, never public.</div>
       </div>
     </div>
   </div>
@@ -138,82 +147,60 @@
     <a href="#" class="back-to-top" aria-label="Back to top">
       <svg viewBox="0 0 12 12" fill="none"><path d="M1 9L6 4L11 9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </a>
-    <div class="features-header-row">
-      <div>
-        <p class="section-eyebrow">Platform Features</p>
-        <h2 class="section-h2 fade-up">Where <em class="serif-accent">community</em><br>meets recovery.</h2>
-      </div>
-      <p class="features-sub fade-up delay-1">
-        Every feature passes a single test: <em>"Does this help carry the message to the alcoholic who still suffers?"</em> If it doesn't, it doesn't ship.
-      </p>
-    </div>
+    <p class="section-eyebrow">Features</p>
+    <h2 class="section-h2 fade-up">Everything a <em class="serif-accent">home group</em> needs.</h2>
+    <p class="section-body fade-up delay-1">
+      Features designed with the 12 Traditions in mind — autonomy, anonymity, and simplicity at every layer.
+    </p>
 
     <div class="features-grid">
-      <!-- Live features -->
-      <div class="feature-card fade-up">
-        <div class="feature-icon" style="background:var(--sn-tint-violet)">
-          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-violet)" stroke-width="1.5" stroke-linecap="round"><path d="M7 8.5V6C7 4.3 8.3 3 10 3C11.7 3 13 4.3 13 6V8.5"/><rect x="4" y="8.5" width="12" height="9" rx="2"/><circle cx="10" cy="13" r="1.5" fill="var(--sn-icon-violet)"/></svg>
-        </div>
-        <div class="feature-title">Private Phone List</div>
-        <div class="feature-desc">Members opt-in their phone numbers. Only authenticated group members can see the list. T11/T12 enforced at the data layer — never cached or indexed.</div>
-        <span class="feature-badge live">LIVE</span>
-      </div>
-      <div class="feature-card fade-up delay-1">
-        <div class="feature-icon" style="background:var(--sn-tint-rose)">
-          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-rose)" stroke-width="1.5" stroke-linecap="round"><circle cx="7.5" cy="7" r="2.5"/><circle cx="12.5" cy="7" r="2.5"/><path d="M3 16C3 13.2 5 11 7.5 11"/><path d="M10 13C10.8 11.8 11.6 11 12.5 11C15 11 17 13 17 16"/></svg>
-        </div>
-        <div class="feature-title">Group Hub</div>
-        <div class="feature-desc">Each home group gets its own private space with a member roster, meeting details, and quick-access tools — all gated to members only.</div>
-        <span class="feature-badge live">LIVE</span>
-      </div>
-      <div class="feature-card fade-up delay-2">
-        <div class="feature-icon" style="background:var(--sn-tint-sky)">
-          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-sky)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8H17M7 4V6M13 4V6"/></svg>
-        </div>
-        <div class="feature-title">Meeting Management</div>
-        <div class="feature-desc">Manage recurring schedules, formats (in-person, online, hybrid), Zoom links, and passcodes. Members-only Zoom details never shown publicly.</div>
-        <span class="feature-badge live">LIVE</span>
-      </div>
-      <div class="feature-card fade-up delay-3">
+      <div class="feature-card fade-up" style="--card-accent:var(--sn-icon-amber)">
         <div class="feature-icon" style="background:var(--sn-tint-amber)">
-          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-amber)" stroke-width="1.5" stroke-linecap="round"><circle cx="10" cy="10" r="7"/><path d="M7 10L9.5 12.5L14 7.5" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-amber)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="14" height="14" rx="2.5"/><path d="M7 7H13M7 10H13M7 13H10"/></svg>
         </div>
-        <div class="feature-title">Public Meeting Finder</div>
-        <div class="feature-desc">A public map for finding open meetings near you — no login required. Only meeting times and formats shown. No member data exposed (T11/T12).</div>
-        <span class="feature-badge live">LIVE</span>
+        <div class="feature-title">Daily Readings</div>
+        <div class="feature-desc">A daily reflection to start the day grounded in recovery.</div>
+        <span class="feature-badge soon">SOON</span>
       </div>
-      <!-- Coming soon -->
-      <div class="feature-card fade-up">
-        <div class="feature-icon" style="background:var(--sn-tint-green)">
-          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-green)" stroke-width="1.5" stroke-linecap="round"><path d="M5 12H4C3.4 12 3 11.6 3 11V4C3 3.4 3.4 3 4 3H16C16.6 3 17 3.4 17 4V11C17 11.6 16.6 12 15 12H13L10 16L7 12H5Z" stroke-linejoin="round"/></svg>
+      <div class="feature-card fade-up delay-1" style="--card-accent:var(--sn-icon-rose)">
+        <div class="feature-icon" style="background:var(--sn-tint-rose)">
+          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-rose)" stroke-width="1.5" stroke-linecap="round"><path d="M5 12H4C3.4 12 3 11.6 3 11V4C3 3.4 3.4 3 4 3H16C16.6 3 17 3.4 17 4V11C17 11.6 16.6 12 15 12H13L10 16L7 12H5Z" stroke-linejoin="round"/></svg>
         </div>
         <div class="feature-title">Bulletin Board</div>
-        <div class="feature-desc">Trusted servants post announcements, event reminders, and group conscience calls. New members go through a probationary moderation queue.</div>
-        <span class="feature-badge soon">COMING SOON</span>
+        <div class="feature-desc">Post announcements and important news to your group.</div>
+        <span class="feature-badge soon">SOON</span>
       </div>
-      <div class="feature-card fade-up delay-1">
+      <div class="feature-card fade-up delay-2" style="--card-accent:var(--sn-icon-teal)">
         <div class="feature-icon" style="background:var(--sn-tint-teal)">
-          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-teal)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8H17M7 4V6M13 4V6M7 12H10M7 15H13"/></svg>
+          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-teal)" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="2.5"/><circle cx="13" cy="7" r="2.5"/><path d="M4 16C4 13.5 5.5 11.5 7 11.5"/><path d="M10.5 13.5C11 12.5 12 11.5 13 11.5C15.5 11.5 17 13.5 17 16"/></svg>
         </div>
-        <div class="feature-title">Events Calendar</div>
-        <div class="feature-desc">Group-scoped events for speaker nights, chip ceremonies, and group conscience meetings. All visibility rules respect group autonomy (T4).</div>
-        <span class="feature-badge soon">COMING SOON</span>
+        <div class="feature-title">Service Roles</div>
+        <div class="feature-desc">Track GSR, secretary, treasurer, and other trusted servants.</div>
+        <span class="feature-badge soon">SOON</span>
       </div>
-      <div class="feature-card fade-up delay-2">
+      <div class="feature-card fade-up" style="--card-accent:var(--sn-icon-indigo)">
         <div class="feature-icon" style="background:var(--sn-tint-indigo)">
-          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-indigo)" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="2" width="12" height="16" rx="2"/><path d="M7 7H13M7 10H13M7 13H10"/></svg>
+          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-indigo)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8H17M7 4V6M13 4V6"/></svg>
         </div>
-        <div class="feature-title">Document Library</div>
-        <div class="feature-desc">Store group conscience notes, reading lists, formats, and meeting agendas. Accessible only to that group's members — no cross-group access ever (T4).</div>
-        <span class="feature-badge soon">COMING SOON</span>
+        <div class="feature-title">Chair Schedule</div>
+        <div class="feature-desc">See who's chairing upcoming meetings at a glance.</div>
+        <span class="feature-badge soon">SOON</span>
       </div>
-      <div class="feature-card fade-up delay-3">
+      <div class="feature-card fade-up delay-1" style="--card-accent:var(--sn-icon-coral)">
         <div class="feature-icon" style="background:var(--sn-tint-coral)">
-          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-coral)" stroke-width="1.5" stroke-linecap="round"><path d="M10 3L12 7H16L13 10L14 14L10 12L6 14L7 10L4 7H8L10 3Z"/></svg>
+          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-coral)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="14" height="14" rx="2.5"/><path d="M7 10L9.5 12.5L14 7.5" stroke-linejoin="round"/></svg>
         </div>
-        <div class="feature-title">Sobriety Milestones</div>
-        <div class="feature-desc">Opt-in anniversary recognition — members choose whether to share. Chip ceremonies posted to the group bulletin. Sobriety date always private.</div>
-        <span class="feature-badge soon">COMING SOON</span>
+        <div class="feature-title">Group Conscience</div>
+        <div class="feature-desc">Conduct business with T2-compliant voting and minutes.</div>
+        <span class="feature-badge soon">SOON</span>
+      </div>
+      <div class="feature-card fade-up delay-2" style="--card-accent:var(--sn-icon-violet)">
+        <div class="feature-icon" style="background:var(--sn-tint-violet)">
+          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-violet)" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="2" width="12" height="16" rx="2"/><path d="M7 7H13M7 10H13M7 13H10"/></svg>
+        </div>
+        <div class="feature-title">Documents</div>
+        <div class="feature-desc">Store group files, guidelines, and shared resources.</div>
+        <span class="feature-badge soon">SOON</span>
       </div>
     </div>
   </div>
@@ -248,11 +235,6 @@
         <div class="step-title">Stay connected between meetings</div>
         <div class="step-desc">Access the phone list, check the meeting schedule, read announcements, and reach out to other members — all inside a private, members-only group space.</div>
       </div>
-    </div>
-
-    <div class="steps-visual fade-up delay-3">
-      <img src="https://static.vecteezy.com/system/resources/previews/058/730/043/non_2x/teamwork-logo-icon-design-free-vector.jpg"
-           alt="Teamwork and community connection">
     </div>
   </div>
 </section>
@@ -291,90 +273,35 @@
   </div>
 </section>
 
-<!-- ══════════════ NEWCOMER CTA (guest only) ═════════════════════════════════ -->
-<section class="sn-newcomer" *ngIf="!auth.isLoggedIn">
-  <div class="section-wrap">
-    <div class="newcomer-inner">
-      <div class="newcomer-text fade-up">
-        <h2>New to A.A.?<br>You are <em class="serif-accent">not alone.</em></h2>
-        <p>
-          The only requirement for membership is a desire to stop drinking.
-          No records, no commitments, no judgment. A.A. members have been
-          where you are — and they want to help.
-        </p>
-      </div>
-      <div class="newcomer-actions fade-up delay-1">
-        <a href="https://www.aa.org/find-aa" target="_blank" rel="noopener" class="btn-light">
-          Find a Meeting Near You
-          <span class="arrow-circle-dark">
-            <svg viewBox="0 0 12 12" fill="none"><path d="M1 11L11 1M11 1H4.5M11 1V7.5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </span>
-        </a>
-        <a href="https://www.aa.org" target="_blank" rel="noopener" class="btn-outline-white">Visit AA.org</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════ DESIGN PRINCIPLES ════════════════════════════════════════ -->
-<section id="principles" class="sn-section sn-principles">
-  <div class="section-wrap">
-    <a href="#" class="back-to-top" aria-label="Back to top">
-      <svg viewBox="0 0 12 12" fill="none"><path d="M1 9L6 4L11 9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </a>
-    <p class="section-eyebrow">Design Principles</p>
-    <h2 class="section-h2 fade-up">Three <em class="serif-accent">unbreakable</em> commitments.</h2>
-    <p class="section-body fade-up delay-1">Not policies. Not settings. Hard-coded architectural constraints.</p>
-
-    <div class="principles-grid">
-      <div class="principle-card fade-up">
-        <div class="pi-wrap" style="background:var(--sn-tint-violet)">
-          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-violet)" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="9" width="12" height="9" rx="2"/><path d="M7 9V6.5C7 5 8.3 3.5 10 3.5C11.7 3.5 13 5 13 6.5V9"/></svg>
-        </div>
-        <div class="principle-title">Anonymity is non-negotiable</div>
-        <div class="principle-desc">No public profiles. No member directories. No searchable rosters. Display names default to first name only. T11 and T12 are enforced at the query layer — not just the UI.</div>
-      </div>
-      <div class="principle-card fade-up delay-1">
-        <div class="pi-wrap" style="background:var(--sn-tint-green)">
-          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-green)" stroke-width="1.5" stroke-linecap="round"><path d="M10 2L3 5.5V10.5C3 14 6 17 10 18C14 17 17 14 17 10.5V5.5L10 2Z"/><path d="M7 10L9.5 12.5L14 7.5" stroke-linejoin="round"/></svg>
-        </div>
-        <div class="principle-title">Groups stay autonomous</div>
-        <div class="principle-desc">Every group is its own island. Members of Group A cannot see Group B's phone list, members, or announcements. T4 is enforced at the query layer with mandatory group_id filters.</div>
-      </div>
-      <div class="principle-card fade-up delay-2">
-        <div class="pi-wrap" style="background:var(--sn-tint-amber)">
-          <svg viewBox="0 0 20 20" fill="none" stroke="var(--sn-icon-amber)" stroke-width="1.5" stroke-linecap="round"><path d="M10 3C10 3 5 6 5 11C5 13.8 7.2 16 10 16C12.8 16 15 13.8 15 11C15 6 10 3 10 3Z"/><path d="M10 9V12"/></svg>
-        </div>
-        <div class="principle-title">No engagement mechanics</div>
-        <div class="principle-desc">No likes, streaks, leaderboards, or notifications engineered to pull you back. Our primary purpose is carrying the message, not maximizing time on site (T5).</div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- ══════════════ 12 TRADITIONS ════════════════════════════════════════════ -->
 <section id="traditions" class="sn-section sn-traditions">
   <div class="section-wrap">
     <a href="#" class="back-to-top" aria-label="Back to top">
       <svg viewBox="0 0 12 12" fill="none"><path d="M1 9L6 4L11 9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </a>
-    <div class="traditions-layout">
-      <div class="traditions-left fade-up">
-        <p class="section-eyebrow">Our foundation</p>
-        <h2 class="section-h2">The 12<br><em class="serif-accent">Traditions.</em></h2>
-        <p class="traditions-intro">
-          Not suggestions — the foundations A.A. has found essential for unity and survival.
-          Every feature, query, and design decision on this platform is evaluated against them.
-        </p>
-        <p class="traditions-note">
-          Sober Network is not affiliated with Alcoholics Anonymous World Services, Inc.
-        </p>
+    <p class="section-eyebrow">Principles</p>
+    <h2 class="section-h2 fade-up">Built around the <em class="serif-accent">12 Traditions.</em></h2>
+    <p class="section-body fade-up delay-1">
+      The 12 Traditions of A.A. guide everything we build. Anonymity (T11/T12) and group autonomy (T4)
+      are non-negotiable architectural constraints.
+    </p>
+
+    <div class="traditions-card-grid fade-up delay-2">
+      <div class="tradition-card" style="--tcard-color:var(--sn-icon-violet)">
+        <span class="tradition-num">T11</span>
+        <span class="tradition-text">No public member directories. First names only by default.</span>
       </div>
-      <div class="traditions-list fade-up delay-1">
-        <div class="tradition-row" *ngFor="let t of traditions">
-          <span class="trad-num">{{ t.num }}</span>
-          <p class="trad-text">{{ t.text }}</p>
-        </div>
+      <div class="tradition-card" style="--tcard-color:var(--sn-icon-sky)">
+        <span class="tradition-num">T4</span>
+        <span class="tradition-text">Each group is autonomous. Data never leaks between groups.</span>
+      </div>
+      <div class="tradition-card" style="--tcard-color:var(--sn-icon-amber)">
+        <span class="tradition-num">T5</span>
+        <span class="tradition-text">No advertising, sponsorships, or engagement mechanics.</span>
+      </div>
+      <div class="tradition-card" style="--tcard-color:var(--sn-icon-green)">
+        <span class="tradition-num">T7</span>
+        <span class="tradition-text">Fully self-supporting. Free for home groups, forever.</span>
       </div>
     </div>
   </div>
@@ -383,17 +310,16 @@
 <!-- ══════════════ FINAL CTA ═════════════════════════════════════════════════ -->
 <section class="sn-final-cta" *ngIf="!auth.isLoggedIn">
   <div class="final-cta-inner fade-up">
-    <p class="section-eyebrow" style="text-align:center">Ready to get started?</p>
-    <h2>Your group deserves<br><em class="serif-accent">a private home.</em></h2>
-    <p>Set up your group in minutes. Free, anonymous, tradition-aligned.</p>
+    <p class="section-eyebrow">Ready?</p>
+    <h2>Find a meeting<br><em class="serif-accent">or start your group.</em></h2>
     <div class="final-cta-actions">
-      <button type="button" (click)="openRegister()" class="btn-dark">
-        Join Your Group
-        <span class="arrow-circle">
-          <svg viewBox="0 0 12 12" fill="none"><path d="M1 11L11 1M11 1H4.5M11 1V7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <a routerLink="/meetings" class="btn-light">
+        Find a Meeting
+        <span class="arrow-circle-dark">
+          <svg viewBox="0 0 12 12" fill="none"><path d="M1 11L11 1M11 1H4.5M11 1V7.5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </span>
-      </button>
-      <a routerLink="/meetings" class="btn-outline">Find a Meeting</a>
+      </a>
+      <button type="button" (click)="openRegister()" class="btn-outline-white">Create Account</button>
     </div>
   </div>
 </section>

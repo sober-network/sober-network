@@ -57,11 +57,25 @@ nav.sn-nav {
   }
 }
 
-.nav-logo {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
+/* ── Logo badge ────────────────────────────────────────────────────────────── */
+.nav-logo-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #1a1a18;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  box-shadow:
+    0 0 0 1px rgba(56,189,248,.18),
+    0 4px 14px rgba(56,189,248,.15),
+    0 1px 3px rgba(0,0,0,.2);
+
+  svg {
+    width: 32px;
+    height: 32px;
+  }
 }
 
 /* ── Pill nav container ────────────────────────────────────────────────────── */

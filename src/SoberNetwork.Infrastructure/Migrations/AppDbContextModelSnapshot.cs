@@ -345,6 +345,9 @@ namespace SoberNetwork.Infrastructure.Migrations
                     b.Property<Guid>("GroupId")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsEmailShared")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsPhoneShared")
                         .HasColumnType("boolean");
 
@@ -380,6 +383,51 @@ namespace SoberNetwork.Infrastructure.Migrations
                     b.HasIndex("GroupId", "Status", "DeletedAt");
 
                     b.ToTable("group_memberships", "public");
+                });
+
+            modelBuilder.Entity("SoberNetwork.Domain.Entities.GroupServiceRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CustomTitle")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RoleType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GroupId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("GroupId", "RoleType");
+
+                    b.HasIndex("GroupId", "UserId");
+
+                    b.ToTable("group_service_roles", "public");
                 });
 
             modelBuilder.Entity("SoberNetwork.Domain.Entities.Meeting", b =>
@@ -660,6 +708,25 @@ namespace SoberNetwork.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SoberNetwork.Domain.Entities.GroupServiceRole", b =>
+                {
+                    b.HasOne("SoberNetwork.Domain.Entities.Group", "Group")
+                        .WithMany("ServiceRoles")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SoberNetwork.Domain.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SoberNetwork.Domain.Entities.Meeting", b =>
                 {
                     b.HasOne("SoberNetwork.Domain.Entities.Group", "Group")
@@ -702,6 +769,8 @@ namespace SoberNetwork.Infrastructure.Migrations
                     b.Navigation("Meetings");
 
                     b.Navigation("Memberships");
+
+                    b.Navigation("ServiceRoles");
                 });
 #pragma warning restore 612, 618
         }

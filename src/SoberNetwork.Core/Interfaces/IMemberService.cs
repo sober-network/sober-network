@@ -47,14 +47,22 @@ public interface IMemberService
     /// <summary>Updates whether the authenticated member shares their phone number within a specific group.</summary>
     Task<(bool Success, string? Error)> SetGroupPhoneVisibilityAsync(
         Guid userId, string groupSlug, bool isShared, CancellationToken ct = default);
-
-    /// <summary>Returns the group phone list for members who opted in to sharing.</summary>
+
+    /// <summary>Updates whether the authenticated member shares their email address within a specific group.</summary>
+    Task<(bool Success, string? Error)> SetGroupEmailVisibilityAsync(
+        Guid userId, string groupSlug, bool isShared, CancellationToken ct = default);
+ 
+    /// <summary>Returns the group phone list for members who opted in to sharing.</summary>
     Task<(IReadOnlyList<PhoneListEntryResponse>? List, string? Error)> GetGroupPhoneListAsync(
         Guid requestingUserId, string groupSlug, CancellationToken ct = default);
-
-    /// <summary>Returns a group-scoped profile view for another member.</summary>
-    Task<(MemberDetailResponse? Member, string? Error)> GetMemberInGroupContextAsync(
-        Guid requestingUserId, string groupSlug, Guid targetUserId, CancellationToken ct = default);
+
+    /// <summary>Returns active group admins with contact details the group is allowed to see.</summary>
+    Task<(IReadOnlyList<GroupAdminContactResponse>? List, string? Error)> GetGroupAdminContactsAsync(
+        Guid requestingUserId, string groupSlug, CancellationToken ct = default);
+
+    /// <summary>Returns a group-scoped profile view for another member.</summary>
+    Task<(MemberDetailResponse? Member, string? Error)> GetMemberInGroupContextAsync(
+        Guid requestingUserId, string groupSlug, Guid targetUserId, CancellationToken ct = default);
 
     /// <summary>Returns all members on the platform for SuperAdmin use.</summary>
     Task<IReadOnlyList<AdminMemberResponse>> GetAllMembersAsync(CancellationToken ct = default);

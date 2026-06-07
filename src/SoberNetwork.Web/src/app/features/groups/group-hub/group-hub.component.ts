@@ -1,47 +1,50 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { catchError, finalize, forkJoin, map, of } from 'rxjs';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
+import { finalize, Subject, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { DAYS_OF_WEEK, GroupResponse, MeetingResponse } from '@app/core/models';
-import { GroupService } from '@app/core/services/group.service';
+import { COUNTRIES, GroupResponse, LANGUAGES, US_STATES } from '@app/core/models';
 import { ClientLogService } from '@app/core/services/client-log.service';
-import { ConfirmDialogComponent } from '@app/shared/components/confirm-dialog/confirm-dialog.component';
+import { GroupService } from '@app/core/services/group.service';
 import { GroupHeroComponent } from '../group-hero/group-hero.component';
-import { GroupPageWrapperComponent } from '../group-page-wrapper/group-page-wrapper.component';
-import { GroupFormModalComponent } from '../group-form-modal/group-form-modal.component';
+import { MeetingFormModalComponent } from '../meeting-form-modal/meeting-form-modal.component';
+import { MeetingsTabComponent } from './tabs/meetings-tab/meetings-tab.component';
+import { MembersTabComponent } from './tabs/members-tab/members-tab.component';
+import { OverviewTabComponent } from './tabs/overview-tab/overview-tab.component';
+import { RequestsTabComponent } from './tabs/requests-tab/requests-tab.component';
+import { SettingsTabComponent } from './tabs/settings-tab/settings-tab.component';
+
+export type HubTab = 'overview' | 'members' | 'meetings' | 'requests' | 'settings';
 
 @Component({
   selector: 'app-group-hub',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     RouterModule,
-    MatButtonModule,
-    MatCardModule,
-    MatChipsModule,
     MatIconModule,
     MatProgressSpinnerModule,
     GroupHeroComponent,
-    GroupPageWrapperComponent,
+    OverviewTabComponent,
+    MembersTabComponent,
+    MeetingsTabComponent,
+    RequestsTabComponent,
+    SettingsTabComponent,
   ],
   templateUrl: './group-hub.component.html',
   styleUrl: './group-hub.component.scss',
 })
-export class GroupHubComponent implements OnInit {
+export class GroupHubComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly groupService = inject(GroupService);
   private readonly dialog = inject(MatDialog);
   private readonly log = inject(ClientLogService);
   private readonly cdr = inject(ChangeDetectorRef);
-
-  readonly daysOfWeek = DAYS_OF_WEEK;
+  private readonly destroy$ = new Subject<void>();
 
   slug = '';
   group: GroupResponse | null = null;
@@ -49,99 +52,69 @@ export class GroupHubComponent implements OnInit {
   leaving = false;
   isAdmin = false;
   error = '';
+  activeTab: HubTab = 'overview';
+  meetingsReloadToken = 0;
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
       this.slug = params.get('slug') ?? '';
-      this.log.info('GroupHub.ngOnInit', { slug: this.slug });
       this.loadGroup();
     });
-  }
 
-  openSettingsModal(): void {
-    this.dialog.open(GroupFormModalComponent, {
-      panelClass: ['sn-modal-panel', 'sn-group-panel'],
-      maxWidth: '100vw',
-      data: {
-        slug: this.slug,
-      },
-      autoFocus: 'first-tabbable',
-    });
-  }
-
-  confirmLeave(): void {
-    if (!this.group || this.leaving) {
-      return;
-    }
-
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      maxWidth: '440px',
-      data: {
-        title: 'Leave this group?',
-        message: `You can always come back later if the door is open. Are you sure you want to leave ${this.group.name}?`,
-        confirmLabel: 'Leave group',
-        dangerous: true,
-      },
-    });
-
-    dialogRef.afterClosed().subscribe(confirmed => {
-      if (confirmed) {
-        this.leaveGroup();
+    this.route.queryParamMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      const tab = params.get('tab') as HubTab | null;
+      if (tab && this.isValidTab(tab)) {
+        this.activeTab = tab;
+        this.cdr.markForCheck();
+      } else if (!tab) {
+        this.activeTab = 'overview';
+        this.cdr.markForCheck();
       }
     });
   }
 
-  meetingWhen(m: MeetingResponse): string {
-    const parts: string[] = [];
-    if (m.isRecurring && m.daysOfWeek && m.daysOfWeek.length > 0) {
-      const dayNames = m.daysOfWeek.map(d => this.daysOfWeek[d] ?? 'Unknown').join(', ');
-      parts.push(dayNames);
-    } else if (!m.isRecurring && m.occursOn) {
-      parts.push(new Date(m.occursOn).toLocaleDateString());
-    }
-    if (m.time) {
-      parts.push(m.time);
-    }
-    return parts.length > 0 ? parts.join(' • ') : 'Meeting time varies';
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  meetingFormats(m: MeetingResponse): string[] {
-    return m.formats;
+  switchTab(tab: HubTab): void {
+    if (!this.isAdmin && (tab === 'requests' || tab === 'settings')) {
+      return;
+    }
+
+    this.activeTab = tab;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab: tab === 'overview' ? null : tab },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+    this.cdr.markForCheck();
   }
 
-  private loadGroup(): void {
-    this.loading = true;
-    this.error = '';
-    this.log.info('GroupHub.loadGroup: subscribing', { slug: this.slug });
+  openCreateMeeting(): void {
+    const readonly = {
+      daysOfWeekLabels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+      languages: LANGUAGES,
+      states: US_STATES,
+      countries: COUNTRIES,
+    };
 
-    forkJoin({
-      group: this.groupService.getGroup(this.slug),
-      isAdmin: this.groupService.getJoinRequests(this.slug, 1, 1).pipe(
-        map(() => true),
-        catchError(() => of(false))
-      ),
-    }).pipe(
-      finalize(() => {
-        this.loading = false;
-        this.cdr.detectChanges();
-        this.log.info('GroupHub.loadGroup: finalize', { slug: this.slug });
-      })
-    ).subscribe({
-      next: result => {
-        this.log.info('GroupHub.loadGroup: next', { groupName: result.group.name, isAdmin: String(result.isAdmin) });
-        this.group = result.group;
-        this.isAdmin = result.isAdmin;
-      },
-      error: err => {
-        this.log.error('GroupHub.loadGroup: error', { message: String(err) });
-        this.group = null;
-        this.error = this.getErrorMessage(err, 'We could not load this group right now.');
-      },
+    this.dialog.open(MeetingFormModalComponent, {
+      maxWidth: '100vw',
+      data: { slug: this.slug, readonly },
+      panelClass: ['sn-modal-panel', 'sn-meeting-panel'],
+    }).afterClosed().subscribe(result => {
+      if (result === true) {
+        this.meetingsReloadToken += 1;
+        this.cdr.markForCheck();
+      }
     });
   }
 
-  private leaveGroup(): void {
-    if (!this.group) {
+  onLeaveGroup(): void {
+    if (!this.group || this.leaving) {
       return;
     }
 
@@ -149,18 +122,57 @@ export class GroupHubComponent implements OnInit {
     this.groupService.leaveGroup(this.group.slug).pipe(
       finalize(() => {
         this.leaving = false;
+        this.cdr.markForCheck();
       })
     ).subscribe({
-      next: () => {
-        this.router.navigate(['/dashboard']);
-      },
+      next: () => this.router.navigate(['/dashboard']),
       error: err => {
-        this.error = this.getErrorMessage(err, 'We could not leave the group right now.');
+        this.error = (err as { error?: { message?: string } })?.error?.message ?? 'Could not leave the group.';
       },
     });
   }
 
-  private getErrorMessage(error: unknown, fallback: string): string {
-    return (error as { error?: { message?: string } })?.error?.message ?? fallback;
+  onGroupUpdated(updated: GroupResponse): void {
+    this.group = updated;
+    this.isAdmin = updated.userRole === 'GroupAdmin';
+    this.cdr.markForCheck();
+  }
+
+  onGroupDeleted(): void {
+    this.router.navigate(['/dashboard']);
+  }
+
+  private isValidTab(tab: string): tab is HubTab {
+    return ['overview', 'members', 'meetings', 'requests', 'settings'].includes(tab);
+  }
+
+  private loadGroup(): void {
+    if (!this.slug) {
+      return;
+    }
+
+    this.loading = true;
+    this.error = '';
+    this.cdr.markForCheck();
+
+    this.groupService.getGroup(this.slug).pipe(
+      finalize(() => {
+        this.loading = false;
+        this.cdr.markForCheck();
+      })
+    ).subscribe({
+      next: group => {
+        this.group = group;
+        this.isAdmin = group.userRole === 'GroupAdmin';
+        if (!this.isAdmin && (this.activeTab === 'requests' || this.activeTab === 'settings')) {
+          this.activeTab = 'overview';
+        }
+        this.log.info('GroupHub: loaded', { slug: this.slug, isAdmin: String(this.isAdmin) });
+      },
+      error: err => {
+        this.error = (err as { error?: { message?: string } })?.error?.message ?? 'We could not load this group.';
+        this.group = null;
+      },
+    });
   }
 }

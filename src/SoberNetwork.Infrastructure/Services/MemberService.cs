@@ -259,6 +259,28 @@ public class MemberService(
         return (true, null);
     }
 
+    public async Task<(bool Success, string? Error)> SetGroupEmailVisibilityAsync(
+        Guid userId, string groupSlug, bool isShared, CancellationToken ct = default)
+    {
+        var group = await db.Groups
+            .AsNoTracking()
+            .FirstOrDefaultAsync(g => g.Slug == groupSlug && g.DeletedAt == null, ct);
+        if (group == null) return (false, "Group not found.");
+
+        var membership = await db.GroupMemberships
+            .FirstOrDefaultAsync(m =>
+                m.UserId == userId &&
+                m.GroupId == group.Id &&
+                m.Status == MemberStatus.Active &&
+                m.DeletedAt == null, ct);
+        if (membership == null) return (false, "You are not an active member of this group.");
+
+        membership.IsEmailShared = isShared;
+        membership.UpdatedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync(ct);
+        return (true, null);
+    }
+
     // ── Group-scoped member views ──────────────────────────────────────────────
 
     public async Task<(IReadOnlyList<PhoneListEntryResponse>? List, string? Error)> GetGroupPhoneListAsync(
@@ -291,6 +313,43 @@ public class MemberService(
                 m.User.PhoneNumber != null)
             .OrderBy(m => m.User!.DisplayName)
             .Select(m => new PhoneListEntryResponse(m.UserId, m.User!.DisplayName, m.User.PhoneNumber!))
+            .ToListAsync(ct);
+
+        return (list, null);
+    }
+
+    public async Task<(IReadOnlyList<GroupAdminContactResponse>? List, string? Error)> GetGroupAdminContactsAsync(
+        Guid requestingUserId, string groupSlug, CancellationToken ct = default)
+    {
+        var group = await db.Groups
+            .AsNoTracking()
+            .FirstOrDefaultAsync(g => g.Slug == groupSlug && g.DeletedAt == null, ct);
+        if (group == null) return (null, "Group not found.");
+
+        var callerMembership = await db.GroupMemberships
+            .AsNoTracking()
+            .FirstOrDefaultAsync(m =>
+            m.GroupId == group.Id &&
+            m.UserId == requestingUserId &&
+            m.Status == MemberStatus.Active &&
+            m.DeletedAt == null, ct);
+        if (callerMembership == null) return (null, "You are not a member of this group.");
+
+        var list = await db.GroupMemberships
+            .AsNoTracking()
+            .Include(m => m.User)
+            .Where(m =>
+                m.GroupId == group.Id &&
+                m.Status == MemberStatus.Active &&
+                m.Role == GroupRole.GroupAdmin &&
+                m.DeletedAt == null &&
+                m.User != null)
+            .OrderBy(m => m.User!.DisplayName)
+            .Select(m => new GroupAdminContactResponse(
+                m.UserId,
+                m.User!.DisplayName,
+                m.User.Email!,
+                m.IsPhoneShared ? m.User.PhoneNumber : null))
             .ToListAsync(ct);
 
         return (list, null);

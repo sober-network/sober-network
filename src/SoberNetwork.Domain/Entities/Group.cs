@@ -16,4 +16,5 @@ public class Group
 
     public ICollection<GroupMembership> Memberships { get; set; } = [];
     public ICollection<Meeting> Meetings { get; set; } = [];
+    public ICollection<GroupServiceRole> ServiceRoles { get; set; } = [];
 }

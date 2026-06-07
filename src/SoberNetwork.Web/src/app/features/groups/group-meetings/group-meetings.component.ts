@@ -214,7 +214,7 @@ export class GroupMeetingsComponent implements OnInit {
     ).subscribe({
       next: ({ group, meetings }) => {
         this.groupName = group.name;
-        this.meetings = meetings;
+        this.meetings = meetings.items;
       },
       error: err => {
         this.error = this.getErrorMessage(err, 'We could not load meetings right now.');

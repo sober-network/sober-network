@@ -58,10 +58,12 @@ public interface IGroupService
 
 
 
-    /// <summary>Returns a paged list of active members for a group.</summary>
-
+    /// <summary>Returns a paged, searchable, sortable list of members for a group.</summary>
+ 
     Task<(PagedResponse<MemberResponse>? Members, string? Error)> GetMembersAsync(
-        string slug, Guid userId, int page = 1, int pageSize = 25, CancellationToken ct = default);
+        string slug, Guid userId, int page = 1, int pageSize = 25,
+        string? search = null, MemberSortBy sortBy = MemberSortBy.Name, bool sortDescending = false,
+        CancellationToken ct = default);
 
 
 

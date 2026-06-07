@@ -1,13 +1,11 @@
-import { Component, inject, AfterViewInit, OnDestroy, NgZone, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, AfterViewInit, OnDestroy, NgZone, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog } from '@angular/material/dialog';
 import { NavigationEnd } from '@angular/router';
 import { LoginModalComponent } from '../login-modal/login-modal.component';
-import { catchError, combineLatest, debounceTime, distinctUntilChanged, filter, map, Observable, of, startWith, switchMap } from 'rxjs';
+import { catchError, combineLatest, debounceTime, distinctUntilChanged, filter, map, of, startWith, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '@app/core/services/auth.service';
 import { GroupService } from '@app/core/services/group.service';
@@ -20,8 +18,6 @@ import { CurrentUser, GroupResponse } from '@app/core/models';
     CommonModule,
     RouterModule,
     MatIconModule,
-    MatMenuModule,
-    MatDividerModule,
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
@@ -34,14 +30,30 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly dialog = inject(MatDialog);
 
-  currentUser$: Observable<CurrentUser | null> = this.auth.currentUser$;
+  user: CurrentUser | null = null;
   myGroups: GroupResponse[] = [];
   activeAnchor: string | null = null;
+
+  // Plain in-DOM dropdowns (no Angular Material mat-menu / CDK overlay). The overlay
+  // portal repeatedly detached from its trigger and flashed at the viewport origin
+  // before closing; an in-template dropdown is fully under our control and immune to it.
+  userMenuOpen = false;
+  groupsMenuOpen = false;
 
   private sectionObserver: IntersectionObserver | null = null;
   private readonly sectionIds = ['about', 'features', 'how-it-works', 'principles', 'traditions'];
 
   constructor() {
+    // Identity-stable: only re-assign `user` when the signed-in identity actually changes,
+    // not on every token-refresh re-emission. This keeps the logged-in template (and its
+    // dropdown triggers) from being torn down when the same user is re-emitted.
+    this.auth.currentUser$
+      .pipe(distinctUntilChanged((a, b) => a?.userId === b?.userId), takeUntilDestroyed())
+      .subscribe(u => {
+        this.user = u;
+        if (!u) this.closeMenus();
+      });
+
     const nav$ = this.router.events.pipe(
       filter(e => e instanceof NavigationEnd),
       startWith(null),
@@ -59,6 +71,7 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
       filter(e => e instanceof NavigationEnd),
       takeUntilDestroyed(),
     ).subscribe(() => {
+      this.closeMenus();
       this.teardownScrollSpy();
       if (this.router.url === '/') {
         setTimeout(() => this.setupScrollSpy(), 150);
@@ -79,11 +92,42 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
   }
 
   navigateToGroup(slug: string): void {
+    this.closeMenus();
     this.router.navigate(['/groups', slug]);
   }
 
   logout(): void {
+    this.closeMenus();
     this.auth.logout();
+  }
+
+  /** Toggle the account dropdown. stopPropagation keeps the document:click handler from closing it instantly. */
+  toggleUserMenu(event: Event): void {
+    event.stopPropagation();
+    this.groupsMenuOpen = false;
+    this.userMenuOpen = !this.userMenuOpen;
+  }
+
+  toggleGroupsMenu(event: Event): void {
+    event.stopPropagation();
+    this.userMenuOpen = false;
+    this.groupsMenuOpen = !this.groupsMenuOpen;
+  }
+
+  closeMenus(): void {
+    this.userMenuOpen = false;
+    this.groupsMenuOpen = false;
+  }
+
+  /** Any click that bubbles to the document (i.e. outside an open dropdown) closes the menus. */
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    if (this.userMenuOpen || this.groupsMenuOpen) this.closeMenus();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.closeMenus();
   }
 
   openSignIn(): void {

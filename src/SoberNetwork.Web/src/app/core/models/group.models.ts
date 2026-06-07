@@ -277,6 +277,16 @@ export interface GroupResponse {
   userMembershipStatus: string;
   createdAt: string;
   meetings: MeetingResponse[];
+  nextMeeting: NextMeetingDto | null;
+  userIsPhoneShared: boolean;
+  userIsEmailShared: boolean;
+}
+
+export interface GroupAdminContactResponse {
+  userId: string;
+  displayName: string;
+  email: string;
+  phoneNumber: string | null;
 }
 
 export interface GroupSummaryResponse {
@@ -290,14 +300,7 @@ export interface GroupSummaryResponse {
   meetings: PublicMeetingResponse[];
 }
 
-export interface GroupMemberResponse {
-  userId: string;
-  displayName: string;
-  role: MemberRole;
-  status: MembershipStatus;
-  joinedAt: string;
-  isPhoneShared: boolean;
-}
+export type GroupMemberResponse = MemberResponse;
 
 export interface PagedResponse<T> {
   items: T[];
@@ -355,3 +358,57 @@ export interface ApproveJoinRequest {
 export interface PhoneVisibilityRequest {
   isShared: boolean;
 }
+
+// ── Hub DTOs ─────────────────────────────────────────────────────────────────
+
+/** Compact next-meeting summary returned as part of GroupResponse. */
+export interface NextMeetingDto {
+  id: string;
+  name: string;
+  nextOccurrence: string; // ISO 8601 UTC
+  durationMinutes: number;
+  meetingType: string; // 'InPerson' | 'Online' | 'Hybrid'
+}
+
+/** Member list entry returned by GET /api/groups/{slug}/members. */
+export interface MemberResponse {
+  userId: string;
+  displayName: string;
+  role: string;
+  status: string;
+  isProbationary: boolean;
+  joinedAt: string;
+  approvedAt: string | null;
+  email: string | null;
+  phoneNumber: string | null;
+  sobrietyDate: string | null;
+}
+
+/** Group service role (AA trusted servant position). */
+export interface GroupServiceRoleResponse {
+  id: string;
+  userId: string;
+  displayName: string;
+  email: string | null;
+  phoneNumber: string | null;
+  roleType: string;
+  customTitle: string | null;
+  displayOrder: number;
+}
+
+export interface AssignServiceRoleRequest {
+  userId: string;
+  roleType: string;
+  customTitle?: string | null;
+  displayOrder?: number;
+}
+
+export interface EmailVisibilityRequest {
+  isShared: boolean;
+}
+
+/** Sort options for member list. */
+export type MemberSortBy = 'Name' | 'JoinedAt' | 'SobrietyDate' | 'Role';
+
+/** Sort options for meeting list. */
+export type MeetingSortBy = 'Time' | 'Name' | 'Type';

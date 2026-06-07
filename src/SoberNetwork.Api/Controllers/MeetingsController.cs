@@ -27,9 +27,9 @@ public class MeetingsController(IMediator mediator) : ControllerBase
     /// Caller must be an active member. Includes Zoom credentials; excludes admin Notes.
     /// </summary>
     [HttpGet]
-    public async Task<IActionResult> GetMeetings(string slug, [FromQuery] PaginationQuery pagination, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetMeetings(string slug, [FromQuery] MeetingsQueryParams query, CancellationToken cancellationToken = default)
     {
-        var result = await mediator.Send(new GetGroupMeetingsQuery(slug, UserId, pagination.Page, pagination.PageSize), cancellationToken);
+        var result = await mediator.Send(new GetGroupMeetingsQuery(slug, UserId, query.Page, query.PageSize, query.Search, query.SortBy), cancellationToken);
         return result.Code switch
         {
             ResultCode.Ok => Ok(result.Data),
@@ -44,9 +44,9 @@ public class MeetingsController(IMediator mediator) : ControllerBase
     /// Caller must be a GroupAdmin.
     /// </summary>
     [HttpGet("admin")]
-    public async Task<IActionResult> GetAdminMeetings(string slug, [FromQuery] PaginationQuery pagination, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetAdminMeetings(string slug, [FromQuery] MeetingsQueryParams query, CancellationToken cancellationToken = default)
     {
-        var result = await mediator.Send(new GetAdminMeetingsQuery(slug, UserId, pagination.Page, pagination.PageSize), cancellationToken);
+        var result = await mediator.Send(new GetAdminMeetingsQuery(slug, UserId, query.Page, query.PageSize, query.Search, query.SortBy), cancellationToken);
         return result.Code switch
         {
             ResultCode.Ok => Ok(result.Data),

@@ -1,0 +1,141 @@
+:host {
+  display: block;
+}
+
+.settings-tab {
+  display: grid;
+  gap: 20px;
+}
+
+.section-header h2,
+.section-header p {
+  margin: 0;
+}
+
+.section-header h2 {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--sn-text, #111110);
+}
+
+.section-header p {
+  margin-top: 0.35rem;
+  color: var(--sn-text-muted, #7a7a75);
+}
+
+.feedback-card {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(192, 57, 43, 0.08);
+  color: #c0392b;
+}
+
+.settings-card {
+  background: #fff;
+  border: 1px solid var(--sn-border, rgba(17, 17, 16, 0.08));
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.card-avatar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--sn-tint-violet, rgba(139, 92, 246, 0.12));
+  color: var(--sn-icon-violet, #7c4dba);
+  flex-shrink: 0;
+}
+
+.card-title,
+.card-subtitle,
+.settings-card p {
+  margin: 0;
+}
+
+.card-title {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--sn-text, #111110);
+}
+
+.card-subtitle,
+.settings-card p {
+  color: var(--sn-text-mid, #3d3d3a);
+  line-height: 1.6;
+}
+
+.settings-form {
+  display: grid;
+  gap: 16px;
+}
+
+.settings-form section {
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--sn-border, rgba(17, 17, 16, 0.08));
+}
+
+.settings-form section:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.settings-form h3 {
+  margin: 0 0 12px;
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--sn-text-mid, #3d3d3a);
+}
+
+.toggle-list {
+  display: grid;
+  gap: 10px;
+}
+
+.manage-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--sn-cta-bg, #1a1a18);
+  text-decoration: none;
+  font-weight: 700;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.success-message {
+  color: #1b5e20;
+}
+
+.card-actions {
+  display: flex;
+  margin-top: 24px;
+}
+
+.card-actions-end {
+  justify-content: flex-end;
+}
+
+.danger-card {
+  border-color: rgba(179, 38, 30, 0.25);
+}
+
+.danger-button {
+  border-color: rgba(179, 38, 30, 0.45);
+  color: #b3261e;
+}

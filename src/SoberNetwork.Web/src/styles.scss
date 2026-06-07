@@ -113,40 +113,6 @@ body {
   --sn-icon-coral:   #cc5020;
 }
 
-// ── MatMenu styling — apply design system fonts and colors ─────────────────────
-.mat-mdc-menu-panel {
-  // Override default Material surface
-  background-color: #faf8f5 !important;
-  border-radius: 8px !important;
-  box-shadow: 0 8px 24px rgba(17,17,16,0.12), 0 2px 6px rgba(17,17,16,0.08) !important;
-  font-family: 'Inter', sans-serif !important;
-  
-  // Force Inter on all text nodes except icons
-  button, a, span:not(mat-icon):not(.material-icons) {
-    font-family: 'Inter', sans-serif !important;
-  }
-}
-
-.mat-mdc-menu-content {
-  padding: 8px 0 !important;
-}
-
-.mat-mdc-menu-item,
-.mdc-list-item,
-.mdc-list-item__primary-text,
-.mdc-list-item__secondary-text {
-  font-family: 'Inter', sans-serif !important;
-  font-size: 0.9rem !important;
-  font-weight: 500 !important;
-  color: var(--sn-text) !important;
-  line-height: 1.4 !important;
-  padding: 8px 16px !important;
-
-  &:hover {
-    background-color: rgba(17,17,16,0.06) !important;
-  }
-}
-
 mat-icon {
   font-family: 'Material Icons' !important;
 }

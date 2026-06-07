@@ -17,7 +17,9 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
 {
     /// <inheritdoc/>
     public async Task<(PagedResponse<MeetingResponse>? Meetings, string? Error)> GetGroupMeetingsAsync(
-        string slug, Guid userId, int page = 1, int pageSize = 25, CancellationToken ct = default)
+        string slug, Guid userId, int page = 1, int pageSize = 50,
+        string? search = null, MeetingSortBy sortBy = MeetingSortBy.Time,
+        CancellationToken ct = default)
     {
         var group = await db.Groups
             .AsNoTracking()
@@ -33,19 +35,29 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
                 m.DeletedAt == null, ct);
         if (!isMember) return (null, "You are not a member of this group.");
 
-        // Get total count from fresh query
-        var totalCount = await db.Meetings
+        var query = db.Meetings
             .AsNoTracking()
-            .Where(m => m.GroupId == group.Id && m.DeletedAt == null && m.IsActive)
-            .CountAsync(ct);
+            .Where(m => m.GroupId == group.Id && m.DeletedAt == null && m.IsActive);
 
-        // Get paginated data from separate fresh query
-        var meetings = await db.Meetings
-            .AsNoTracking()
-            .Where(m => m.GroupId == group.Id && m.DeletedAt == null && m.IsActive)
-            .OrderBy(m => m.IsRecurring ? 0 : 1)
-            .ThenBy(m => m.DaysOfWeek == null || m.DaysOfWeek.Length == 0 ? int.MaxValue : m.DaysOfWeek[0])
-            .ThenBy(m => m.Time)
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var s = search.Trim().ToLower();
+            query = query.Where(m => m.Name.ToLower().Contains(s)
+                || (m.Description != null && m.Description.ToLower().Contains(s))
+                || m.Formats.Any(f => f.ToLower().Contains(s)));
+        }
+
+        query = sortBy switch
+        {
+            MeetingSortBy.Name => query.OrderBy(m => m.Name),
+            MeetingSortBy.Type => query.OrderBy(m => m.MeetingType),
+            _ => query.OrderBy(m => m.IsRecurring ? 0 : 1)
+                .ThenBy(m => m.DaysOfWeek == null || m.DaysOfWeek.Length == 0 ? int.MaxValue : m.DaysOfWeek[0])
+                .ThenBy(m => m.Time)
+        };
+
+        var totalCount = await query.CountAsync(ct);
+        var meetings = await query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(ct);
@@ -62,7 +74,9 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
 
     /// <inheritdoc/>
     public async Task<(PagedResponse<AdminMeetingResponse>? Meetings, string? Error)> GetAdminMeetingsAsync(
-        string slug, Guid userId, int page = 1, int pageSize = 25, CancellationToken ct = default)
+        string slug, Guid userId, int page = 1, int pageSize = 50,
+        string? search = null, MeetingSortBy sortBy = MeetingSortBy.Time,
+        CancellationToken ct = default)
     {
         var group = await db.Groups
             .AsNoTracking()
@@ -79,19 +93,29 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
                 m.DeletedAt == null, ct);
         if (!isAdmin) return (null, "You do not have permission to view admin meetings.");
 
-        // Get total count from fresh query
-        var totalCount = await db.Meetings
+        var query = db.Meetings
             .AsNoTracking()
-            .Where(m => m.GroupId == group.Id && m.DeletedAt == null)
-            .CountAsync(ct);
+            .Where(m => m.GroupId == group.Id && m.DeletedAt == null);
 
-        // Get paginated data from separate fresh query
-        var meetings = await db.Meetings
-            .AsNoTracking()
-            .Where(m => m.GroupId == group.Id && m.DeletedAt == null)
-            .OrderBy(m => m.IsRecurring ? 0 : 1)
-            .ThenBy(m => m.DaysOfWeek == null || m.DaysOfWeek.Length == 0 ? int.MaxValue : m.DaysOfWeek[0])
-            .ThenBy(m => m.Time)
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var s = search.Trim().ToLower();
+            query = query.Where(m => m.Name.ToLower().Contains(s)
+                || (m.Description != null && m.Description.ToLower().Contains(s))
+                || m.Formats.Any(f => f.ToLower().Contains(s)));
+        }
+
+        query = sortBy switch
+        {
+            MeetingSortBy.Name => query.OrderBy(m => m.Name),
+            MeetingSortBy.Type => query.OrderBy(m => m.MeetingType),
+            _ => query.OrderBy(m => m.IsRecurring ? 0 : 1)
+                .ThenBy(m => m.DaysOfWeek == null || m.DaysOfWeek.Length == 0 ? int.MaxValue : m.DaysOfWeek[0])
+                .ThenBy(m => m.Time)
+        };
+
+        var totalCount = await query.CountAsync(ct);
+        var meetings = await query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(ct);

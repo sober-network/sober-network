@@ -1,0 +1,123 @@
+<section class="meetings-tab">
+  <div class="meetings-toolbar">
+    <div class="search-wrap">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input
+        class="search-input"
+        type="search"
+        [(ngModel)]="searchQuery"
+        (input)="onSearch()"
+        placeholder="Search meetings by name, format, or type"
+      />
+      <button *ngIf="searchQuery" type="button" class="clear-btn" (click)="clearSearch()" aria-label="Clear meeting search">✕</button>
+    </div>
+
+    <select class="sort-select" [ngModel]="sortBy" (ngModelChange)="onSortChange($event)">
+      <option *ngFor="let option of sortOptions" [ngValue]="option">Sort by {{ option }}</option>
+    </select>
+
+    <div class="count-pill">{{ filteredMeetings.length }} meetings</div>
+  </div>
+
+  <div class="error-card" *ngIf="error && !loading">{{ error }}</div>
+
+  <div class="loading-state" *ngIf="loading">
+    <mat-spinner diameter="36"></mat-spinner>
+    <p>Loading meetings…</p>
+  </div>
+
+  <div *ngIf="!loading && filteredMeetings.length > 0">
+    <article class="meeting-card" [ngClass]="cardAccentClass(meeting)" *ngFor="let meeting of filteredMeetings; trackBy: trackById">
+      <div class="meeting-card-grid">
+        <div class="meeting-main">
+          <div class="meeting-header">
+            <div class="meeting-icon">
+              <mat-icon>{{ meetingIcon(meeting) }}</mat-icon>
+            </div>
+
+            <div class="meeting-title-block">
+              <h3>{{ meeting.name }}</h3>
+              <p class="meeting-when">{{ formatWhen(meeting) }}</p>
+            </div>
+
+            <span class="inactive-badge" *ngIf="!meeting.isActive">Inactive</span>
+
+            <div class="meeting-actions" *ngIf="isAdmin">
+              <button class="meeting-settings-btn" type="button" (click)="openEdit(meeting)">
+                <mat-icon>settings</mat-icon>
+                <span class="settings-label">Settings</span>
+              </button>
+              <button class="meeting-delete-btn" type="button" (click)="delete(meeting)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <p class="meeting-description" *ngIf="meeting.description">{{ meeting.description }}</p>
+
+          <div class="meeting-meta">
+            <span class="meta-pill">{{ meetingTypeLabel(meeting.meetingType) }}</span>
+            <span class="meta-pill">{{ meeting.durationMinutes }} min</span>
+            <span class="meta-pill" *ngIf="meeting.isRecurring">Recurring</span>
+            <span class="meta-pill" *ngIf="!meeting.isRecurring">One-time</span>
+            <span class="meta-pill state-pill closed" *ngIf="!meeting.isOpen">Closed</span>
+            <span class="meta-pill state-pill open" *ngIf="meeting.isOpen">Open</span>
+          </div>
+
+          <div class="meeting-formats" *ngIf="meeting.formats.length > 0">
+            <span class="format-chip" *ngFor="let format of meeting.formats">{{ formatMeetingLabel(format) }}</span>
+          </div>
+        </div>
+
+        <div class="meeting-side">
+          <div class="info-panel" *ngIf="hasPhysicalLocation(meeting)">
+            <h4>Location</h4>
+            <p class="panel-line strong" *ngIf="meeting.location && !meeting.venueName && !meeting.street">{{ meeting.location }}</p>
+            <p class="panel-line strong" *ngIf="meeting.venueName">{{ meeting.venueName }}</p>
+            <p class="panel-line" *ngIf="meeting.street">{{ meeting.street }}</p>
+            <p class="panel-line" *ngIf="addressLine(meeting)">{{ addressLine(meeting) }}</p>
+            <p class="panel-line" *ngIf="meeting.country">{{ meeting.country }}</p>
+            <a class="panel-link" [href]="directionsUrl(meeting)" target="_blank" rel="noreferrer">Get directions</a>
+          </div>
+
+          <div class="mini-map" *ngIf="hasPhysicalLocation(meeting)">
+            <ng-container *ngIf="mapPreviewUrl(meeting) as mapUrl; else mapFallback">
+              <iframe
+                class="mini-map-frame"
+                [src]="mapUrl"
+                [title]="mapPreviewCaption(meeting)"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+              ></iframe>
+              <div class="mini-map-overlay">
+                <span class="mini-map-label">{{ mapPreviewCaption(meeting) }}</span>
+              </div>
+            </ng-container>
+            <ng-template #mapFallback>
+              <div class="mini-map-empty">
+                <span class="mini-map-empty-title">Map unavailable</span>
+                <span class="mini-map-empty-copy">{{ mapPreviewCaption(meeting) }}</span>
+              </div>
+            </ng-template>
+          </div>
+
+          <div class="info-panel" *ngIf="hasZoomDetails(meeting)">
+            <h4>Zoom</h4>
+            <p class="panel-line" *ngIf="meeting.publicJoinUrl">
+              <a [href]="meeting.publicJoinUrl" target="_blank" rel="noreferrer">Join meeting</a>
+            </p>
+            <p class="panel-line" *ngIf="meeting.zoomLink"><strong>Members link:</strong> {{ meeting.zoomLink }}</p>
+            <p class="panel-line" *ngIf="meeting.zoomMeetingId"><strong>Meeting ID:</strong> {{ meeting.zoomMeetingId }}</p>
+            <p class="panel-line" *ngIf="meeting.zoomPasscode"><strong>Passcode:</strong> {{ meeting.zoomPasscode }}</p>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && !error && filteredMeetings.length === 0">
+    <mat-icon>calendar_month</mat-icon>
+    <h3>No meetings yet</h3>
+    <p>{{ isAdmin ? 'Use the plus button above to add your first meeting.' : 'This group has not published any meetings yet.' }}</p>
+  </div>
+</section>

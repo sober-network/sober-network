@@ -1,0 +1,212 @@
+<section class="overview-stack">
+  <button
+    type="button"
+    class="next-meeting-banner"
+    *ngIf="group.nextMeeting; else noMeeting"
+    (click)="switchToMeetings.emit()"
+  >
+    <div class="banner-icon">
+      <mat-icon>calendar_month</mat-icon>
+    </div>
+    <div class="banner-copy">
+      <span class="eyebrow">Your next meeting</span>
+      <h2>{{ group.nextMeeting.name }}</h2>
+      <p>{{ formatNextMeetingDate() }} · {{ formatNextMeetingTime() }}</p>
+    </div>
+    <mat-icon class="banner-arrow">arrow_forward</mat-icon>
+  </button>
+
+  <ng-template #noMeeting>
+    <div class="soft-card empty-state-card">
+      <mat-icon>event_busy</mat-icon>
+      <div>
+        <h2>No upcoming meetings scheduled yet.</h2>
+        <p>When your group adds its next gathering, it will show up here.</p>
+      </div>
+    </div>
+  </ng-template>
+
+  <section class="soft-card about-card">
+    <div class="section-head">
+      <mat-icon>format_quote</mat-icon>
+      <h3>About This Group</h3>
+    </div>
+    <blockquote>
+      {{ group.description || 'No group description has been added yet.' }}
+    </blockquote>
+  </section>
+
+  <section class="soft-card details-card">
+    <div class="section-head">
+      <mat-icon>info</mat-icon>
+      <h3>Group Details</h3>
+    </div>
+
+    <div class="group-details-grid">
+      <div class="detail-item">
+        <mat-icon>visibility</mat-icon>
+        <div>
+          <span class="detail-label">Access</span>
+          <span class="detail-value badge-inline">{{ groupAccess() }}</span>
+        </div>
+      </div>
+
+      <div class="detail-item">
+        <mat-icon>door_front</mat-icon>
+        <div>
+          <span class="detail-label">Join Policy</span>
+          <span class="detail-value">{{ approvalPolicy() }}</span>
+        </div>
+      </div>
+
+      <div class="detail-item" *ngIf="group.timeZone">
+        <mat-icon>schedule</mat-icon>
+        <div>
+          <span class="detail-label">Time Zone</span>
+          <span class="detail-value">{{ group.timeZone }}</span>
+        </div>
+      </div>
+
+      <div class="detail-item">
+        <mat-icon>verified_user</mat-icon>
+        <div>
+          <span class="detail-label">Your Role</span>
+          <span class="detail-value badge-inline">{{ humanize(group.userRole) }}</span>
+        </div>
+      </div>
+
+      <div class="detail-item">
+        <mat-icon>person</mat-icon>
+        <div>
+          <span class="detail-label">Status</span>
+          <span class="detail-value">{{ humanize(group.userMembershipStatus) }}</span>
+        </div>
+      </div>
+
+      <div class="detail-item">
+        <mat-icon>favorite</mat-icon>
+        <div>
+          <span class="detail-label">Member Since</span>
+          <span class="detail-value">{{ memberSinceDate() }}</span>
+        </div>
+      </div>
+
+      <div class="detail-item">
+        <mat-icon>history</mat-icon>
+        <div>
+          <span class="detail-label">Created</span>
+          <span class="detail-value">{{ createdDate() }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="membership-card">
+    <div class="section-head">
+      <mat-icon>contact_phone</mat-icon>
+      <div>
+        <h3>Share your info with the group</h3>
+        <p>Only fellow members in this group can see contact details you choose to share.</p>
+      </div>
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Phone</div>
+        <div class="toggle-value">{{ myProfile?.phoneNumber ?? 'No phone on profile' }}</div>
+      </div>
+      <div class="toggle-action">
+        <mat-spinner *ngIf="togglingPhone" diameter="20"></mat-spinner>
+        <mat-slide-toggle
+          [checked]="phoneShared"
+          [disabled]="togglingPhone"
+          (change)="togglePhone($event.checked)"
+        ></mat-slide-toggle>
+      </div>
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Email</div>
+        <div class="toggle-value">{{ currentUserEmail || 'No email available' }}</div>
+      </div>
+      <div class="toggle-action">
+        <mat-spinner *ngIf="togglingEmail" diameter="20"></mat-spinner>
+        <mat-slide-toggle
+          [checked]="emailShared"
+          [disabled]="togglingEmail"
+          (change)="toggleEmail($event.checked)"
+        ></mat-slide-toggle>
+      </div>
+    </div>
+
+    <a class="profile-link" routerLink="/profile">Edit your profile →</a>
+  </section>
+
+  <section class="soft-card contacts-card">
+    <div class="section-head">
+      <mat-icon>shield</mat-icon>
+      <h3>Group Admins</h3>
+    </div>
+
+    <div class="people-list" *ngIf="admins.length > 0; else noAdmins">
+      <div class="admin-row" *ngFor="let admin of admins; trackBy: trackByUserId">
+        <div class="admin-avatar">{{ admin.displayName.charAt(0) | uppercase }}</div>
+        <div class="person-meta">
+          <div class="person-name">{{ admin.displayName }}</div>
+          <div class="person-links">
+            <a [href]="adminEmailHref(admin.email)">{{ admin.email }}</a>
+            <a *ngIf="admin.phoneNumber && adminPhoneHref(admin.phoneNumber) as phoneHref" [href]="phoneHref">
+              {{ admin.phoneNumber }}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noAdmins>
+      <p class="empty-copy">No admin contacts are available right now.</p>
+    </ng-template>
+  </section>
+
+  <section class="soft-card contacts-card">
+    <div class="section-head">
+      <mat-icon>volunteer_activism</mat-icon>
+      <h3>Trusted Servants</h3>
+    </div>
+
+    <div class="roles-loading" *ngIf="loadingRoles">
+      <mat-spinner diameter="28"></mat-spinner>
+      <span>Loading service roles…</span>
+    </div>
+
+    <div class="people-list" *ngIf="!loadingRoles && serviceRoles.length > 0; else noRoles">
+      <div class="servant-row" *ngFor="let role of serviceRoles; trackBy: trackByUserId">
+        <div class="admin-avatar servant-avatar">{{ role.displayName.charAt(0) | uppercase }}</div>
+        <div class="person-meta">
+          <div class="servant-head">
+            <div class="person-name">{{ role.displayName }}</div>
+            <span class="role-badge" [ngClass]="roleColorClass(role.roleType)">
+              {{ roleLabel(role.roleType, role.customTitle) }}
+            </span>
+          </div>
+          <div class="person-links">
+            <a *ngIf="role.email" [href]="adminEmailHref(role.email)">{{ role.email }}</a>
+            <a *ngIf="role.phoneNumber && adminPhoneHref(role.phoneNumber) as phoneHref" [href]="phoneHref">
+              {{ role.phoneNumber }}
+            </a>
+            <span *ngIf="!role.email && !role.phoneNumber" class="muted-inline">Contact info not shared.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noRoles>
+      <p class="empty-copy" *ngIf="!loadingRoles">No service roles assigned yet.</p>
+    </ng-template>
+  </section>
+
+  <div class="footer-leave">
+    <button mat-button class="leave-btn" type="button" (click)="confirmLeave()">Leave Group</button>
+  </div>
+</section>

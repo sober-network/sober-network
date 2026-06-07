@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SoberNetwork.Core.DTOs;
@@ -66,10 +67,13 @@ public class GroupService(
             .ThenBy(m => m.Time)
             .Select(ToPublicMeetingResponse).ToList();
 
-    private static GroupResponse ToGroupResponse(Group g, string userRole, string userMembershipStatus, int memberCount) => new(
+    private static GroupResponse ToGroupResponse(
+        Group g, string userRole, string userMembershipStatus, int memberCount,
+        bool userIsPhoneShared = false, bool userIsEmailShared = false) => new(
         g.Id, g.Name, g.Slug, g.Description, g.TimeZone,
         g.IsActive, g.IsPublic, g.RequiresApproval,
-        memberCount, userRole, userMembershipStatus, g.CreatedAt, ActiveMeetings(g));
+        memberCount, userRole, userMembershipStatus, g.CreatedAt, ActiveMeetings(g),
+        ComputeNextMeeting(g.Meetings), userIsPhoneShared, userIsEmailShared);
 
     private static GroupSummaryResponse ToGroupSummaryResponse(Group group) => new(
         group.Name, group.Slug, group.Description, group.TimeZone,
@@ -83,7 +87,67 @@ public class GroupService(
         m.Status.ToString(),
         m.IsProbationary,
         m.JoinedAt,
-        m.ApprovedAt);
+        m.ApprovedAt,
+        m.IsEmailShared ? m.User?.Email : null,
+        m.IsPhoneShared ? m.User?.PhoneNumber : null,
+        m.User?.IsSobrietyDatePublic == true && m.User.SobrietyDate.HasValue ? m.User.SobrietyDate : null);
+
+    private static NextMeetingDto? ComputeNextMeeting(IEnumerable<Meeting> meetings)
+    {
+        var now = DateTime.UtcNow;
+        NextMeetingDto? nextMeeting = null;
+        DateTime? earliest = null;
+
+        foreach (var meeting in meetings.Where(m => m.DeletedAt == null && m.IsActive))
+        {
+            if (string.IsNullOrWhiteSpace(meeting.Time) ||
+                !TimeOnly.TryParseExact(meeting.Time, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var meetingTime))
+            {
+                continue;
+            }
+
+            DateTime? occurrence = null;
+            if (meeting.IsRecurring && meeting.DaysOfWeek is { Length: > 0 })
+            {
+                for (var offset = 0; offset < 7; offset++)
+                {
+                    var candidateDate = now.Date.AddDays(offset);
+                    if (!meeting.DaysOfWeek.Contains((int)candidateDate.DayOfWeek))
+                    {
+                        continue;
+                    }
+
+                    var candidateDateTime = candidateDate.Add(meetingTime.ToTimeSpan());
+                    if (candidateDateTime > now)
+                    {
+                        occurrence = candidateDateTime;
+                        break;
+                    }
+                }
+            }
+            else if (!meeting.IsRecurring && meeting.OccursOn.HasValue)
+            {
+                var candidateDateTime = meeting.OccursOn.Value.Date.Add(meetingTime.ToTimeSpan());
+                if (candidateDateTime > now)
+                {
+                    occurrence = candidateDateTime;
+                }
+            }
+
+            if (occurrence.HasValue && (earliest == null || occurrence.Value < earliest.Value))
+            {
+                earliest = occurrence.Value;
+                nextMeeting = new NextMeetingDto(
+                    meeting.Id,
+                    meeting.Name,
+                    occurrence.Value,
+                    meeting.DurationMinutes,
+                    meeting.MeetingType.ToString());
+            }
+        }
+
+        return nextMeeting;
+    }
 
     private Task<int> GetMemberCountAsync(Guid groupId, CancellationToken ct = default) =>
         db.GroupMemberships.CountAsync(m =>
@@ -204,7 +268,8 @@ public class GroupService(
                 m.GroupId == group.Id &&
                 m.Status == MemberStatus.Active &&
                 m.DeletedAt == null, ct);
-        return ToGroupResponse(group, membership.Role.ToString(), membership.Status.ToString(), count);
+        return ToGroupResponse(group, membership.Role.ToString(), membership.Status.ToString(), count,
+            membership.IsPhoneShared, membership.IsEmailShared);
     }
 
     // ── Group mutations ────────────────────────────────────────────────────────
@@ -303,7 +368,9 @@ public class GroupService(
     // ── Member queries ─────────────────────────────────────────────────────────
 
     public async Task<(PagedResponse<MemberResponse>? Members, string? Error)> GetMembersAsync(
-        string slug, Guid userId, int page = 1, int pageSize = 25, CancellationToken ct = default)
+        string slug, Guid userId, int page = 1, int pageSize = 25,
+        string? search = null, MemberSortBy sortBy = MemberSortBy.Name, bool sortDescending = false,
+        CancellationToken ct = default)
     {
         var group = await db.Groups
             .AsNoTracking()
@@ -324,15 +391,43 @@ public class GroupService(
             .Include(m => m.User)
             .Where(m =>
                 m.GroupId == group.Id &&
-                m.Status == MemberStatus.Active &&
-                m.DeletedAt == null)
-            .OrderBy(m => m.JoinedAt);
+                m.DeletedAt == null);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var s = search.Trim().ToLower();
+            baseQuery = baseQuery.Where(m => m.User.DisplayName.ToLower().Contains(s));
+        }
+
+        baseQuery = (sortBy, sortDescending) switch
+        {
+            (MemberSortBy.Name, false) => baseQuery.OrderBy(m => m.User.DisplayName),
+            (MemberSortBy.Name, true) => baseQuery.OrderByDescending(m => m.User.DisplayName),
+            (MemberSortBy.JoinedAt, false) => baseQuery.OrderBy(m => m.JoinedAt),
+            (MemberSortBy.JoinedAt, true) => baseQuery.OrderByDescending(m => m.JoinedAt),
+            (MemberSortBy.SobrietyDate, false) => baseQuery.OrderBy(m => m.User.SobrietyDate),
+            (MemberSortBy.SobrietyDate, true) => baseQuery.OrderByDescending(m => m.User.SobrietyDate),
+            (MemberSortBy.Role, false) => baseQuery.OrderBy(m => m.Role),
+            (MemberSortBy.Role, true) => baseQuery.OrderByDescending(m => m.Role),
+            _ => baseQuery.OrderBy(m => m.User.DisplayName)
+        };
 
         var total = await baseQuery.CountAsync(ct);
         var items = await baseQuery
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(m => ToMemberResponse(m))
+            .Select(m => new MemberResponse(
+                m.UserId,
+                m.User.DisplayName,
+                m.Role.ToString(),
+                m.Status.ToString(),
+                m.IsProbationary,
+                m.JoinedAt,
+                m.ApprovedAt,
+                m.IsEmailShared ? m.User.Email : null,
+                m.IsPhoneShared ? m.User.PhoneNumber : null,
+                m.User.IsSobrietyDatePublic && m.User.SobrietyDate.HasValue ? m.User.SobrietyDate : null
+            ))
             .ToListAsync(ct);
 
         return (new PagedResponse<MemberResponse>(items, page, pageSize, total), null);

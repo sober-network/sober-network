@@ -109,14 +109,27 @@ public class GroupsController(IMediator mediator) : ControllerBase
         };
     }
 
-    /// <summary>Returns the active member list. Caller must be an active member.</summary>
+    /// <summary>Returns the member list. Caller must be an active member. Supports search and sort.</summary>
     [HttpGet("{slug}/members")]
     public async Task<IActionResult> GetMembers(
         string slug,
-        [FromQuery] PaginationQuery pagination,
+        [FromQuery] MembersQueryParams query,
         CancellationToken cancellationToken = default)
     {
-        var result = await mediator.Send(new GetMembersQuery(slug, UserId, pagination.Page, pagination.PageSize), cancellationToken);
+        var result = await mediator.Send(new GetMembersQuery(slug, UserId, query.Page, query.PageSize, query.Search, query.SortBy, query.SortDescending), cancellationToken);
+        return result.Code switch
+        {
+            ResultCode.Ok => Ok(result.Data),
+            ResultCode.Forbidden => Forbid(),
+            _ => NotFound()
+        };
+    }
+
+    /// <summary>Returns active group admins with contact details the group is allowed to see.</summary>
+    [HttpGet("{slug}/admins")]
+    public async Task<IActionResult> GetGroupAdmins(string slug, CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(new GetGroupAdminsQuery(UserId, slug), cancellationToken);
         return result.Code switch
         {
             ResultCode.Ok => Ok(result.Data),
@@ -267,6 +280,61 @@ public class GroupsController(IMediator mediator) : ControllerBase
             ResultCode.Ok => Ok(new { message = request.IsShared ? "Phone shared with group." : "Phone hidden from group." }),
             ResultCode.Forbidden => Forbid(),
             _ => Problem(result.Error, statusCode: 400)
+        };
+    }
+
+    /// <summary>
+    /// Toggles per-group email sharing for the current user.
+    /// Caller must be an active member of the group (T12).
+    /// </summary>
+    [HttpPatch("{slug}/members/me/email-visibility")]
+    public async Task<IActionResult> SetMyEmailVisibility(string slug, [FromBody] EmailVisibilityRequest request, CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(new SetEmailVisibilityCommand(UserId, slug, request.IsShared), cancellationToken);
+        return result.Code switch
+        {
+            ResultCode.Ok => Ok(new { message = request.IsShared ? "Email shared with group." : "Email hidden from group." }),
+            ResultCode.Forbidden => Forbid(),
+            _ => Problem(result.Error, statusCode: 400)
+        };
+    }
+
+    /// <summary>Returns AA service role assignments for the group. Caller must be an active member.</summary>
+    [HttpGet("{slug}/service-roles")]
+    public async Task<IActionResult> GetServiceRoles(string slug, CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(new GetGroupServiceRolesQuery(slug, UserId), cancellationToken);
+        return result.Code switch
+        {
+            ResultCode.Ok => Ok(result.Data),
+            ResultCode.Forbidden => Forbid(),
+            _ => NotFound()
+        };
+    }
+
+    /// <summary>Assigns an AA service role to a group member. Caller must be a GroupAdmin.</summary>
+    [HttpPost("{slug}/service-roles")]
+    public async Task<IActionResult> AssignServiceRole(string slug, [FromBody] AssignServiceRoleRequest request, CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(new AssignServiceRoleCommand(slug, request, UserId), cancellationToken);
+        return result.Code switch
+        {
+            ResultCode.Ok => Ok(result.Data),
+            ResultCode.Forbidden => Forbid(),
+            _ => Problem(result.Error, statusCode: 400)
+        };
+    }
+
+    /// <summary>Removes an AA service role assignment. Caller must be a GroupAdmin.</summary>
+    [HttpDelete("{slug}/service-roles/{roleId:guid}")]
+    public async Task<IActionResult> RemoveServiceRole(string slug, Guid roleId, CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(new RemoveServiceRoleCommand(slug, roleId, UserId), cancellationToken);
+        return result.Code switch
+        {
+            ResultCode.Ok => NoContent(),
+            ResultCode.Forbidden => Forbid(),
+            _ => NotFound()
         };
     }
 

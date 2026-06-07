@@ -12,6 +12,7 @@ public class GroupMembership
     public MemberStatus Status { get; set; } = MemberStatus.PendingApproval;
     public bool IsProbationary { get; set; } = true;   // posts require moderation for new members
     public bool IsPhoneShared { get; set; } = false;   // per-group phone visibility (T12)
+    public bool IsEmailShared { get; set; } = false;   // per-group email visibility (T12)
     public int ApprovedPostCount { get; set; } = 0;
     public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

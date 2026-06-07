@@ -1,0 +1,53 @@
+<section class="requests-tab">
+  <div class="section-header">
+    <h2>Join Requests</h2>
+    <p>Review the folks waiting at the door and respond with care.</p>
+  </div>
+
+  <div class="error-card" *ngIf="error && !loading">{{ error }}</div>
+
+  <div class="loading-state" *ngIf="loading">
+    <mat-spinner diameter="36"></mat-spinner>
+    <p>Loading pending requests…</p>
+  </div>
+
+  <ng-container *ngIf="!loading">
+    <div class="empty-state" *ngIf="requests.length === 0">
+      <mat-icon>mark_email_read</mat-icon>
+      <h3>No pending requests</h3>
+      <p>When someone asks to join, their request will appear here.</p>
+    </div>
+
+    <div class="request-list" *ngIf="requests.length > 0">
+      <article class="request-card" *ngFor="let request of requests; trackBy: trackByUserId">
+        <div class="request-header">
+          <div>
+            <h3>{{ request.displayName }}</h3>
+            <p>{{ request.email }}</p>
+          </div>
+          <span>Requested {{ request.requestedAt | date:'medium' }}</span>
+        </div>
+
+        <p class="request-message" *ngIf="request.message">“{{ request.message }}”</p>
+
+        <div class="request-actions">
+          <button mat-raised-button class="approve-button" type="button" [disabled]="actionUserId === request.userId" (click)="approve(request)">
+            Approve
+          </button>
+          <button mat-stroked-button color="warn" type="button" [disabled]="actionUserId === request.userId" (click)="confirmReject(request)">
+            Reject
+          </button>
+        </div>
+      </article>
+    </div>
+
+    <mat-paginator
+      *ngIf="totalCount > pageSize"
+      [length]="totalCount"
+      [pageIndex]="pageIndex"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[5, 10, 25, 50]"
+      (page)="onPageChange($event)"
+    ></mat-paginator>
+  </ng-container>
+</section>

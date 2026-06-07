@@ -9,7 +9,7 @@
     </a>
 
     <!-- ── GUEST: landing-section pills ──────────────────────────────────── -->
-    <ng-container *ngIf="!(currentUser$ | async); else loggedInPill">
+    <ng-container *ngIf="!user">
       <div class="nav-pill">
         <a href="#about"        class="nav-link" [class.active]="activeAnchor === 'about'">About</a>
         <a href="#features"     class="nav-link" [class.active]="activeAnchor === 'features'">Features</a>
@@ -31,49 +31,65 @@
     </ng-container>
 
     <!-- ── LOGGED IN: app nav pills ──────────────────────────────────────── -->
-    <ng-template #loggedInPill>
-      <ng-container *ngIf="currentUser$ | async as user">
-        <div class="nav-pill">
-          <a routerLink="/meetings"  routerLinkActive="active" class="nav-link">Find a Meeting</a>
-          <button class="nav-link nav-link-btn"
-                  [matMenuTriggerFor]="groupMenu"
-                  *ngIf="myGroups.length > 0">
+    <ng-container *ngIf="user">
+      <div class="nav-pill">
+        <a routerLink="/meetings"  routerLinkActive="active" class="nav-link">Find a Meeting</a>
+
+        <!-- My Groups dropdown (in-DOM, anchored to its trigger) -->
+        <div class="menu-anchor" *ngIf="myGroups.length > 0">
+          <button type="button" class="nav-link nav-link-btn"
+                  [class.open]="groupsMenuOpen"
+                  (click)="toggleGroupsMenu($event)"
+                  aria-haspopup="true" [attr.aria-expanded]="groupsMenuOpen">
             My Groups
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <svg class="caret" width="10" height="10" viewBox="0 0 10 10" fill="none">
               <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
-          <mat-menu #groupMenu="matMenu" panelClass="groups-menu-panel">
-            <button mat-menu-item *ngFor="let g of myGroups" (click)="navigateToGroup(g.slug)">
+
+          <div class="sn-dropdown groups-dropdown" *ngIf="groupsMenuOpen"
+               (click)="$event.stopPropagation()" role="menu">
+            <button type="button" class="sn-dropdown-item" *ngFor="let g of myGroups"
+                    (click)="navigateToGroup(g.slug)" role="menuitem">
               {{ g.name }}
             </button>
-          </mat-menu>
-          <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">Dashboard</a>
-          <a routerLink="/admin"     routerLinkActive="active" class="nav-link"
-             *ngIf="user.isSuperAdmin">Admin</a>
+          </div>
         </div>
 
-        <div class="nav-actions">
-          <button class="user-pill" [matMenuTriggerFor]="userMenu" aria-label="Account menu">
-            <span class="user-display-name">{{ user.displayName }}&nbsp;</span>
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">Dashboard</a>
+        <a routerLink="/admin"     routerLinkActive="active" class="nav-link"
+           *ngIf="user.isSuperAdmin">Admin</a>
+      </div>
+
+      <div class="nav-actions">
+        <!-- Account dropdown (in-DOM, anchored to the user pill) -->
+        <div class="menu-anchor">
+          <button type="button" class="user-pill"
+                  [class.open]="userMenuOpen"
+                  (click)="toggleUserMenu($event)"
+                  aria-haspopup="true" [attr.aria-expanded]="userMenuOpen" aria-label="Account menu">
+            <span class="user-display-name">{{ user.displayName }}</span>
+            <span class="user-initial">{{ user.displayName[0]?.toUpperCase() }}</span>
           </button>
-          <mat-menu #userMenu="matMenu" panelClass="user-menu-panel">
-            <div class="user-menu-header">
-              <span class="user-name">{{ user.displayName }}</span>
-              <span class="user-email">{{ user.email }}</span>
+
+          <div class="sn-dropdown user-dropdown" *ngIf="userMenuOpen"
+               (click)="$event.stopPropagation()" role="menu">
+            <div class="dropdown-header">
+              <span class="dd-name">{{ user.displayName }}</span>
+              <span class="dd-email">{{ user.email }}</span>
             </div>
-            <mat-divider></mat-divider>
-            <a mat-menu-item routerLink="/profile">
-              <mat-icon>person</mat-icon>My Profile
+            <div class="dropdown-divider"></div>
+            <a class="sn-dropdown-item" routerLink="/profile" (click)="closeMenus()" role="menuitem">
+              <mat-icon>person</mat-icon><span>My Profile</span>
             </a>
-            <mat-divider></mat-divider>
-            <button mat-menu-item (click)="logout()">
-              <mat-icon>logout</mat-icon>Sign Out
+            <div class="dropdown-divider"></div>
+            <button type="button" class="sn-dropdown-item" (click)="logout()" role="menuitem">
+              <mat-icon>logout</mat-icon><span>Sign Out</span>
             </button>
-          </mat-menu>
+          </div>
         </div>
-      </ng-container>
-    </ng-template>
+      </div>
+    </ng-container>
 
   </div>
 </nav>

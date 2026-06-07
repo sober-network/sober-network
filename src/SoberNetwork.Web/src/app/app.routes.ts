@@ -31,34 +31,39 @@ export const routes: Routes = [
     loadComponent: () => import('./features/groups/groups-dashboard/groups-dashboard.component').then(m => m.GroupsDashboardComponent)
   },
   {
-    path: 'groups/:slug',
-    canActivate: [authGuard, groupMemberGuard],
-    loadComponent: () => import('./features/groups/group-hub/group-hub.component').then(m => m.GroupHubComponent)
-  },
-  {
     path: 'groups/:slug/members',
+    pathMatch: 'full',
     canActivate: [authGuard, groupMemberGuard],
-    loadComponent: () => import('./features/groups/group-members/group-members.component').then(m => m.GroupMembersComponent)
+    redirectTo: 'groups/:slug'
   },
   {
     path: 'groups/:slug/phone-list',
+    pathMatch: 'full',
     canActivate: [authGuard, groupMemberGuard],
-    loadComponent: () => import('./features/groups/group-phone-list/group-phone-list.component').then(m => m.GroupPhoneListComponent)
+    redirectTo: 'groups/:slug'
   },
   {
     path: 'groups/:slug/join-requests',
+    pathMatch: 'full',
     canActivate: [authGuard, groupAdminGuard],
-    loadComponent: () => import('./features/groups/group-join-requests/group-join-requests.component').then(m => m.GroupJoinRequestsComponent)
+    redirectTo: 'groups/:slug'
   },
   {
     path: 'groups/:slug/meetings',
-    canActivate: [authGuard, groupAdminGuard],
-    loadComponent: () => import('./features/groups/group-meetings/group-meetings.component').then(m => m.GroupMeetingsComponent)
+    pathMatch: 'full',
+    canActivate: [authGuard, groupMemberGuard],
+    redirectTo: 'groups/:slug'
   },
   {
     path: 'groups/:slug/settings',
+    pathMatch: 'full',
     canActivate: [authGuard, groupAdminGuard],
-    loadComponent: () => import('./features/groups/group-settings/group-settings.component').then(m => m.GroupSettingsComponent)
+    redirectTo: 'groups/:slug'
+  },
+  {
+    path: 'groups/:slug',
+    canActivate: [authGuard, groupMemberGuard],
+    loadComponent: () => import('./features/groups/group-hub/group-hub.component').then(m => m.GroupHubComponent)
   },
   {
     path: 'profile',

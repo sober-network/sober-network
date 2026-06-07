@@ -1,13 +1,31 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import {
-  GroupResponse, GroupSummaryResponse, GroupMemberResponse, PagedResponse,
-  CreateGroupRequest, UpdateGroupRequest, JoinGroupRequest,
-  JoinRequestResponse, UpdateMemberRoleRequest, UpdateMemberStatusRequest,
-  ApproveJoinRequest, PhoneVisibilityRequest,
-  PhoneListEntryResponse, MemberDetailResponse,
-  MeetingResponse, AdminMeetingResponse, CreateMeetingRequest, UpdateMeetingRequest
+  AdminMeetingResponse,
+  ApproveJoinRequest,
+  AssignServiceRoleRequest,
+  CreateGroupRequest,
+  CreateMeetingRequest,
+  EmailVisibilityRequest,
+  GroupAdminContactResponse,
+  GroupResponse,
+  GroupServiceRoleResponse,
+  GroupSummaryResponse,
+  JoinGroupRequest,
+  JoinRequestResponse,
+  MeetingResponse,
+  MeetingSortBy,
+  MemberDetailResponse,
+  MemberResponse,
+  MemberSortBy,
+  PagedResponse,
+  PhoneListEntryResponse,
+  PhoneVisibilityRequest,
+  UpdateGroupRequest,
+  UpdateMeetingRequest,
+  UpdateMemberRoleRequest,
+  UpdateMemberStatusRequest,
 } from '@app/core/models';
 import { environment } from '../../../environments/environment';
 
@@ -19,7 +37,10 @@ export class GroupService {
   // ── Group CRUD ──────────────────────────────────────────────────────────────
 
   getMyGroups(): Observable<GroupResponse[]> {
-    return this.http.get<GroupResponse[]>(this.base);
+    // Backend returns PagedResponse<GroupResponse>; extract items here so all consumers see a flat array.
+    // pageSize=50 covers any realistic number of home groups a member would belong to.
+    const params = new HttpParams().set('page', 1).set('pageSize', 50);
+    return this.http.get<PagedResponse<GroupResponse>>(this.base, { params }).pipe(map(r => r.items));
   }
 
   getAllGroups(): Observable<GroupSummaryResponse[]> {
@@ -32,6 +53,10 @@ export class GroupService {
 
   getGroupInfo(slug: string): Observable<GroupSummaryResponse> {
     return this.http.get<GroupSummaryResponse>(`${this.base}/${slug}/info`);
+  }
+
+  getGroupAdmins(slug: string): Observable<GroupAdminContactResponse[]> {
+    return this.http.get<GroupAdminContactResponse[]>(`${this.base}/${slug}/admins`);
   }
 
   createGroup(request: CreateGroupRequest): Observable<GroupResponse> {
@@ -48,12 +73,22 @@ export class GroupService {
 
   // ── Meetings ────────────────────────────────────────────────────────────────
 
-  getMeetings(slug: string): Observable<MeetingResponse[]> {
-    return this.http.get<MeetingResponse[]>(`${this.base}/${slug}/meetings`);
+  getMeetings(slug: string, page = 1, pageSize = 100, search?: string, sortBy: MeetingSortBy = 'Time'): Observable<PagedResponse<MeetingResponse>> {
+    let params = new HttpParams()
+      .set('page', page)
+      .set('pageSize', pageSize)
+      .set('sortBy', sortBy);
+    if (search) params = params.set('search', search);
+    return this.http.get<PagedResponse<MeetingResponse>>(`${this.base}/${slug}/meetings`, { params });
   }
 
-  getAdminMeetings(slug: string): Observable<AdminMeetingResponse[]> {
-    return this.http.get<AdminMeetingResponse[]>(`${this.base}/${slug}/meetings/admin`);
+  getAdminMeetings(slug: string, page = 1, pageSize = 100, search?: string, sortBy: MeetingSortBy = 'Time'): Observable<PagedResponse<AdminMeetingResponse>> {
+    let params = new HttpParams()
+      .set('page', page)
+      .set('pageSize', pageSize)
+      .set('sortBy', sortBy);
+    if (search) params = params.set('search', search);
+    return this.http.get<PagedResponse<AdminMeetingResponse>>(`${this.base}/${slug}/meetings/admin`, { params });
   }
 
   createMeeting(slug: string, request: CreateMeetingRequest): Observable<AdminMeetingResponse> {
@@ -70,9 +105,14 @@ export class GroupService {
 
   // ── Membership ──────────────────────────────────────────────────────────────
 
-  getMembers(slug: string, page = 1, pageSize = 50): Observable<PagedResponse<GroupMemberResponse>> {
-    const params = new HttpParams().set('page', page).set('pageSize', pageSize);
-    return this.http.get<PagedResponse<GroupMemberResponse>>(`${this.base}/${slug}/members`, { params });
+  getMembers(slug: string, page = 1, pageSize = 100, search?: string, sortBy: MemberSortBy = 'Name', sortDescending = false): Observable<PagedResponse<MemberResponse>> {
+    let params = new HttpParams()
+      .set('page', page)
+      .set('pageSize', pageSize)
+      .set('sortBy', sortBy)
+      .set('sortDescending', String(sortDescending));
+    if (search) params = params.set('search', search);
+    return this.http.get<PagedResponse<MemberResponse>>(`${this.base}/${slug}/members`, { params });
   }
 
   joinGroup(slug: string, request: JoinGroupRequest): Observable<void> {
@@ -114,6 +154,22 @@ export class GroupService {
 
   setPhoneVisibility(slug: string, request: PhoneVisibilityRequest): Observable<void> {
     return this.http.patch<void>(`${this.base}/${slug}/members/me/phone-visibility`, request);
+  }
+
+  setEmailVisibility(slug: string, request: EmailVisibilityRequest): Observable<void> {
+    return this.http.patch<void>(`${this.base}/${slug}/members/me/email-visibility`, request);
+  }
+
+  getServiceRoles(slug: string): Observable<GroupServiceRoleResponse[]> {
+    return this.http.get<GroupServiceRoleResponse[]>(`${this.base}/${slug}/service-roles`);
+  }
+
+  assignServiceRole(slug: string, request: AssignServiceRoleRequest): Observable<GroupServiceRoleResponse> {
+    return this.http.post<GroupServiceRoleResponse>(`${this.base}/${slug}/service-roles`, request);
+  }
+
+  removeServiceRole(slug: string, roleId: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${slug}/service-roles/${roleId}`);
   }
 
   getPhoneList(slug: string): Observable<PhoneListEntryResponse[]> {

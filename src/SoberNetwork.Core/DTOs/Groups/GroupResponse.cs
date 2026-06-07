@@ -27,5 +27,11 @@ public record GroupResponse(
     /// <summary>UTC timestamp when the group was created.</summary>
     DateTime CreatedAt,
     /// <summary>Meetings belonging to this group.</summary>
-    IReadOnlyList<MeetingResponse> Meetings
+    IReadOnlyList<MeetingResponse> Meetings,
+    /// <summary>The next upcoming meeting, if any.</summary>
+    NextMeetingDto? NextMeeting,
+    /// <summary>Whether the current caller is sharing their phone number with this group.</summary>
+    bool UserIsPhoneShared,
+    /// <summary>Whether the current caller is sharing their email address with this group.</summary>
+    bool UserIsEmailShared
 );

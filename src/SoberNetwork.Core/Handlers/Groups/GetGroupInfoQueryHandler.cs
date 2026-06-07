@@ -8,5 +8,5 @@ namespace SoberNetwork.Core.Handlers.Groups;
 public class GetGroupInfoQueryHandler(IGroupService groupService) : IRequestHandler<GetGroupInfoQuery, GroupSummaryResponse?>
 {
     public Task<GroupSummaryResponse?> Handle(GetGroupInfoQuery request, CancellationToken cancellationToken) =>
-        groupService.GetGroupInfoAsync(request.Slug);
+        groupService.GetGroupInfoAsync(request.Slug, cancellationToken);
 }

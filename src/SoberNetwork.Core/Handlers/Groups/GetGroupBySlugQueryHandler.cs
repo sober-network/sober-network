@@ -8,5 +8,5 @@ namespace SoberNetwork.Core.Handlers.Groups;
 public class GetGroupBySlugQueryHandler(IGroupService groupService) : IRequestHandler<GetGroupBySlugQuery, GroupResponse?>
 {
     public Task<GroupResponse?> Handle(GetGroupBySlugQuery request, CancellationToken cancellationToken) =>
-        groupService.GetGroupBySlugAsync(request.Slug, request.UserId);
+        groupService.GetGroupBySlugAsync(request.Slug, request.UserId, cancellationToken);
 }

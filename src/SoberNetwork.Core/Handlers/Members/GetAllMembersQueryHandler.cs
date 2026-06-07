@@ -8,5 +8,5 @@ namespace SoberNetwork.Core.Handlers.Members;
 public class GetAllMembersQueryHandler(IMemberService memberService) : IRequestHandler<GetAllMembersQuery, IReadOnlyList<AdminMemberResponse>>
 {
     public Task<IReadOnlyList<AdminMemberResponse>> Handle(GetAllMembersQuery request, CancellationToken cancellationToken) =>
-        memberService.GetAllMembersAsync();
+        memberService.GetAllMembersAsync(cancellationToken);
 }

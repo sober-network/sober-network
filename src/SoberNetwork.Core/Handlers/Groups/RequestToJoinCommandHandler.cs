@@ -9,7 +9,7 @@ public class RequestToJoinCommandHandler(IGroupService groupService) : IRequestH
 {
     public async Task<DataResult<bool>> Handle(RequestToJoinCommand request, CancellationToken cancellationToken)
     {
-        var (success, autoApproved, error) = await groupService.RequestToJoinAsync(request.Slug, request.UserId);
+        var (success, autoApproved, error) = await groupService.RequestToJoinAsync(request.Slug, request.UserId, cancellationToken);
         if (!success)
             return DataResult<bool>.Fail(error!.Contains("already") ? ResultCode.Conflict : ResultCode.NotFound, error!);
         return DataResult<bool>.Ok(autoApproved);

@@ -9,7 +9,7 @@ public class ApproveMemberCommandHandler(IGroupService groupService) : IRequestH
 {
     public async Task<CommandResult> Handle(ApproveMemberCommand request, CancellationToken cancellationToken)
     {
-        var (success, error) = await groupService.ApproveMemberAsync(request.Slug, request.TargetUserId, request.AdminUserId);
+        var (success, error) = await groupService.ApproveMemberAsync(request.Slug, request.TargetUserId, request.AdminUserId, cancellationToken);
         if (!success)
             return CommandResult.Fail(error!.Contains("permission") ? ResultCode.Forbidden : ResultCode.BadRequest, error!);
         return CommandResult.Ok();

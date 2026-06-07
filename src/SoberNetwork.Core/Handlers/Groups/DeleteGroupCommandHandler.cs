@@ -9,7 +9,7 @@ public class DeleteGroupCommandHandler(IGroupService groupService) : IRequestHan
 {
     public async Task<CommandResult> Handle(DeleteGroupCommand request, CancellationToken cancellationToken)
     {
-        var (success, error) = await groupService.SoftDeleteGroupAsync(request.Slug, request.UserId);
+        var (success, error) = await groupService.SoftDeleteGroupAsync(request.Slug, request.UserId, cancellationToken);
         if (!success)
             return CommandResult.Fail(error!.Contains("permission") ? ResultCode.Forbidden : ResultCode.NotFound, error!);
         return CommandResult.Ok();

@@ -20,59 +20,59 @@ public class CrossGroupAccessTests
         var factory = new TestWebApplicationFactory();
 
         factory.GroupService
-            .Setup(service => service.GetMembersAsync(GroupSlug, OutsiderUserId, It.IsAny<int>(), It.IsAny<int>()))
+            .Setup(service => service.GetMembersAsync(GroupSlug, OutsiderUserId, It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(((PagedResponse<MemberResponse>?)null, "You are not a member of this group."));
 
         factory.GroupService
-            .Setup(service => service.GetJoinRequestsAsync(GroupSlug, OutsiderUserId, It.IsAny<int>(), It.IsAny<int>()))
+            .Setup(service => service.GetJoinRequestsAsync(GroupSlug, OutsiderUserId, It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(((PagedResponse<JoinRequestResponse>?)null, "You do not have permission to view join requests."));
 
         factory.GroupService
-            .Setup(service => service.GetGroupBySlugAsync(GroupSlug, OutsiderUserId))
+            .Setup(service => service.GetGroupBySlugAsync(GroupSlug, OutsiderUserId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((GroupResponse?)null);
 
         factory.MemberService
-            .Setup(service => service.GetGroupPhoneListAsync(OutsiderUserId, GroupSlug))
+            .Setup(service => service.GetGroupPhoneListAsync(OutsiderUserId, GroupSlug, It.IsAny<CancellationToken>()))
             .ReturnsAsync(((IReadOnlyList<PhoneListEntryResponse>?)null, "You are not a member of this group."));
 
         factory.MemberService
-            .Setup(service => service.GetMemberInGroupContextAsync(OutsiderUserId, GroupSlug, It.IsAny<Guid>()))
+            .Setup(service => service.GetMemberInGroupContextAsync(OutsiderUserId, GroupSlug, It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(((MemberDetailResponse?)null, "You are not a member of this group."));
 
         factory.MemberService
-            .Setup(service => service.SetGroupPhoneVisibilityAsync(OutsiderUserId, GroupSlug, It.IsAny<bool>()))
+            .Setup(service => service.SetGroupPhoneVisibilityAsync(OutsiderUserId, GroupSlug, It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((false, "You are not an active member of this group."));
 
         factory.GroupService
-            .Setup(service => service.ApproveMemberAsync(GroupSlug, It.IsAny<Guid>(), OutsiderUserId))
+            .Setup(service => service.ApproveMemberAsync(GroupSlug, It.IsAny<Guid>(), OutsiderUserId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((false, "You do not have permission to approve members."));
 
         factory.GroupService
-            .Setup(service => service.RejectMemberAsync(GroupSlug, It.IsAny<Guid>(), OutsiderUserId))
+            .Setup(service => service.RejectMemberAsync(GroupSlug, It.IsAny<Guid>(), OutsiderUserId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((false, "You do not have permission to reject members."));
 
         factory.GroupService
-            .Setup(service => service.RemoveMemberAsync(GroupSlug, It.IsAny<Guid>(), OutsiderUserId))
+            .Setup(service => service.RemoveMemberAsync(GroupSlug, It.IsAny<Guid>(), OutsiderUserId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((false, "You do not have permission to remove members."));
 
         factory.GroupService
-            .Setup(service => service.ChangeRoleAsync(GroupSlug, It.IsAny<Guid>(), OutsiderUserId, It.IsAny<GroupRole>()))
+            .Setup(service => service.ChangeRoleAsync(GroupSlug, It.IsAny<Guid>(), OutsiderUserId, It.IsAny<GroupRole>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((false, "You do not have permission to change roles."));
 
         factory.GroupService
-            .Setup(service => service.ChangeMemberStatusAsync(GroupSlug, It.IsAny<Guid>(), OutsiderUserId, It.IsAny<MemberStatus>()))
+            .Setup(service => service.ChangeMemberStatusAsync(GroupSlug, It.IsAny<Guid>(), OutsiderUserId, It.IsAny<MemberStatus>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((false, "You do not have permission to change member status."));
 
         factory.GroupService
-            .Setup(service => service.ClearProbationaryStatusAsync(GroupSlug, It.IsAny<Guid>(), OutsiderUserId))
+            .Setup(service => service.ClearProbationaryStatusAsync(GroupSlug, It.IsAny<Guid>(), OutsiderUserId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((false, "You do not have permission to clear probationary status."));
 
         factory.GroupService
-            .Setup(service => service.UpdateGroupAsync(GroupSlug, It.IsAny<UpdateGroupRequest>(), OutsiderUserId))
+            .Setup(service => service.UpdateGroupAsync(GroupSlug, It.IsAny<UpdateGroupRequest>(), OutsiderUserId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(((GroupResponse?)null, "You do not have permission to update this group."));
 
         factory.GroupService
-            .Setup(service => service.SoftDeleteGroupAsync(GroupSlug, OutsiderUserId))
+            .Setup(service => service.SoftDeleteGroupAsync(GroupSlug, OutsiderUserId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((false, "You do not have permission to delete this group."));
 
         return factory;

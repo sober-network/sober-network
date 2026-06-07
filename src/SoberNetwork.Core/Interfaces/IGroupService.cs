@@ -30,31 +30,31 @@ public interface IGroupService
 
     /// <summary>Returns full group detail when the caller is an active member; otherwise null.</summary>
 
-    Task<GroupResponse?> GetGroupBySlugAsync(string slug, Guid userId);
+    Task<GroupResponse?> GetGroupBySlugAsync(string slug, Guid userId, CancellationToken ct = default);
 
 
 
     /// <summary>Returns public group information for discovery and join screens.</summary>
 
-    Task<GroupSummaryResponse?> GetGroupInfoAsync(string slug);
+    Task<GroupSummaryResponse?> GetGroupInfoAsync(string slug, CancellationToken ct = default);
 
 
 
     /// <summary>Creates a new group and makes the creator the initial GroupAdmin.</summary>
 
-    Task<(GroupResponse? Group, string? Error)> CreateGroupAsync(CreateGroupRequest request, Guid creatorUserId);
+    Task<(GroupResponse? Group, string? Error)> CreateGroupAsync(CreateGroupRequest request, Guid creatorUserId, CancellationToken ct = default);
 
 
 
     /// <summary>Updates mutable group fields for a GroupAdmin caller.</summary>
 
-    Task<(GroupResponse? Group, string? Error)> UpdateGroupAsync(string slug, UpdateGroupRequest request, Guid userId);
+    Task<(GroupResponse? Group, string? Error)> UpdateGroupAsync(string slug, UpdateGroupRequest request, Guid userId, CancellationToken ct = default);
 
 
 
     /// <summary>Soft-deletes a group when the caller is a GroupAdmin.</summary>
 
-    Task<(bool Success, string? Error)> SoftDeleteGroupAsync(string slug, Guid userId);
+    Task<(bool Success, string? Error)> SoftDeleteGroupAsync(string slug, Guid userId, CancellationToken ct = default);
 
 
 
@@ -74,49 +74,49 @@ public interface IGroupService
 
     /// <summary>Submits or reuses a join request and reports whether membership was auto-approved.</summary>
 
-    Task<(bool Success, bool AutoApproved, string? Error)> RequestToJoinAsync(string slug, Guid userId);
+    Task<(bool Success, bool AutoApproved, string? Error)> RequestToJoinAsync(string slug, Guid userId, CancellationToken ct = default);
 
 
 
     /// <summary>Approves a pending group join request.</summary>
 
-    Task<(bool Success, string? Error)> ApproveMemberAsync(string slug, Guid targetUserId, Guid adminUserId);
+    Task<(bool Success, string? Error)> ApproveMemberAsync(string slug, Guid targetUserId, Guid adminUserId, CancellationToken ct = default);
 
 
 
     /// <summary>Rejects a pending group join request.</summary>
 
-    Task<(bool Success, string? Error)> RejectMemberAsync(string slug, Guid targetUserId, Guid adminUserId);
+    Task<(bool Success, string? Error)> RejectMemberAsync(string slug, Guid targetUserId, Guid adminUserId, CancellationToken ct = default);
 
 
 
     /// <summary>Removes a member from a group while enforcing the last-admin guard.</summary>
 
-    Task<(bool Success, string? Error)> RemoveMemberAsync(string slug, Guid targetUserId, Guid adminUserId);
+    Task<(bool Success, string? Error)> RemoveMemberAsync(string slug, Guid targetUserId, Guid adminUserId, CancellationToken ct = default);
 
 
 
     /// <summary>Allows a member to leave a group while enforcing the last-admin guard.</summary>
 
-    Task<(bool Success, string? Error)> LeaveGroupAsync(string slug, Guid userId);
+    Task<(bool Success, string? Error)> LeaveGroupAsync(string slug, Guid userId, CancellationToken ct = default);
 
 
 
     /// <summary>Clears the probationary flag for a group member.</summary>
 
-    Task<(bool Success, string? Error)> ClearProbationaryStatusAsync(string slug, Guid targetUserId, Guid adminUserId);
+    Task<(bool Success, string? Error)> ClearProbationaryStatusAsync(string slug, Guid targetUserId, Guid adminUserId, CancellationToken ct = default);
 
 
 
     /// <summary>Changes a member's group role while enforcing the last-admin guard.</summary>
 
-    Task<(bool Success, string? Error)> ChangeRoleAsync(string slug, Guid targetUserId, Guid adminUserId, GroupRole newRole);
+    Task<(bool Success, string? Error)> ChangeRoleAsync(string slug, Guid targetUserId, Guid adminUserId, GroupRole newRole, CancellationToken ct = default);
 
 
 
     /// <summary>Changes a member's status while enforcing the last-admin guard.</summary>
 
-    Task<(bool Success, string? Error)> ChangeMemberStatusAsync(string slug, Guid targetUserId, Guid adminUserId, MemberStatus newStatus);
+    Task<(bool Success, string? Error)> ChangeMemberStatusAsync(string slug, Guid targetUserId, Guid adminUserId, MemberStatus newStatus, CancellationToken ct = default);
 
 }
 

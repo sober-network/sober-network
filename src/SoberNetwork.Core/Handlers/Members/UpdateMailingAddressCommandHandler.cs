@@ -10,7 +10,7 @@ public class UpdateMailingAddressCommandHandler(IMemberService memberService)
 {
     public async Task<CommandResult> Handle(UpdateMailingAddressCommand request, CancellationToken cancellationToken)
     {
-        var (success, error) = await memberService.UpdateMailingAddressAsync(request.UserId, request.Request);
+        var (success, error) = await memberService.UpdateMailingAddressAsync(request.UserId, request.Request, cancellationToken);
         return success ? CommandResult.Ok() : CommandResult.Fail(ResultCode.NotFound, error!);
     }
 }

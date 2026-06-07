@@ -10,7 +10,7 @@ public class GetMemberDetailQueryHandler(IMemberService memberService) : IReques
 {
     public async Task<DataResult<MemberDetailResponse>> Handle(GetMemberDetailQuery request, CancellationToken cancellationToken)
     {
-        var (member, error) = await memberService.GetMemberInGroupContextAsync(request.UserId, request.Slug, request.TargetUserId);
+        var (member, error) = await memberService.GetMemberInGroupContextAsync(request.UserId, request.Slug, request.TargetUserId, cancellationToken);
         if (error is not null)
             return DataResult<MemberDetailResponse>.Fail(error.Contains("not a member") ? ResultCode.Forbidden : ResultCode.NotFound, error);
         return DataResult<MemberDetailResponse>.Ok(member!);

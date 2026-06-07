@@ -9,7 +9,7 @@ public class SetPhoneCommandHandler(IMemberService memberService) : IRequestHand
 {
     public async Task<CommandResult> Handle(SetPhoneCommand request, CancellationToken cancellationToken)
     {
-        var (success, error) = await memberService.SetPhoneAsync(request.UserId, request.PhoneNumber);
+        var (success, error) = await memberService.SetPhoneAsync(request.UserId, request.PhoneNumber, cancellationToken);
         if (!success)
             return CommandResult.Fail(ResultCode.BadRequest, error!);
         return CommandResult.Ok();

@@ -10,7 +10,7 @@ public class GetPhoneListQueryHandler(IMemberService memberService) : IRequestHa
 {
     public async Task<DataResult<IReadOnlyList<PhoneListEntryResponse>>> Handle(GetPhoneListQuery request, CancellationToken cancellationToken)
     {
-        var (list, error) = await memberService.GetGroupPhoneListAsync(request.UserId, request.Slug);
+        var (list, error) = await memberService.GetGroupPhoneListAsync(request.UserId, request.Slug, cancellationToken);
         if (error is not null)
             return DataResult<IReadOnlyList<PhoneListEntryResponse>>.Fail(error.Contains("not a member") ? ResultCode.Forbidden : ResultCode.NotFound, error);
         return DataResult<IReadOnlyList<PhoneListEntryResponse>>.Ok(list!);

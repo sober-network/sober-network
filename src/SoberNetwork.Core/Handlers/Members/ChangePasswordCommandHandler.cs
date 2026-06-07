@@ -9,7 +9,7 @@ public class ChangePasswordCommandHandler(IMemberService memberService) : IReque
 {
     public async Task<CommandResult> Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
     {
-        var (success, error) = await memberService.ChangePasswordAsync(request.UserId, request.Request);
+        var (success, error) = await memberService.ChangePasswordAsync(request.UserId, request.Request, cancellationToken);
         if (!success)
             return CommandResult.Fail(error!.Contains("match") ? ResultCode.BadRequest : ResultCode.Unauthorized, error!);
         return CommandResult.Ok();

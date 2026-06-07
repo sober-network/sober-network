@@ -9,7 +9,7 @@ public class SetSobrietyDateCommandHandler(IMemberService memberService) : IRequ
 {
     public async Task<CommandResult> Handle(SetSobrietyDateCommand request, CancellationToken cancellationToken)
     {
-        var (success, error) = await memberService.SetSobrietyDateAsync(request.UserId, request.SobrietyDate);
+        var (success, error) = await memberService.SetSobrietyDateAsync(request.UserId, request.SobrietyDate, cancellationToken);
         if (!success)
             return CommandResult.Fail(ResultCode.BadRequest, error!);
         return CommandResult.Ok();

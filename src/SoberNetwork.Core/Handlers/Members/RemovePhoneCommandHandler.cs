@@ -9,7 +9,7 @@ public class RemovePhoneCommandHandler(IMemberService memberService) : IRequestH
 {
     public async Task<CommandResult> Handle(RemovePhoneCommand request, CancellationToken cancellationToken)
     {
-        var success = await memberService.RemovePhoneAsync(request.UserId);
+        var success = await memberService.RemovePhoneAsync(request.UserId, cancellationToken);
         return success ? CommandResult.Ok() : CommandResult.Fail(ResultCode.NotFound, "No phone number on record.");
     }
 }

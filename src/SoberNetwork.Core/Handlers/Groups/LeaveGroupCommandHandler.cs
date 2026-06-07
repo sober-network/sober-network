@@ -9,7 +9,7 @@ public class LeaveGroupCommandHandler(IGroupService groupService) : IRequestHand
 {
     public async Task<CommandResult> Handle(LeaveGroupCommand request, CancellationToken cancellationToken)
     {
-        var (success, error) = await groupService.LeaveGroupAsync(request.Slug, request.UserId);
+        var (success, error) = await groupService.LeaveGroupAsync(request.Slug, request.UserId, cancellationToken);
         if (!success)
             return CommandResult.Fail(error!.Contains("only admin") ? ResultCode.Conflict : ResultCode.NotFound, error!);
         return CommandResult.Ok();

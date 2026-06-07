@@ -46,16 +46,16 @@ public class MemberService(
 
     // ── Own profile ────────────────────────────────────────────────────────────
 
-    public async Task<MemberProfileResponse?> GetMyProfileAsync(Guid userId)
+    public async Task<MemberProfileResponse?> GetMyProfileAsync(Guid userId, CancellationToken ct = default)
     {
         var user = await userManager.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Id == userId);
+            .FirstOrDefaultAsync(u => u.Id == userId, ct);
         return user == null || user.DeletedAt != null ? null : ToProfileResponse(user);
     }
 
     public async Task<(MemberProfileResponse? Profile, string? Error)> UpdateProfileAsync(
-        Guid userId, UpdateProfileRequest request)
+        Guid userId, UpdateProfileRequest request, CancellationToken ct = default)
     {
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null || user.DeletedAt != null) return (null, "User not found.");
@@ -72,7 +72,7 @@ public class MemberService(
         return (ToProfileResponse(user), null);
     }
 
-    public async Task<(bool Success, string? Error)> DeleteAccountAsync(Guid userId, string password)
+    public async Task<(bool Success, string? Error)> DeleteAccountAsync(Guid userId, string password, CancellationToken ct = default)
     {
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null || user.DeletedAt != null) return (false, "User not found.");
@@ -87,17 +87,17 @@ public class MemberService(
         // Cascade: soft-delete all group memberships
         var memberships = await db.GroupMemberships
             .Where(m => m.UserId == userId && m.DeletedAt == null)
-            .ToListAsync();
+            .ToListAsync(ct);
         foreach (var m in memberships) { m.DeletedAt = now; m.UpdatedAt = now; }
 
         // Cascade: revoke all refresh tokens
         var tokens = await db.RefreshTokens
             .Where(t => t.UserId == userId && t.RevokedAt == null)
-            .ToListAsync();
+            .ToListAsync(ct);
         foreach (var t in tokens) t.RevokedAt = now;
 
         await userManager.UpdateAsync(user);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(ct);
 
         await audit.LogAsync(SecurityEventType.AccountDeactivated, userId, "Self-deleted account");
         return (true, null);
@@ -106,7 +106,7 @@ public class MemberService(
     // ── Credentials ────────────────────────────────────────────────────────────
 
     public async Task<(bool Success, string? Error)> ChangePasswordAsync(
-        Guid userId, ChangePasswordRequest request)
+        Guid userId, ChangePasswordRequest request, CancellationToken ct = default)
     {
         if (request.NewPassword != request.ConfirmNewPassword)
             return (false, "New passwords do not match.");
@@ -123,7 +123,7 @@ public class MemberService(
     }
 
     public async Task<(bool Success, string? Error)> ChangeEmailAsync(
-        Guid userId, ChangeEmailRequest request)
+        Guid userId, ChangeEmailRequest request, CancellationToken ct = default)
     {
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null || user.DeletedAt != null) return (false, "User not found.");
@@ -157,7 +157,7 @@ public class MemberService(
 
     // ── Sobriety date ──────────────────────────────────────────────────────────
 
-    public async Task<(bool Success, string? Error)> SetSobrietyDateAsync(Guid userId, DateOnly date)
+    public async Task<(bool Success, string? Error)> SetSobrietyDateAsync(Guid userId, DateOnly date, CancellationToken ct = default)
     {
         if (date > DateOnly.FromDateTime(DateTime.UtcNow))
             return (false, "Sobriety date cannot be in the future.");
@@ -173,7 +173,7 @@ public class MemberService(
         return (true, null);
     }
 
-    public async Task<bool> RemoveSobrietyDateAsync(Guid userId)
+    public async Task<bool> RemoveSobrietyDateAsync(Guid userId, CancellationToken ct = default)
     {
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null || user.DeletedAt != null) return false;
@@ -187,7 +187,7 @@ public class MemberService(
         return true;
     }
 
-    public async Task<bool> UpdateSobrietyVisibilityAsync(Guid userId, bool isPublic)
+    public async Task<bool> UpdateSobrietyVisibilityAsync(Guid userId, bool isPublic, CancellationToken ct = default)
     {
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null || user.DeletedAt != null) return false;
@@ -203,7 +203,7 @@ public class MemberService(
 
     // ── Phone ──────────────────────────────────────────────────────────────────
 
-    public async Task<(bool Success, string? Error)> SetPhoneAsync(Guid userId, string phoneNumber)
+    public async Task<(bool Success, string? Error)> SetPhoneAsync(Guid userId, string phoneNumber, CancellationToken ct = default)
     {
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null || user.DeletedAt != null) return (false, "User not found.");
@@ -218,7 +218,7 @@ public class MemberService(
         return (true, null);
     }
 
-    public async Task<bool> RemovePhoneAsync(Guid userId)
+    public async Task<bool> RemovePhoneAsync(Guid userId, CancellationToken ct = default)
     {
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null || user.DeletedAt != null) return false;
@@ -231,18 +231,18 @@ public class MemberService(
     }
 
     public async Task<(bool Success, string? Error)> SetGroupPhoneVisibilityAsync(
-        Guid userId, string groupSlug, bool isShared)
+        Guid userId, string groupSlug, bool isShared, CancellationToken ct = default)
     {
         var group = await db.Groups
             .AsNoTracking()
-            .FirstOrDefaultAsync(g => g.Slug == groupSlug && g.DeletedAt == null);
+            .FirstOrDefaultAsync(g => g.Slug == groupSlug && g.DeletedAt == null, ct);
         if (group == null) return (false, "Group not found.");
 
         var membership = await db.GroupMemberships.FirstOrDefaultAsync(m =>
             m.GroupId == group.Id &&
             m.UserId == userId &&
             m.Status == MemberStatus.Active &&
-            m.DeletedAt == null);
+            m.DeletedAt == null, ct);
         if (membership == null) return (false, "You are not an active member of this group.");
 
         // Cannot share phone if none is set
@@ -252,7 +252,7 @@ public class MemberService(
 
         membership.IsPhoneShared = isShared;
         membership.UpdatedAt = DateTime.UtcNow;
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(ct);
 
         await audit.LogAsync(SecurityEventType.PhoneVisibilityChanged, userId,
             $"group={groupSlug} isShared={isShared}");
@@ -262,21 +262,21 @@ public class MemberService(
     // ── Group-scoped member views ──────────────────────────────────────────────
 
     public async Task<(IReadOnlyList<PhoneListEntryResponse>? List, string? Error)> GetGroupPhoneListAsync(
-        Guid requestingUserId, string groupSlug)
+        Guid requestingUserId, string groupSlug, CancellationToken ct = default)
     {
         var group = await db.Groups
             .AsNoTracking()
-            .FirstOrDefaultAsync(g => g.Slug == groupSlug && g.DeletedAt == null);
+            .FirstOrDefaultAsync(g => g.Slug == groupSlug && g.DeletedAt == null, ct);
         if (group == null) return (null, "Group not found.");
 
         // Caller must be an active member (T12 — auth-only)
         var callerMembership = await db.GroupMemberships
             .AsNoTracking()
             .FirstOrDefaultAsync(m =>
-                m.GroupId == group.Id &&
-                m.UserId == requestingUserId &&
-                m.Status == MemberStatus.Active &&
-                m.DeletedAt == null);
+            m.GroupId == group.Id &&
+            m.UserId == requestingUserId &&
+            m.Status == MemberStatus.Active &&
+            m.DeletedAt == null, ct);
         if (callerMembership == null) return (null, "You are not a member of this group.");
 
         var list = await db.GroupMemberships
@@ -291,37 +291,37 @@ public class MemberService(
                 m.User.PhoneNumber != null)
             .OrderBy(m => m.User!.DisplayName)
             .Select(m => new PhoneListEntryResponse(m.UserId, m.User!.DisplayName, m.User.PhoneNumber!))
-            .ToListAsync();
+            .ToListAsync(ct);
 
         return (list, null);
     }
 
     public async Task<(MemberDetailResponse? Member, string? Error)> GetMemberInGroupContextAsync(
-        Guid requestingUserId, string groupSlug, Guid targetUserId)
+        Guid requestingUserId, string groupSlug, Guid targetUserId, CancellationToken ct = default)
     {
         var group = await db.Groups
             .AsNoTracking()
-            .FirstOrDefaultAsync(g => g.Slug == groupSlug && g.DeletedAt == null);
+            .FirstOrDefaultAsync(g => g.Slug == groupSlug && g.DeletedAt == null, ct);
         if (group == null) return (null, "Group not found.");
 
         // Caller must be an active member of this group (T4)
         var callerMembership = await db.GroupMemberships
             .AsNoTracking()
             .FirstOrDefaultAsync(m =>
-                m.GroupId == group.Id &&
-                m.UserId == requestingUserId &&
-                m.Status == MemberStatus.Active &&
-                m.DeletedAt == null);
+            m.GroupId == group.Id &&
+            m.UserId == requestingUserId &&
+            m.Status == MemberStatus.Active &&
+            m.DeletedAt == null, ct);
         if (callerMembership == null) return (null, "You are not a member of this group.");
 
         var targetMembership = await db.GroupMemberships
             .AsNoTracking()
             .Include(m => m.User)
             .FirstOrDefaultAsync(m =>
-                m.GroupId == group.Id &&
-                m.UserId == targetUserId &&
-                m.Status == MemberStatus.Active &&
-                m.DeletedAt == null);
+            m.GroupId == group.Id &&
+            m.UserId == targetUserId &&
+            m.Status == MemberStatus.Active &&
+            m.DeletedAt == null, ct);
         if (targetMembership == null) return (null, "Member not found in this group.");
 
         var u = targetMembership.User;
@@ -344,13 +344,13 @@ public class MemberService(
 
     // ── SuperAdmin ─────────────────────────────────────────────────────────────
 
-    public async Task<IReadOnlyList<AdminMemberResponse>> GetAllMembersAsync()
+    public async Task<IReadOnlyList<AdminMemberResponse>> GetAllMembersAsync(CancellationToken ct = default)
     {
         var users = await userManager.Users
             .AsNoTracking()
             .Where(u => u.DeletedAt == null)
             .OrderBy(u => u.DisplayName)
-            .ToListAsync();
+            .ToListAsync(ct);
 
         var userIds = users.Select(u => u.Id).ToList();
         var groupCounts = await db.GroupMemberships
@@ -358,7 +358,7 @@ public class MemberService(
             .Where(m => userIds.Contains(m.UserId) && m.Status == MemberStatus.Active && m.DeletedAt == null)
             .GroupBy(m => m.UserId)
             .Select(g => new { UserId = g.Key, Count = g.Count() })
-            .ToDictionaryAsync(g => g.UserId, g => g.Count);
+            .ToDictionaryAsync(g => g.UserId, g => g.Count, ct);
 
         var result = new List<AdminMemberResponse>();
         foreach (var user in users)
@@ -393,16 +393,16 @@ public class MemberService(
         return result;
     }
 
-    public async Task<AdminMemberResponse?> GetUserByIdAsync(Guid targetUserId)
+    public async Task<AdminMemberResponse?> GetUserByIdAsync(Guid targetUserId, CancellationToken ct = default)
     {
         var user = await userManager.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Id == targetUserId);
+            .FirstOrDefaultAsync(u => u.Id == targetUserId, ct);
         if (user == null) return null;
 
         var groupCount = await db.GroupMemberships
             .AsNoTracking()
-            .CountAsync(m => m.UserId == user.Id && m.Status == MemberStatus.Active && m.DeletedAt == null);
+            .CountAsync(m => m.UserId == user.Id && m.Status == MemberStatus.Active && m.DeletedAt == null, ct);
         var daysSober = user.SobrietyDate.HasValue
             ? (DateTime.UtcNow.Date - user.SobrietyDate.Value.ToDateTime(TimeOnly.MinValue)).Days
             : (int?)null;
@@ -432,11 +432,11 @@ public class MemberService(
 
     // ── Mailing Address ────────────────────────────────────────────────────────
 
-    public async Task<MailingAddressResponse?> GetMailingAddressAsync(Guid userId)
+    public async Task<MailingAddressResponse?> GetMailingAddressAsync(Guid userId, CancellationToken ct = default)
     {
         var user = await userManager.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Id == userId);
+            .FirstOrDefaultAsync(u => u.Id == userId, ct);
         if (user == null || user.DeletedAt != null) return null;
 
         return new MailingAddressResponse(
@@ -451,7 +451,7 @@ public class MemberService(
     }
 
     public async Task<(bool Success, string? Error)> UpdateMailingAddressAsync(
-        Guid userId, UpdateMailingAddressRequest request)
+        Guid userId, UpdateMailingAddressRequest request, CancellationToken ct = default)
     {
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null || user.DeletedAt != null) return (false, "User not found.");
@@ -475,7 +475,7 @@ public class MemberService(
             {
                 var http = httpClientFactory.CreateClient("Nominatim");
                 var url = $"https://nominatim.openstreetmap.org/search?q={Uri.EscapeDataString(query)}&format=json&limit=1";
-                var results = await http.GetFromJsonAsync<NominatimResult[]>(url);
+                var results = await http.GetFromJsonAsync<NominatimResult[]>(url, ct);
                 if (results is { Length: > 0 })
                 {
                     user.MailingLatitude  = results[0].Lat;
@@ -501,7 +501,7 @@ public class MemberService(
 
     // ── Superadmin: user deactivation ─────────────────────────────────────────
 
-    public async Task<(bool Success, string? Error)> DeactivateUserAsync(Guid adminUserId, Guid targetUserId)
+    public async Task<(bool Success, string? Error)> DeactivateUserAsync(Guid adminUserId, Guid targetUserId, CancellationToken ct = default)
     {
         if (adminUserId == targetUserId)
             return (false, "Use DELETE /api/members/me to deactivate your own account.");
@@ -516,16 +516,16 @@ public class MemberService(
 
         var memberships = await db.GroupMemberships
             .Where(m => m.UserId == targetUserId && m.DeletedAt == null)
-            .ToListAsync();
+            .ToListAsync(ct);
         foreach (var m in memberships) { m.DeletedAt = now; m.UpdatedAt = now; }
 
         var tokens = await db.RefreshTokens
             .Where(t => t.UserId == targetUserId && t.RevokedAt == null)
-            .ToListAsync();
+            .ToListAsync(ct);
         foreach (var t in tokens) t.RevokedAt = now;
 
         await userManager.UpdateAsync(user);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(ct);
 
         await audit.LogAsync(SecurityEventType.AccountDeactivated, adminUserId,
             $"SuperAdmin deactivated userId={targetUserId}");

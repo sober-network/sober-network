@@ -117,7 +117,7 @@ public class AuthService(
         await auditService.LogAsync(SecurityEventType.LoginSuccess, user.Id, ipAddress: ipAddress, userAgent: userAgent);
 
         logger.LogInformation("Login succeeded: {UserId}", user.Id);
-        var refreshToken = await refreshTokenService.CreateAsync(user.Id);
+        var refreshToken = await refreshTokenService.CreateAsync(user.Id, cancellationToken);
         return DataResult<AuthResponse>.Ok(new AuthResponse(
             AccessToken: tokenService.GenerateToken(user),
             ExpiresAt: tokenService.GetExpiry(),
@@ -156,7 +156,7 @@ public class AuthService(
             return CommandResult.Fail(ResultCode.BadRequest, "Password reset failed. The link may have expired.");
         }
 
-        await refreshTokenService.RevokeAllForUserAsync(user.Id);
+        await refreshTokenService.RevokeAllForUserAsync(user.Id, cancellationToken);
         await auditService.LogAsync(SecurityEventType.PasswordReset, user.Id, ipAddress: ipAddress, userAgent: userAgent);
         logger.LogInformation("Password reset completed: {UserId}", userId);
         return CommandResult.Ok();
@@ -164,7 +164,7 @@ public class AuthService(
 
     public async Task<DataResult<AuthResponse>> RefreshAsync(string refreshToken, string? ipAddress, string? userAgent, CancellationToken cancellationToken = default)
     {
-        var rotated = await refreshTokenService.RotateAsync(refreshToken);
+        var rotated = await refreshTokenService.RotateAsync(refreshToken, cancellationToken);
         if (rotated is null)
         {
             logger.LogWarning("Invalid or expired refresh token attempt");
@@ -187,7 +187,7 @@ public class AuthService(
 
     public async Task<CommandResult> LogoutAsync(string refreshToken, string? ipAddress, string? userAgent, CancellationToken cancellationToken = default)
     {
-        await refreshTokenService.RevokeAsync(refreshToken);
+        await refreshTokenService.RevokeAsync(refreshToken, cancellationToken);
         await auditService.LogAsync(SecurityEventType.Logout, ipAddress: ipAddress, userAgent: userAgent);
         return CommandResult.Ok();
     }

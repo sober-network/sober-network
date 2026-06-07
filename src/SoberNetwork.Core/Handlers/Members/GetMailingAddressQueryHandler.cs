@@ -9,5 +9,5 @@ public class GetMailingAddressQueryHandler(IMemberService memberService)
     : IRequestHandler<GetMailingAddressQuery, MailingAddressResponse?>
 {
     public Task<MailingAddressResponse?> Handle(GetMailingAddressQuery request, CancellationToken cancellationToken) =>
-        memberService.GetMailingAddressAsync(request.UserId);
+        memberService.GetMailingAddressAsync(request.UserId, cancellationToken);
 }

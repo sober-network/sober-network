@@ -10,7 +10,7 @@ public class UpdateGroupCommandHandler(IGroupService groupService) : IRequestHan
 {
     public async Task<DataResult<GroupResponse>> Handle(UpdateGroupCommand request, CancellationToken cancellationToken)
     {
-        var (group, error) = await groupService.UpdateGroupAsync(request.Slug, request.Request, request.UserId);
+        var (group, error) = await groupService.UpdateGroupAsync(request.Slug, request.Request, request.UserId, cancellationToken);
         if (error is not null)
             return DataResult<GroupResponse>.Fail(error.Contains("permission") ? ResultCode.Forbidden : ResultCode.NotFound, error);
         return DataResult<GroupResponse>.Ok(group!);

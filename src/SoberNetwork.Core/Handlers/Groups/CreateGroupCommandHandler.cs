@@ -10,7 +10,7 @@ public class CreateGroupCommandHandler(IGroupService groupService) : IRequestHan
 {
     public async Task<DataResult<GroupResponse>> Handle(CreateGroupCommand request, CancellationToken cancellationToken)
     {
-        var (group, error) = await groupService.CreateGroupAsync(request.Request, request.UserId);
+        var (group, error) = await groupService.CreateGroupAsync(request.Request, request.UserId, cancellationToken);
         if (error is not null)
             return DataResult<GroupResponse>.Fail(ResultCode.Conflict, error);
         return DataResult<GroupResponse>.Ok(group!);

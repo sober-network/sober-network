@@ -9,7 +9,7 @@ public class DeleteAccountCommandHandler(IMemberService memberService) : IReques
 {
     public async Task<CommandResult> Handle(DeleteAccountCommand request, CancellationToken cancellationToken)
     {
-        var (success, error) = await memberService.DeleteAccountAsync(request.UserId, request.Password);
+        var (success, error) = await memberService.DeleteAccountAsync(request.UserId, request.Password, cancellationToken);
         if (!success)
             return CommandResult.Fail(error!.Contains("Incorrect") ? ResultCode.Unauthorized : ResultCode.BadRequest, error!);
         return CommandResult.Ok();

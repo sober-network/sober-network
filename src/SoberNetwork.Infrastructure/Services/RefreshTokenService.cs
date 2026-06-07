@@ -11,7 +11,7 @@ public class RefreshTokenService(
     ITokenService tokenService,
     ILogger<RefreshTokenService> logger) : IRefreshTokenService
 {
-    public async Task<string> CreateAsync(Guid userId)
+    public async Task<string> CreateAsync(Guid userId, CancellationToken ct = default)
     {
         var (plainToken, hash) = tokenService.GenerateRefreshToken();
 
@@ -22,17 +22,17 @@ public class RefreshTokenService(
             ExpiresAt = tokenService.GetRefreshExpiry()
         });
 
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(ct);
         return plainToken;
     }
 
-    public async Task<(string newPlainToken, RefreshToken storedToken)?> RotateAsync(string plainToken)
+    public async Task<(string newPlainToken, RefreshToken storedToken)?> RotateAsync(string plainToken, CancellationToken ct = default)
     {
         var hash = tokenService.HashToken(plainToken);
 
         var stored = await db.RefreshTokens
             .Include(t => t.User)
-            .FirstOrDefaultAsync(t => t.TokenHash == hash);
+            .FirstOrDefaultAsync(t => t.TokenHash == hash, ct);
 
         if (stored is null || !stored.IsActive)
             return null;
@@ -49,32 +49,32 @@ public class RefreshTokenService(
             ExpiresAt = tokenService.GetRefreshExpiry()
         });
 
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(ct);
         return (newPlainToken, stored);
     }
 
-    public async Task RevokeAsync(string plainToken)
+    public async Task RevokeAsync(string plainToken, CancellationToken ct = default)
     {
         var hash = tokenService.HashToken(plainToken);
-        var stored = await db.RefreshTokens.FirstOrDefaultAsync(t => t.TokenHash == hash);
+        var stored = await db.RefreshTokens.FirstOrDefaultAsync(t => t.TokenHash == hash, ct);
 
         if (stored is { IsActive: true })
         {
             stored.RevokedAt = DateTime.UtcNow;
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(ct);
         }
     }
 
-    public async Task RevokeAllForUserAsync(Guid userId)
+    public async Task RevokeAllForUserAsync(Guid userId, CancellationToken ct = default)
     {
         var tokens = await db.RefreshTokens
             .Where(t => t.UserId == userId && t.RevokedAt == null)
-            .ToListAsync();
+            .ToListAsync(ct);
 
         foreach (var t in tokens)
             t.RevokedAt = DateTime.UtcNow;
 
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(ct);
         logger.LogInformation("Revoked {Count} refresh token(s) for user {UserId}", tokens.Count, userId);
     }
 }

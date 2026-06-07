@@ -9,7 +9,7 @@ public class ChangeEmailCommandHandler(IMemberService memberService) : IRequestH
 {
     public async Task<CommandResult> Handle(ChangeEmailCommand request, CancellationToken cancellationToken)
     {
-        var (success, error) = await memberService.ChangeEmailAsync(request.UserId, request.Request);
+        var (success, error) = await memberService.ChangeEmailAsync(request.UserId, request.Request, cancellationToken);
         if (!success)
             return CommandResult.Fail(error!.Contains("Incorrect") ? ResultCode.Unauthorized : ResultCode.BadRequest, error!);
         return CommandResult.Ok();

@@ -9,7 +9,7 @@ public class UpdateSobrietyVisibilityCommandHandler(IMemberService memberService
 {
     public async Task<CommandResult> Handle(UpdateSobrietyVisibilityCommand request, CancellationToken cancellationToken)
     {
-        var success = await memberService.UpdateSobrietyVisibilityAsync(request.UserId, request.IsPublic);
+        var success = await memberService.UpdateSobrietyVisibilityAsync(request.UserId, request.IsPublic, cancellationToken);
         return success ? CommandResult.Ok() : CommandResult.Fail(ResultCode.NotFound, "User not found.");
     }
 }

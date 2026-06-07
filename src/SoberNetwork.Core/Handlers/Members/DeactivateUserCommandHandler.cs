@@ -9,7 +9,7 @@ public class DeactivateUserCommandHandler(IMemberService memberService) : IReque
 {
     public async Task<CommandResult> Handle(DeactivateUserCommand request, CancellationToken cancellationToken)
     {
-        var (success, error) = await memberService.DeactivateUserAsync(request.AdminUserId, request.TargetUserId);
+        var (success, error) = await memberService.DeactivateUserAsync(request.AdminUserId, request.TargetUserId, cancellationToken);
         if (!success)
             return CommandResult.Fail(ResultCode.BadRequest, error!);
         return CommandResult.Ok();

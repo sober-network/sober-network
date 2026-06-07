@@ -9,7 +9,7 @@ public class RemoveSobrietyDateCommandHandler(IMemberService memberService) : IR
 {
     public async Task<CommandResult> Handle(RemoveSobrietyDateCommand request, CancellationToken cancellationToken)
     {
-        var success = await memberService.RemoveSobrietyDateAsync(request.UserId);
+        var success = await memberService.RemoveSobrietyDateAsync(request.UserId, cancellationToken);
         return success ? CommandResult.Ok() : CommandResult.Fail(ResultCode.NotFound, "No sobriety date on record.");
     }
 }

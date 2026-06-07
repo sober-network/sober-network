@@ -20,19 +20,19 @@ public class GroupService(
 
     // ── Helpers ────────────────────────────────────────────────────────────────
 
-    private Task<GroupMembership?> GetActiveMembershipAsync(Guid groupId, Guid userId) =>
+    private Task<GroupMembership?> GetActiveMembershipAsync(Guid groupId, Guid userId, CancellationToken ct = default) =>
         db.GroupMemberships.FirstOrDefaultAsync(m =>
             m.GroupId == groupId &&
             m.UserId == userId &&
             m.Status == MemberStatus.Active &&
-            m.DeletedAt == null);
+            m.DeletedAt == null, ct);
 
-    private Task<int> CountAdminsAsync(Guid groupId) =>
+    private Task<int> CountAdminsAsync(Guid groupId, CancellationToken ct = default) =>
         db.GroupMemberships.CountAsync(m =>
             m.GroupId == groupId &&
             m.Role == GroupRole.GroupAdmin &&
             m.Status == MemberStatus.Active &&
-            m.DeletedAt == null);
+            m.DeletedAt == null, ct);
 
     private static string? NullIfWhiteSpace(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
@@ -85,11 +85,11 @@ public class GroupService(
         m.JoinedAt,
         m.ApprovedAt);
 
-    private Task<int> GetMemberCountAsync(Guid groupId) =>
+    private Task<int> GetMemberCountAsync(Guid groupId, CancellationToken ct = default) =>
         db.GroupMemberships.CountAsync(m =>
             m.GroupId == groupId &&
             m.Status == MemberStatus.Active &&
-            m.DeletedAt == null);
+            m.DeletedAt == null, ct);
 
     // ── Group queries ──────────────────────────────────────────────────────────
 
@@ -155,24 +155,24 @@ public class GroupService(
         return (new PagedResponse<GroupSummaryResponse>(items, page, pageSize, totalCount), null);
     }
 
-    public async Task<GroupSummaryResponse?> GetGroupInfoAsync(string slug)
+    public async Task<GroupSummaryResponse?> GetGroupInfoAsync(string slug, CancellationToken ct = default)
     {
         // IsPublic controls group-list discoverability, not direct-link access (T4 — group autonomy).
         // A group admin can share a join link for a private group; the recipient can still see info + request to join.
         var group = await db.Groups
             .AsNoTracking()
             .Include(g => g.Meetings)
-            .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null && g.IsActive);
+            .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null && g.IsActive, ct);
         if (group == null) return null;
         return ToGroupSummaryResponse(group);
     }
 
-    public async Task<GroupResponse?> GetGroupBySlugAsync(string slug, Guid userId)
+    public async Task<GroupResponse?> GetGroupBySlugAsync(string slug, Guid userId, CancellationToken ct = default)
     {
         var group = await db.Groups
             .AsNoTracking()
             .Include(g => g.Meetings)
-            .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null);
+            .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null, ct);
         if (group == null) return null;
 
         var membership = await db.GroupMemberships
@@ -180,7 +180,7 @@ public class GroupService(
             .FirstOrDefaultAsync(m =>
                 m.GroupId == group.Id &&
                 m.UserId == userId &&
-                m.DeletedAt == null);
+                m.DeletedAt == null, ct);
         if (membership == null) return null;  // not a member — access denied (T4)
 
         var count = await db.GroupMemberships
@@ -188,16 +188,16 @@ public class GroupService(
             .CountAsync(m =>
                 m.GroupId == group.Id &&
                 m.Status == MemberStatus.Active &&
-                m.DeletedAt == null);
+                m.DeletedAt == null, ct);
         return ToGroupResponse(group, membership.Role.ToString(), membership.Status.ToString(), count);
     }
 
     // ── Group mutations ────────────────────────────────────────────────────────
 
     public async Task<(GroupResponse? Group, string? Error)> CreateGroupAsync(
-        CreateGroupRequest request, Guid creatorUserId)
+        CreateGroupRequest request, Guid creatorUserId, CancellationToken ct = default)
     {
-        if (await db.Groups.AnyAsync(g => g.Slug == request.Slug && g.DeletedAt == null))
+        if (await db.Groups.AnyAsync(g => g.Slug == request.Slug && g.DeletedAt == null, ct))
             return (null, "A group with that slug already exists.");
 
         var group = new Group
@@ -232,7 +232,7 @@ public class GroupService(
 
         db.Groups.Add(group);
         db.GroupMemberships.Add(membership);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(ct);
 
         await audit.LogAsync(SecurityEventType.GroupCreated, creatorUserId,
             $"Created group slug={request.Slug}");
@@ -241,14 +241,14 @@ public class GroupService(
     }
 
     public async Task<(GroupResponse? Group, string? Error)> UpdateGroupAsync(
-        string slug, UpdateGroupRequest request, Guid userId)
+        string slug, UpdateGroupRequest request, Guid userId, CancellationToken ct = default)
     {
         var group = await db.Groups
             .Include(g => g.Meetings)
-            .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null);
+            .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null, ct);
         if (group == null) return (null, "Group not found.");
 
-        var membership = await GetActiveMembershipAsync(group.Id, userId);
+        var membership = await GetActiveMembershipAsync(group.Id, userId, ct);
         if (membership == null || membership.Role != GroupRole.GroupAdmin)
             return (null, "You do not have permission to update this group.");
 
@@ -259,27 +259,27 @@ public class GroupService(
         if (request.RequiresApproval != null) group.RequiresApproval = request.RequiresApproval.Value;
         group.UpdatedAt = DateTime.UtcNow;
 
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(ct);
         await audit.LogAsync(SecurityEventType.GroupUpdated, userId, $"Updated group slug={slug}");
 
-        var count = await GetMemberCountAsync(group.Id);
+        var count = await GetMemberCountAsync(group.Id, ct);
         return (ToGroupResponse(group, membership.Role.ToString(), membership.Status.ToString(), count), null);
     }
 
-    public async Task<(bool Success, string? Error)> SoftDeleteGroupAsync(string slug, Guid userId)
+    public async Task<(bool Success, string? Error)> SoftDeleteGroupAsync(string slug, Guid userId, CancellationToken ct = default)
     {
         var group = await db.Groups.FirstOrDefaultAsync(g =>
-            g.Slug == slug && g.DeletedAt == null);
+            g.Slug == slug && g.DeletedAt == null, ct);
         if (group == null) return (false, "Group not found.");
 
-        var membership = await GetActiveMembershipAsync(group.Id, userId);
+        var membership = await GetActiveMembershipAsync(group.Id, userId, ct);
         if (membership == null || membership.Role != GroupRole.GroupAdmin)
             return (false, "You do not have permission to delete this group.");
 
         group.DeletedAt = DateTime.UtcNow;
         group.IsActive = false;
         group.UpdatedAt = DateTime.UtcNow;
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(ct);
 
         await audit.LogAsync(SecurityEventType.GroupDeleted, userId, $"Soft-deleted group slug={slug}");
         return (true, null);
@@ -362,16 +362,16 @@ public class GroupService(
 
     // ── Membership mutations ───────────────────────────────────────────────────
 
-    public async Task<(bool Success, bool AutoApproved, string? Error)> RequestToJoinAsync(string slug, Guid userId)
+    public async Task<(bool Success, bool AutoApproved, string? Error)> RequestToJoinAsync(string slug, Guid userId, CancellationToken ct = default)
     {
         var group = await db.Groups
             .AsNoTracking()
-            .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null && g.IsActive);
+            .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null && g.IsActive, ct);
         if (group == null) return (false, false, "Group not found.");
 
         var existing = await db.GroupMemberships
             .AsNoTracking()
-            .FirstOrDefaultAsync(m => m.GroupId == group.Id && m.UserId == userId && m.DeletedAt == null);
+            .FirstOrDefaultAsync(m => m.GroupId == group.Id && m.UserId == userId && m.DeletedAt == null, ct);
 
         if (existing != null)
         {
@@ -396,7 +396,7 @@ public class GroupService(
         };
 
         db.GroupMemberships.Add(membership);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(ct);
 
         await audit.LogAsync(
             autoApprove ? SecurityEventType.GroupMemberApproved : SecurityEventType.GroupJoinRequested,
@@ -413,7 +413,7 @@ public class GroupService(
         // Notify all current admins of the new join request (fire-and-forget — don't fail the request)
         var applicant = await db.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Id == userId);
+            .FirstOrDefaultAsync(u => u.Id == userId, ct);
         var admins = await db.GroupMemberships
             .AsNoTracking()
             .Include(m => m.User)
@@ -423,7 +423,7 @@ public class GroupService(
                 m.Status == MemberStatus.Active &&
                 m.DeletedAt == null)
             .Select(m => m.User!)
-            .ToListAsync();
+            .ToListAsync(ct);
 
         var approvalLink = $"{AppBaseUrl}/groups/{slug}/join-requests";
         foreach (var admin in admins.Where(a => a.Email != null))
@@ -436,9 +436,9 @@ public class GroupService(
     }
 
     public async Task<(bool Success, string? Error)> ApproveMemberAsync(
-        string slug, Guid targetUserId, Guid adminUserId)
+        string slug, Guid targetUserId, Guid adminUserId, CancellationToken ct = default)
     {
-        var (group, membership, error) = await GetAdminAndTarget(slug, targetUserId, adminUserId);
+        var (group, membership, error) = await GetAdminAndTarget(slug, targetUserId, adminUserId, ct);
         if (error != null) return (false, error);
 
         if (membership!.Status != MemberStatus.PendingApproval)
@@ -448,12 +448,12 @@ public class GroupService(
         membership.ApprovedAt = DateTime.UtcNow;
         membership.ApprovedByUserId = adminUserId;
         membership.UpdatedAt = DateTime.UtcNow;
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(ct);
 
         await audit.LogAsync(SecurityEventType.GroupMemberApproved, adminUserId,
             $"Approved userId={targetUserId} in group slug={slug}");
 
-        var member = await db.Users.FindAsync(targetUserId);
+        var member = await db.Users.FindAsync(new object[] { targetUserId }, ct);
         if (member?.Email != null)
         {
             try { await email.SendGroupJoinApprovedAsync(member.Email, member.DisplayName, group!.Name); }
@@ -464,9 +464,9 @@ public class GroupService(
     }
 
     public async Task<(bool Success, string? Error)> RejectMemberAsync(
-        string slug, Guid targetUserId, Guid adminUserId)
+        string slug, Guid targetUserId, Guid adminUserId, CancellationToken ct = default)
     {
-        var (group, membership, error) = await GetAdminAndTarget(slug, targetUserId, adminUserId);
+        var (group, membership, error) = await GetAdminAndTarget(slug, targetUserId, adminUserId, ct);
         if (error != null) return (false, error);
 
         if (membership!.Status != MemberStatus.PendingApproval)
@@ -474,12 +474,12 @@ public class GroupService(
 
         membership.DeletedAt = DateTime.UtcNow;
         membership.UpdatedAt = DateTime.UtcNow;
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(ct);
 
         await audit.LogAsync(SecurityEventType.GroupMemberRejected, adminUserId,
             $"Rejected userId={targetUserId} in group slug={slug}");
 
-        var member = await db.Users.FindAsync(targetUserId);
+        var member = await db.Users.FindAsync(new object[] { targetUserId }, ct);
         if (member?.Email != null)
         {
             try { await email.SendGroupJoinRejectedAsync(member.Email, member.DisplayName, group!.Name); }
@@ -490,18 +490,18 @@ public class GroupService(
     }
 
     public async Task<(bool Success, string? Error)> RemoveMemberAsync(
-        string slug, Guid targetUserId, Guid adminUserId)
+        string slug, Guid targetUserId, Guid adminUserId, CancellationToken ct = default)
     {
-        var (group, membership, error) = await GetAdminAndTarget(slug, targetUserId, adminUserId);
+        var (group, membership, error) = await GetAdminAndTarget(slug, targetUserId, adminUserId, ct);
         if (error != null) return (false, error);
 
         // Last-admin guard (T2, T9)
-        if (membership!.Role == GroupRole.GroupAdmin && await CountAdminsAsync(group!.Id) <= 1)
+        if (membership!.Role == GroupRole.GroupAdmin && await CountAdminsAsync(group!.Id, ct) <= 1)
             return (false, "Cannot remove the last group admin. Assign another admin first.");
 
         membership.DeletedAt = DateTime.UtcNow;
         membership.UpdatedAt = DateTime.UtcNow;
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(ct);
 
         await audit.LogAsync(SecurityEventType.GroupMemberRemoved, adminUserId,
             $"Removed userId={targetUserId} from group slug={slug}");
@@ -509,22 +509,22 @@ public class GroupService(
         return (true, null);
     }
 
-    public async Task<(bool Success, string? Error)> LeaveGroupAsync(string slug, Guid userId)
+    public async Task<(bool Success, string? Error)> LeaveGroupAsync(string slug, Guid userId, CancellationToken ct = default)
     {
         var group = await db.Groups.FirstOrDefaultAsync(g =>
-            g.Slug == slug && g.DeletedAt == null);
+            g.Slug == slug && g.DeletedAt == null, ct);
         if (group == null) return (false, "Group not found.");
 
-        var membership = await GetActiveMembershipAsync(group.Id, userId);
+        var membership = await GetActiveMembershipAsync(group.Id, userId, ct);
         if (membership == null) return (false, "You are not a member of this group.");
 
         // Last-admin guard — a group cannot be left without a leader (T2, T9)
-        if (membership.Role == GroupRole.GroupAdmin && await CountAdminsAsync(group.Id) <= 1)
+        if (membership.Role == GroupRole.GroupAdmin && await CountAdminsAsync(group.Id, ct) <= 1)
             return (false, "You are the only admin. Assign another admin before leaving.");
 
         membership.DeletedAt = DateTime.UtcNow;
         membership.UpdatedAt = DateTime.UtcNow;
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(ct);
 
         await audit.LogAsync(SecurityEventType.GroupMemberLeft, userId,
             $"Left group slug={slug}");
@@ -533,16 +533,16 @@ public class GroupService(
     }
 
     public async Task<(bool Success, string? Error)> ClearProbationaryStatusAsync(
-        string slug, Guid targetUserId, Guid adminUserId)
+        string slug, Guid targetUserId, Guid adminUserId, CancellationToken ct = default)
     {
-        var (group, membership, error) = await GetAdminAndTarget(slug, targetUserId, adminUserId);
+        var (group, membership, error) = await GetAdminAndTarget(slug, targetUserId, adminUserId, ct);
         if (error != null) return (false, error);
 
         if (!membership!.IsProbationary) return (true, null);  // idempotent
 
         membership.IsProbationary = false;
         membership.UpdatedAt = DateTime.UtcNow;
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(ct);
 
         await audit.LogAsync(SecurityEventType.GroupProbationCleared, adminUserId,
             $"Cleared probation for userId={targetUserId} in group slug={slug}");
@@ -551,22 +551,22 @@ public class GroupService(
     }
 
     public async Task<(bool Success, string? Error)> ChangeRoleAsync(
-        string slug, Guid targetUserId, Guid adminUserId, GroupRole newRole)
+        string slug, Guid targetUserId, Guid adminUserId, GroupRole newRole, CancellationToken ct = default)
     {
-        var (group, membership, error) = await GetAdminAndTarget(slug, targetUserId, adminUserId);
+        var (group, membership, error) = await GetAdminAndTarget(slug, targetUserId, adminUserId, ct);
         if (error != null) return (false, error);
 
         // Last-admin guard (T2, T9)
         if (membership!.Role == GroupRole.GroupAdmin &&
             newRole != GroupRole.GroupAdmin &&
-            await CountAdminsAsync(group!.Id) <= 1)
+            await CountAdminsAsync(group!.Id, ct) <= 1)
         {
             return (false, "Cannot demote the last group admin. Assign another admin first.");
         }
 
         membership.Role = newRole;
         membership.UpdatedAt = DateTime.UtcNow;
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(ct);
 
         await audit.LogAsync(SecurityEventType.GroupRoleChanged, adminUserId,
             $"Changed userId={targetUserId} to role={newRole} in group slug={slug}");
@@ -575,22 +575,22 @@ public class GroupService(
     }
 
     public async Task<(bool Success, string? Error)> ChangeMemberStatusAsync(
-        string slug, Guid targetUserId, Guid adminUserId, MemberStatus newStatus)
+        string slug, Guid targetUserId, Guid adminUserId, MemberStatus newStatus, CancellationToken ct = default)
     {
-        var (group, membership, error) = await GetAdminAndTarget(slug, targetUserId, adminUserId);
+        var (group, membership, error) = await GetAdminAndTarget(slug, targetUserId, adminUserId, ct);
         if (error != null) return (false, error);
 
         // Last-admin guard for suspension (T2, T9)
         if (membership!.Role == GroupRole.GroupAdmin &&
             newStatus != MemberStatus.Active &&
-            await CountAdminsAsync(group!.Id) <= 1)
+            await CountAdminsAsync(group!.Id, ct) <= 1)
         {
             return (false, "Cannot suspend the last group admin. Assign another admin first.");
         }
 
         membership.Status = newStatus;
         membership.UpdatedAt = DateTime.UtcNow;
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(ct);
 
         await audit.LogAsync(SecurityEventType.GroupMemberStatusChanged, adminUserId,
             $"Changed userId={targetUserId} to status={newStatus} in group slug={slug}");
@@ -601,19 +601,19 @@ public class GroupService(
     // ── Private helpers ────────────────────────────────────────────────────────
 
     private async Task<(Group? Group, GroupMembership? Membership, string? Error)> GetAdminAndTarget(
-        string slug, Guid targetUserId, Guid adminUserId)
+        string slug, Guid targetUserId, Guid adminUserId, CancellationToken ct = default)
     {
         var group = await db.Groups
             .AsNoTracking()
-            .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null);
+            .FirstOrDefaultAsync(g => g.Slug == slug && g.DeletedAt == null, ct);
         if (group == null) return (null, null, "Group not found.");
 
-        var adminMembership = await GetActiveMembershipAsync(group.Id, adminUserId);
+        var adminMembership = await GetActiveMembershipAsync(group.Id, adminUserId, ct);
         if (adminMembership == null || adminMembership.Role != GroupRole.GroupAdmin)
             return (null, null, "You do not have permission to perform this action.");
 
         var targetMembership = await db.GroupMemberships.FirstOrDefaultAsync(m =>
-            m.GroupId == group.Id && m.UserId == targetUserId && m.DeletedAt == null);
+            m.GroupId == group.Id && m.UserId == targetUserId && m.DeletedAt == null, ct);
         if (targetMembership == null) return (null, null, "Member not found.");
 
         return (group, targetMembership, null);

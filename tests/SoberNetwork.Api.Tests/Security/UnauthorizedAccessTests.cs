@@ -14,7 +14,7 @@ public class UnauthorizedAccessTests : IClassFixture<TestWebApplicationFactory>
     {
         _client = factory.CreateAnonymousClient();
         factory.GroupService
-            .Setup(service => service.GetGroupInfoAsync(It.IsAny<string>()))
+            .Setup(service => service.GetGroupInfoAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((GroupSummaryResponse?)null);
     }
 

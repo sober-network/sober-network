@@ -9,7 +9,7 @@ public class ChangeMemberStatusCommandHandler(IGroupService groupService) : IReq
 {
     public async Task<CommandResult> Handle(ChangeMemberStatusCommand request, CancellationToken cancellationToken)
     {
-        var (success, error) = await groupService.ChangeMemberStatusAsync(request.Slug, request.TargetUserId, request.AdminUserId, request.NewStatus);
+        var (success, error) = await groupService.ChangeMemberStatusAsync(request.Slug, request.TargetUserId, request.AdminUserId, request.NewStatus, cancellationToken);
         if (!success)
             return CommandResult.Fail(error!.Contains("permission") ? ResultCode.Forbidden : ResultCode.BadRequest, error!);
         return CommandResult.Ok();

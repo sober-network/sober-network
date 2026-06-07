@@ -1,0 +1,1547 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Sober Network — Nav Hierarchy &amp; States</title>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Sober Network — Full Nav Hierarchy + Page Mock</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@1&display=swap">
+  <style>
+    :root {
+      --bg:        #f7f5f2;
+      --bg-soft:   #f0ede8;
+      --text:      #111110;
+      --mid:       #3d3d3a;
+      --muted:     #7a7a75;
+      --cta:       #1a1a18;
+      --line:      rgba(17,17,16,.09);
+      --shadow-sm: 0 4px 14px rgba(17,17,16,.06);
+      --shadow:    0 12px 36px rgba(17,17,16,.09);
+      --shadow-lg: 0 24px 64px rgba(17,17,16,.13);
+
+      --violet: #8a4fa3; --t-violet: rgba(138,79,163,.12);
+      --sky:    #0ea5e9; --t-sky:    rgba(14,165,233,.12);
+      --green:  #2a9459; --t-green:  rgba(42,148,89,.12);
+      --amber:  #d97706; --t-amber:  rgba(217,119,6,.12);
+      --rose:   #d9359a; --t-rose:   rgba(217,53,154,.12);
+      --teal:   #0f766e; --t-teal:   rgba(15,118,110,.12);
+      --indigo: #4f46e5; --t-indigo: rgba(79,70,229,.12);
+      --coral:  #ea5e3d; --t-coral:  rgba(234,94,61,.12);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    /* ─── HEADER ─────────────────────────────────────────── */
+    .page-header {
+      background: var(--cta);
+      color: white;
+      padding: 32px 40px 28px;
+    }
+    .page-header h1 {
+      font-family: "Inter Tight", sans-serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: -.04em;
+      margin-bottom: 6px;
+    }
+    .page-header p {
+      color: rgba(255,255,255,.55);
+      font-size: .88rem;
+    }
+
+    /* ─── LAYOUT ─────────────────────────────────────────── */
+    .doc {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 40px 32px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 56px;
+    }
+
+    .section-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: "Inter Tight", sans-serif;
+      font-size: .72rem;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+    .section-eyebrow .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+    }
+
+    h2 {
+      font-family: "Inter Tight", sans-serif;
+      font-size: 1.55rem;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      color: var(--mid);
+      font-size: .94rem;
+      line-height: 1.6;
+      max-width: 720px;
+      margin-bottom: 24px;
+    }
+
+    /* ─── HIERARCHY TREE ─────────────────────────────────── */
+    .tree-wrap {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .tree-header {
+      padding: 16px 24px;
+      background: var(--bg-soft);
+      border-bottom: 1px solid var(--line);
+      font-family: "Inter Tight", sans-serif;
+      font-weight: 800;
+      font-size: .82rem;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tree-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+
+    .tree-col {
+      padding: 24px 28px;
+      border-right: 1px solid var(--line);
+    }
+    .tree-col:last-child { border-right: 0; }
+
+    .tree-col-heading {
+      font-family: "Inter Tight", sans-serif;
+      font-size: .7rem;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+      display: inline-flex;
+    }
+
+    .tree-l1 {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .tree-l1 > li {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .tree-node {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 12px;
+      font-family: "Inter Tight", sans-serif;
+      font-weight: 800;
+      font-size: .9rem;
+      color: var(--text);
+      text-decoration: none;
+      transition: background .12s;
+    }
+    .tree-node:hover { background: var(--bg); }
+    .tree-node .icon { font-size: 1rem; width: 22px; text-align: center; flex-shrink: 0; }
+    .tree-node .route {
+      font-family: "Inter", monospace;
+      font-size: .72rem;
+      font-weight: 500;
+      color: var(--muted);
+      margin-left: auto;
+      padding: 2px 7px;
+      background: var(--bg-soft);
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .tree-l2 {
+      list-style: none;
+      margin-left: 34px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      position: relative;
+      padding-left: 12px;
+    }
+    .tree-l2::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 6px; bottom: 6px;
+      width: 1px;
+      background: var(--line);
+    }
+
+    .tree-l2 > li {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tree-node-2 {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 10px;
+      border-radius: 10px;
+      font-size: .84rem;
+      font-weight: 600;
+      color: var(--mid);
+      text-decoration: none;
+      transition: background .12s;
+    }
+    .tree-node-2:hover { background: var(--bg); color: var(--text); }
+    .tree-node-2 .route {
+      font-family: "Inter", monospace;
+      font-size: .68rem;
+      color: var(--muted);
+      margin-left: auto;
+      padding: 1px 6px;
+      background: var(--bg-soft);
+      border-radius: 5px;
+      white-space: nowrap;
+    }
+
+    .tree-l3 {
+      list-style: none;
+      margin-left: 28px;
+      padding-left: 10px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .tree-l3::before {
+      content: "";
+      position: absolute;
+      left: 0; top: 4px; bottom: 4px;
+      width: 1px;
+      background: var(--line);
+      opacity: .5;
+    }
+
+    .tree-node-3 {
+      padding: 5px 8px;
+      border-radius: 8px;
+      font-size: .78rem;
+      color: var(--muted);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill-cs {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: .64rem;
+      font-weight: 900;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      background: rgba(217,119,6,.12);
+      color: var(--amber);
+      flex-shrink: 0;
+    }
+
+    .pill-live {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: .64rem;
+      font-weight: 900;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      background: rgba(42,148,89,.12);
+      color: var(--green);
+      flex-shrink: 0;
+    }
+
+    .pill-admin {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: .64rem;
+      font-weight: 900;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      background: rgba(138,79,163,.12);
+      color: var(--violet);
+      flex-shrink: 0;
+    }
+
+    /* ─── NAV MOCK ───────────────────────────────────────── */
+    .nav-mock-wrap {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .mock-label {
+      padding: 8px 18px;
+      background: var(--cta);
+      color: rgba(255,255,255,.65);
+      font-family: "Inter Tight", sans-serif;
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    nav.sn-nav {
+      background: white;
+      border-bottom: 1px solid var(--line);
+      position: relative;
+    }
+    nav.sn-nav::after {
+      content: "";
+      display: block;
+      height: 2px;
+      background: linear-gradient(90deg, #87ceeb, #b39ddb 25%, #ffe082 50%, #ffab91 75%, #80cbc4);
+    }
+
+    .nav-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 28px;
+      height: 62px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .nav-logo-ring {
+      width: 40px; height: 40px;
+      border-radius: 14px;
+      background: conic-gradient(from 180deg, #8a4fa3, #0ea5e9, #2a9459, #d97706, #8a4fa3);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 6px 14px rgba(17,17,16,.16);
+    }
+    .nav-logo-ring svg { width: 20px; height: 20px; }
+    .brand-name {
+      font-family: "Inter Tight", sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: -.02em;
+    }
+
+    .nav-center { display: flex; justify-content: center; }
+
+    .nav-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      background: rgba(17,17,16,.07);
+      border-radius: 999px;
+      padding: 4px;
+    }
+
+    .nlink {
+      font-family: "Inter Tight", sans-serif;
+      font-size: .83rem;
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+      padding: 7px 13px;
+      border-radius: 999px;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      transition: background .13s;
+    }
+    .nlink:hover { background: rgba(17,17,16,.06); }
+    .nlink.active { background: var(--cta); color: white; }
+
+    .caret-svg { width: 9px; height: 9px; flex-shrink: 0; opacity: .5; }
+
+    .nav-actions { display: flex; align-items: center; gap: 8px; }
+
+    .nav-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--cta);
+      color: white;
+      font-family: "Inter Tight", sans-serif;
+      font-size: .88rem;
+      font-weight: 700;
+      padding: 7px 7px 7px 14px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .arrow-circle {
+      width: 26px; height: 26px;
+      background: rgba(255,255,255,.15);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+    }
+    .arrow-circle svg { width: 10px; height: 10px; }
+
+    .user-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--cta);
+      color: white;
+      font-family: "Inter Tight", sans-serif;
+      font-size: .88rem;
+      font-weight: 700;
+      padding: 6px 6px 6px 14px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+    }
+    .user-initial {
+      width: 26px; height: 26px;
+      background: rgba(255,255,255,.18);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: .82rem;
+      font-weight: 700;
+    }
+
+    /* Mega dropdown */
+    .mega-menu {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 10px;
+      width: min(1080px, calc(100vw - 48px));
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow-lg);
+      padding: 20px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      z-index: 100;
+    }
+
+    .mm-col {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .mm-col-head {
+      font-family: "Inter Tight", sans-serif;
+      font-size: .7rem;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 6px 10px 8px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .mm-col-head .mm-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .mm-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      text-decoration: none;
+      color: var(--text);
+      transition: background .12s;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+    }
+    .mm-item:hover { background: var(--bg); }
+
+    .mm-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .mm-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+    .mm-name {
+      font-family: "Inter Tight", sans-serif;
+      font-weight: 800;
+      font-size: .86rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .mm-desc { font-size: .75rem; color: var(--muted); line-height: 1.4; }
+
+    /* User dropdown */
+    .user-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 10px;
+      min-width: 230px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 8px;
+      z-index: 100;
+    }
+
+    .dd-header {
+      padding: 10px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .dd-name { font-weight: 700; font-size: .92rem; }
+    .dd-role {
+      font-size: .75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--t-violet);
+      color: var(--violet);
+      font-weight: 800;
+      font-family: "Inter Tight", sans-serif;
+      display: inline-block;
+      width: fit-content;
+      margin-top: 3px;
+    }
+    .dd-divider { height: 1px; background: var(--line); margin: 4px 0; }
+    .dd-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--text);
+      font-size: .88rem;
+      font-weight: 500;
+      transition: background .12s;
+    }
+    .dd-item:hover { background: var(--bg); }
+    .dd-item.warn { color: #b91c1c; }
+    .dd-item .dd-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+    /* ─── BREADCRUMBS ────────────────────────────────────── */
+    .breadcrumb-demos {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .crumb-demo {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .crumb-demo-label {
+      padding: 10px 18px;
+      background: var(--bg-soft);
+      font-family: "Inter Tight", sans-serif;
+      font-size: .72rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .crumb-bar {
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .crumb {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-family: "Inter Tight", sans-serif;
+      font-weight: 700;
+      font-size: .8rem;
+      color: var(--mid);
+      text-decoration: none;
+      background: transparent;
+      border: 1px solid transparent;
+      transition: background .12s;
+    }
+    .crumb:hover { background: var(--bg); border-color: var(--line); }
+    .crumb.current {
+      background: var(--cta);
+      color: white;
+      border-color: var(--cta);
+    }
+    .crumb.ghost { color: var(--muted); font-weight: 500; }
+    .crumb-sep { color: var(--muted); font-size: .8rem; line-height: 1; padding: 0 2px; }
+
+    .crumb-page-title {
+      padding: 16px 20px;
+      font-family: "Inter Tight", sans-serif;
+      font-weight: 900;
+      font-size: 1.25rem;
+      letter-spacing: -.03em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .crumb-page-title .badge {
+      font-size: .74rem;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-weight: 800;
+    }
+
+    /* ─── PAGE MOCK ──────────────────────────────────────── */
+    .page-mock {
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* Hero region */
+    .mock-hero {
+      padding: 64px 36px;
+      background:
+        linear-gradient(135deg,
+          rgba(212,232,245,.9) 0%,
+          rgba(247,245,240,.82) 52%,
+          rgba(245,232,216,.9) 100%),
+        url('https://static.vecteezy.com/system/resources/previews/011/930/314/non_2x/young-friends-staying-together-outdoor-in-the-park-free-photo.jpg') center/cover;
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 28px;
+      align-items: center;
+    }
+
+    .mock-hero.member {
+      background:
+        linear-gradient(135deg,
+          rgba(138,79,163,.1) 0%,
+          rgba(255,255,255,.92) 60%,
+          rgba(14,165,233,.08) 100%);
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.72);
+      border: 1px solid var(--line);
+      font-family: "Inter Tight", sans-serif;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--mid);
+      margin-bottom: 18px;
+    }
+    .hero-eyebrow::before {
+      content: "";
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    .mock-hero h1 {
+      font-family: "Inter Tight", sans-serif;
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-weight: 900;
+      letter-spacing: -.04em;
+      line-height: 1.03;
+      margin-bottom: 16px;
+    }
+
+    .serif { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-weight: 400; }
+
+    .hero-lead {
+      color: var(--mid);
+      font-size: 1rem;
+      line-height: 1.7;
+      max-width: 560px;
+      margin-bottom: 28px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-family: "Inter Tight", sans-serif;
+      font-weight: 800;
+      font-size: .9rem;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn.dark { background: var(--cta); color: white; }
+    .btn.outline {
+      background: rgba(255,255,255,.65);
+      color: var(--mid);
+      border: 1.5px solid rgba(17,17,16,.16);
+    }
+    .btn.violet { background: var(--t-violet); color: var(--violet); }
+    .btn.sky { background: var(--t-sky); color: var(--sky); font-weight: 700; }
+
+    /* Trust strip */
+    .trust-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .trust-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.6);
+      border: 1px solid var(--line);
+      font-size: .78rem;
+      font-weight: 700;
+      font-family: "Inter Tight", sans-serif;
+      color: var(--mid);
+    }
+
+    /* Hero side panel */
+    .hero-panel {
+      background: rgba(255,255,255,.82);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: 0 8px 28px rgba(17,17,16,.07);
+      backdrop-filter: blur(6px);
+    }
+    .hero-panel h3 {
+      font-family: "Inter Tight", sans-serif;
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: -.02em;
+      margin-bottom: 14px;
+    }
+
+    .feature-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 11px;
+      border-radius: 999px;
+      font-size: .77rem;
+      font-weight: 800;
+      font-family: "Inter Tight", sans-serif;
+    }
+
+    .chip.cs {
+      opacity: .55;
+      position: relative;
+    }
+
+    /* Sections below hero */
+    .content-body {
+      background: white;
+    }
+
+    .section-row {
+      padding: 40px 36px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section-row:last-child { border-bottom: 0; }
+
+    .section-heading {
+      font-family: "Inter Tight", sans-serif;
+      font-size: .7rem;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card.soft { background: var(--bg-soft); box-shadow: none; border-color: rgba(17,17,16,.05); }
+
+    .card-icon {
+      width: 44px; height: 44px;
+      border-radius: 13px;
+      display: grid;
+      place-items: center;
+      font-size: 1.3rem;
+    }
+
+    .card-title {
+      font-family: "Inter Tight", sans-serif;
+      font-weight: 900;
+      font-size: .96rem;
+      letter-spacing: -.02em;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .card-desc {
+      color: var(--mid);
+      font-size: .83rem;
+      line-height: 1.55;
+      flex: 1;
+    }
+
+    .card-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: "Inter Tight", sans-serif;
+      font-size: .8rem;
+      font-weight: 800;
+      text-decoration: none;
+      color: var(--text);
+      margin-top: auto;
+    }
+
+    .member-hero-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .m-card {
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(17,17,16,.07);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .m-card:hover { box-shadow: var(--shadow-sm); }
+
+    .m-card .m-icon {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 1.1rem;
+    }
+
+    .m-card .m-title {
+      font-family: "Inter Tight", sans-serif;
+      font-weight: 900;
+      font-size: .92rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .m-card .m-desc {
+      font-size: .78rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ─── RESPONSIVE ─────────────────────────────────────── */
+    @media (max-width: 880px) {
+      .tree-body { grid-template-columns: 1fr; }
+      .tree-col { border-right: 0; border-bottom: 1px solid var(--line); }
+      .tree-col:last-child { border-bottom: 0; }
+      .mega-menu { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .mock-hero { grid-template-columns: 1fr; }
+      .mock-hero .hero-panel { display: none; }
+      .breadcrumb-demos { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      .doc { padding: 24px 16px 60px; }
+      .nav-inner { padding: 0 16px; }
+      .section-row { padding: 28px 18px; }
+      .mega-menu { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+</head>
+<body>
+<div class="page-header">
+  <h1>Sober Network — Nav Hierarchy &amp; States</h1>
+  <p>Site map · Nav states (guest / member / superadmin) · Breadcrumb patterns. Coming Soon = amber. Live = green. Admin = violet.</p>
+</div>
+<div class="doc">
+  <!-- ══ SECTION 1: HIERARCHY TREE ══════════════════════════════════════ -->
+  <div>
+    <div class="section-eyebrow"><span class="dot" style="background:var(--sky)"></span>Site hierarchy</div>
+    <h2>Full site map — public + member</h2>
+    <p class="subtitle">Every route, feature, and section in priority order. Use this as the canonical reference for nav placement and breadcrumb depth.</p>
+
+    <div class="tree-wrap">
+      <div class="tree-header">
+        <span>◉</span>
+        <span>Sober Network</span>
+        <span style="margin-left:auto;font-size:.68rem;opacity:.5">route · status</span>
+      </div>
+      <div class="tree-body">
+
+        <!-- LEFT: PUBLIC TREE -->
+        <div class="tree-col">
+          <div class="tree-col-heading" style="background:var(--t-sky);color:var(--sky)">🌐 Public / Guest</div>
+          <ul class="tree-l1">
+
+            <li>
+              <div class="tree-node">
+                <span class="icon">🏠</span>
+                <strong>Home</strong>
+                <span class="pill-live">Live</span>
+                <span class="route">/</span>
+              </div>
+              <ul class="tree-l2">
+                <li><div class="tree-node-2"><span>About &amp; Mission</span><span class="route">#about</span></div></li>
+                <li><div class="tree-node-2"><span>Features</span><span class="route">#features</span></div></li>
+                <li><div class="tree-node-2"><span>How It Works</span><span class="route">#how-it-works</span></div></li>
+                <li><div class="tree-node-2"><span>Roadmap</span><span class="route">#roadmap</span></div></li>
+                <li><div class="tree-node-2"><span>12 Traditions</span><span class="route">#traditions</span></div></li>
+                <li>
+                  <div class="tree-node-2"><span>Newcomer Resources</span><span class="pill-cs">Soon</span></div>
+                  <ul class="tree-l3">
+                    <li class="tree-node-3">Getting started guide</li>
+                    <li class="tree-node-3">What to expect at a meeting</li>
+                    <li class="tree-node-3">FAQ</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+
+            <li>
+              <div class="tree-node">
+                <span class="icon">📍</span>
+                <strong>Meeting Finder</strong>
+                <span class="pill-live">Live</span>
+                <span class="route">/meetings</span>
+              </div>
+              <ul class="tree-l2">
+                <li><div class="tree-node-2"><span>Search by location</span></div></li>
+                <li><div class="tree-node-2"><span>Day / time / format filters</span></div></li>
+                <li><div class="tree-node-2"><span>Map view (Leaflet)</span></div></li>
+                <li><div class="tree-node-2"><span>Online / in-person / hybrid</span></div></li>
+              </ul>
+            </li>
+
+            <li>
+              <div class="tree-node">
+                <span class="icon">👁️</span>
+                <strong>Public Group Page</strong>
+                <span class="pill-live">Live</span>
+                <span class="route">/group/:slug</span>
+              </div>
+              <ul class="tree-l2">
+                <li><div class="tree-node-2"><span>Meeting schedule</span></div></li>
+                <li><div class="tree-node-2"><span>Join request</span></div></li>
+                <li><div class="tree-node-2"><span>Contact (no member data)</span></div></li>
+              </ul>
+            </li>
+
+            <li>
+              <div class="tree-node">
+                <span class="icon">📖</span>
+                <strong>Daily Readings</strong>
+                <span class="pill-cs">Soon</span>
+                <span class="route">/readings</span>
+              </div>
+              <ul class="tree-l2">
+                <li><div class="tree-node-2"><span>Today's reading (public excerpt)</span></div></li>
+                <li><div class="tree-node-2"><span>Calendar / archive</span></div></li>
+              </ul>
+            </li>
+
+            <li>
+              <div class="tree-node">
+                <span class="icon">🔐</span>
+                <strong>Auth</strong>
+                <span class="pill-live">Live</span>
+                <span class="route">/auth</span>
+              </div>
+              <ul class="tree-l2">
+                <li><div class="tree-node-2"><span>Sign In</span><span class="route">/auth/login</span></div></li>
+                <li><div class="tree-node-2"><span>Create Account</span><span class="route">/auth/register</span></div></li>
+                <li><div class="tree-node-2"><span>Forgot Password</span><span class="route">/auth/forgot-password</span></div></li>
+                <li><div class="tree-node-2"><span>Reset Password</span><span class="route">/auth/reset-password</span></div></li>
+              </ul>
+            </li>
+
+          </ul>
+        </div>
+
+        <!-- RIGHT: MEMBER TREE -->
+        <div class="tree-col">
+          <div class="tree-col-heading" style="background:var(--t-violet);color:var(--violet)">🔒 Member / Authenticated</div>
+          <ul class="tree-l1">
+
+            <li>
+              <div class="tree-node">
+                <span class="icon">🏡</span>
+                <strong>Dashboard</strong>
+                <span class="pill-live">Live</span>
+                <span class="route">/dashboard</span>
+              </div>
+              <ul class="tree-l2">
+                <li><div class="tree-node-2"><span>My groups grid</span></div></li>
+                <li><div class="tree-node-2"><span>Create group</span></div></li>
+                <li><div class="tree-node-2"><span>Quick stats</span><span class="pill-cs">Soon</span></div></li>
+              </ul>
+            </li>
+
+            <li>
+              <div class="tree-node">
+                <span class="icon">🏘️</span>
+                <strong>Group Hub</strong>
+                <span class="pill-live">Live</span>
+                <span class="route">/groups/:slug</span>
+              </div>
+              <ul class="tree-l2">
+                <li><div class="tree-node-2"><span>Overview</span><span class="route">?tab=overview</span></div></li>
+                <li><div class="tree-node-2"><span>Members</span><span class="route">?tab=members</span></div></li>
+                <li><div class="tree-node-2"><span>Meetings</span><span class="route">?tab=meetings</span></div></li>
+                <li><div class="tree-node-2"><span>Announcements</span><span class="pill-cs">Soon</span></div></li>
+                <li><div class="tree-node-2"><span>Bulletin Board</span><span class="pill-cs">Soon</span></div></li>
+                <li><div class="tree-node-2"><span>Documents &amp; Archives</span><span class="pill-cs">Soon</span></div></li>
+                <li><div class="tree-node-2"><span>Daily Readings</span><span class="pill-cs">Soon</span></div></li>
+                <li><div class="tree-node-2"><span>Events Calendar</span><span class="pill-cs">Soon</span></div></li>
+                <li><div class="tree-node-2"><span>Phone List</span><span class="pill-cs">Soon</span></div></li>
+                <li><div class="tree-node-2"><span>Join Requests</span><span class="pill-admin">Admin</span><span class="route">?tab=requests</span></div></li>
+                <li><div class="tree-node-2"><span>Chair Schedule</span><span class="pill-cs">Soon</span><span class="pill-admin">Admin</span></div></li>
+                <li><div class="tree-node-2"><span>Group Conscience</span><span class="pill-cs">Soon</span><span class="pill-admin">Admin</span></div></li>
+                <li><div class="tree-node-2"><span>Settings</span><span class="pill-admin">Admin</span><span class="route">?tab=settings</span></div></li>
+              </ul>
+            </li>
+
+            <li>
+              <div class="tree-node">
+                <span class="icon">👤</span>
+                <strong>My Profile</strong>
+                <span class="pill-live">Live</span>
+                <span class="route">/profile</span>
+              </div>
+              <ul class="tree-l2">
+                <li><div class="tree-node-2"><span>Account details</span></div></li>
+                <li><div class="tree-node-2"><span>Contact sharing</span></div></li>
+                <li><div class="tree-node-2"><span>Sobriety date</span></div></li>
+                <li><div class="tree-node-2"><span>Sobriety tracker</span><span class="pill-cs">Soon</span></div></li>
+                <li><div class="tree-node-2"><span>Notification prefs</span><span class="pill-cs">Soon</span></div></li>
+              </ul>
+            </li>
+
+            <li>
+              <div class="tree-node">
+                <span class="icon">👥</span>
+                <strong>Member Detail</strong>
+                <span class="pill-live">Live</span>
+                <span class="route">/profile/:userId</span>
+              </div>
+            </li>
+
+            <li>
+              <div class="tree-node">
+                <span class="icon">📋</span>
+                <strong>Member Directory</strong>
+                <span class="pill-cs">Soon</span>
+                <span class="route">/community/directory</span>
+              </div>
+              <ul class="tree-l2">
+                <li><div class="tree-node-2"><span>Browse &amp; search (group-scoped)</span></div></li>
+                <li><div class="tree-node-2"><span>Service roles view</span></div></li>
+              </ul>
+            </li>
+
+            <li>
+              <div class="tree-node">
+                <span class="icon">🛡️</span>
+                <strong>Platform Admin</strong>
+                <span class="pill-admin">Superadmin</span>
+                <span class="route">/admin</span>
+              </div>
+              <ul class="tree-l2">
+                <li><div class="tree-node-2"><span>All users</span></div></li>
+                <li><div class="tree-node-2"><span>All groups</span></div></li>
+                <li><div class="tree-node-2"><span>Audit log</span><span class="pill-cs">Soon</span></div></li>
+                <li><div class="tree-node-2"><span>Cost dashboard</span><span class="pill-cs">Soon</span></div></li>
+              </ul>
+            </li>
+
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 2: NAV STATES ══════════════════════════════════════════ -->
+  <div>
+    <div class="section-eyebrow"><span class="dot" style="background:var(--violet)"></span>Navigation states</div>
+    <h2>Universal navbar — guest &amp; member modes</h2>
+    <p class="subtitle">Same shell. Same logo. Two modes. Guest gets landing scroll links; member gets the Community mega-menu. The pill count and right-side CTA swap seamlessly on auth state change.</p>
+
+    <!-- GUEST NAV -->
+    <div class="nav-mock-wrap" style="margin-bottom:18px;">
+      <div class="mock-label">● Guest / logged-out state</div>
+      <nav class="sn-nav">
+        <div class="nav-inner">
+          <a class="nav-brand" href="#">
+            <div class="nav-logo-ring">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/>
+              </svg>
+            </div>
+            <span class="brand-name">Sober Network</span>
+          </a>
+          <div class="nav-center">
+            <div class="nav-pill">
+              <a class="nlink active" href="#">About</a>
+              <a class="nlink" href="#">Features</a>
+              <a class="nlink" href="#">How It Works</a>
+              <a class="nlink" href="#">Roadmap</a>
+              <a class="nlink" href="#">12 Traditions</a>
+            </div>
+          </div>
+          <div class="nav-actions">
+            <a class="nlink" href="#" style="border:1.5px solid rgba(17,17,16,.12);padding:7px 14px;">Sign In</a>
+            <button class="nav-cta">
+              Create Account
+              <span class="arrow-circle">
+                <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round">
+                  <path d="M1 11L11 1M11 1H4.5M11 1V7.5"/>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </div>
+      </nav>
+    </div>
+
+    <!-- MEMBER NAV with Community mega open -->
+    <div class="nav-mock-wrap">
+      <div class="mock-label">● Member / logged-in state — Community mega-menu open</div>
+      <nav class="sn-nav" style="position:relative;">
+        <div class="nav-inner">
+          <a class="nav-brand" href="#">
+            <div class="nav-logo-ring">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/>
+              </svg>
+            </div>
+            <span class="brand-name">Sober Network</span>
+          </a>
+          <div class="nav-center">
+            <div class="nav-pill">
+              <a class="nlink" href="#">Find a Meeting</a>
+              <button class="nlink active" style="background:var(--cta);color:white;">
+                Community
+                <svg class="caret-svg" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round">
+                  <path d="M2 3.5L5 6.5L8 3.5"/>
+                </svg>
+              </button>
+              <a class="nlink" href="#">Readings <span class="pill-cs" style="font-size:.58rem;">Soon</span></a>
+              <a class="nlink" href="#">Find a Meeting</a>
+            </div>
+          </div>
+          <div class="nav-actions">
+            <div style="position:relative;">
+              <button class="user-pill">
+                Tess C.
+                <span class="user-initial">T</span>
+              </button>
+              <div class="user-dropdown">
+                <div class="dd-header">
+                  <span class="dd-name">Tess C.</span>
+                  <span class="dd-role">Member</span>
+                </div>
+                <div class="dd-divider"></div>
+                <a class="dd-item" href="#"><span class="dd-icon">👤</span> My Profile</a>
+                <a class="dd-item" href="#"><span class="dd-icon">⚙️</span> Account Settings</a>
+                <div class="dd-divider"></div>
+                <a class="dd-item warn" href="#"><span class="dd-icon">↩</span> Sign Out</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MEGA MENU -->
+        <div class="mega-menu">
+          <div class="mm-col">
+            <div class="mm-col-head"><span class="mm-dot" style="background:var(--violet)"></span>My Groups</div>
+            <button class="mm-item">
+              <div class="mm-icon" style="background:var(--t-violet);">🏘️</div>
+              <div class="mm-text">
+                <div class="mm-name">Dashboard <span class="pill-live">Live</span></div>
+                <div class="mm-desc">All your groups in one place</div>
+              </div>
+            </button>
+            <button class="mm-item">
+              <div class="mm-icon" style="background:var(--t-sky);">🌅</div>
+              <div class="mm-text">
+                <div class="mm-name">Early Bird Zoom</div>
+                <div class="mm-desc">Online · 7:00 AM · Daily</div>
+              </div>
+            </button>
+            <button class="mm-item">
+              <div class="mm-icon" style="background:var(--t-green);">➕</div>
+              <div class="mm-text">
+                <div class="mm-name">Join or Create Group</div>
+                <div class="mm-desc">Start or find a home group</div>
+              </div>
+            </button>
+          </div>
+
+          <div class="mm-col">
+            <div class="mm-col-head"><span class="mm-dot" style="background:var(--sky)"></span>Connection</div>
+            <button class="mm-item">
+              <div class="mm-icon" style="background:var(--t-sky);">📋</div>
+              <div class="mm-text">
+                <div class="mm-name">Member Directory <span class="pill-cs">Soon</span></div>
+                <div class="mm-desc">Browse your group's members</div>
+              </div>
+            </button>
+            <button class="mm-item">
+              <div class="mm-icon" style="background:var(--t-green);">📞</div>
+              <div class="mm-text">
+                <div class="mm-name">Phone List <span class="pill-cs">Soon</span></div>
+                <div class="mm-desc">Reach out between meetings</div>
+              </div>
+            </button>
+            <button class="mm-item">
+              <div class="mm-icon" style="background:var(--t-amber);">📌</div>
+              <div class="mm-text">
+                <div class="mm-name">Bulletin Board <span class="pill-cs">Soon</span></div>
+                <div class="mm-desc">Group posts and notices</div>
+              </div>
+            </button>
+          </div>
+
+          <div class="mm-col">
+            <div class="mm-col-head"><span class="mm-dot" style="background:var(--green)"></span>Resources</div>
+            <button class="mm-item">
+              <div class="mm-icon" style="background:var(--t-teal);">📖</div>
+              <div class="mm-text">
+                <div class="mm-name">Daily Readings <span class="pill-cs">Soon</span></div>
+                <div class="mm-desc">Today's reflection &amp; reading</div>
+              </div>
+            </button>
+            <button class="mm-item">
+              <div class="mm-icon" style="background:var(--t-indigo);">📂</div>
+              <div class="mm-text">
+                <div class="mm-name">Documents &amp; Archives <span class="pill-cs">Soon</span></div>
+                <div class="mm-desc">Group conscience notes, formats</div>
+              </div>
+            </button>
+            <button class="mm-item">
+              <div class="mm-icon" style="background:var(--t-sky);">🔗</div>
+              <div class="mm-text">
+                <div class="mm-name">Literature Links <span class="pill-cs">Soon</span></div>
+                <div class="mm-desc">AA approved resources</div>
+              </div>
+            </button>
+          </div>
+
+          <div class="mm-col">
+            <div class="mm-col-head"><span class="mm-dot" style="background:var(--amber)"></span>Service</div>
+            <button class="mm-item">
+              <div class="mm-icon" style="background:var(--t-violet);">🛎️</div>
+              <div class="mm-text">
+                <div class="mm-name">Service Roles <span class="pill-live">Live</span></div>
+                <div class="mm-desc">Trusted servants &amp; officers</div>
+              </div>
+            </button>
+            <button class="mm-item">
+              <div class="mm-icon" style="background:var(--t-amber);">🗓️</div>
+              <div class="mm-text">
+                <div class="mm-name">Chair Schedule <span class="pill-cs">Soon</span></div>
+                <div class="mm-desc">Sign up for service slots</div>
+              </div>
+            </button>
+            <button class="mm-item">
+              <div class="mm-icon" style="background:var(--t-rose);">🗳️</div>
+              <div class="mm-text">
+                <div class="mm-name">Group Conscience <span class="pill-cs">Soon</span></div>
+                <div class="mm-desc">Proposals, votes &amp; motions</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+      </nav>
+    </div>
+
+    <!-- SUPERADMIN NAV -->
+    <div class="nav-mock-wrap" style="margin-top:18px;">
+      <div class="mock-label" style="background:#4a1942;">● Superadmin state — same nav as member, admin entry only in user dropdown</div>
+      <nav class="sn-nav" style="position:relative;">
+        <div class="nav-inner">
+          <a class="nav-brand" href="#">
+            <div class="nav-logo-ring">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/>
+              </svg>
+            </div>
+            <span class="brand-name">Sober Network</span>
+          </a>
+          <div class="nav-center">
+            <!-- Identical pill to regular member — no Admin item -->
+            <div class="nav-pill">
+              <a class="nlink" href="#">Find a Meeting</a>
+              <a class="nlink" href="#">Community</a>
+              <a class="nlink" href="#">Readings <span class="pill-cs" style="font-size:.58rem;">Soon</span></a>
+            </div>
+          </div>
+          <div class="nav-actions">
+            <div style="position:relative;">
+              <button class="user-pill">
+                Scott C.
+                <span class="user-initial" style="background:rgba(138,79,163,.35);">S</span>
+              </button>
+              <!-- User dropdown — admin link lives quietly here only -->
+              <div class="user-dropdown">
+                <div class="dd-header">
+                  <span class="dd-name">Scott C.</span>
+                  <span class="dd-role">Superadmin</span>
+                </div>
+                <div class="dd-divider"></div>
+                <a class="dd-item" href="#"><span class="dd-icon">👤</span> My Profile</a>
+                <a class="dd-item" href="#"><span class="dd-icon">⚙️</span> Account Settings</a>
+                <div class="dd-divider"></div>
+                <!-- The only admin entry point in the nav -->
+                <a class="dd-item" href="#" style="color:var(--violet);font-weight:700;">
+                  <span class="dd-icon">🛡️</span> Platform Overview
+                  <span class="pill-admin" style="margin-left:auto;font-size:.58rem;">Admin</span>
+                </a>
+                <div class="dd-divider"></div>
+                <a class="dd-item warn" href="#"><span class="dd-icon">↩</span> Sign Out</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Contextual admin affordances explanation -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;padding:20px;background:var(--bg-soft);border-top:1px solid var(--line);">
+        <div style="background:white;border:1px solid var(--line);border-radius:16px;padding:18px;">
+          <div style="font-family:'Inter Tight',sans-serif;font-weight:900;font-size:.88rem;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+            🏘️ Group Hub
+            <span class="pill-admin">Admin sees extra tabs</span>
+          </div>
+          <div style="font-size:.8rem;color:var(--muted);line-height:1.55;">
+            A superadmin visiting any group hub sees all tabs a group admin would — Join Requests, Settings — plus a quiet <strong>Platform</strong> overlay tab with suspend / reassign controls. No separate interface.
+          </div>
+        </div>
+        <div style="background:white;border:1px solid var(--line);border-radius:16px;padding:18px;">
+          <div style="font-family:'Inter Tight',sans-serif;font-weight:900;font-size:.88rem;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+            👤 Member Profile
+            <span class="pill-admin">Admin sees extra actions</span>
+          </div>
+          <div style="font-size:.8rem;color:var(--muted);line-height:1.55;">
+            A superadmin viewing any member profile sees an elevated action bar — force-confirm email, deactivate account, assign roles — rendered inline below the profile card. Same page, elevated view.
+          </div>
+        </div>
+        <div style="background:white;border:1px solid rgba(138,79,163,.18);border-radius:16px;padding:18px;background:linear-gradient(135deg,rgba(138,79,163,.06),white);">
+          <div style="font-family:'Inter Tight',sans-serif;font-weight:900;font-size:.88rem;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+            🛡️ Platform Overview
+            <span class="pill-cs">Minimal /admin</span>
+          </div>
+          <div style="font-size:.8rem;color:var(--muted);line-height:1.55;">
+            The only page with no contextual home: audit log, cost dashboard, health/uptime, platform announcements. Accessible only via the user dropdown. Quiet. Not a control room.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 3: BREADCRUMBS ═════════════════════════════════════════ -->
+  <div>
+    <div class="section-eyebrow"><span class="dot" style="background:var(--green)"></span>Breadcrumb patterns</div>
+    <h2>Location-aware breadcrumbs</h2>
+    <p class="subtitle">Breadcrumbs appear on all authenticated inner pages. They stay subtle — pill style, not traditional slashes — and only go as deep as makes sense. The current page is always a filled dark pill.</p>
+
+    <div class="breadcrumb-demos">
+
+      <div class="crumb-demo">
+        <div class="crumb-demo-label">Group Hub · Overview tab</div>
+        <div class="crumb-bar">
+          <a class="crumb" href="#">🏡 Home</a>
+          <span class="crumb-sep">›</span>
+          <a class="crumb" href="#">Community</a>
+          <span class="crumb-sep">›</span>
+          <a class="crumb" href="#">Early Bird Zoom</a>
+          <span class="crumb-sep">›</span>
+          <span class="crumb current">Overview</span>
+        </div>
+        <div class="crumb-page-title">
+          Early Bird Zoom
+          <span class="badge" style="background:var(--t-sky);color:var(--sky);">Hub</span>
+        </div>
+      </div>
+
+      <div class="crumb-demo">
+        <div class="crumb-demo-label">Group Hub · Meetings tab</div>
+        <div class="crumb-bar">
+          <a class="crumb" href="#">🏡 Home</a>
+          <span class="crumb-sep">›</span>
+          <a class="crumb" href="#">Community</a>
+          <span class="crumb-sep">›</span>
+          <a class="crumb" href="#">Early Bird Zoom</a>
+          <span class="crumb-sep">›</span>
+          <span class="crumb current">Meetings</span>
+        </div>
+        <div class="crumb-page-title">
+          Meetings
+          <span class="badge" style="background:var(--t-sky);color:var(--sky);">3 scheduled</span>
+        </div>
+      </div>
+
+      <div class="crumb-demo">
+        <div class="crumb-demo-label">Member detail page</div>
+        <div class="crumb-bar">
+          <a class="crumb" href="#">🏡 Home</a>
+          <span class="crumb-sep">›</span>
+          <a class="crumb" href="#">Community</a>
+          <span class="crumb-sep">›</span>
+          <a class="crumb" href="#">Early Bird Zoom</a>
+          <span class="crumb-sep">›</span>
+          <a class="crumb" href="#">Members</a>
+          <span class="crumb-sep">›</span>
+          <span class="crumb current">Tess C.</span>
+        </div>
+        <div class="crumb-page-title">
+          Tess C.
+          <span class="badge" style="background:var(--t-violet);color:var(--violet);">Member</span>
+        </div>
+      </div>
+
+      <div class="crumb-demo">
+        <div class="crumb-demo-label">Admin → Users</div>
+        <div class="crumb-bar">
+          <a class="crumb" href="#">🏡 Home</a>
+          <span class="crumb-sep">›</span>
+          <span class="crumb ghost">Admin</span>
+          <span class="crumb-sep">›</span>
+          <span class="crumb current">Users</span>
+        </div>
+        <div class="crumb-page-title">
+          Platform Administration
+          <span class="badge" style="background:var(--t-violet);color:var(--violet);">Superadmin</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

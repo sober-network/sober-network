@@ -1,0 +1,904 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Sober Network — Interactive Mock</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@1&display=swap">
+  <style>
+    /* ── Design tokens ──────────────────────────────────────────────────── */
+    :root {
+      --bg: #f7f5f2; --bg-soft: #f0ede8;
+      --text: #111110; --text-mid: #3d3d3a; --text-muted: #7a7a75;
+      --cta: #1a1a18; --border: rgba(17,17,16,.10);
+      --t-violet: rgba(124,58,237,.10);  --violet: #7c3aed;
+      --t-sky:    rgba(14,165,233,.10);  --sky:    #0ea5e9;
+      --t-amber:  rgba(217,119,6,.12);   --amber:  #d97706;
+      --t-green:  rgba(22,163,74,.10);   --green:  #16a34a;
+      --t-rose:   rgba(225,29,72,.10);   --rose:   #e11d48;
+      --t-teal:   rgba(20,184,166,.10);  --teal:   #14b8a6;
+      --t-indigo: rgba(99,102,241,.10);  --indigo: #6366f1;
+      --t-coral:  rgba(249,115,22,.10);  --coral:  #f97316;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    a, button { font-family: inherit; }
+
+    /* ── NAVBAR ─────────────────────────────────────────────────────────── */
+    .sn-nav {
+      position: sticky; top: 0; z-index: 100;
+      background: white; border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 0 rgba(17,17,16,.04);
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 24px;
+      height: 64px; display: flex; align-items: center; gap: 16px;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; flex-shrink: 0; cursor: pointer;
+    }
+    .nav-logo-ring {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: conic-gradient(from 0deg, #e11d48, #f97316, #eab308, #22c55e, #0ea5e9, #7c3aed, #e11d48);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .nav-logo-ring svg { width: 18px; height: 18px; }
+    .brand-name { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: 1rem; color: var(--text); letter-spacing: -0.02em; }
+    .nav-center { flex: 1; display: flex; justify-content: center; }
+    .nav-pill {
+      display: flex; align-items: center; gap: 2px;
+      background: var(--bg); border-radius: 100px; padding: 4px;
+    }
+    .nlink {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 100px;
+      font-family: 'Inter Tight', sans-serif; font-size: 0.875rem; font-weight: 600;
+      color: var(--text-mid); cursor: pointer; border: none; background: transparent;
+      text-decoration: none; white-space: nowrap; transition: background .15s, color .15s;
+    }
+    .nlink:hover { background: rgba(17,17,16,.06); color: var(--text); }
+    .nlink.active { background: var(--text); color: white; }
+    .caret-svg { width: 10px; height: 10px; flex-shrink: 0; }
+    .nav-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .nav-cta {
+      display: flex; align-items: center; gap: 8px; padding: 8px 16px 8px 20px;
+      background: linear-gradient(135deg, #1a1a18 0%, #2d2d2a 100%);
+      color: white; border: none; border-radius: 100px;
+      font-family: 'Inter Tight', sans-serif; font-size: 0.875rem; font-weight: 700;
+      cursor: pointer; letter-spacing: -0.01em;
+    }
+    .arrow-circle {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: rgba(255,255,255,.18);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .arrow-circle svg { width: 10px; height: 10px; }
+    .user-pill {
+      display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 8px;
+      background: var(--bg); border-radius: 100px; border: 1px solid var(--border);
+      font-family: 'Inter Tight', sans-serif; font-size: 0.875rem; font-weight: 600;
+      color: var(--text); cursor: pointer;
+    }
+    .user-initial {
+      width: 26px; height: 26px; border-radius: 50%; background: var(--cta);
+      color: white; font-size: 0.75rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── MEGA MENU ──────────────────────────────────────────────────────── */
+    .mega-anchor { position: static; }
+    .mega-menu {
+      display: none; position: absolute; top: 64px; left: 50%; transform: translateX(-50%);
+      background: white; border-radius: 16px; border: 1px solid var(--border);
+      box-shadow: 0 8px 40px rgba(0,0,0,.12); padding: 20px;
+      grid-template-columns: repeat(4, 200px); gap: 8px; z-index: 200;
+    }
+    .mega-menu.open { display: grid; }
+    .mm-col { display: flex; flex-direction: column; gap: 4px; }
+    .mm-col-head {
+      display: flex; align-items: center; gap: 6px; padding: 4px 8px 8px;
+      font-family: 'Inter Tight', sans-serif; font-size: 0.7rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted);
+    }
+    .mm-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .mm-item {
+      display: flex; align-items: flex-start; gap: 10px; padding: 8px;
+      border-radius: 10px; border: none; background: transparent;
+      cursor: pointer; text-align: left; width: 100%; transition: background .12s;
+    }
+    .mm-item:hover { background: var(--bg); }
+    .mm-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;
+    }
+    .mm-name { font-family: 'Inter Tight', sans-serif; font-size: 0.8125rem; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 5px; }
+    .mm-desc { font-size: 0.74rem; color: var(--text-muted); margin-top: 1px; line-height: 1.3; }
+
+    /* ── USER DROPDOWN ──────────────────────────────────────────────────── */
+    .user-wrap { position: relative; }
+    .user-dropdown {
+      display: none; position: absolute; top: calc(100% + 8px); right: 0;
+      background: white; border: 1px solid var(--border); border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.10); min-width: 200px; z-index: 200; padding: 6px;
+    }
+    .user-dropdown.open { display: block; }
+    .dd-header { padding: 8px 10px 10px; }
+    .dd-name { display: block; font-family: 'Inter Tight', sans-serif; font-size: 0.875rem; font-weight: 700; }
+    .dd-role { display: block; font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+    .dd-divider { height: 1px; background: var(--border); margin: 4px 0; }
+    .dd-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; font-size: 0.84rem; color: var(--text-mid); cursor: pointer; text-decoration: none; }
+    .dd-item:hover { background: var(--bg); }
+    .dd-item.warn { color: var(--rose); }
+    .dd-icon { font-size: 0.9rem; }
+
+    /* ── STATUS PILLS ───────────────────────────────────────────────────── */
+    .pill-live { display: inline-block; padding: 1px 6px; border-radius: 100px; background: var(--t-green); color: var(--green); font-size: .65rem; font-weight: 700; font-family: 'Inter Tight', sans-serif; text-transform: uppercase; letter-spacing: .05em; }
+    .pill-cs   { display: inline-block; padding: 1px 6px; border-radius: 100px; background: var(--t-amber); color: var(--amber); font-size: .65rem; font-weight: 700; font-family: 'Inter Tight', sans-serif; text-transform: uppercase; letter-spacing: .05em; }
+    .pill-admin{ display: inline-block; padding: 1px 6px; border-radius: 100px; background: var(--t-violet); color: var(--violet); font-size: .65rem; font-weight: 700; font-family: 'Inter Tight', sans-serif; text-transform: uppercase; letter-spacing: .05em; }
+
+    /* ── APP-HERO ───────────────────────────────────────────────────────── */
+    .app-hero {
+      background: linear-gradient(135deg, #dbeafe 0%, #fde8d8 60%, #fef3c7 100%);
+      padding: 28px 0 0; position: relative; overflow: hidden;
+    }
+    .app-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1400&q=80') center/cover;
+      opacity: .05;
+    }
+    .hero-inner { max-width: 1200px; margin: 0 auto; padding: 0 32px 28px; position: relative; }
+
+    /* Breadcrumbs — ng-content projected slot */
+    .app-breadcrumbs { display: flex; align-items: center; gap: 6px; margin-bottom: 14px; }
+    .bc-item { font-family: 'Inter Tight', sans-serif; font-size: 0.78rem; font-weight: 600; color: rgba(17,17,16,.45); cursor: pointer; text-decoration: none; }
+    .bc-item:hover { color: var(--text); }
+    .bc-item.current { color: var(--text-mid); cursor: default; }
+    .bc-sep { font-size: 0.7rem; color: rgba(17,17,16,.28); }
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,.75); border: 1px solid rgba(17,17,16,.08);
+      border-radius: 100px; padding: 4px 12px; margin-bottom: 10px;
+      font-family: 'Inter Tight', sans-serif; font-size: 0.72rem; font-weight: 700;
+      color: var(--text-mid); letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    .hero-title {
+      font-family: 'Inter Tight', sans-serif; font-size: clamp(1.6rem, 3vw, 2.25rem);
+      font-weight: 900; color: var(--text); letter-spacing: -0.04em; line-height: 1.1;
+      margin-bottom: 8px;
+    }
+    .hero-title .serif { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; }
+    .hero-subtitle { font-size: 0.9375rem; color: var(--text-mid); max-width: 500px; line-height: 1.5; margin-bottom: 16px; }
+    .hero-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .meta-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: rgba(255,255,255,.75); border: 1px solid rgba(17,17,16,.08);
+      border-radius: 100px; padding: 3px 10px;
+      font-family: 'Inter Tight', sans-serif; font-size: 0.74rem; font-weight: 700; color: var(--text-mid);
+    }
+
+    /* Tab rail (inside hero for group pages) */
+    .tab-rail {
+      display: flex; gap: 4px; margin-top: 16px;
+      border-bottom: 1px solid rgba(17,17,16,.08); padding-bottom: 0;
+    }
+    .tab-btn {
+      display: flex; align-items: center; gap: 7px; padding: 9px 16px;
+      border: none; background: transparent;
+      font-family: 'Inter Tight', sans-serif; font-size: 0.84rem; font-weight: 600;
+      color: var(--text-muted); cursor: pointer;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      border-radius: 8px 8px 0 0; transition: color .15s;
+    }
+    .tab-btn:hover { color: var(--text); background: rgba(255,255,255,.5); }
+    .tab-btn.active { color: var(--text); border-bottom-color: var(--text); background: transparent; }
+
+    /* ── BUTTONS ────────────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px; border-radius: 100px;
+      font-family: 'Inter Tight', sans-serif; font-size: 0.875rem; font-weight: 700;
+      cursor: pointer; border: none; text-decoration: none; transition: opacity .15s;
+    }
+    .btn:hover { opacity: .88; }
+    .btn.dark { background: var(--cta); color: white; }
+    .btn.outline { background: transparent; border: 1.5px solid rgba(17,17,16,.2); color: var(--text); }
+    .btn.ghost  { background: rgba(255,255,255,.75); color: var(--text); }
+    .btn.sm { padding: 7px 14px; font-size: .8rem; }
+
+    /* ── PAGE SHELL ─────────────────────────────────────────────────────── */
+    .page-shell { max-width: 1200px; margin: 0 auto; padding: 32px 32px 80px; }
+
+    /* ── CARDS ──────────────────────────────────────────────────────────── */
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+    .card {
+      background: white; border-radius: 16px; border: 1px solid var(--border);
+      padding: 20px; transition: box-shadow .15s;
+    }
+    .card.clickable { cursor: pointer; }
+    .card.clickable:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+    .card-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 12px; }
+    .card-title { font-family: 'Inter Tight', sans-serif; font-size: 0.9375rem; font-weight: 700; margin-bottom: 4px; }
+    .card-desc { font-size: 0.8125rem; color: var(--text-muted); line-height: 1.4; }
+    .section-block { margin-bottom: 36px; }
+    .section-head {
+      font-family: 'Inter Tight', sans-serif; font-size: 0.7rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 12px;
+    }
+
+    /* ── LANDING HERO ───────────────────────────────────────────────────── */
+    .landing-hero {
+      min-height: 520px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+      background: linear-gradient(135deg, #dbeafe 0%, #fde8d8 60%, #fef3c7 100%);
+      padding: 80px 32px; position: relative; overflow: hidden;
+    }
+    .landing-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1400&q=80') center/cover;
+      opacity: .07;
+    }
+    .landing-hero-inner { position: relative; max-width: 680px; }
+    .landing-title { font-family: 'Inter Tight', sans-serif; font-size: clamp(2.4rem, 5vw, 3.8rem); font-weight: 900; letter-spacing: -0.04em; line-height: 1.05; margin-bottom: 16px; }
+    .landing-title .serif { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; }
+    .landing-lead { font-size: 1.0625rem; color: var(--text-mid); line-height: 1.55; margin-bottom: 28px; max-width: 520px; margin-left: auto; margin-right: auto; }
+    .trust-strip { display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: wrap; margin-top: 20px; }
+    .trust-item { font-size: 0.8rem; color: var(--text-muted); font-family: 'Inter Tight', sans-serif; font-weight: 600; }
+    .stats-row {
+      display: flex; gap: 32px; justify-content: center; flex-wrap: wrap;
+      padding: 24px 32px; background: white; border-bottom: 1px solid var(--border);
+    }
+    .stat-item { text-align: center; }
+    .stat-num { font-family: 'Inter Tight', sans-serif; font-size: 1.5rem; font-weight: 900; color: var(--text); }
+    .stat-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+
+    /* ── MISC ───────────────────────────────────────────────────────────── */
+    .placeholder-block {
+      background: white; border-radius: 12px; border: 1.5px dashed rgba(17,17,16,.15);
+      padding: 48px; text-align: center; color: var(--text-muted); font-size: 0.875rem;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .route-debug {
+      position: fixed; bottom: 16px; right: 16px;
+      background: rgba(17,17,16,.82); color: rgba(255,255,255,.8);
+      font-family: monospace; font-size: 0.72rem; padding: 6px 12px;
+      border-radius: 8px; z-index: 9999; backdrop-filter: blur(4px);
+      pointer-events: none;
+    }
+    .route-debug span { opacity: .5; margin-right: 4px; }
+
+    /* component annotation label */
+    .cmp { font-family: monospace; font-size: .65rem; color: var(--sky); background: rgba(14,165,233,.07); padding: 1px 5px; border-radius: 4px; }
+
+    input[type="text"] {
+      padding: 10px 14px; border: 1px solid rgba(17,17,16,.15); border-radius: 10px;
+      font-family: 'Inter', sans-serif; font-size: .9rem; outline: none; color: var(--text);
+    }
+    input[type="text"]:focus { border-color: rgba(17,17,16,.4); box-shadow: 0 0 0 3px rgba(17,17,16,.06); }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     <app-root>
+     ════════════════════════════════════════════════════════════════════ -->
+
+<!-- ════ <app-navbar> ══════════════════════════════════════════════════ -->
+<nav class="sn-nav" style="position:sticky;top:0;z-index:100;">
+  <div class="nav-inner">
+
+    <a class="nav-brand" onclick="navigate('/')">
+      <div class="nav-logo-ring">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/>
+        </svg>
+      </div>
+      <span class="brand-name">Sober Network</span>
+    </a>
+
+    <div class="nav-center" id="nav-center"><!-- renderNav() --></div>
+    <div class="nav-actions" id="nav-actions"><!-- renderNav() --></div>
+
+  </div>
+
+  <!-- mega menu lives outside nav-inner so it can overlap content -->
+  <div style="position:relative;">
+    <div class="mega-menu" id="mega-menu">
+      <div class="mm-col">
+        <div class="mm-col-head"><span class="mm-dot" style="background:var(--violet)"></span>My Groups</div>
+        <button class="mm-item" onclick="navigate('/dashboard');closeMega()">
+          <div class="mm-icon" style="background:var(--t-violet)">🏘️</div>
+          <div><div class="mm-name">Dashboard <span class="pill-live">Live</span></div><div class="mm-desc">All your groups in one place</div></div>
+        </button>
+        <button class="mm-item" onclick="navigate('/groups/early-bird-zoom');closeMega()">
+          <div class="mm-icon" style="background:var(--t-sky)">🌅</div>
+          <div><div class="mm-name">Early Bird Zoom</div><div class="mm-desc">Online · 7:00 AM · Mon–Fri</div></div>
+        </button>
+        <button class="mm-item" onclick="closeMega()">
+          <div class="mm-icon" style="background:var(--t-green)">➕</div>
+          <div><div class="mm-name">Join or Create Group</div><div class="mm-desc">Start or find a home group</div></div>
+        </button>
+      </div>
+      <div class="mm-col">
+        <div class="mm-col-head"><span class="mm-dot" style="background:var(--sky)"></span>Connection</div>
+        <button class="mm-item" onclick="closeMega()">
+          <div class="mm-icon" style="background:var(--t-sky)">📋</div>
+          <div><div class="mm-name">Member Directory <span class="pill-cs">Soon</span></div><div class="mm-desc">Browse your group's members</div></div>
+        </button>
+        <button class="mm-item" onclick="closeMega()">
+          <div class="mm-icon" style="background:var(--t-green)">📞</div>
+          <div><div class="mm-name">Phone List <span class="pill-cs">Soon</span></div><div class="mm-desc">Reach out between meetings</div></div>
+        </button>
+        <button class="mm-item" onclick="closeMega()">
+          <div class="mm-icon" style="background:var(--t-amber)">📌</div>
+          <div><div class="mm-name">Bulletin Board <span class="pill-cs">Soon</span></div><div class="mm-desc">Group announcements</div></div>
+        </button>
+      </div>
+      <div class="mm-col">
+        <div class="mm-col-head"><span class="mm-dot" style="background:var(--amber)"></span>Resources</div>
+        <button class="mm-item" onclick="closeMega()">
+          <div class="mm-icon" style="background:var(--t-amber)">📖</div>
+          <div><div class="mm-name">Daily Readings <span class="pill-cs">Soon</span></div><div class="mm-desc">Meditation and literature</div></div>
+        </button>
+        <button class="mm-item" onclick="closeMega()">
+          <div class="mm-icon" style="background:var(--t-rose)">📁</div>
+          <div><div class="mm-name">Documents <span class="pill-cs">Soon</span></div><div class="mm-desc">Group files and archives</div></div>
+        </button>
+        <button class="mm-item" onclick="closeMega()">
+          <div class="mm-icon" style="background:var(--t-teal)">🔗</div>
+          <div><div class="mm-name">Literature Links <span class="pill-cs">Soon</span></div><div class="mm-desc">AA.org and trusted resources</div></div>
+        </button>
+      </div>
+      <div class="mm-col">
+        <div class="mm-col-head"><span class="mm-dot" style="background:var(--green)"></span>Service</div>
+        <button class="mm-item" onclick="closeMega()">
+          <div class="mm-icon" style="background:var(--t-green)">🏅</div>
+          <div><div class="mm-name">Service Roles <span class="pill-cs">Soon</span></div><div class="mm-desc">GSR, secretary, treasurer</div></div>
+        </button>
+        <button class="mm-item" onclick="closeMega()">
+          <div class="mm-icon" style="background:var(--t-indigo)">🪑</div>
+          <div><div class="mm-name">Chair Schedule <span class="pill-cs">Soon</span></div><div class="mm-desc">Who's chairing this week</div></div>
+        </button>
+        <button class="mm-item" onclick="closeMega()">
+          <div class="mm-icon" style="background:var(--t-coral)">🗳️</div>
+          <div><div class="mm-name">Group Conscience <span class="pill-cs">Soon</span></div><div class="mm-desc">Votes and group decisions</div></div>
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+<!-- ════ </app-navbar> ═════════════════════════════════════════════════ -->
+
+<!-- ════ <router-outlet> ══════════════════════════════════════════════ -->
+<main id="app-main"></main>
+
+<div class="route-debug"><span>route</span><span id="route-display">/</span></div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────
+let authState   = 'guest';   // 'guest' | 'member'
+let currentRoute = '/';
+let megaOpen    = false;
+let userDropOpen = false;
+
+// ── Route manifest ────────────────────────────────────────────────────────
+// Each entry mirrors Angular route + component @Input() config
+const ROUTES = {
+  '/': {
+    auth: 'any', layout: 'landing',
+  },
+  '/meetings': {
+    auth: 'any', layout: 'hero-page',
+    eyebrow: 'Public',
+    title:    'Find a <span class="serif">Meeting</span>',
+    subtitle: 'Search public meetings from A.A. home groups near you.',
+    breadcrumbs: [{ label: 'Home', route: '/' }],
+  },
+  '/dashboard': {
+    auth: 'member', layout: 'hero-page',
+    eyebrow: 'Community',
+    title:    'Welcome back, <span class="serif">Tess.</span>',
+    subtitle: 'Your groups, connections, and recovery resources — all in one place.',
+    breadcrumbs: [{ label: 'Home', route: '/' }],
+  },
+  '/groups/early-bird-zoom': {
+    auth: 'member', layout: 'group-hub',
+    eyebrow: 'Home Group',
+    title:    'Early Bird Zoom',
+    subtitle: 'Online · Mon–Fri · 7:00 AM',
+    breadcrumbs: [{ label: 'Home', route: '/' }, { label: 'Community', route: '/dashboard' }],
+    tabs: [
+      { label: 'Overview',   icon: '🌅', route: '/groups/early-bird-zoom' },
+      { label: 'Meetings',   icon: '🗓️', route: '/groups/early-bird-zoom/meetings' },
+      { label: 'Members',    icon: '👥', route: '/groups/early-bird-zoom/members' },
+      { label: 'Documents',  icon: '📁', route: '/groups/early-bird-zoom/documents' },
+      { label: 'Phone List', icon: '📞', route: '/groups/early-bird-zoom/phone-list' },
+      { label: 'Settings',   icon: '⚙️', route: '/groups/early-bird-zoom/settings' },
+    ],
+  },
+  '/groups/early-bird-zoom/meetings': {
+    auth: 'member', layout: 'group-hub',
+    eyebrow: 'Home Group', title: 'Early Bird Zoom', subtitle: 'Online · Mon–Fri · 7:00 AM',
+    breadcrumbs: [{ label: 'Home', route: '/' }, { label: 'Community', route: '/dashboard' }],
+    tabs: [
+      { label: 'Overview',   icon: '🌅', route: '/groups/early-bird-zoom' },
+      { label: 'Meetings',   icon: '🗓️', route: '/groups/early-bird-zoom/meetings' },
+      { label: 'Members',    icon: '👥', route: '/groups/early-bird-zoom/members' },
+      { label: 'Documents',  icon: '📁', route: '/groups/early-bird-zoom/documents' },
+      { label: 'Phone List', icon: '📞', route: '/groups/early-bird-zoom/phone-list' },
+      { label: 'Settings',   icon: '⚙️', route: '/groups/early-bird-zoom/settings' },
+    ],
+  },
+  '/groups/early-bird-zoom/members': {
+    auth: 'member', layout: 'group-hub',
+    eyebrow: 'Home Group', title: 'Early Bird Zoom', subtitle: 'Online · Mon–Fri · 7:00 AM',
+    breadcrumbs: [{ label: 'Home', route: '/' }, { label: 'Community', route: '/dashboard' }],
+    tabs: [
+      { label: 'Overview',   icon: '🌅', route: '/groups/early-bird-zoom' },
+      { label: 'Meetings',   icon: '🗓️', route: '/groups/early-bird-zoom/meetings' },
+      { label: 'Members',    icon: '👥', route: '/groups/early-bird-zoom/members' },
+      { label: 'Documents',  icon: '📁', route: '/groups/early-bird-zoom/documents' },
+      { label: 'Phone List', icon: '📞', route: '/groups/early-bird-zoom/phone-list' },
+      { label: 'Settings',   icon: '⚙️', route: '/groups/early-bird-zoom/settings' },
+    ],
+  },
+  '/groups/early-bird-zoom/documents': {
+    auth: 'member', layout: 'group-hub',
+    eyebrow: 'Home Group', title: 'Early Bird Zoom', subtitle: 'Online · Mon–Fri · 7:00 AM',
+    breadcrumbs: [{ label: 'Home', route: '/' }, { label: 'Community', route: '/dashboard' }],
+    tabs: [
+      { label: 'Overview',   icon: '🌅', route: '/groups/early-bird-zoom' },
+      { label: 'Meetings',   icon: '🗓️', route: '/groups/early-bird-zoom/meetings' },
+      { label: 'Members',    icon: '👥', route: '/groups/early-bird-zoom/members' },
+      { label: 'Documents',  icon: '📁', route: '/groups/early-bird-zoom/documents' },
+      { label: 'Phone List', icon: '📞', route: '/groups/early-bird-zoom/phone-list' },
+      { label: 'Settings',   icon: '⚙️', route: '/groups/early-bird-zoom/settings' },
+    ],
+  },
+  '/groups/early-bird-zoom/phone-list': {
+    auth: 'member', layout: 'group-hub',
+    eyebrow: 'Home Group', title: 'Early Bird Zoom', subtitle: 'Online · Mon–Fri · 7:00 AM',
+    breadcrumbs: [{ label: 'Home', route: '/' }, { label: 'Community', route: '/dashboard' }],
+    tabs: [
+      { label: 'Overview',   icon: '🌅', route: '/groups/early-bird-zoom' },
+      { label: 'Meetings',   icon: '🗓️', route: '/groups/early-bird-zoom/meetings' },
+      { label: 'Members',    icon: '👥', route: '/groups/early-bird-zoom/members' },
+      { label: 'Documents',  icon: '📁', route: '/groups/early-bird-zoom/documents' },
+      { label: 'Phone List', icon: '📞', route: '/groups/early-bird-zoom/phone-list' },
+      { label: 'Settings',   icon: '⚙️', route: '/groups/early-bird-zoom/settings' },
+    ],
+  },
+  '/groups/early-bird-zoom/settings': {
+    auth: 'member', layout: 'group-hub',
+    eyebrow: 'Home Group', title: 'Early Bird Zoom', subtitle: 'Online · Mon–Fri · 7:00 AM',
+    breadcrumbs: [{ label: 'Home', route: '/' }, { label: 'Community', route: '/dashboard' }],
+    tabs: [
+      { label: 'Overview',   icon: '🌅', route: '/groups/early-bird-zoom' },
+      { label: 'Meetings',   icon: '🗓️', route: '/groups/early-bird-zoom/meetings' },
+      { label: 'Members',    icon: '👥', route: '/groups/early-bird-zoom/members' },
+      { label: 'Documents',  icon: '📁', route: '/groups/early-bird-zoom/documents' },
+      { label: 'Phone List', icon: '📞', route: '/groups/early-bird-zoom/phone-list' },
+      { label: 'Settings',   icon: '⚙️', route: '/groups/early-bird-zoom/settings' },
+    ],
+  },
+  '/profile': {
+    auth: 'member', layout: 'hero-page',
+    eyebrow: 'Account',
+    title:    'My Profile',
+    subtitle: 'Your personal information and preferences.',
+    breadcrumbs: [{ label: 'Home', route: '/' }, { label: 'Community', route: '/dashboard' }],
+  },
+};
+
+// ── Page content ──────────────────────────────────────────────────────────
+const PAGES = {
+  '/': () => `
+    <div class="landing-hero">
+      <div class="landing-hero-inner">
+        <div class="hero-eyebrow" style="margin-bottom:14px;">A.A. home groups, online</div>
+        <h1 class="landing-title">A place to stay <span class="serif">close</span><br>to your program.</h1>
+        <p class="landing-lead">Sober Network gives home groups a simple, private space for meetings, members, and connection between gatherings. Built around the 12 Traditions.</p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+          <button class="btn dark" onclick="navigate('/meetings')">Find a Meeting</button>
+          <button class="btn ghost" onclick="signIn()">Sign In</button>
+          <button class="btn outline">How It Works</button>
+        </div>
+        <div class="trust-strip">
+          <span class="trust-item">🔒 No public member rosters</span>
+          <span class="trust-item">📖 Built on the 12 Traditions</span>
+          <span class="trust-item">🌐 Free for home groups</span>
+        </div>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-item"><div class="stat-num">142</div><div class="stat-label">Active Members</div></div>
+      <div class="stat-item"><div class="stat-num">18</div><div class="stat-label">Home Groups</div></div>
+      <div class="stat-item"><div class="stat-num">74</div><div class="stat-label">Weekly Meetings</div></div>
+    </div>
+    <div class="page-shell">
+      <div class="section-block">
+        <div class="section-head">Features</div>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon" style="background:var(--t-violet)">🏘️</div><div class="card-title">Home Groups</div><div class="card-desc">Each group gets its own private hub — meetings, members, documents, and more.</div></div>
+          <div class="card"><div class="card-icon" style="background:var(--t-sky)">🗓️</div><div class="card-title">Meeting Schedule</div><div class="card-desc">Online, in-person, or hybrid. Publish your meetings to the public finder.</div></div>
+          <div class="card"><div class="card-icon" style="background:var(--t-green)">📞</div><div class="card-title">Phone List <span class="pill-cs">Soon</span></div><div class="card-desc">Members share their number with their group — opt-in, never public.</div></div>
+          <div class="card"><div class="card-icon" style="background:var(--t-amber)">📖</div><div class="card-title">Daily Readings <span class="pill-cs">Soon</span></div><div class="card-desc">A daily reflection to start the day grounded in recovery.</div></div>
+          <div class="card"><div class="card-icon" style="background:var(--t-rose)">📌</div><div class="card-title">Bulletin Board <span class="pill-cs">Soon</span></div><div class="card-desc">Post announcements and important news to your group.</div></div>
+          <div class="card"><div class="card-icon" style="background:var(--t-teal)">🏅</div><div class="card-title">Service Roles <span class="pill-cs">Soon</span></div><div class="card-desc">Track GSR, secretary, treasurer, and other trusted servants.</div></div>
+        </div>
+      </div>
+    </div>`,
+
+  '/dashboard': () => `
+    <div class="page-shell">
+      <div class="section-block">
+        <div class="section-head">My Groups</div>
+        <div class="card-grid">
+          <div class="card clickable" onclick="navigate('/groups/early-bird-zoom')">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <div class="card-icon" style="background:var(--t-sky);margin:0;">🌅</div>
+              <div style="flex:1">
+                <div class="card-title" style="margin:0;">Early Bird Zoom</div>
+                <div style="font-size:.75rem;color:var(--text-muted);">Online · 7:00 AM · Mon–Fri</div>
+              </div>
+              <span class="pill-admin">Admin</span>
+            </div>
+            <div class="card-desc">24 members · 5 meetings this week</div>
+          </div>
+          <div class="card clickable" onclick="navigate('/groups/early-bird-zoom')">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <div class="card-icon" style="background:var(--t-rose);margin:0;">🏡</div>
+              <div>
+                <div class="card-title" style="margin:0;">Downtown Thursday Night</div>
+                <div style="font-size:.75rem;color:var(--text-muted);">In-person · Thu 7:30 PM</div>
+              </div>
+            </div>
+            <div class="card-desc">31 members · 1 meeting this week</div>
+          </div>
+          <div class="card" style="border-style:dashed;display:flex;align-items:center;justify-content:center;gap:10px;color:var(--text-muted);cursor:pointer;">
+            <span style="font-size:1.25rem;">➕</span>
+            <span style="font-family:'Inter Tight',sans-serif;font-weight:700;font-size:.875rem;">Join or Create a Group</span>
+          </div>
+        </div>
+      </div>
+      <div class="section-block">
+        <div class="section-head">Quick Access</div>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon" style="background:var(--t-amber)">📖</div><div class="card-title">Daily Reading <span class="pill-cs">Soon</span></div><div class="card-desc">Today's meditation and reflection.</div></div>
+          <div class="card"><div class="card-icon" style="background:var(--t-green)">📞</div><div class="card-title">Phone List <span class="pill-cs">Soon</span></div><div class="card-desc">Reach a member between meetings.</div></div>
+          <div class="card"><div class="card-icon" style="background:var(--t-indigo)">🪑</div><div class="card-title">Chair Schedule <span class="pill-cs">Soon</span></div><div class="card-desc">See who's chairing this week.</div></div>
+        </div>
+      </div>
+    </div>`,
+
+  '/groups/early-bird-zoom': () => `
+    <div class="page-shell">
+      <div class="section-block">
+        <div class="section-head">About this group</div>
+        <div class="card" style="max-width:680px;">
+          <p style="font-size:.9rem;line-height:1.6;color:var(--text-mid);">Early morning Zoom meeting for people in recovery. Open speaker format. We welcome newcomers. This is a closed A.A. meeting — attendance is for those who have a desire to stop drinking.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+            <span class="meta-badge">🌐 Online</span>
+            <span class="meta-badge">🔒 Closed</span>
+            <span class="meta-badge">🗓️ Mon–Fri</span>
+            <span class="meta-badge">⏰ 7:00 AM</span>
+            <span class="meta-badge">👥 24 members</span>
+          </div>
+        </div>
+      </div>
+      <div class="section-block">
+        <div class="section-head">This week's meetings</div>
+        <div class="card-grid">
+          ${['Mon Jun 9','Tue Jun 10','Wed Jun 11','Thu Jun 12','Fri Jun 13'].map(d => `
+            <div class="card">
+              <div class="card-title">${d}</div>
+              <div class="card-desc" style="margin-bottom:10px;">7:00 AM · Zoom · Speaker format</div>
+              <span style="font-size:.75rem;font-family:'Inter Tight',sans-serif;font-weight:700;color:var(--sky);">Join Zoom →</span>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>`,
+
+  '/groups/early-bird-zoom/meetings': () => `
+    <div class="page-shell">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div class="section-head" style="margin:0;">All Meetings</div>
+        <button class="btn dark sm">+ Add Meeting</button>
+      </div>
+      <div class="card-grid">
+        ${['Monday','Tuesday','Wednesday','Thursday','Friday'].map(d => `
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+              <div class="card-title">${d}</div>
+              <span class="pill-live">Live</span>
+            </div>
+            <div class="card-desc" style="margin-bottom:6px;">7:00 AM · 60 min · Speaker</div>
+            <div style="font-size:.73rem;color:var(--text-muted);">Zoom · members only link</div>
+          </div>`).join('')}
+        <div class="card" style="border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text-muted);cursor:pointer;min-height:100px;">
+          <span style="font-size:1.5rem;">➕</span>
+          <span style="font-family:'Inter Tight',sans-serif;font-weight:700;font-size:.875rem;">Add Meeting</span>
+        </div>
+      </div>
+    </div>`,
+
+  '/groups/early-bird-zoom/members': () => `
+    <div class="page-shell">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div class="section-head" style="margin:0;">Members (24)</div>
+        <button class="btn outline sm">Invite Member</button>
+      </div>
+      <div class="card-grid">
+        ${['Tess C.','Marcus W.','Jordan A.','Robin S.','Alex M.','Sam P.','Dana L.','Chris B.'].map((n,i) => `
+          <div class="card clickable" onclick="navigate('/profile')">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--cta);color:white;display:flex;align-items:center;justify-content:center;font-family:'Inter Tight',sans-serif;font-size:.85rem;font-weight:800;flex-shrink:0;">${n[0]}</div>
+              <div>
+                <div class="card-title" style="margin:0;font-size:.875rem;">${n} ${i===0?'<span class="pill-admin">Admin</span>':''}</div>
+                <div style="font-size:.73rem;color:var(--text-muted);">Member since 2024</div>
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`,
+
+  '/groups/early-bird-zoom/documents': () => `
+    <div class="page-shell">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div class="section-head" style="margin:0;">Documents</div>
+        <button class="btn dark sm">+ Upload</button>
+      </div>
+      <div class="card-grid">
+        ${['Group Guidelines.pdf','Zoom Link & Password.txt','7th Tradition Info.pdf','Contact Sheet.pdf'].map(f => `
+          <div class="card clickable">
+            <div class="card-icon" style="background:var(--t-amber)">📄</div>
+            <div class="card-title">${f}</div>
+            <div class="card-desc">Shared by group admin · Jun 2024</div>
+          </div>`).join('')}
+      </div>
+    </div>`,
+
+  '/groups/early-bird-zoom/phone-list': () => `
+    <div class="page-shell">
+      <div class="card" style="max-width:560px;margin-bottom:16px;background:var(--t-amber);border-color:rgba(217,119,6,.2);">
+        <div style="font-family:'Inter Tight',sans-serif;font-weight:700;font-size:.875rem;margin-bottom:4px;">🔒 Members-only</div>
+        <div style="font-size:.8rem;color:var(--text-mid);">This list is only visible to group members. Members opt in to share their number.</div>
+      </div>
+      <div class="card-grid">
+        ${['Tess C.','Marcus W.','Jordan A.','Robin S.'].map(n => `
+          <div class="card">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--cta);color:white;display:flex;align-items:center;justify-content:center;font-family:'Inter Tight',sans-serif;font-size:.85rem;font-weight:800;flex-shrink:0;">${n[0]}</div>
+              <div>
+                <div class="card-title" style="margin:0;font-size:.875rem;">${n}</div>
+                <div style="font-size:.73rem;color:var(--text-muted);">(555) 000-0000</div>
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`,
+
+  '/groups/early-bird-zoom/settings': () => `
+    <div class="page-shell">
+      <div class="card" style="max-width:540px;margin-bottom:24px;">
+        <div class="section-head">Group settings</div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);">
+            <div><div style="font-size:.875rem;font-weight:600;">Group name</div><div style="font-size:.78rem;color:var(--text-muted);">Early Bird Zoom</div></div>
+            <button class="btn outline sm">Edit</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);">
+            <div><div style="font-size:.875rem;font-weight:600;">Public listing</div><div style="font-size:.78rem;color:var(--text-muted);">Visible in the meeting finder</div></div>
+            <div style="width:36px;height:20px;background:var(--green);border-radius:100px;position:relative;cursor:pointer;"><div style="position:absolute;right:2px;top:2px;width:16px;height:16px;border-radius:50%;background:white;"></div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;">
+            <div><div style="font-size:.875rem;font-weight:600;">Transfer admin</div><div style="font-size:.78rem;color:var(--text-muted);">Pass the trusted servant role</div></div>
+            <button class="btn outline sm">Transfer</button>
+          </div>
+        </div>
+      </div>
+    </div>`,
+
+  '/meetings': () => `
+    <div class="page-shell">
+      <div class="card" style="max-width:560px;margin-bottom:24px;">
+        <div class="section-head">Search</div>
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <input type="text" placeholder="City, state or ZIP code" style="flex:1;">
+          <button class="btn dark sm">Search</button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          ${['Online','In-Person','Morning','Evening','Open','Closed','Spanish'].map(f =>
+            `<span style="padding:5px 12px;border-radius:100px;border:1px solid rgba(17,17,16,.15);font-size:.75rem;font-family:'Inter Tight',sans-serif;font-weight:600;cursor:pointer;">${f}</span>`).join('')}
+        </div>
+      </div>
+      <div class="placeholder-block" style="height:200px;margin-bottom:24px;">🗺️ &nbsp; Leaflet map renders here</div>
+      <div class="section-head">Nearby meetings</div>
+      <div class="card-grid">
+        ${[
+          {name:'Early Bird Zoom',    time:'Mon–Fri · 7:00 AM',    type:'Online'},
+          {name:'Downtown Thu Night', time:'Thu · 7:30 PM',        type:'In-Person'},
+          {name:'Serenity Morning',   time:'Mon/Wed/Fri · 8:00 AM',type:'Hybrid'},
+        ].map(m => `
+          <div class="card">
+            <div class="card-title">${m.name}</div>
+            <div class="card-desc" style="margin-bottom:10px;">${m.time}</div>
+            <span class="meta-badge">${m.type}</span>
+          </div>`).join('')}
+      </div>
+    </div>`,
+
+  '/profile': () => `
+    <div class="page-shell">
+      <div class="card" style="max-width:500px;margin-bottom:24px;">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+          <div style="width:56px;height:56px;border-radius:50%;background:var(--cta);color:white;display:flex;align-items:center;justify-content:center;font-family:'Inter Tight',sans-serif;font-size:1.25rem;font-weight:800;">T</div>
+          <div style="flex:1;">
+            <div style="font-family:'Inter Tight',sans-serif;font-weight:800;font-size:1.1rem;">Tess C.</div>
+            <div style="font-size:.8rem;color:var(--text-muted);">Member since Jan 2024</div>
+          </div>
+          <button class="btn outline sm">Edit</button>
+        </div>
+        <div class="section-head">Display name</div>
+        <div style="font-size:.875rem;color:var(--text-mid);margin-bottom:16px;">Tess C. &nbsp;<span style="font-size:.75rem;color:var(--text-muted);">(first name + last initial — default)</span></div>
+        <div class="section-head">Sobriety date</div>
+        <div style="font-size:.875rem;color:var(--text-muted);font-style:italic;margin-bottom:16px;">Not set — opt-in</div>
+        <div class="section-head">Phone number</div>
+        <div style="font-size:.875rem;color:var(--text-muted);font-style:italic;">Not shared — opt-in</div>
+      </div>
+    </div>`,
+};
+
+// ── renderNav ──────────────────────────────────────────────────────────────
+function renderNav() {
+  const center  = document.getElementById('nav-center');
+  const actions = document.getElementById('nav-actions');
+  const isGroupRoute = currentRoute.startsWith('/groups') || currentRoute === '/dashboard' || currentRoute === '/profile';
+
+  if (authState === 'guest') {
+    center.innerHTML = `
+      <div class="nav-pill">
+        <a class="nlink ${currentRoute==='/'?'active':''}" onclick="navigate('/')">About</a>
+        <a class="nlink ${currentRoute==='/meetings'?'active':''}" onclick="navigate('/meetings')">Find a Meeting</a>
+        <a class="nlink" href="#">Features</a>
+        <a class="nlink" href="#">12 Traditions</a>
+      </div>`;
+    actions.innerHTML = `
+      <a class="nlink" onclick="signIn()" style="border:1.5px solid rgba(17,17,16,.12);padding:7px 14px;">Sign In</a>
+      <button class="nav-cta" onclick="signIn()">Create Account
+        <span class="arrow-circle"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M1 11L11 1M11 1H4.5M11 1V7.5"/></svg></span>
+      </button>`;
+  } else {
+    center.innerHTML = `
+      <div class="nav-pill">
+        <a class="nlink ${currentRoute==='/meetings'?'active':''}" onclick="navigate('/meetings')">Find a Meeting</a>
+        <button class="nlink ${isGroupRoute?'active':''}" id="community-btn" onclick="toggleMega(event)"
+          style="${isGroupRoute?'background:var(--cta);color:white;':''}">
+          Community
+          <svg class="caret-svg" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3.5L5 6.5L8 3.5"/></svg>
+        </button>
+        <a class="nlink" href="#">Readings <span class="pill-cs" style="font-size:.58rem;">Soon</span></a>
+      </div>`;
+    actions.innerHTML = `
+      <div class="user-wrap">
+        <button class="user-pill" onclick="toggleUserDrop(event)">
+          Tess C. <span class="user-initial">T</span>
+        </button>
+        <div class="user-dropdown" id="user-dropdown">
+          <div class="dd-header"><span class="dd-name">Tess C.</span><span class="dd-role">Member</span></div>
+          <div class="dd-divider"></div>
+          <a class="dd-item" onclick="navigate('/profile');closeUserDrop()"><span class="dd-icon">👤</span> My Profile</a>
+          <a class="dd-item" href="#"><span class="dd-icon">⚙️</span> Account Settings</a>
+          <div class="dd-divider"></div>
+          <a class="dd-item warn" onclick="signOut()"><span class="dd-icon">↩</span> Sign Out</a>
+        </div>
+      </div>`;
+  }
+}
+
+// ── renderHero ─────────────────────────────────────────────────────────────
+// Mirrors <app-hero [config]="heroConfig"> with <app-breadcrumbs> as ng-content
+function renderHero(config) {
+  const crumbs = config.breadcrumbs.map(b =>
+    `<a class="bc-item" onclick="navigate('${b.route}')">${b.label}</a><span class="bc-sep">›</span>`
+  ).join('') + `<span class="bc-item current">${config.title.replace(/<[^>]*>/g,'')}</span>`;
+
+  const tabsHtml = config.tabs ? `
+    <div class="tab-rail">
+      ${config.tabs.map(t => {
+        const active = currentRoute === t.route;
+        return `<button class="tab-btn ${active?'active':''}" onclick="navigate('${t.route}')">${t.icon} ${t.label}</button>`;
+      }).join('')}
+    </div>` : '';
+
+  const metaBadges = config.tabs ? `
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:0;">
+      <span class="meta-badge">🌐 Online</span>
+      <span class="meta-badge">👥 24 members</span>
+      <span class="meta-badge" style="color:var(--green);">✅ Public listing</span>
+    </div>` : '';
+
+  return `
+    <!-- ════ <app-hero> ════════════════════════════════════════════════ -->
+    <div class="app-hero">
+      <div class="hero-inner">
+        <!-- ════ <app-breadcrumbs> — projected via ng-content ════════ -->
+        <div class="app-breadcrumbs">${crumbs}</div>
+        <!-- ════════════════════════════════════════════════════════════ -->
+        ${config.eyebrow ? `<div class="hero-eyebrow">${config.eyebrow}</div>` : ''}
+        <h1 class="hero-title">${config.title}</h1>
+        <p class="hero-subtitle">${config.subtitle}</p>
+        ${metaBadges}
+        ${tabsHtml}
+      </div>
+    </div>
+    <!-- ════ </app-hero> ═══════════════════════════════════════════════ -->`;
+}
+
+// ── navigate ───────────────────────────────────────────────────────────────
+function navigate(route) {
+  const config = ROUTES[route];
+  if (!config) return;
+
+  // Soft auth guard: clicking member content auto-signs in for demo
+  if (config.auth === 'member' && authState === 'guest') {
+    authState = 'member';
+  }
+
+  currentRoute = route;
+  closeMega();
+  closeUserDrop();
+  renderNav();
+
+  document.getElementById('route-display').textContent = route;
+
+  const main = document.getElementById('app-main');
+  const content = PAGES[route] ? PAGES[route]() : `<div class="page-shell"><div class="placeholder-block">This page is coming soon.</div></div>`;
+
+  if (config.layout === 'landing') {
+    main.innerHTML = content;
+  } else {
+    main.innerHTML = renderHero(config) + content;
+  }
+
+  window.scrollTo(0, 0);
+}
+
+// ── Auth helpers ──────────────────────────────────────────────────────────
+function signIn()  { authState = 'member'; navigate('/dashboard'); }
+function signOut() { authState = 'guest';  navigate('/'); }
+
+// ── Mega menu ─────────────────────────────────────────────────────────────
+function toggleMega(e) {
+  e.stopPropagation();
+  megaOpen = !megaOpen;
+  document.getElementById('mega-menu').classList.toggle('open', megaOpen);
+}
+function closeMega() {
+  megaOpen = false;
+  const m = document.getElementById('mega-menu');
+  if (m) m.classList.remove('open');
+}
+
+// ── User dropdown ─────────────────────────────────────────────────────────
+function toggleUserDrop(e) {
+  e.stopPropagation();
+  userDropOpen = !userDropOpen;
+  const d = document.getElementById('user-dropdown');
+  if (d) d.classList.toggle('open', userDropOpen);
+}
+function closeUserDrop() {
+  userDropOpen = false;
+  const d = document.getElementById('user-dropdown');
+  if (d) d.classList.remove('open');
+}
+
+document.addEventListener('click', () => { closeMega(); closeUserDrop(); });
+
+// Boot
+navigate('/');
+</script>
+</body>
+</html>

@@ -4,6 +4,11 @@ import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { HeroComponent } from '@app/shared/components/hero-component/hero.component';
 
+export interface HeroTag {
+  label: string;
+  color: 'sky' | 'green' | 'violet' | 'amber' | 'teal' | 'rose' | 'muted';
+}
+
 @Component({
   selector: 'app-group-hero',
   standalone: true,
@@ -18,6 +23,7 @@ import { HeroComponent } from '@app/shared/components/hero-component/hero.compon
 export class GroupHeroComponent extends HeroComponent {
   @Input() eyebrowIcon = 'groups';
   @Input() titleSuffix = '';
+  @Input() tags: HeroTag[] = [];
   @Output() override plusClick = new EventEmitter<void>();
   
   readonly backgroundImageSrc = '/circle-sunset.jpg';

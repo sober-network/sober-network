@@ -28,11 +28,10 @@
   width: 48px; height: 48px;
   border-radius: 14px;
   flex-shrink: 0;
-  background: linear-gradient(135deg, #0ea5e9, #2a9459);
+  background: rgba(14,165,233,.14);
   display: grid;
   place-items: center;
   font-size: 1.4rem;
-  box-shadow: 0 8px 20px rgba(14,165,233,.22);
 }
 
 .banner-copy { flex: 1; min-width: 160px; }
@@ -343,17 +342,15 @@
   font-family: 'Inter Tight', sans-serif;
   font-weight: 900;
   font-size: 1rem;
-  color: white;
   flex-shrink: 0;
-  box-shadow: 0 6px 16px rgba(17,17,16,.14);
 }
-.av-violet { background: linear-gradient(135deg,#9b63b4,#6d3e86); }
-.av-sky    { background: linear-gradient(135deg,#2bb8f0,#0b79b1); }
-.av-green  { background: linear-gradient(135deg,#41b66d,#227a46); }
-.av-rose   { background: linear-gradient(135deg,#f06cb9,#c62786); }
-.av-amber  { background: linear-gradient(135deg,#f0b04a,#c97a11); }
-.av-teal   { background: linear-gradient(135deg,#2dd4bf,#0d9488); }
-.av-coral  { background: linear-gradient(135deg,#fb8468,#d94820); }
+.av-violet { background: rgba(138,79,163,.22);  color: #6d3e86; }
+.av-sky    { background: rgba(14,165,233,.18);  color: #0369a1; }
+.av-green  { background: rgba(42,148,89,.18);   color: #166534; }
+.av-rose   { background: rgba(244,63,94,.16);   color: #be185d; }
+.av-amber  { background: rgba(217,119,6,.18);   color: #92400e; }
+.av-teal   { background: rgba(15,118,110,.18);  color: #0f766e; }
+.av-coral  { background: rgba(249,115,22,.16);  color: #c2410c; }
 
 /* Chips */
 .chip {

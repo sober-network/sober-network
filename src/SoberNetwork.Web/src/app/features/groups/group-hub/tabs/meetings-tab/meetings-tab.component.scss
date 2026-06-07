@@ -100,14 +100,8 @@
   overflow: hidden;
   box-shadow: 0 6px 20px rgba(17,17,16,.04);
   padding: 0;
-  border-left: 5px solid transparent;
 
-  &.accent-sky   { border-left-color: #0ea5e9; }
-  &.accent-green { border-left-color: #2a9459; }
-  &.accent-amber { border-left-color: #d97706; }
-  &.accent-teal  { border-left-color: #0f766e; }
-  &.accent-blue  { border-left-color: #0ea5e9; }
-  &.inactive     { opacity: .82; border-left-color: rgba(17,17,16,.15); }
+  &.inactive { opacity: .82; }
 }
 
 .card-inner { padding: 18px 20px; }
@@ -134,12 +128,11 @@
   display: grid;
   place-items: center;
   font-size: 1.4rem;
-  box-shadow: 0 6px 18px rgba(17,17,16,.15);
 }
-.icon-sky   { background: linear-gradient(135deg,#0ea5e9,#0284c7); box-shadow: 0 6px 18px rgba(14,165,233,.25); }
-.icon-green { background: linear-gradient(135deg,#2a9459,#166534); box-shadow: 0 6px 18px rgba(42,148,89,.25); }
-.icon-teal  { background: linear-gradient(135deg,#0f766e,#0d9488); box-shadow: 0 6px 18px rgba(15,118,110,.25); }
-.icon-gray  { background: linear-gradient(135deg,#9ca3af,#6b7280); }
+.icon-sky   { background: rgba(14,165,233,.14);  }
+.icon-green { background: rgba(42,148,89,.14);   }
+.icon-teal  { background: rgba(15,118,110,.14);  }
+.icon-gray  { background: rgba(17,17,16,.08);    }
 
 .meeting-name {
   font-family: 'Inter Tight', sans-serif;

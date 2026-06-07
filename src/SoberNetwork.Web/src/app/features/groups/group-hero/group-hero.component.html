@@ -26,7 +26,7 @@
 <div class="section-wrap">
   <div class="hero-inner">
     <div *ngIf="eyebrowText" class="hero-eyebrow">
-      <mat-icon class="eyebrow-icon">{{ eyebrowIcon }}</mat-icon>
+      <span class="eyebrow-dot"></span>
       {{ eyebrowText }}
     </div>
     <h1>
@@ -34,6 +34,13 @@
       <span *ngIf="titleSuffix" class="serif-accent"> {{ titleSuffix }}</span>
     </h1>
     <p *ngIf="description">{{ description }}</p>
+  </div>
+
+  <div *ngIf="tags.length" class="hero-tags-card">
+    <span class="tags-label">TAGS</span>
+    <div class="tags-row">
+      <span *ngFor="let tag of tags" class="tag-pill tag-{{ tag.color }}">{{ tag.label }}</span>
+    </div>
   </div>
 </div>
 </section>

@@ -5,10 +5,10 @@ import { finalize, Subject, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { COUNTRIES, GroupResponse, LANGUAGES, US_STATES } from '@app/core/models';
+import { COUNTRIES, GroupResponse, LANGUAGES, MeetingType, US_STATES } from '@app/core/models';
 import { ClientLogService } from '@app/core/services/client-log.service';
 import { GroupService } from '@app/core/services/group.service';
-import { GroupHeroComponent } from '../group-hero/group-hero.component';
+import { GroupHeroComponent, HeroTag } from '../group-hero/group-hero.component';
 import { MeetingFormModalComponent } from '../meeting-form-modal/meeting-form-modal.component';
 import { MeetingsTabComponent } from './tabs/meetings-tab/meetings-tab.component';
 import { MembersTabComponent } from './tabs/members-tab/members-tab.component';
@@ -54,6 +54,32 @@ export class GroupHubComponent implements OnInit, OnDestroy {
   error = '';
   activeTab: HubTab = 'overview';
   meetingsReloadToken = 0;
+
+  get heroTags(): HeroTag[] {
+    if (!this.group) return [];
+    const tags: HeroTag[] = [];
+
+    const meetingTypes = [...new Set(this.group.meetings.map(m => m.meetingType))];
+    for (const type of meetingTypes) {
+      if (type === MeetingType.Online) tags.push({ label: 'Online', color: 'sky' });
+      else if (type === MeetingType.InPerson) tags.push({ label: 'In Person', color: 'green' });
+      else if (type === MeetingType.Hybrid) tags.push({ label: 'Hybrid', color: 'teal' });
+    }
+
+    tags.push(this.group.isPublic
+      ? { label: 'Public', color: 'green' }
+      : { label: 'Private', color: 'muted' });
+
+    if (this.group.requiresApproval) {
+      tags.push({ label: 'Approval req.', color: 'amber' });
+    }
+
+    if (this.group.timeZone) {
+      tags.push({ label: this.group.timeZone.replace(/_/g, ' '), color: 'muted' });
+    }
+
+    return tags;
+  }
 
   ngOnInit(): void {
     this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {

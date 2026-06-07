@@ -133,6 +133,8 @@ Self-contained navigable HTML files live in `docs/mocks/`. They are **committed 
 4. **Mock quality = implementation quality.** A vague mock leaves room for interpretation. The more precisely the mock is designed, the less ambiguity there is in code. Invest in the mock first.
 5. **When a mock is ambiguous, underspecified, or silent on a detail — stop and ask before implementing.** Don't interpolate. A clarifying question costs one turn; a wrong implementation costs a revert and a rewrite.
 
+**Rebase the mock** periodically to keep it in sync with live components — especially after completing a significant feature. See `docs/mocks/README.md` for the full rebase workflow. **When mock and live code disagree, the live code wins** — rebase updates the mock to match the code, not the reverse (unless intentionally redesigning).
+
 **Token naming:** Mocks use unprefixed tokens (`--bg`, `--cta-bg`). Angular components use `--sn-*` prefix (`--sn-bg`, `--sn-cta-bg`) with literal fallbacks. The translation is mechanical.
 
 **Component annotations in the interactive mock** mark Angular component boundaries as HTML comments (`<!-- ════ <app-hero> ════ -->`) so the mock maps directly to the component tree.

@@ -7,33 +7,51 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@1&display=swap">
   <style>
-    /* ── Design tokens ──────────────────────────────────────────────────── */
+    /* ══════════════════════════════════════════════════════════════════════
+       Design tokens — unprefixed equivalents of Angular's --sn-* tokens
+       ══════════════════════════════════════════════════════════════════════ */
     :root {
       --bg: #f7f5f2; --bg-soft: #f0ede8;
       --text: #111110; --text-mid: #3d3d3a; --text-muted: #7a7a75;
-      --cta: #1a1a18; --border: rgba(17,17,16,.10);
-      --t-violet: rgba(124,58,237,.10);  --violet: #7c3aed;
-      --t-sky:    rgba(14,165,233,.10);  --sky:    #0ea5e9;
+      --cta: #1a1a18; --border: rgba(17,17,16,.08);
+
+      /* 8 tints (12% opacity backgrounds) */
+      --t-violet: rgba(138,79,163,.12);  --violet: #8a4fa3;
+      --t-sky:    rgba(14,165,233,.12);  --sky:    #0ea5e9;
       --t-amber:  rgba(217,119,6,.12);   --amber:  #d97706;
-      --t-green:  rgba(22,163,74,.10);   --green:  #16a34a;
+      --t-green:  rgba(42,148,89,.12);   --green:  #2a9459;
       --t-rose:   rgba(225,29,72,.10);   --rose:   #e11d48;
-      --t-teal:   rgba(20,184,166,.10);  --teal:   #14b8a6;
-      --t-indigo: rgba(99,102,241,.10);  --indigo: #6366f1;
-      --t-coral:  rgba(249,115,22,.10);  --coral:  #f97316;
+      --t-teal:   rgba(15,118,110,.12);  --teal:   #0f766e;
+      --t-indigo: rgba(79,70,229,.12);   --indigo: #4f46e5;
+      --t-coral:  rgba(249,115,22,.12);  --coral:  #f97316;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
     a, button { font-family: inherit; }
 
-    /* ── NAVBAR ─────────────────────────────────────────────────────────── */
+    /* ══════════════════════════════════════════════════════════════════════
+       NAVBAR — mirrors navbar.component.scss exactly
+       ══════════════════════════════════════════════════════════════════════ */
     .sn-nav {
-      position: sticky; top: 0; z-index: 100;
-      background: white; border-bottom: 1px solid var(--border);
-      box-shadow: 0 1px 0 rgba(17,17,16,.04);
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 64px;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .sn-nav::after {
+      content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #e11d48, #f97316, #eab308, #22c55e, #0ea5e9, #8a4fa3, #e11d48);
+      opacity: .6;
     }
     .nav-inner {
-      max-width: 1200px; margin: 0 auto; padding: 0 24px;
-      height: 64px; display: flex; align-items: center; gap: 16px;
+      max-width: 1200px; height: 100%; margin: 0 auto; padding: 0 24px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 24px;
     }
     .nav-brand {
       display: flex; align-items: center; gap: 10px;
@@ -41,15 +59,15 @@
     }
     .nav-logo-ring {
       width: 36px; height: 36px; border-radius: 50%;
-      background: conic-gradient(from 0deg, #e11d48, #f97316, #eab308, #22c55e, #0ea5e9, #7c3aed, #e11d48);
+      background: conic-gradient(from 0deg, #e11d48, #f97316, #eab308, #22c55e, #0ea5e9, #8a4fa3, #e11d48);
       display: flex; align-items: center; justify-content: center;
     }
     .nav-logo-ring svg { width: 18px; height: 18px; }
     .brand-name { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: 1rem; color: var(--text); letter-spacing: -0.02em; }
-    .nav-center { flex: 1; display: flex; justify-content: center; }
+    .nav-center { display: flex; justify-content: center; }
     .nav-pill {
       display: flex; align-items: center; gap: 2px;
-      background: var(--bg); border-radius: 100px; padding: 4px;
+      background: rgba(17,17,16,.08); border-radius: 100px; padding: 4px;
     }
     .nlink {
       display: flex; align-items: center; gap: 6px;
@@ -59,8 +77,9 @@
       text-decoration: none; white-space: nowrap; transition: background .15s, color .15s;
     }
     .nlink:hover { background: rgba(17,17,16,.06); color: var(--text); }
-    .nlink.active { background: var(--text); color: white; }
-    .caret-svg { width: 10px; height: 10px; flex-shrink: 0; }
+    .nlink.active { background: var(--cta); color: white; }
+    .caret-svg { width: 10px; height: 10px; flex-shrink: 0; transition: transform .15s; }
+    .nlink[aria-expanded="true"] .caret-svg { transform: rotate(180deg); }
     .nav-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .nav-cta {
       display: flex; align-items: center; gap: 8px; padding: 8px 16px 8px 20px;
@@ -68,7 +87,9 @@
       color: white; border: none; border-radius: 100px;
       font-family: 'Inter Tight', sans-serif; font-size: 0.875rem; font-weight: 700;
       cursor: pointer; letter-spacing: -0.01em;
+      transition: opacity .15s;
     }
+    .nav-cta:hover { opacity: .9; }
     .arrow-circle {
       width: 20px; height: 20px; border-radius: 50%;
       background: rgba(255,255,255,.18);
@@ -77,80 +98,96 @@
     .arrow-circle svg { width: 10px; height: 10px; }
     .user-pill {
       display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 8px;
-      background: var(--bg); border-radius: 100px; border: 1px solid var(--border);
+      background: var(--cta); border-radius: 100px;
       font-family: 'Inter Tight', sans-serif; font-size: 0.875rem; font-weight: 600;
-      color: var(--text); cursor: pointer;
+      color: white; cursor: pointer; border: none;
+      transition: opacity .15s;
     }
+    .user-pill:hover { opacity: .9; }
     .user-initial {
-      width: 26px; height: 26px; border-radius: 50%; background: var(--cta);
-      color: white; font-size: 0.75rem; font-weight: 700;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(255,255,255,.18);
+      color: rgba(255,255,255,.92); font-size: 0.75rem; font-weight: 700;
       display: flex; align-items: center; justify-content: center;
     }
 
-    /* ── MEGA MENU ──────────────────────────────────────────────────────── */
-    .mega-anchor { position: static; }
-    .mega-menu {
-      display: none; position: absolute; top: 64px; left: 50%; transform: translateX(-50%);
-      background: white; border-radius: 16px; border: 1px solid var(--border);
-      box-shadow: 0 8px 40px rgba(0,0,0,.12); padding: 20px;
-      grid-template-columns: repeat(4, 200px); gap: 8px; z-index: 200;
+    /* ══════════════════════════════════════════════════════════════════════
+       DROPDOWN MENUS — plain CSS, not mat-menu
+       ══════════════════════════════════════════════════════════════════════ */
+    .sn-dropdown-wrap { position: relative; }
+    .sn-dropdown {
+      display: none; position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+      background: white; border-radius: 14px; border: 1px solid rgba(17,17,16,.09);
+      box-shadow: 0 10px 40px rgba(0,0,0,.13), 0 2px 6px rgba(0,0,0,.06);
+      min-width: 200px; z-index: 200; padding: 8px; animation: sn-dropdown-in .16s ease-out;
     }
-    .mega-menu.open { display: grid; }
-    .mm-col { display: flex; flex-direction: column; gap: 4px; }
-    .mm-col-head {
-      display: flex; align-items: center; gap: 6px; padding: 4px 8px 8px;
-      font-family: 'Inter Tight', sans-serif; font-size: 0.7rem; font-weight: 800;
-      text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted);
+    @keyframes sn-dropdown-in { from { opacity: 0; transform: translateX(-50%) translateY(-6px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+    .sn-dropdown.open { display: block; }
+    .sn-dropdown.right { left: auto; right: 0; transform: none; animation-name: sn-dropdown-right-in; }
+    @keyframes sn-dropdown-right-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+    .dd-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px;
+      font-size: 0.875rem; font-weight: 600; color: var(--text-mid); cursor: pointer; text-decoration: none;
+      transition: background .12s;
     }
-    .mm-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-    .mm-item {
-      display: flex; align-items: flex-start; gap: 10px; padding: 8px;
-      border-radius: 10px; border: none; background: transparent;
-      cursor: pointer; text-align: left; width: 100%; transition: background .12s;
-    }
-    .mm-item:hover { background: var(--bg); }
-    .mm-icon {
-      width: 32px; height: 32px; border-radius: 8px;
-      display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;
-    }
-    .mm-name { font-family: 'Inter Tight', sans-serif; font-size: 0.8125rem; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 5px; }
-    .mm-desc { font-size: 0.74rem; color: var(--text-muted); margin-top: 1px; line-height: 1.3; }
+    .dd-item:hover { background: var(--bg-soft); }
+    .dd-item.warn { color: #b91c1c; }
+    .dd-icon { font-size: 0.95rem; width: 20px; text-align: center; }
+    .dd-divider { height: 1px; background: rgba(17,17,16,.08); margin: 6px 0; }
+    .dd-header { padding: 10px 12px 8px; display: flex; align-items: center; gap: 10px; }
+    .dd-name { font-family: 'Inter Tight', sans-serif; font-size: 0.9rem; font-weight: 800; }
+    .dd-role { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
 
-    /* ── USER DROPDOWN ──────────────────────────────────────────────────── */
-    .user-wrap { position: relative; }
-    .user-dropdown {
-      display: none; position: absolute; top: calc(100% + 8px); right: 0;
-      background: white; border: 1px solid var(--border); border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,.10); min-width: 200px; z-index: 200; padding: 6px;
+    /* Groups dropdown (My Groups nav item) */
+    .groups-dropdown { min-width: 260px; }
+    .groups-dropdown .dd-group-item {
+      display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px;
+      cursor: pointer; text-decoration: none; transition: background .12s;
     }
-    .user-dropdown.open { display: block; }
-    .dd-header { padding: 8px 10px 10px; }
-    .dd-name { display: block; font-family: 'Inter Tight', sans-serif; font-size: 0.875rem; font-weight: 700; }
-    .dd-role { display: block; font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
-    .dd-divider { height: 1px; background: var(--border); margin: 4px 0; }
-    .dd-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; font-size: 0.84rem; color: var(--text-mid); cursor: pointer; text-decoration: none; }
-    .dd-item:hover { background: var(--bg); }
-    .dd-item.warn { color: var(--rose); }
-    .dd-icon { font-size: 0.9rem; }
+    .groups-dropdown .dd-group-item:hover { background: var(--bg-soft); }
+    .dd-group-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;
+    }
+    .dd-group-name { font-family: 'Inter Tight', sans-serif; font-size: 0.875rem; font-weight: 700; }
+    .dd-group-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
 
-    /* ── STATUS PILLS ───────────────────────────────────────────────────── */
-    .pill-live { display: inline-block; padding: 1px 6px; border-radius: 100px; background: var(--t-green); color: var(--green); font-size: .65rem; font-weight: 700; font-family: 'Inter Tight', sans-serif; text-transform: uppercase; letter-spacing: .05em; }
-    .pill-cs   { display: inline-block; padding: 1px 6px; border-radius: 100px; background: var(--t-amber); color: var(--amber); font-size: .65rem; font-weight: 700; font-family: 'Inter Tight', sans-serif; text-transform: uppercase; letter-spacing: .05em; }
-    .pill-admin{ display: inline-block; padding: 1px 6px; border-radius: 100px; background: var(--t-violet); color: var(--violet); font-size: .65rem; font-weight: 700; font-family: 'Inter Tight', sans-serif; text-transform: uppercase; letter-spacing: .05em; }
+    /* ══════════════════════════════════════════════════════════════════════
+       STATUS PILLS — Live, Coming Soon, Admin badges
+       ══════════════════════════════════════════════════════════════════════ */
+    .pill-live { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 100px; background: var(--t-green); color: var(--green); font-size: .68rem; font-weight: 800; font-family: 'Inter Tight', sans-serif; text-transform: uppercase; letter-spacing: .05em; }
+    .pill-live::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+    .pill-cs   { display: inline-block; padding: 2px 8px; border-radius: 100px; background: var(--t-amber); color: var(--amber); font-size: .68rem; font-weight: 800; font-family: 'Inter Tight', sans-serif; text-transform: uppercase; letter-spacing: .05em; }
+    .pill-admin{ display: inline-block; padding: 2px 8px; border-radius: 100px; background: var(--t-violet); color: var(--violet); font-size: .68rem; font-weight: 800; font-family: 'Inter Tight', sans-serif; text-transform: uppercase; letter-spacing: .05em; }
 
-    /* ── APP-HERO ───────────────────────────────────────────────────────── */
-    .app-hero {
+    /* ══════════════════════════════════════════════════════════════════════
+       GROUP HERO — mirrors group-hero.component.scss
+       ══════════════════════════════════════════════════════════════════════ */
+    .group-hero {
+      position: relative;
       background: linear-gradient(135deg, #dbeafe 0%, #fde8d8 60%, #fef3c7 100%);
-      padding: 28px 0 0; position: relative; overflow: hidden;
+      padding: 28px 0 0;
+      overflow: hidden;
     }
-    .app-hero::before {
+    .group-hero::before {
       content: ''; position: absolute; inset: 0;
       background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1400&q=80') center/cover;
       opacity: .05;
     }
-    .hero-inner { max-width: 1200px; margin: 0 auto; padding: 0 32px 28px; position: relative; }
+    .hero-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px 0; position: relative; }
+    .hero-back {
+      position: absolute; top: 0; left: 24px;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px 8px 10px; border-radius: 100px;
+      font-family: 'Inter Tight', sans-serif; font-size: .82rem; font-weight: 700;
+      color: var(--text-mid); background: transparent; border: none; cursor: pointer;
+      transition: background .12s;
+    }
+    .hero-back:hover { background: rgba(255,255,255,.5); }
+    .hero-gradient { position: absolute; inset: 0; pointer-events: none; }
+    .hero-content { max-width: 1200px; margin: 0 auto; padding: 64px 24px 32px; display: flex; align-items: flex-start; justify-content: space-between; gap: 40px; flex-wrap: wrap; position: relative; }
 
-    /* Breadcrumbs — ng-content projected slot */
+    /* Breadcrumbs */
     .app-breadcrumbs { display: flex; align-items: center; gap: 6px; margin-bottom: 14px; }
     .bc-item { font-family: 'Inter Tight', sans-serif; font-size: 0.78rem; font-weight: 600; color: rgba(17,17,16,.45); cursor: pointer; text-decoration: none; }
     .bc-item:hover { color: var(--text); }
@@ -159,124 +196,722 @@
 
     .hero-eyebrow {
       display: inline-flex; align-items: center; gap: 6px;
-      background: rgba(255,255,255,.75); border: 1px solid rgba(17,17,16,.08);
-      border-radius: 100px; padding: 4px 12px; margin-bottom: 10px;
-      font-family: 'Inter Tight', sans-serif; font-size: 0.72rem; font-weight: 700;
+      background: rgba(255,255,255,.75); backdrop-filter: blur(8px);
+      border: 1px solid rgba(17,17,16,.08);
+      border-radius: 100px; padding: 5px 12px 5px 8px; margin-bottom: 12px;
+      font-family: 'Inter Tight', sans-serif; font-size: 0.72rem; font-weight: 800;
       color: var(--text-mid); letter-spacing: 0.05em; text-transform: uppercase;
     }
+    .eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
     .hero-title {
       font-family: 'Inter Tight', sans-serif; font-size: clamp(1.6rem, 3vw, 2.25rem);
       font-weight: 900; color: var(--text); letter-spacing: -0.04em; line-height: 1.1;
       margin-bottom: 8px;
     }
-    .hero-title .serif { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; }
-    .hero-subtitle { font-size: 0.9375rem; color: var(--text-mid); max-width: 500px; line-height: 1.5; margin-bottom: 16px; }
-    .hero-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-    .meta-badge {
-      display: inline-flex; align-items: center; gap: 4px;
-      background: rgba(255,255,255,.75); border: 1px solid rgba(17,17,16,.08);
-      border-radius: 100px; padding: 3px 10px;
-      font-family: 'Inter Tight', sans-serif; font-size: 0.74rem; font-weight: 700; color: var(--text-mid);
+    .hero-title .serif-accent {
+      display: block; text-align: right; transform: translateX(3rem);
+      font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 700;
     }
+    .hero-subtitle { font-size: 0.95rem; color: var(--text-mid); max-width: 500px; line-height: 1.5; margin-bottom: 16px; }
 
-    /* Tab rail (inside hero for group pages) */
+    /* Tags card (frosted glass) */
+    .hero-tags {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px;
+      background: rgba(255,255,255,.85); backdrop-filter: blur(12px);
+      border: 1px solid rgba(17,17,16,.08); border-radius: 14px;
+      padding: 10px 14px; width: fit-content;
+    }
+    .tag-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 10px; border-radius: 999px;
+      font-family: 'Inter Tight', sans-serif; font-size: .78rem; font-weight: 800;
+      background: rgba(17,17,16,.06); color: var(--text-mid);
+    }
+    .tag-chip.sky    { background: var(--t-sky);    color: var(--sky); }
+    .tag-chip.violet { background: var(--t-violet); color: var(--violet); }
+    .tag-chip.green  { background: var(--t-green);  color: var(--green); }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       BUTTONS — mirrors landing.component.scss button classes
+       ══════════════════════════════════════════════════════════════════════ */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 12px 24px; border-radius: 100px;
+      font-family: 'Inter Tight', sans-serif; font-size: 0.9375rem; font-weight: 700;
+      cursor: pointer; border: none; text-decoration: none;
+      transition: opacity .15s, transform .12s, box-shadow .15s;
+    }
+    .btn:hover { opacity: .92; }
+    .btn:active { transform: scale(.98); }
+    .btn.dark { background: var(--cta); color: white; }
+    .btn.outline { background: transparent; border: 1.5px solid rgba(17,17,16,.18); color: var(--text); }
+    .btn.outline:hover { border-color: rgba(17,17,16,.32); }
+    .btn.ghost { background: rgba(255,255,255,.8); backdrop-filter: blur(6px); color: var(--text); border: 1px solid rgba(17,17,16,.08); }
+    .btn.light { background: white; color: var(--text); }
+    .btn.sm { padding: 8px 16px; font-size: .84rem; }
+    .btn.icon-btn { padding: 10px; width: 40px; height: 40px; }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       GROUP HUB SHELL — page card + tab rail (from group-hub.component.scss)
+       ══════════════════════════════════════════════════════════════════════ */
+    .hub-shell {
+      max-width: 1200px; margin: 0 auto; padding: 0 24px 80px;
+    }
+    .page {
+      background: rgba(255,255,255,.9);
+      border: 1px solid rgba(17,17,16,.09);
+      border-radius: 28px; overflow: hidden;
+      box-shadow: 0 16px 52px rgba(17,17,16,.07);
+      margin-top: 12px;
+    }
     .tab-rail {
-      display: flex; gap: 4px; margin-top: 16px;
-      border-bottom: 1px solid rgba(17,17,16,.08); padding-bottom: 0;
+      padding: 16px 20px 0;
+      border-bottom: 1px solid rgba(17,17,16,.09);
+      background: rgba(247,245,242,.8);
+      display: flex; flex-wrap: wrap; gap: 4px;
     }
     .tab-btn {
-      display: flex; align-items: center; gap: 7px; padding: 9px 16px;
-      border: none; background: transparent;
-      font-family: 'Inter Tight', sans-serif; font-size: 0.84rem; font-weight: 600;
-      color: var(--text-muted); cursor: pointer;
-      border-bottom: 2px solid transparent; margin-bottom: -1px;
-      border-radius: 8px 8px 0 0; transition: color .15s;
+      appearance: none;
+      border: 1px solid transparent; border-bottom: 0;
+      background: transparent;
+      padding: 12px 18px 14px;
+      font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: .88rem;
+      color: var(--text-muted);
+      border-radius: 14px 14px 0 0; margin-bottom: -1px;
+      transition: color .15s, background .15s;
+      display: flex; align-items: center; gap: 6px;
+      cursor: pointer; white-space: nowrap;
     }
-    .tab-btn:hover { color: var(--text); background: rgba(255,255,255,.5); }
-    .tab-btn.active { color: var(--text); border-bottom-color: var(--text); background: transparent; }
-
-    /* ── BUTTONS ────────────────────────────────────────────────────────── */
-    .btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 20px; border-radius: 100px;
-      font-family: 'Inter Tight', sans-serif; font-size: 0.875rem; font-weight: 700;
-      cursor: pointer; border: none; text-decoration: none; transition: opacity .15s;
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active {
+      background: white; color: var(--text);
+      border-color: rgba(17,17,16,.09); border-bottom-color: white;
     }
-    .btn:hover { opacity: .88; }
-    .btn.dark { background: var(--cta); color: white; }
-    .btn.outline { background: transparent; border: 1.5px solid rgba(17,17,16,.2); color: var(--text); }
-    .btn.ghost  { background: rgba(255,255,255,.75); color: var(--text); }
-    .btn.sm { padding: 7px 14px; font-size: .8rem; }
+    .tab-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 20px; height: 20px; padding: 0 6px;
+      border-radius: 999px; font-size: .72rem; font-weight: 900;
+      font-family: 'Inter Tight', sans-serif;
+    }
+    .tab-badge-violet { background: rgba(138,79,163,.12); color: #8a4fa3; }
+    .tab-badge-sky    { background: rgba(14,165,233,.12);  color: #0ea5e9; }
+    .tab-badge-green  { background: rgba(42,148,89,.12);   color: #2a9459; }
+    .tab-badge-amber  { background: rgba(217,119,6,.12);   color: #d97706; }
+    .tab-admin-badge { font-size: .68rem; padding: 2px 7px; border-radius: 999px; font-weight: 800; }
+    .tab-panel { /* panels set their own padding */ }
 
-    /* ── PAGE SHELL ─────────────────────────────────────────────────────── */
-    .page-shell { max-width: 1200px; margin: 0 auto; padding: 32px 32px 80px; }
+    /* ══════════════════════════════════════════════════════════════════════
+       OVERVIEW TAB — cards, banners, avatars, chips (overview-tab.component.scss)
+       ══════════════════════════════════════════════════════════════════════ */
+    .panel-inner { padding: 24px; }
 
-    /* ── CARDS ──────────────────────────────────────────────────────────── */
-    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+    /* Next meeting banner */
+    .next-meeting-banner {
+      display: flex; align-items: center; justify-content: space-between; gap: 18px;
+      background: linear-gradient(120deg, rgba(14,165,233,.1) 0%, rgba(42,148,89,.1) 100%);
+      border: 1px solid rgba(14,165,233,.18);
+      border-radius: 20px; padding: 18px 22px;
+      flex-wrap: wrap; margin-bottom: 20px;
+      text-decoration: none; color: inherit;
+      transition: box-shadow .18s, transform .15s;
+    }
+    .next-meeting-banner:hover { box-shadow: 0 8px 28px rgba(14,165,233,.18); transform: translateY(-1px); }
+    .banner-icon { width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0; background: rgba(14,165,233,.14); display: grid; place-items: center; font-size: 1.4rem; }
+    .banner-copy { flex: 1; min-width: 160px; }
+    .banner-eyebrow { font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #0ea5e9; margin-bottom: 3px; }
+    .banner-name { font-family: 'Inter Tight', sans-serif; font-weight: 900; font-size: 1.1rem; margin-bottom: 2px; color: var(--text); }
+    .banner-when { color: var(--text-mid); font-size: .88rem; }
+    .banner-cta { text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+    .countdown-unit { display: inline-flex; align-items: baseline; gap: 2px; padding: 3px 8px; border-radius: 999px; background: rgba(255,255,255,.74); border: 1px solid rgba(17,17,16,.08); font-family: 'Inter Tight', sans-serif; color: var(--text); }
+    .countdown-unit strong { font-size: .95rem; font-weight: 900; line-height: 1; font-family: 'Roboto Mono', monospace; }
+    .countdown-unit small { font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
+
+    /* Two-column grid */
+    .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .overview-col { display: flex; flex-direction: column; gap: 14px; }
+
+    /* Cards */
     .card {
-      background: white; border-radius: 16px; border: 1px solid var(--border);
-      padding: 20px; transition: box-shadow .15s;
+      background: white;
+      border: 1px solid rgba(17,17,16,.09);
+      border-radius: 18px; padding: 18px;
+      box-shadow: 0 6px 20px rgba(17,17,16,.04);
     }
-    .card.clickable { cursor: pointer; }
-    .card.clickable:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
-    .card-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 12px; }
-    .card-title { font-family: 'Inter Tight', sans-serif; font-size: 0.9375rem; font-weight: 700; margin-bottom: 4px; }
-    .card-desc { font-size: 0.8125rem; color: var(--text-muted); line-height: 1.4; }
-    .section-block { margin-bottom: 36px; }
-    .section-head {
-      font-family: 'Inter Tight', sans-serif; font-size: 0.7rem; font-weight: 800;
-      text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 12px;
+    .card.clickable { cursor: pointer; transition: box-shadow .15s, transform .12s; }
+    .card.clickable:hover { box-shadow: 0 8px 28px rgba(17,17,16,.08); transform: translateY(-2px); }
+    .section-heading {
+      font-family: 'Inter Tight', sans-serif; font-size: .7rem; font-weight: 900;
+      text-transform: uppercase; letter-spacing: .09em; color: var(--text-muted); margin-bottom: 10px;
     }
+    .card-subtext { font-size: .84rem; color: var(--text-muted); margin-bottom: 11px; line-height: 1.5; }
 
-    /* ── LANDING HERO ───────────────────────────────────────────────────── */
-    .landing-hero {
-      min-height: 520px; display: flex; flex-direction: column;
+    /* About card */
+    .about-card { background: linear-gradient(135deg, rgba(248,246,241,.9), rgba(240,237,232,.95)); border-color: rgba(17,17,16,.06); position: relative; overflow: hidden; }
+    .quote-mark { position: absolute; top: -18px; right: -18px; font-size: 4.5rem; opacity: .07; line-height: 1; pointer-events: none; font-family: Georgia, serif; }
+    .about-text { font-size: 1rem; line-height: 1.72; color: var(--text-mid); font-style: italic; }
+
+    /* Membership card */
+    .membership-card { background: linear-gradient(135deg, rgba(138,79,163,.07), rgba(79,70,229,.06)); border-color: rgba(138,79,163,.14); }
+    .membership-heading { color: #8a4fa3; }
+    .membership-identity { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .membership-name { font-family: 'Inter Tight', sans-serif; font-weight: 900; font-size: 1rem; }
+
+    /* Entity rows (admins, servants) */
+    .entity-row { display: flex; align-items: flex-start; gap: 14px; padding: 14px; border-radius: 14px; background: var(--bg-soft); border: 1px solid rgba(17,17,16,.06); margin-bottom: 10px; }
+    .entity-row:last-child { margin-bottom: 0; }
+    .entity-name { font-family: 'Inter Tight', sans-serif; font-weight: 900; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .entity-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+    .entity-links a { color: var(--cta); font-weight: 800; font-size: .88rem; text-decoration: none; }
+    .entity-links a:hover { text-decoration: underline; }
+
+    /* Avatars */
+    .avatar { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-family: 'Inter Tight', sans-serif; font-weight: 900; font-size: 1rem; flex-shrink: 0; }
+    .av-violet { background: rgba(138,79,163,.22); color: #6d3e86; }
+    .av-sky    { background: rgba(14,165,233,.18); color: #0369a1; }
+    .av-green  { background: rgba(42,148,89,.18);  color: #166534; }
+    .av-rose   { background: rgba(244,63,94,.16);  color: #be185d; }
+    .av-amber  { background: rgba(217,119,6,.18);  color: #92400e; }
+    .av-teal   { background: rgba(15,118,110,.18); color: #0f766e; }
+    .av-coral  { background: rgba(249,115,22,.16); color: #c2410c; }
+
+    /* Chips */
+    .chip { display: inline-block; padding: 5px 10px; border-radius: 999px; font-size: .78rem; font-weight: 800; font-family: 'Inter Tight', sans-serif; border: 1px solid transparent; }
+    .chip-small { font-size: .68rem; padding: 2px 8px; vertical-align: middle; }
+    .chip-violet { background: rgba(138,79,163,.12); color: #8a4fa3; }
+    .chip-sky    { background: rgba(14,165,233,.12);  color: #0ea5e9; }
+    .chip-green  { background: rgba(42,148,89,.12);   color: #2a9459; }
+    .chip-amber  { background: rgba(217,119,6,.12);   color: #d97706; }
+    .chip-rose   { background: rgba(217,53,154,.12);  color: #d9359a; }
+    .chip-teal   { background: rgba(15,118,110,.12);  color: #0f766e; }
+    .chip-indigo { background: rgba(79,70,229,.12);   color: #4f46e5; }
+    .chip-coral  { background: rgba(234,94,61,.12);   color: #ea5e3d; }
+    .chip-muted  { background: rgba(17,17,16,.06);    color: #7a7a75; }
+
+    /* Detail rows */
+    .detail-rows { display: flex; flex-direction: column; gap: 9px; }
+    .detail-row { display: flex; align-items: center; gap: 10px; }
+    .detail-icon { font-size: .95rem; width: 22px; text-align: center; }
+    .detail-text { font-size: .88rem; color: var(--text-mid); }
+    .detail-text strong { font-weight: 700; color: var(--text); }
+    .detail-text a { color: var(--sky); font-weight: 700; text-decoration: none; }
+    .detail-text a:hover { text-decoration: underline; }
+    .detail-divider { height: 1px; background: rgba(17,17,16,.06); margin: 2px 0; }
+
+    /* Toggle buttons */
+    .toggle-button {
+      min-width: 72px; height: 36px; padding: 0 14px;
+      border-radius: 999px; border: 1px solid rgba(17,17,16,.12);
+      background: rgba(17,17,16,.04); color: var(--text-mid);
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex-shrink: 0;
+      cursor: pointer; font-family: 'Inter Tight', sans-serif; font-size: .85rem; font-weight: 800;
+      transition: background .15s, border-color .15s, color .15s, box-shadow .15s;
+    }
+    .toggle-button.on { background: rgba(42,148,89,.12); border-color: rgba(42,148,89,.28); color: #166534; }
+    .toggle-button:hover { box-shadow: 0 4px 14px rgba(17,17,16,.06); }
+
+    /* Leave button */
+    .btn-warn-sm {
+      display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px;
+      border-radius: 999px; font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: .84rem;
+      background: rgba(220,38,38,.1); color: #b91c1c; border: 1px solid rgba(220,38,38,.2);
+      cursor: pointer; transition: opacity .15s;
+    }
+    .btn-warn-sm:hover { opacity: .85; }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       LANDING PAGE — hero, sections, card grids (landing.component.scss)
+       ══════════════════════════════════════════════════════════════════════ */
+    .hero-section {
+      min-height: 560px; display: flex; flex-direction: column;
       align-items: center; justify-content: center; text-align: center;
       background: linear-gradient(135deg, #dbeafe 0%, #fde8d8 60%, #fef3c7 100%);
-      padding: 80px 32px; position: relative; overflow: hidden;
+      padding: 100px 32px 80px; position: relative; overflow: hidden;
+    }
+    .hero-section::before {
+      content: ''; position: absolute; inset: 0;
+      background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1400&q=80') center/cover;
+      opacity: .06;
+    }
+    .hero-wrap { position: relative; max-width: 720px; }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,.8); backdrop-filter: blur(8px);
+      border: 1px solid rgba(17,17,16,.08); border-radius: 100px;
+      padding: 6px 14px; margin-bottom: 18px;
+      font-family: 'Inter Tight', sans-serif; font-size: .75rem; font-weight: 800;
+      color: var(--text-mid); letter-spacing: .04em; text-transform: uppercase;
+    }
+    .hero-title {
+      font-family: 'Inter Tight', sans-serif;
+      font-size: clamp(2.5rem, 6vw, 4.2rem);
+      font-weight: 900; letter-spacing: -0.045em; line-height: 1.05; margin-bottom: 18px;
+    }
+    .hero-title .serif-accent {
+      font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400;
+    }
+    .hero-lead {
+      font-size: 1.1rem; color: var(--text-mid); line-height: 1.6;
+      margin-bottom: 32px; max-width: 540px; margin-left: auto; margin-right: auto;
+    }
+    .hero-ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .landing-hero {
+      min-height: 560px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+      background: linear-gradient(135deg, #dbeafe 0%, #fde8d8 60%, #fef3c7 100%);
+      padding: 100px 32px 80px; position: relative; overflow: hidden;
     }
     .landing-hero::before {
       content: ''; position: absolute; inset: 0;
       background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1400&q=80') center/cover;
-      opacity: .07;
+      opacity: .06;
     }
-    .landing-hero-inner { position: relative; max-width: 680px; }
-    .landing-title { font-family: 'Inter Tight', sans-serif; font-size: clamp(2.4rem, 5vw, 3.8rem); font-weight: 900; letter-spacing: -0.04em; line-height: 1.05; margin-bottom: 16px; }
-    .landing-title .serif { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; }
-    .landing-lead { font-size: 1.0625rem; color: var(--text-mid); line-height: 1.55; margin-bottom: 28px; max-width: 520px; margin-left: auto; margin-right: auto; }
-    .trust-strip { display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: wrap; margin-top: 20px; }
-    .trust-item { font-size: 0.8rem; color: var(--text-muted); font-family: 'Inter Tight', sans-serif; font-weight: 600; }
+    .landing-hero-inner { position: relative; max-width: 720px; }
+    .landing-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,.8); backdrop-filter: blur(8px);
+      border: 1px solid rgba(17,17,16,.08); border-radius: 100px;
+      padding: 6px 14px; margin-bottom: 18px;
+      font-family: 'Inter Tight', sans-serif; font-size: .75rem; font-weight: 800;
+      color: var(--text-mid); letter-spacing: .04em; text-transform: uppercase;
+    }
+    .landing-title {
+      font-family: 'Inter Tight', sans-serif;
+      font-size: clamp(2.5rem, 6vw, 4.2rem);
+      font-weight: 900; letter-spacing: -0.045em; line-height: 1.05; margin-bottom: 18px;
+    }
+    .landing-title .serif {
+      font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400;
+    }
+    .landing-lead {
+      font-size: 1.1rem; color: var(--text-mid); line-height: 1.6;
+      margin-bottom: 32px; max-width: 540px; margin-left: auto; margin-right: auto;
+    }
+    .landing-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .trust-strip {
+      display: flex; align-items: center; justify-content: center; gap: 28px; flex-wrap: wrap;
+      margin-top: 32px;
+    }
+    .trust-item {
+      font-size: 0.82rem; color: var(--text-muted);
+      font-family: 'Inter Tight', sans-serif; font-weight: 600;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .trust-icon { font-size: 0.9rem; }
     .stats-row {
-      display: flex; gap: 32px; justify-content: center; flex-wrap: wrap;
-      padding: 24px 32px; background: white; border-bottom: 1px solid var(--border);
+      display: flex; gap: 40px; justify-content: center; flex-wrap: wrap;
+      padding: 28px 32px; background: white; border-bottom: 1px solid var(--border);
     }
     .stat-item { text-align: center; }
-    .stat-num { font-family: 'Inter Tight', sans-serif; font-size: 1.5rem; font-weight: 900; color: var(--text); }
-    .stat-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+    .stat-num { font-family: 'Inter Tight', sans-serif; font-size: 1.75rem; font-weight: 900; color: var(--text); }
+    .stat-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-top: 3px; }
 
-    /* ── MISC ───────────────────────────────────────────────────────────── */
+    /* Landing sections */
+    .section { padding: 0; }
+    .section-wrap { max-width: 1200px; margin: 0 auto; padding: 80px 32px; position: relative; }
+    .section-white { background: white; }
+    .section-bg { background: var(--bg); }
+    .section-dark { background: var(--cta); color: white; }
+    .section-eyebrow {
+      font-family: 'Inter Tight', sans-serif; font-size: .72rem; font-weight: 900;
+      text-transform: uppercase; letter-spacing: .1em; color: var(--violet);
+      margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+    }
+    .section-dark .section-eyebrow { color: rgba(255,255,255,.6); }
+    .section-title {
+      font-family: 'Inter Tight', sans-serif; font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 900; letter-spacing: -0.035em; line-height: 1.1; margin-bottom: 12px;
+    }
+    .section-title .serif { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; }
+    .section-subtitle { font-size: 1rem; color: var(--text-mid); line-height: 1.6; max-width: 560px; }
+    .section-dark .section-subtitle { color: rgba(255,255,255,.7); }
+
+    /* Feature cards grid */
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 32px; }
+    .card-grid.three-col { grid-template-columns: repeat(3, 1fr); }
+    .feature-card {
+      background: white; border: 1px solid rgba(17,17,16,.08);
+      border-radius: 20px; padding: 24px;
+      transition: box-shadow .18s, transform .12s;
+    }
+    .feature-card:hover { box-shadow: 0 12px 36px rgba(17,17,16,.08); transform: translateY(-3px); }
+    .feature-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; margin-bottom: 16px;
+    }
+    .feature-title { font-family: 'Inter Tight', sans-serif; font-size: 1rem; font-weight: 800; margin-bottom: 6px; }
+    .feature-desc { font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; }
+    .card-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; margin-bottom: 16px;
+    }
+    .card-title { font-family: 'Inter Tight', sans-serif; font-size: 1rem; font-weight: 800; margin-bottom: 6px; }
+    .card-desc { font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; }
+    /* Section title and lead */
+    .section-title { font-family: 'Inter Tight', sans-serif; font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 900; letter-spacing: -0.035em; line-height: 1.1; margin-bottom: 12px; }
+    .section-title .serif-accent { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; }
+    .section-lead { font-size: 1rem; color: var(--text-mid); line-height: 1.6; max-width: 560px; margin-bottom: 24px; }
+    .section-dark .section-lead { color: rgba(255,255,255,.7); }
+    /* How It Works */
+    .how-it-works-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 32px; }
+    .step-card { text-align: center; }
+    .step-num { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: var(--t-violet); color: var(--violet); font-family: 'Inter Tight', sans-serif; font-size: 1rem; font-weight: 900; margin-bottom: 16px; }
+    .step-title { font-family: 'Inter Tight', sans-serif; font-size: 1.05rem; font-weight: 800; margin-bottom: 8px; }
+    .step-desc { font-size: .88rem; color: var(--text-muted); line-height: 1.5; }
+    /* Traditions */
+    .traditions-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 28px; }
+    .tradition-card { background: white; border: 1px solid rgba(17,17,16,.08); border-radius: 14px; padding: 18px; }
+    .tradition-num { display: inline-block; padding: 3px 10px; border-radius: 999px; background: var(--t-violet); color: var(--violet); font-family: 'Inter Tight', sans-serif; font-size: .72rem; font-weight: 900; margin-bottom: 10px; }
+    .tradition-text { font-size: .85rem; color: var(--text-mid); line-height: 1.5; }
+
+    /* Dashboard card grid */
+    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    .group-card {
+      background: white; border: 1px solid rgba(17,17,16,.09);
+      border-radius: 18px; padding: 18px; cursor: pointer;
+      transition: box-shadow .15s, transform .12s;
+    }
+    .group-card:hover { box-shadow: 0 8px 28px rgba(17,17,16,.08); transform: translateY(-2px); }
+    .group-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .group-card-icon { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 1.2rem; flex-shrink: 0; }
+    .group-card-title { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: .95rem; }
+    .group-card-meta { font-size: .78rem; color: var(--text-muted); margin-top: 2px; }
+    .group-card-footer { font-size: .84rem; color: var(--text-muted); }
+
+    /* Page shell (for simple pages) */
+    .page-shell { max-width: 1200px; margin: 0 auto; padding: 32px 24px 80px; }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       MEETINGS TAB — meeting cards (meetings-tab.component.scss)
+       ══════════════════════════════════════════════════════════════════════ */
+    .meetings-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+    .meeting-card { display: flex; gap: 16px; padding: 18px; background: white; border: 1px solid rgba(17,17,16,.09); border-radius: 18px; margin-bottom: 12px; box-shadow: 0 4px 16px rgba(17,17,16,.03); transition: box-shadow .15s; }
+    .meeting-card:hover { box-shadow: 0 8px 28px rgba(17,17,16,.08); }
+    .meeting-day-badge { width: 54px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 0; border-radius: 12px; background: var(--t-sky); }
+    .meeting-day-abbr { font-family: 'Inter Tight', sans-serif; font-size: .7rem; font-weight: 800; text-transform: uppercase; color: var(--sky); }
+    .meeting-day-num { font-family: 'Inter Tight', sans-serif; font-size: 1.4rem; font-weight: 900; color: var(--text); }
+    .meeting-info { flex: 1; }
+    .meeting-title { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: .95rem; margin-bottom: 4px; }
+    .meeting-time { font-size: .84rem; color: var(--text-muted); }
+    .meeting-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .meeting-actions { flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       MEMBERS TAB — member cards (members-tab.component.scss)
+       ══════════════════════════════════════════════════════════════════════ */
+    .members-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+    .member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+    .member-card { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: white; border: 1px solid rgba(17,17,16,.09); border-radius: 14px; transition: box-shadow .15s; }
+    .member-card:hover { box-shadow: 0 6px 20px rgba(17,17,16,.06); }
+    .member-meta { flex: 1; min-width: 0; }
+    .member-name { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: .9rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .member-joined { font-size: .78rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       REQUESTS TAB — request cards (requests-tab.component.scss)
+       ══════════════════════════════════════════════════════════════════════ */
+    .requests-panel { padding: 24px; }
+    .request-card { display: flex; align-items: flex-start; gap: 16px; padding: 18px; background: white; border: 1px solid rgba(17,17,16,.09); border-radius: 16px; margin-bottom: 12px; }
+    .request-info { flex: 1; }
+    .request-name { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: .95rem; margin-bottom: 4px; }
+    .request-date { font-size: .82rem; color: var(--text-muted); }
+    .request-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .request-actions .btn { padding: 8px 16px; font-size: .84rem; }
+    .empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); }
+    .empty-icon { font-size: 2.5rem; margin-bottom: 12px; opacity: .6; }
+    .empty-text { font-size: .95rem; }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       SETTINGS TAB — form cards, toggles (settings-tab.component.scss)
+       ══════════════════════════════════════════════════════════════════════ */
+    .settings-panel { padding: 24px; }
+    .settings-section { margin-bottom: 28px; }
+    .settings-card { background: white; border: 1px solid rgba(17,17,16,.09); border-radius: 18px; padding: 20px; }
+    .setting-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid rgba(17,17,16,.06); }
+    .setting-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .setting-row:first-child { padding-top: 0; }
+    .setting-label { font-size: .9rem; font-weight: 600; }
+    .setting-desc { font-size: .8rem; color: var(--text-muted); margin-top: 2px; }
+    .toggle-switch { width: 44px; height: 24px; border-radius: 100px; background: rgba(17,17,16,.15); position: relative; cursor: pointer; transition: background .15s; flex-shrink: 0; }
+    .toggle-switch.on { background: var(--green); }
+    .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: white; box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: transform .15s; }
+    .toggle-switch.on::after { transform: translateX(20px); }
+    .danger-zone { background: rgba(220,38,38,.04); border-color: rgba(220,38,38,.15); }
+    .danger-zone .section-heading { color: #b91c1c; }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       FORMS & INPUTS — from modal components
+       ══════════════════════════════════════════════════════════════════════ */
+    .lm-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .lm-label { font-size: .8125rem; font-weight: 600; color: var(--text-mid); letter-spacing: .01em; }
+    .lm-input {
+      width: 100%; height: 44px; padding: 0 14px;
+      border: 1px solid rgba(17,17,16,.18); border-radius: 10px;
+      background: rgba(255,255,255,.7);
+      font-family: 'Inter', sans-serif; font-size: .9375rem; color: var(--text);
+      outline: none; transition: border-color .15s, box-shadow .15s;
+    }
+    .lm-input::placeholder { color: var(--text-muted); }
+    .lm-input:focus { border-color: rgba(17,17,16,.4); box-shadow: 0 0 0 3px rgba(17,17,16,.06); }
+    .lm-field-error { font-size: .8rem; color: #c0392b; }
+    .error-message { font-size: .875rem; color: #c0392b; padding: 8px 12px; background: rgba(192,57,43,.07); border-radius: 8px; }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       MISC & UTILITIES
+       ══════════════════════════════════════════════════════════════════════ */
     .placeholder-block {
-      background: white; border-radius: 12px; border: 1.5px dashed rgba(17,17,16,.15);
-      padding: 48px; text-align: center; color: var(--text-muted); font-size: 0.875rem;
+      background: var(--bg-soft); border-radius: 14px; border: 1.5px dashed rgba(17,17,16,.12);
+      padding: 48px; text-align: center; color: var(--text-muted); font-size: .9rem; font-weight: 600;
       display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .map-placeholder {
+      display: grid; place-items: center;
+      background: var(--bg-soft); border-radius: 10px; border: 1px solid rgba(17,17,16,.09);
+      color: #7a7a75; font-weight: 700; height: 160px; font-size: 1.2rem;
     }
     .route-debug {
       position: fixed; bottom: 16px; right: 16px;
-      background: rgba(17,17,16,.82); color: rgba(255,255,255,.8);
-      font-family: monospace; font-size: 0.72rem; padding: 6px 12px;
-      border-radius: 8px; z-index: 9999; backdrop-filter: blur(4px);
+      background: rgba(17,17,16,.88); color: rgba(255,255,255,.85);
+      font-family: 'Roboto Mono', monospace; font-size: .72rem; padding: 7px 14px;
+      border-radius: 10px; z-index: 9999; backdrop-filter: blur(6px);
       pointer-events: none;
     }
-    .route-debug span { opacity: .5; margin-right: 4px; }
+    .route-debug span { opacity: .5; margin-right: 6px; }
+    .spacer-64 { padding-top: 64px; } /* offset for fixed nav */
 
-    /* component annotation label */
-    .cmp { font-family: monospace; font-size: .65rem; color: var(--sky); background: rgba(14,165,233,.07); padding: 1px 5px; border-radius: 4px; }
+    /* ══════════════════════════════════════════════════════════════════════
+       NEW COMPONENT STYLES — added for updated mock
+       ══════════════════════════════════════════════════════════════════════ */
 
-    input[type="text"] {
-      padding: 10px 14px; border: 1px solid rgba(17,17,16,.15); border-radius: 10px;
-      font-family: 'Inter', sans-serif; font-size: .9rem; outline: none; color: var(--text);
+    /* Dropdown wraps for navbar */
+    .dropdown-wrap { position: relative; }
+    .user-wrap { position: relative; }
+    .dropdown-trigger { display: flex; align-items: center; gap: 6px; }
+    .groups-dropdown, .user-dropdown {
+      display: none; position: absolute; top: calc(100% + 8px);
+      background: white; border-radius: 14px; border: 1px solid rgba(17,17,16,.09);
+      box-shadow: 0 10px 40px rgba(0,0,0,.13), 0 2px 6px rgba(0,0,0,.06);
+      z-index: 200; padding: 8px; animation: sn-dropdown-in .16s ease-out;
     }
-    input[type="text"]:focus { border-color: rgba(17,17,16,.4); box-shadow: 0 0 0 3px rgba(17,17,16,.06); }
+    .groups-dropdown { left: 0; min-width: 280px; }
+    .user-dropdown { right: 0; min-width: 220px; }
+    .groups-dropdown.open, .user-dropdown.open { display: block; }
+    .dd-section-title { font-family: 'Inter Tight', sans-serif; font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); padding: 8px 12px 6px; }
+    .dd-group-info { display: flex; flex-direction: column; flex: 1; }
+    .dd-avatar { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-family: 'Inter Tight', sans-serif; font-weight: 800; color: white; flex-shrink: 0; }
+    .dd-user-info { display: flex; flex-direction: column; }
+    .dd-email { font-size: .75rem; color: var(--text-muted); }
+    .pill-admin.sm { font-size: .6rem; padding: 2px 6px; }
+
+    /* Page card for group hub */
+    .page-card {
+      max-width: 1200px; margin: 0 auto 60px;
+      background: rgba(255,255,255,.95); backdrop-filter: blur(8px);
+      border: 1px solid rgba(17,17,16,.09); border-radius: 28px;
+      box-shadow: 0 16px 52px rgba(17,17,16,.07);
+      overflow: hidden;
+    }
+    .page-card.simple { border-radius: 20px; padding: 24px; margin-bottom: 40px; }
+    .tab-content { padding: 24px; }
+    .tab-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; font-size: .72rem; font-weight: 900; }
+    .tab-badge.violet { background: var(--t-violet); color: var(--violet); }
+    .tab-badge.sky { background: var(--t-sky); color: var(--sky); }
+    .tab-badge.green { background: var(--t-green); color: var(--green); }
+    .tab-badge.amber { background: var(--t-amber); color: var(--amber); }
+
+    /* Group hero (new layout) */
+    .hero-content { display: flex; justify-content: space-between; align-items: flex-start; gap: 32px; padding: 48px 24px 32px; max-width: 1200px; margin: 0 auto; }
+    .hero-left { flex: 1; }
+    .hero-right { flex-shrink: 0; }
+    .group-title { font-family: 'Inter Tight', sans-serif; font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 900; letter-spacing: -0.04em; line-height: 1.08; margin-bottom: 12px; }
+    .serif-accent { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; }
+    .group-subtitle { font-size: .95rem; color: var(--text-mid); }
+    .tags-card { background: rgba(255,255,255,.85); backdrop-filter: blur(10px); border: 1px solid rgba(17,17,16,.08); border-radius: 16px; padding: 16px 20px; min-width: 200px; }
+    .tag-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
+    .tag-row:not(:last-child) { border-bottom: 1px solid rgba(17,17,16,.05); }
+    .tag-label { font-size: .75rem; color: var(--text-muted); font-weight: 600; }
+    .tag-value { font-size: .82rem; font-weight: 700; }
+
+    /* Page header for simple pages */
+    .page-header { max-width: 1200px; margin: 0 auto; padding: 32px 24px 16px; }
+    .page-title { font-family: 'Inter Tight', sans-serif; font-size: 1.75rem; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 8px; }
+    .page-subtitle { font-size: .95rem; color: var(--text-mid); }
+    .breadcrumbs { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
+
+    /* Dashboard page */
+    .dashboard-page { padding: 8px; }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .section-header .section-title { font-family: 'Inter Tight', sans-serif; font-size: 1.25rem; font-weight: 900; margin: 0; }
+    .groups-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .group-card { background: white; border: 1px solid rgba(17,17,16,.09); border-radius: 18px; padding: 18px; cursor: pointer; transition: box-shadow .15s, transform .12s; }
+    .group-card:hover { box-shadow: 0 8px 28px rgba(17,17,16,.08); transform: translateY(-2px); }
+    .group-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .group-icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-size: 1.25rem; flex-shrink: 0; }
+    .group-info { flex: 1; }
+    .group-name { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: .95rem; }
+    .group-meta { font-size: .78rem; color: var(--text-muted); margin-top: 2px; }
+    .group-stats { display: flex; gap: 16px; font-size: .82rem; color: var(--text-muted); }
+    .group-card.add-card { border-style: dashed; display: flex; align-items: center; justify-content: center; gap: 12px; color: var(--text-muted); }
+    .add-icon { font-size: 1.5rem; }
+    .add-text { font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: .875rem; }
+
+    /* Overview tab components */
+    .next-meeting-banner { display: flex; align-items: center; gap: 16px; background: linear-gradient(120deg, rgba(14,165,233,.1) 0%, rgba(42,148,89,.1) 100%); border: 1px solid rgba(14,165,233,.18); border-radius: 20px; padding: 18px 22px; margin-bottom: 24px; flex-wrap: wrap; }
+    .nm-badge { font-size: .65rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--sky); background: rgba(14,165,233,.12); padding: 4px 10px; border-radius: 999px; }
+    .nm-content { flex: 1; display: flex; align-items: center; gap: 24px; }
+    .nm-main { display: flex; flex-direction: column; }
+    .nm-day { font-size: .8rem; font-weight: 700; color: var(--sky); }
+    .nm-title { font-family: 'Inter Tight', sans-serif; font-weight: 900; font-size: 1.1rem; }
+    .nm-time { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: 1.5rem; color: var(--text); }
+    .nm-join { flex-shrink: 0; }
+    .arrow-circle.sm { width: 18px; height: 18px; }
+    .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .content-card { background: white; border: 1px solid rgba(17,17,16,.08); border-radius: 18px; padding: 20px; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .card-header .card-title { font-family: 'Inter Tight', sans-serif; font-size: .95rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 8px; }
+    .about-text { font-size: .9rem; line-height: 1.65; color: var(--text-mid); margin-bottom: 14px; }
+    .tag-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border-radius: 999px; background: rgba(17,17,16,.05); font-size: .78rem; font-weight: 700; }
+    .membership-status { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; font-size: .82rem; font-weight: 700; }
+    .status-badge.admin { background: var(--t-violet); color: var(--violet); }
+    .joined-date { font-size: .82rem; color: var(--text-muted); }
+    .privacy-toggles { display: flex; flex-direction: column; gap: 12px; }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid rgba(17,17,16,.06); }
+    .toggle-info { display: flex; flex-direction: column; }
+    .toggle-label { font-size: .85rem; font-weight: 700; }
+    .toggle-desc { font-size: .75rem; color: var(--text-muted); }
+    .toggle-switch { width: 44px; height: 24px; border-radius: 999px; background: rgba(17,17,16,.12); position: relative; cursor: pointer; flex-shrink: 0; }
+    .toggle-switch.on { background: var(--green); }
+    .toggle-knob { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: white; box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: transform .15s; }
+    .toggle-switch.on .toggle-knob { transform: translateX(20px); }
+    .members-preview { margin-bottom: 20px; }
+    .members-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .avatar { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: 1rem; color: white; flex-shrink: 0; }
+    .avatar.large { width: 64px; height: 64px; border-radius: 50%; font-size: 1.5rem; }
+    .avatar.more { background: var(--bg-soft); color: var(--text-muted); font-size: .75rem; }
+    .count-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px; font-size: .75rem; font-weight: 900; }
+    .count-badge.violet { background: var(--t-violet); color: var(--violet); }
+    .admin-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .admin-card { display: flex; align-items: center; gap: 14px; padding: 16px; background: var(--bg-soft); border: 1px solid rgba(17,17,16,.06); border-radius: 14px; cursor: pointer; transition: box-shadow .15s; }
+    .admin-card:hover { box-shadow: 0 6px 20px rgba(17,17,16,.06); }
+    .admin-icon { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 1.2rem; flex-shrink: 0; }
+    .admin-info { flex: 1; }
+    .admin-title { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: .9rem; display: block; }
+    .admin-count { font-size: .78rem; color: var(--text-muted); }
+    .admin-badge { font-size: .65rem; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; }
+    .admin-badge.green { background: var(--t-green); color: var(--green); }
+    .admin-badge.amber { background: var(--t-amber); color: var(--amber); }
+
+    /* Members tab */
+    .tab-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .tab-header .tab-title { font-family: 'Inter Tight', sans-serif; font-size: 1.1rem; font-weight: 900; margin: 0; display: flex; align-items: center; gap: 10px; }
+    .members-list { display: flex; flex-direction: column; gap: 10px; }
+    .member-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: white; border: 1px solid rgba(17,17,16,.08); border-radius: 14px; }
+    .member-info { flex: 1; display: flex; flex-direction: column; }
+    .member-name { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: .9rem; }
+    .member-since { font-size: .78rem; color: var(--text-muted); }
+
+    /* Meetings tab */
+    .meetings-list { display: flex; flex-direction: column; gap: 12px; }
+    .meeting-card { display: flex; align-items: center; gap: 16px; padding: 16px 18px; background: white; border: 1px solid rgba(17,17,16,.08); border-radius: 14px; }
+    .meeting-day { font-family: 'Inter Tight', sans-serif; font-weight: 900; font-size: 1rem; min-width: 80px; }
+    .meeting-info { flex: 1; display: flex; flex-direction: column; }
+    .meeting-time { font-weight: 700; font-size: .9rem; }
+    .meeting-details { font-size: .8rem; color: var(--text-muted); }
+    .meeting-actions { display: flex; align-items: center; gap: 8px; }
+
+    /* Requests tab */
+    .info-banner { display: flex; align-items: center; gap: 10px; padding: 14px 18px; background: var(--t-amber); border: 1px solid rgba(217,119,6,.15); border-radius: 12px; margin-bottom: 20px; }
+    .info-icon { font-size: 1.1rem; }
+    .info-text { font-size: .85rem; color: var(--text-mid); }
+    .requests-list { display: flex; flex-direction: column; gap: 12px; }
+    .request-row { display: flex; align-items: center; gap: 14px; padding: 16px 18px; background: white; border: 1px solid rgba(17,17,16,.08); border-radius: 14px; }
+    .request-info { flex: 1; display: flex; flex-direction: column; }
+    .request-name { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: .9rem; }
+    .request-date { font-size: .78rem; color: var(--text-muted); }
+    .request-actions { display: flex; gap: 8px; }
+
+    /* Settings tab */
+    .settings-form { max-width: 560px; }
+    .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid rgba(17,17,16,.06); }
+    .settings-row:last-child { border-bottom: none; }
+    .settings-info { display: flex; flex-direction: column; }
+    .settings-label { font-size: .9rem; font-weight: 700; }
+    .settings-value { font-size: .85rem; color: var(--text-mid); margin-top: 2px; }
+    .settings-value.truncate { max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .settings-hint { font-size: .78rem; color: var(--text-muted); margin-top: 2px; }
+    .settings-divider { height: 1px; background: rgba(17,17,16,.08); margin: 12px 0; }
+    .settings-row.danger .settings-label { color: #b91c1c; }
+    .btn.danger { color: #b91c1c; border-color: rgba(185,28,28,.2); }
+
+    /* Meeting finder page */
+    .finder-layout { display: grid; grid-template-columns: 280px 1fr; gap: 24px; }
+    .finder-sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .search-box { background: white; border: 1px solid rgba(17,17,16,.08); border-radius: 14px; padding: 16px; }
+    .search-input { width: 100%; height: 44px; padding: 0 14px; border: 1px solid rgba(17,17,16,.12); border-radius: 10px; font-size: .9rem; }
+    .filter-section { background: white; border: 1px solid rgba(17,17,16,.08); border-radius: 14px; padding: 16px; }
+    .filter-title { font-family: 'Inter Tight', sans-serif; font-size: .75rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin-bottom: 12px; }
+    .day-chips { display: flex; gap: 6px; }
+    .day-chip { width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(17,17,16,.1); background: white; font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: .82rem; cursor: pointer; transition: all .15s; }
+    .day-chip:hover { border-color: var(--sky); }
+    .day-chip.active { background: var(--sky); color: white; border-color: var(--sky); }
+    .filter-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .filter-chip { padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(17,17,16,.1); background: white; font-size: .82rem; font-weight: 600; cursor: pointer; transition: all .15s; }
+    .filter-chip:hover { border-color: var(--sky); }
+    .filter-chip.active { background: var(--t-sky); border-color: rgba(14,165,233,.3); color: var(--sky); }
+    .finder-main { display: flex; flex-direction: column; gap: 20px; }
+    .map-placeholder { height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: var(--bg-soft); border: 1px solid rgba(17,17,16,.08); border-radius: 16px; color: var(--text-muted); font-size: 1.1rem; }
+    .results-header h3 { font-family: 'Inter Tight', sans-serif; font-size: 1rem; font-weight: 800; }
+    .results-list { display: flex; flex-direction: column; gap: 10px; }
+    .result-card { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; background: white; border: 1px solid rgba(17,17,16,.08); border-radius: 14px; cursor: pointer; transition: box-shadow .15s; }
+    .result-card:hover { box-shadow: 0 6px 20px rgba(17,17,16,.06); }
+    .result-info { display: flex; flex-direction: column; }
+    .result-name { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: .95rem; }
+    .result-time { font-size: .82rem; color: var(--text-muted); }
+    .result-meta { display: flex; align-items: center; gap: 12px; }
+    .result-type { padding: 4px 10px; border-radius: 999px; font-size: .72rem; font-weight: 800; text-transform: uppercase; }
+    .result-type.online { background: var(--t-sky); color: var(--sky); }
+    .result-type.in-person { background: var(--t-green); color: var(--green); }
+    .result-type.hybrid { background: var(--t-violet); color: var(--violet); }
+    .result-dist { font-size: .82rem; color: var(--text-muted); font-weight: 600; }
+
+    /* Profile page */
+    .profile-page { max-width: 600px; }
+    .profile-header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+    .profile-info { flex: 1; }
+    .profile-name { font-family: 'Inter Tight', sans-serif; font-size: 1.35rem; font-weight: 900; margin: 0; }
+    .profile-since { font-size: .85rem; color: var(--text-muted); }
+    .profile-section { margin-bottom: 28px; }
+    .profile-section .section-title { font-family: 'Inter Tight', sans-serif; font-size: .95rem; font-weight: 800; margin-bottom: 14px; }
+    .info-rows { display: flex; flex-direction: column; gap: 12px; }
+    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(17,17,16,.06); }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-size: .85rem; color: var(--text-muted); }
+    .info-value { font-size: .9rem; font-weight: 600; }
+    .info-value.muted { color: var(--text-muted); font-style: italic; }
+    .info-hint { font-size: .75rem; color: var(--text-muted); font-weight: 400; }
+    .groups-mini { display: flex; flex-direction: column; gap: 10px; }
+    .group-mini { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg-soft); border-radius: 12px; cursor: pointer; transition: background .15s; }
+    .group-mini:hover { background: rgba(17,17,16,.06); }
+    .group-mini .group-icon { width: 36px; height: 36px; border-radius: 10px; font-size: 1rem; }
+    .group-mini .group-name { flex: 1; font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: .9rem; }
+
+    /* Buttons */
+    .btn.primary { background: linear-gradient(135deg, #1a1a18 0%, #2d2d2a 100%); color: white; }
+    .btn.primary:hover { opacity: .9; }
+
+    @media (max-width: 860px) {
+      .overview-grid { grid-template-columns: 1fr; }
+      .admin-row { grid-template-columns: 1fr; }
+      .finder-layout { grid-template-columns: 1fr; }
+      .hero-content { flex-direction: column; padding: 32px 20px 24px; }
+      .tags-card { width: 100%; }
+      .nav-inner { padding: 0 16px; }
+      .hub-shell { padding: 0 12px 48px; }
+      .panel-inner { padding: 18px; }
+    }
   </style>
 </head>
 <body>
@@ -285,8 +920,10 @@
      <app-root>
      ════════════════════════════════════════════════════════════════════ -->
 
+<div class="spacer-64"></div>
+
 <!-- ════ <app-navbar> ══════════════════════════════════════════════════ -->
-<nav class="sn-nav" style="position:sticky;top:0;z-index:100;">
+<nav class="sn-nav">
   <div class="nav-inner">
 
     <a class="nav-brand" onclick="navigate('/')">
@@ -302,72 +939,6 @@
     <div class="nav-actions" id="nav-actions"><!-- renderNav() --></div>
 
   </div>
-
-  <!-- mega menu lives outside nav-inner so it can overlap content -->
-  <div style="position:relative;">
-    <div class="mega-menu" id="mega-menu">
-      <div class="mm-col">
-        <div class="mm-col-head"><span class="mm-dot" style="background:var(--violet)"></span>My Groups</div>
-        <button class="mm-item" onclick="navigate('/dashboard');closeMega()">
-          <div class="mm-icon" style="background:var(--t-violet)">🏘️</div>
-          <div><div class="mm-name">Dashboard <span class="pill-live">Live</span></div><div class="mm-desc">All your groups in one place</div></div>
-        </button>
-        <button class="mm-item" onclick="navigate('/groups/early-bird-zoom');closeMega()">
-          <div class="mm-icon" style="background:var(--t-sky)">🌅</div>
-          <div><div class="mm-name">Early Bird Zoom</div><div class="mm-desc">Online · 7:00 AM · Mon–Fri</div></div>
-        </button>
-        <button class="mm-item" onclick="closeMega()">
-          <div class="mm-icon" style="background:var(--t-green)">➕</div>
-          <div><div class="mm-name">Join or Create Group</div><div class="mm-desc">Start or find a home group</div></div>
-        </button>
-      </div>
-      <div class="mm-col">
-        <div class="mm-col-head"><span class="mm-dot" style="background:var(--sky)"></span>Connection</div>
-        <button class="mm-item" onclick="closeMega()">
-          <div class="mm-icon" style="background:var(--t-sky)">📋</div>
-          <div><div class="mm-name">Member Directory <span class="pill-cs">Soon</span></div><div class="mm-desc">Browse your group's members</div></div>
-        </button>
-        <button class="mm-item" onclick="closeMega()">
-          <div class="mm-icon" style="background:var(--t-green)">📞</div>
-          <div><div class="mm-name">Phone List <span class="pill-cs">Soon</span></div><div class="mm-desc">Reach out between meetings</div></div>
-        </button>
-        <button class="mm-item" onclick="closeMega()">
-          <div class="mm-icon" style="background:var(--t-amber)">📌</div>
-          <div><div class="mm-name">Bulletin Board <span class="pill-cs">Soon</span></div><div class="mm-desc">Group announcements</div></div>
-        </button>
-      </div>
-      <div class="mm-col">
-        <div class="mm-col-head"><span class="mm-dot" style="background:var(--amber)"></span>Resources</div>
-        <button class="mm-item" onclick="closeMega()">
-          <div class="mm-icon" style="background:var(--t-amber)">📖</div>
-          <div><div class="mm-name">Daily Readings <span class="pill-cs">Soon</span></div><div class="mm-desc">Meditation and literature</div></div>
-        </button>
-        <button class="mm-item" onclick="closeMega()">
-          <div class="mm-icon" style="background:var(--t-rose)">📁</div>
-          <div><div class="mm-name">Documents <span class="pill-cs">Soon</span></div><div class="mm-desc">Group files and archives</div></div>
-        </button>
-        <button class="mm-item" onclick="closeMega()">
-          <div class="mm-icon" style="background:var(--t-teal)">🔗</div>
-          <div><div class="mm-name">Literature Links <span class="pill-cs">Soon</span></div><div class="mm-desc">AA.org and trusted resources</div></div>
-        </button>
-      </div>
-      <div class="mm-col">
-        <div class="mm-col-head"><span class="mm-dot" style="background:var(--green)"></span>Service</div>
-        <button class="mm-item" onclick="closeMega()">
-          <div class="mm-icon" style="background:var(--t-green)">🏅</div>
-          <div><div class="mm-name">Service Roles <span class="pill-cs">Soon</span></div><div class="mm-desc">GSR, secretary, treasurer</div></div>
-        </button>
-        <button class="mm-item" onclick="closeMega()">
-          <div class="mm-icon" style="background:var(--t-indigo)">🪑</div>
-          <div><div class="mm-name">Chair Schedule <span class="pill-cs">Soon</span></div><div class="mm-desc">Who's chairing this week</div></div>
-        </button>
-        <button class="mm-item" onclick="closeMega()">
-          <div class="mm-icon" style="background:var(--t-coral)">🗳️</div>
-          <div><div class="mm-name">Group Conscience <span class="pill-cs">Soon</span></div><div class="mm-desc">Votes and group decisions</div></div>
-        </button>
-      </div>
-    </div>
-  </div>
 </nav>
 <!-- ════ </app-navbar> ═════════════════════════════════════════════════ -->
 
@@ -377,420 +948,728 @@
 <div class="route-debug"><span>route</span><span id="route-display">/</span></div>
 
 <script>
-// ── State ─────────────────────────────────────────────────────────────────
-let authState   = 'guest';   // 'guest' | 'member'
+// ══════════════════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════════════════
+let authState = 'guest';   // 'guest' | 'member'
 let currentRoute = '/';
-let megaOpen    = false;
+let groupsDropOpen = false;
 let userDropOpen = false;
 
-// ── Route manifest ────────────────────────────────────────────────────────
-// Each entry mirrors Angular route + component @Input() config
+// Group hub tabs configuration — matches Angular group-hub.component.ts
+const GROUP_TABS = [
+  { id: 'overview',  label: 'Overview',  icon: '🏠', badge: null, admin: false },
+  { id: 'members',   label: 'Members',   icon: '👥', badge: '24', badgeColor: 'violet', admin: false },
+  { id: 'meetings',  label: 'Meetings',  icon: '🗓️', badge: '5', badgeColor: 'sky', admin: false },
+  { id: 'requests',  label: 'Requests',  icon: '📥', badge: '2', badgeColor: 'green', admin: true },
+  { id: 'settings',  label: 'Settings',  icon: '⚙️', badge: null, badgeColor: 'amber', admin: true },
+];
+
+// ══════════════════════════════════════════════════════════════════════════
+// ROUTE MANIFEST — mirrors Angular routes + component configs
+// ══════════════════════════════════════════════════════════════════════════
 const ROUTES = {
   '/': {
     auth: 'any', layout: 'landing',
   },
   '/meetings': {
-    auth: 'any', layout: 'hero-page',
+    auth: 'any', layout: 'simple-page',
     eyebrow: 'Public',
-    title:    'Find a <span class="serif">Meeting</span>',
-    subtitle: 'Search public meetings from A.A. home groups near you.',
-    breadcrumbs: [{ label: 'Home', route: '/' }],
+    title: 'Find a Meeting',
   },
   '/dashboard': {
-    auth: 'member', layout: 'hero-page',
-    eyebrow: 'Community',
-    title:    'Welcome back, <span class="serif">Tess.</span>',
-    subtitle: 'Your groups, connections, and recovery resources — all in one place.',
-    breadcrumbs: [{ label: 'Home', route: '/' }],
+    auth: 'member', layout: 'simple-page',
+    eyebrow: 'My Groups',
+    title: 'Dashboard',
   },
   '/groups/early-bird-zoom': {
-    auth: 'member', layout: 'group-hub',
+    auth: 'member', layout: 'group-hub', activeTab: 'overview',
     eyebrow: 'Home Group',
-    title:    'Early Bird Zoom',
-    subtitle: 'Online · Mon–Fri · 7:00 AM',
-    breadcrumbs: [{ label: 'Home', route: '/' }, { label: 'Community', route: '/dashboard' }],
-    tabs: [
-      { label: 'Overview',   icon: '🌅', route: '/groups/early-bird-zoom' },
-      { label: 'Meetings',   icon: '🗓️', route: '/groups/early-bird-zoom/meetings' },
-      { label: 'Members',    icon: '👥', route: '/groups/early-bird-zoom/members' },
-      { label: 'Documents',  icon: '📁', route: '/groups/early-bird-zoom/documents' },
-      { label: 'Phone List', icon: '📞', route: '/groups/early-bird-zoom/phone-list' },
-      { label: 'Settings',   icon: '⚙️', route: '/groups/early-bird-zoom/settings' },
-    ],
-  },
-  '/groups/early-bird-zoom/meetings': {
-    auth: 'member', layout: 'group-hub',
-    eyebrow: 'Home Group', title: 'Early Bird Zoom', subtitle: 'Online · Mon–Fri · 7:00 AM',
-    breadcrumbs: [{ label: 'Home', route: '/' }, { label: 'Community', route: '/dashboard' }],
-    tabs: [
-      { label: 'Overview',   icon: '🌅', route: '/groups/early-bird-zoom' },
-      { label: 'Meetings',   icon: '🗓️', route: '/groups/early-bird-zoom/meetings' },
-      { label: 'Members',    icon: '👥', route: '/groups/early-bird-zoom/members' },
-      { label: 'Documents',  icon: '📁', route: '/groups/early-bird-zoom/documents' },
-      { label: 'Phone List', icon: '📞', route: '/groups/early-bird-zoom/phone-list' },
-      { label: 'Settings',   icon: '⚙️', route: '/groups/early-bird-zoom/settings' },
-    ],
+    title: 'Early Bird Zoom',
+    titleAccent: 'Online',
+    subtitle: 'Mon–Fri · 7:00 AM · Speaker / Open',
   },
   '/groups/early-bird-zoom/members': {
-    auth: 'member', layout: 'group-hub',
-    eyebrow: 'Home Group', title: 'Early Bird Zoom', subtitle: 'Online · Mon–Fri · 7:00 AM',
-    breadcrumbs: [{ label: 'Home', route: '/' }, { label: 'Community', route: '/dashboard' }],
-    tabs: [
-      { label: 'Overview',   icon: '🌅', route: '/groups/early-bird-zoom' },
-      { label: 'Meetings',   icon: '🗓️', route: '/groups/early-bird-zoom/meetings' },
-      { label: 'Members',    icon: '👥', route: '/groups/early-bird-zoom/members' },
-      { label: 'Documents',  icon: '📁', route: '/groups/early-bird-zoom/documents' },
-      { label: 'Phone List', icon: '📞', route: '/groups/early-bird-zoom/phone-list' },
-      { label: 'Settings',   icon: '⚙️', route: '/groups/early-bird-zoom/settings' },
-    ],
+    auth: 'member', layout: 'group-hub', activeTab: 'members',
+    eyebrow: 'Home Group', title: 'Early Bird Zoom', titleAccent: 'Online',
+    subtitle: 'Mon–Fri · 7:00 AM · Speaker / Open',
   },
-  '/groups/early-bird-zoom/documents': {
-    auth: 'member', layout: 'group-hub',
-    eyebrow: 'Home Group', title: 'Early Bird Zoom', subtitle: 'Online · Mon–Fri · 7:00 AM',
-    breadcrumbs: [{ label: 'Home', route: '/' }, { label: 'Community', route: '/dashboard' }],
-    tabs: [
-      { label: 'Overview',   icon: '🌅', route: '/groups/early-bird-zoom' },
-      { label: 'Meetings',   icon: '🗓️', route: '/groups/early-bird-zoom/meetings' },
-      { label: 'Members',    icon: '👥', route: '/groups/early-bird-zoom/members' },
-      { label: 'Documents',  icon: '📁', route: '/groups/early-bird-zoom/documents' },
-      { label: 'Phone List', icon: '📞', route: '/groups/early-bird-zoom/phone-list' },
-      { label: 'Settings',   icon: '⚙️', route: '/groups/early-bird-zoom/settings' },
-    ],
+  '/groups/early-bird-zoom/meetings': {
+    auth: 'member', layout: 'group-hub', activeTab: 'meetings',
+    eyebrow: 'Home Group', title: 'Early Bird Zoom', titleAccent: 'Online',
+    subtitle: 'Mon–Fri · 7:00 AM · Speaker / Open',
   },
-  '/groups/early-bird-zoom/phone-list': {
-    auth: 'member', layout: 'group-hub',
-    eyebrow: 'Home Group', title: 'Early Bird Zoom', subtitle: 'Online · Mon–Fri · 7:00 AM',
-    breadcrumbs: [{ label: 'Home', route: '/' }, { label: 'Community', route: '/dashboard' }],
-    tabs: [
-      { label: 'Overview',   icon: '🌅', route: '/groups/early-bird-zoom' },
-      { label: 'Meetings',   icon: '🗓️', route: '/groups/early-bird-zoom/meetings' },
-      { label: 'Members',    icon: '👥', route: '/groups/early-bird-zoom/members' },
-      { label: 'Documents',  icon: '📁', route: '/groups/early-bird-zoom/documents' },
-      { label: 'Phone List', icon: '📞', route: '/groups/early-bird-zoom/phone-list' },
-      { label: 'Settings',   icon: '⚙️', route: '/groups/early-bird-zoom/settings' },
-    ],
+  '/groups/early-bird-zoom/requests': {
+    auth: 'member', layout: 'group-hub', activeTab: 'requests',
+    eyebrow: 'Home Group', title: 'Early Bird Zoom', titleAccent: 'Online',
+    subtitle: 'Mon–Fri · 7:00 AM · Speaker / Open',
   },
   '/groups/early-bird-zoom/settings': {
-    auth: 'member', layout: 'group-hub',
-    eyebrow: 'Home Group', title: 'Early Bird Zoom', subtitle: 'Online · Mon–Fri · 7:00 AM',
-    breadcrumbs: [{ label: 'Home', route: '/' }, { label: 'Community', route: '/dashboard' }],
-    tabs: [
-      { label: 'Overview',   icon: '🌅', route: '/groups/early-bird-zoom' },
-      { label: 'Meetings',   icon: '🗓️', route: '/groups/early-bird-zoom/meetings' },
-      { label: 'Members',    icon: '👥', route: '/groups/early-bird-zoom/members' },
-      { label: 'Documents',  icon: '📁', route: '/groups/early-bird-zoom/documents' },
-      { label: 'Phone List', icon: '📞', route: '/groups/early-bird-zoom/phone-list' },
-      { label: 'Settings',   icon: '⚙️', route: '/groups/early-bird-zoom/settings' },
-    ],
+    auth: 'member', layout: 'group-hub', activeTab: 'settings',
+    eyebrow: 'Home Group', title: 'Early Bird Zoom', titleAccent: 'Online',
+    subtitle: 'Mon–Fri · 7:00 AM · Speaker / Open',
   },
   '/profile': {
-    auth: 'member', layout: 'hero-page',
+    auth: 'member', layout: 'simple-page',
     eyebrow: 'Account',
-    title:    'My Profile',
-    subtitle: 'Your personal information and preferences.',
-    breadcrumbs: [{ label: 'Home', route: '/' }, { label: 'Community', route: '/dashboard' }],
+    title: 'My Profile',
   },
 };
 
-// ── Page content ──────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════
+// PAGE CONTENT — HTML for each route
+// ══════════════════════════════════════════════════════════════════════════
 const PAGES = {
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // LANDING PAGE — matches Angular landing.component.html
+  // ───────────────────────────────────────────────────────────────────────────
   '/': () => `
-    <div class="landing-hero">
-      <div class="landing-hero-inner">
-        <div class="hero-eyebrow" style="margin-bottom:14px;">A.A. home groups, online</div>
-        <h1 class="landing-title">A place to stay <span class="serif">close</span><br>to your program.</h1>
-        <p class="landing-lead">Sober Network gives home groups a simple, private space for meetings, members, and connection between gatherings. Built around the 12 Traditions.</p>
-        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-          <button class="btn dark" onclick="navigate('/meetings')">Find a Meeting</button>
-          <button class="btn ghost" onclick="signIn()">Sign In</button>
-          <button class="btn outline">How It Works</button>
-        </div>
-        <div class="trust-strip">
-          <span class="trust-item">🔒 No public member rosters</span>
-          <span class="trust-item">📖 Built on the 12 Traditions</span>
-          <span class="trust-item">🌐 Free for home groups</span>
-        </div>
-      </div>
+<!-- ════ HERO SECTION ════ -->
+<section class="hero-section">
+  <div class="hero-wrap">
+    <div class="hero-eyebrow">A.A. home groups, online</div>
+    <h1 class="hero-title">
+      A place to stay<br>
+      <span class="serif-accent">close</span> to your program.
+    </h1>
+    <p class="hero-lead">Sober Network gives home groups a simple, private space for meetings, members, and connection between gatherings. Built around the 12 Traditions.</p>
+    <div class="hero-ctas">
+      <button class="btn primary" onclick="navigate('/meetings')">Find a Meeting<span class="arrow-circle"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M1 11L11 1M11 1H4.5M11 1V7.5"/></svg></span></button>
+      <button class="btn ghost" onclick="scrollToSection('how-it-works')">How It Works</button>
     </div>
-    <div class="stats-row">
-      <div class="stat-item"><div class="stat-num">142</div><div class="stat-label">Active Members</div></div>
-      <div class="stat-item"><div class="stat-num">18</div><div class="stat-label">Home Groups</div></div>
-      <div class="stat-item"><div class="stat-num">74</div><div class="stat-label">Weekly Meetings</div></div>
+    <div class="trust-strip">
+      <span class="trust-item"><span class="trust-icon">🔒</span> No public member rosters</span>
+      <span class="trust-item"><span class="trust-icon">📖</span> Built on the 12 Traditions</span>
+      <span class="trust-item"><span class="trust-icon">🌐</span> Free for home groups</span>
     </div>
-    <div class="page-shell">
-      <div class="section-block">
-        <div class="section-head">Features</div>
-        <div class="card-grid">
-          <div class="card"><div class="card-icon" style="background:var(--t-violet)">🏘️</div><div class="card-title">Home Groups</div><div class="card-desc">Each group gets its own private hub — meetings, members, documents, and more.</div></div>
-          <div class="card"><div class="card-icon" style="background:var(--t-sky)">🗓️</div><div class="card-title">Meeting Schedule</div><div class="card-desc">Online, in-person, or hybrid. Publish your meetings to the public finder.</div></div>
-          <div class="card"><div class="card-icon" style="background:var(--t-green)">📞</div><div class="card-title">Phone List <span class="pill-cs">Soon</span></div><div class="card-desc">Members share their number with their group — opt-in, never public.</div></div>
-          <div class="card"><div class="card-icon" style="background:var(--t-amber)">📖</div><div class="card-title">Daily Readings <span class="pill-cs">Soon</span></div><div class="card-desc">A daily reflection to start the day grounded in recovery.</div></div>
-          <div class="card"><div class="card-icon" style="background:var(--t-rose)">📌</div><div class="card-title">Bulletin Board <span class="pill-cs">Soon</span></div><div class="card-desc">Post announcements and important news to your group.</div></div>
-          <div class="card"><div class="card-icon" style="background:var(--t-teal)">🏅</div><div class="card-title">Service Roles <span class="pill-cs">Soon</span></div><div class="card-desc">Track GSR, secretary, treasurer, and other trusted servants.</div></div>
-        </div>
-      </div>
-    </div>`,
+  </div>
+</section>
 
+<!-- ════ STATS ROW ════ -->
+<div class="stats-row">
+  <div class="stat-item"><div class="stat-num">142</div><div class="stat-label">Active Members</div></div>
+  <div class="stat-item"><div class="stat-num">18</div><div class="stat-label">Home Groups</div></div>
+  <div class="stat-item"><div class="stat-num">74</div><div class="stat-label">Weekly Meetings</div></div>
+</div>
+
+<!-- ════ ABOUT SECTION ════ -->
+<section class="section" id="about">
+  <div class="section-wrap">
+    <div class="section-eyebrow">About</div>
+    <h2 class="section-title">Meetings, members,<br><span class="serif-accent">connection.</span></h2>
+    <p class="section-lead">Every A.A. home group needs a place to stay organized between meetings. Sober Network provides that — without advertising, gamification, or public member rosters.</p>
+    <div class="card-grid three-col">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--t-violet)">🏘️</div>
+        <h3 class="feature-title">Home Groups</h3>
+        <p class="feature-desc">Each group gets its own private hub — meetings, members, documents, and more.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--t-sky)">🗓️</div>
+        <h3 class="feature-title">Meeting Schedule</h3>
+        <p class="feature-desc">Online, in-person, or hybrid. Publish your meetings to the public finder.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--t-green)">📞</div>
+        <h3 class="feature-title">Phone List</h3>
+        <p class="feature-desc">Members share their number with their group — opt-in, never public.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ FEATURES SECTION ════ -->
+<section class="section bg-soft" id="features">
+  <div class="section-wrap">
+    <div class="section-eyebrow">Features</div>
+    <h2 class="section-title">Everything a<br><span class="serif-accent">home group</span> needs.</h2>
+    <p class="section-lead">Features designed with the 12 Traditions in mind — autonomy, anonymity, and simplicity at every layer.</p>
+    <div class="card-grid three-col">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--t-amber)">📖</div>
+        <h3 class="feature-title">Daily Readings <span class="pill-cs">Soon</span></h3>
+        <p class="feature-desc">A daily reflection to start the day grounded in recovery.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--t-rose)">📌</div>
+        <h3 class="feature-title">Bulletin Board <span class="pill-cs">Soon</span></h3>
+        <p class="feature-desc">Post announcements and important news to your group.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--t-teal)">🏅</div>
+        <h3 class="feature-title">Service Roles <span class="pill-cs">Soon</span></h3>
+        <p class="feature-desc">Track GSR, secretary, treasurer, and other trusted servants.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--t-indigo)">🪑</div>
+        <h3 class="feature-title">Chair Schedule <span class="pill-cs">Soon</span></h3>
+        <p class="feature-desc">See who's chairing upcoming meetings at a glance.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--t-coral)">🗳️</div>
+        <h3 class="feature-title">Group Conscience <span class="pill-cs">Soon</span></h3>
+        <p class="feature-desc">Conduct business with T2-compliant voting and minutes.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--t-violet)">📄</div>
+        <h3 class="feature-title">Documents <span class="pill-cs">Soon</span></h3>
+        <p class="feature-desc">Store group files, guidelines, and shared resources.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ HOW IT WORKS SECTION ════ -->
+<section class="section" id="how-it-works">
+  <div class="section-wrap">
+    <div class="section-eyebrow">How It Works</div>
+    <h2 class="section-title">Start simple,<br><span class="serif-accent">grow together.</span></h2>
+    <p class="section-lead">Getting your home group started takes minutes. No credit card required, ever.</p>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <h3 class="step-title">Create a group</h3>
+        <p class="step-desc">Name your group, set a meeting schedule, and invite your members.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <h3 class="step-title">Invite members</h3>
+        <p class="step-desc">Share a private link. Members join with their first name only — no public roster.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <h3 class="step-title">Stay connected</h3>
+        <p class="step-desc">Phone list, announcements, daily readings, and more — between meetings.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ 12 TRADITIONS SECTION ════ -->
+<section class="section bg-soft" id="traditions">
+  <div class="section-wrap">
+    <div class="section-eyebrow">Principles</div>
+    <h2 class="section-title">Built around the<br><span class="serif-accent">12 Traditions.</span></h2>
+    <p class="section-lead">The 12 Traditions of A.A. guide everything we build. Anonymity (T11/T12) and group autonomy (T4) are non-negotiable architectural constraints.</p>
+    <div class="traditions-grid">
+      <div class="tradition-card">
+        <span class="tradition-num">T11</span>
+        <span class="tradition-text">No public member directories. First names only by default.</span>
+      </div>
+      <div class="tradition-card">
+        <span class="tradition-num">T4</span>
+        <span class="tradition-text">Each group is autonomous. Data never leaks between groups.</span>
+      </div>
+      <div class="tradition-card">
+        <span class="tradition-num">T5</span>
+        <span class="tradition-text">No advertising, sponsorships, or engagement mechanics.</span>
+      </div>
+      <div class="tradition-card">
+        <span class="tradition-num">T7</span>
+        <span class="tradition-text">Fully self-supporting. Free for home groups, forever.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ FINAL CTA SECTION ════ -->
+<section class="section section-dark" id="final-cta">
+  <div class="section-wrap" style="text-align:center;">
+    <div class="section-eyebrow" style="color:var(--text-muted);">Ready?</div>
+    <h2 class="section-title" style="color:white;">Find a meeting<br><span class="serif-accent" style="color:rgba(255,255,255,.7);">or start your group.</span></h2>
+    <p class="section-lead" style="color:rgba(255,255,255,.7);">Join thousands of home groups using Sober Network.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:32px;">
+      <button class="btn primary" onclick="navigate('/meetings')">Find a Meeting<span class="arrow-circle"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M1 11L11 1M11 1H4.5M11 1V7.5"/></svg></span></button>
+      <button class="btn ghost" onclick="signIn()">Create Account</button>
+    </div>
+  </div>
+</section>
+`,
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // DASHBOARD — My Groups page
+  // ───────────────────────────────────────────────────────────────────────────
   '/dashboard': () => `
-    <div class="page-shell">
-      <div class="section-block">
-        <div class="section-head">My Groups</div>
-        <div class="card-grid">
-          <div class="card clickable" onclick="navigate('/groups/early-bird-zoom')">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-              <div class="card-icon" style="background:var(--t-sky);margin:0;">🌅</div>
-              <div style="flex:1">
-                <div class="card-title" style="margin:0;">Early Bird Zoom</div>
-                <div style="font-size:.75rem;color:var(--text-muted);">Online · 7:00 AM · Mon–Fri</div>
-              </div>
-              <span class="pill-admin">Admin</span>
-            </div>
-            <div class="card-desc">24 members · 5 meetings this week</div>
-          </div>
-          <div class="card clickable" onclick="navigate('/groups/early-bird-zoom')">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-              <div class="card-icon" style="background:var(--t-rose);margin:0;">🏡</div>
-              <div>
-                <div class="card-title" style="margin:0;">Downtown Thursday Night</div>
-                <div style="font-size:.75rem;color:var(--text-muted);">In-person · Thu 7:30 PM</div>
-              </div>
-            </div>
-            <div class="card-desc">31 members · 1 meeting this week</div>
-          </div>
-          <div class="card" style="border-style:dashed;display:flex;align-items:center;justify-content:center;gap:10px;color:var(--text-muted);cursor:pointer;">
-            <span style="font-size:1.25rem;">➕</span>
-            <span style="font-family:'Inter Tight',sans-serif;font-weight:700;font-size:.875rem;">Join or Create a Group</span>
-          </div>
+<div class="dashboard-page">
+  <div class="section-header">
+    <h2 class="section-title">My Groups</h2>
+    <button class="btn primary sm" onclick="alert('Create Group modal')">+ Create Group</button>
+  </div>
+  <div class="groups-grid">
+    <!-- Group card: Early Bird Zoom (admin) -->
+    <div class="group-card" onclick="navigate('/groups/early-bird-zoom')">
+      <div class="group-header">
+        <div class="group-icon" style="background:var(--t-sky)">🌅</div>
+        <div class="group-info">
+          <div class="group-name">Early Bird Zoom</div>
+          <div class="group-meta">Online · Mon–Fri 7:00 AM</div>
+        </div>
+        <span class="pill-admin">Admin</span>
+      </div>
+      <div class="group-stats">
+        <span>👥 24 members</span>
+        <span>🗓️ 5 meetings</span>
+      </div>
+    </div>
+    <!-- Group card: Downtown Thursday Night -->
+    <div class="group-card" onclick="navigate('/groups/early-bird-zoom')">
+      <div class="group-header">
+        <div class="group-icon" style="background:var(--t-rose)">🏡</div>
+        <div class="group-info">
+          <div class="group-name">Downtown Thursday Night</div>
+          <div class="group-meta">In-Person · Thu 7:30 PM</div>
         </div>
       </div>
-      <div class="section-block">
-        <div class="section-head">Quick Access</div>
-        <div class="card-grid">
-          <div class="card"><div class="card-icon" style="background:var(--t-amber)">📖</div><div class="card-title">Daily Reading <span class="pill-cs">Soon</span></div><div class="card-desc">Today's meditation and reflection.</div></div>
-          <div class="card"><div class="card-icon" style="background:var(--t-green)">📞</div><div class="card-title">Phone List <span class="pill-cs">Soon</span></div><div class="card-desc">Reach a member between meetings.</div></div>
-          <div class="card"><div class="card-icon" style="background:var(--t-indigo)">🪑</div><div class="card-title">Chair Schedule <span class="pill-cs">Soon</span></div><div class="card-desc">See who's chairing this week.</div></div>
-        </div>
+      <div class="group-stats">
+        <span>👥 31 members</span>
+        <span>🗓️ 1 meeting</span>
       </div>
-    </div>`,
+    </div>
+    <!-- Add/Join card -->
+    <div class="group-card add-card" onclick="alert('Join or Create Group modal')">
+      <span class="add-icon">➕</span>
+      <span class="add-text">Join or Create a Group</span>
+    </div>
+  </div>
+</div>
+`,
 
+  // ───────────────────────────────────────────────────────────────────────────
+  // GROUP HUB: OVERVIEW TAB — matches overview-tab.component.html
+  // ───────────────────────────────────────────────────────────────────────────
   '/groups/early-bird-zoom': () => `
-    <div class="page-shell">
-      <div class="section-block">
-        <div class="section-head">About this group</div>
-        <div class="card" style="max-width:680px;">
-          <p style="font-size:.9rem;line-height:1.6;color:var(--text-mid);">Early morning Zoom meeting for people in recovery. Open speaker format. We welcome newcomers. This is a closed A.A. meeting — attendance is for those who have a desire to stop drinking.</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
-            <span class="meta-badge">🌐 Online</span>
-            <span class="meta-badge">🔒 Closed</span>
-            <span class="meta-badge">🗓️ Mon–Fri</span>
-            <span class="meta-badge">⏰ 7:00 AM</span>
-            <span class="meta-badge">👥 24 members</span>
-          </div>
-        </div>
-      </div>
-      <div class="section-block">
-        <div class="section-head">This week's meetings</div>
-        <div class="card-grid">
-          ${['Mon Jun 9','Tue Jun 10','Wed Jun 11','Thu Jun 12','Fri Jun 13'].map(d => `
-            <div class="card">
-              <div class="card-title">${d}</div>
-              <div class="card-desc" style="margin-bottom:10px;">7:00 AM · Zoom · Speaker format</div>
-              <span style="font-size:.75rem;font-family:'Inter Tight',sans-serif;font-weight:700;color:var(--sky);">Join Zoom →</span>
-            </div>`).join('')}
-        </div>
-      </div>
-    </div>`,
+<!-- Next Meeting Banner -->
+<div class="next-meeting-banner">
+  <div class="nm-badge">NEXT MEETING</div>
+  <div class="nm-content">
+    <div class="nm-main">
+      <span class="nm-day">Today</span>
+      <span class="nm-title">Daily Morning Meeting</span>
+    </div>
+    <div class="nm-time">7:00 AM</div>
+  </div>
+  <button class="btn primary sm nm-join">Join Zoom<span class="arrow-circle sm"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M1 11L11 1M11 1H4.5M11 1V7.5"/></svg></span></button>
+</div>
 
-  '/groups/early-bird-zoom/meetings': () => `
-    <div class="page-shell">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <div class="section-head" style="margin:0;">All Meetings</div>
-        <button class="btn dark sm">+ Add Meeting</button>
-      </div>
-      <div class="card-grid">
-        ${['Monday','Tuesday','Wednesday','Thursday','Friday'].map(d => `
-          <div class="card">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-              <div class="card-title">${d}</div>
-              <span class="pill-live">Live</span>
-            </div>
-            <div class="card-desc" style="margin-bottom:6px;">7:00 AM · 60 min · Speaker</div>
-            <div style="font-size:.73rem;color:var(--text-muted);">Zoom · members only link</div>
-          </div>`).join('')}
-        <div class="card" style="border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text-muted);cursor:pointer;min-height:100px;">
-          <span style="font-size:1.5rem;">➕</span>
-          <span style="font-family:'Inter Tight',sans-serif;font-weight:700;font-size:.875rem;">Add Meeting</span>
-        </div>
-      </div>
-    </div>`,
+<div class="overview-grid">
+  <!-- ABOUT CARD -->
+  <div class="content-card about-card">
+    <div class="card-header">
+      <h3 class="card-title">About</h3>
+      <!-- Admin only --> <button class="btn ghost sm">Edit</button>
+    </div>
+    <p class="about-text">Early morning Zoom meeting for people in recovery. Open speaker format. We welcome newcomers. This is a closed A.A. meeting — attendance is for those who have a desire to stop drinking.</p>
+    <div class="tag-list">
+      <span class="tag">🌐 Online</span>
+      <span class="tag">🔒 Closed Meeting</span>
+      <span class="tag">🎤 Speaker Format</span>
+    </div>
+  </div>
 
+  <!-- MEMBERSHIP CARD -->
+  <div class="content-card membership-card">
+    <div class="card-header">
+      <h3 class="card-title">Your Membership</h3>
+    </div>
+    <div class="membership-status">
+      <span class="status-badge admin">👑 Group Admin</span>
+      <span class="joined-date">Joined Jan 2024</span>
+    </div>
+    <div class="privacy-toggles">
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <span class="toggle-label">📞 Phone List</span>
+          <span class="toggle-desc">Share your phone with group</span>
+        </div>
+        <div class="toggle-switch on"><div class="toggle-knob"></div></div>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <span class="toggle-label">🎂 Sobriety Date</span>
+          <span class="toggle-desc">Show your sobriety date</span>
+        </div>
+        <div class="toggle-switch"><div class="toggle-knob"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MEMBERS PREVIEW -->
+<div class="content-card members-preview">
+  <div class="card-header">
+    <h3 class="card-title">Members <span class="count-badge violet">24</span></h3>
+    <button class="btn ghost sm" onclick="navigate('/groups/early-bird-zoom/members')">View All →</button>
+  </div>
+  <div class="members-row">
+    ${['Tess','Marcus','Jordan','Robin','Alex','Sam','Dana','Chris'].map((n,i) => {
+      const colors = ['#e879f9','#38bdf8','#fbbf24','#4ade80','#f472b6','#2dd4bf','#818cf8','#fb923c'];
+      return `<div class="avatar" style="background:${colors[i % 8]}">${n[0]}</div>`;
+    }).join('')}
+    <div class="avatar more">+16</div>
+  </div>
+</div>
+
+<!-- Admin row --> 
+<div class="admin-row">
+  <div class="admin-card" onclick="navigate('/groups/early-bird-zoom/requests')">
+    <div class="admin-icon" style="background:var(--t-green)">📥</div>
+    <div class="admin-info">
+      <span class="admin-title">Join Requests</span>
+      <span class="admin-count">2 pending</span>
+    </div>
+    <span class="admin-badge green">Admin</span>
+  </div>
+  <div class="admin-card" onclick="navigate('/groups/early-bird-zoom/settings')">
+    <div class="admin-icon" style="background:var(--t-amber)">⚙️</div>
+    <div class="admin-info">
+      <span class="admin-title">Group Settings</span>
+      <span class="admin-count">Public listing on</span>
+    </div>
+    <span class="admin-badge amber">Admin</span>
+  </div>
+</div>
+`,
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // GROUP HUB: MEMBERS TAB — matches members-tab.component.html
+  // ───────────────────────────────────────────────────────────────────────────
   '/groups/early-bird-zoom/members': () => `
-    <div class="page-shell">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <div class="section-head" style="margin:0;">Members (24)</div>
-        <button class="btn outline sm">Invite Member</button>
+<div class="tab-header">
+  <h3 class="tab-title">Members <span class="count-badge violet">24</span></h3>
+  <!-- Admin only --> <button class="btn ghost sm" onclick="alert('Invite modal')">+ Invite</button>
+</div>
+<div class="members-list">
+  ${[
+    { name: 'Tess C.', role: 'admin', since: 'Jan 2024', color: '#e879f9' },
+    { name: 'Marcus W.', role: 'member', since: 'Feb 2024', color: '#38bdf8' },
+    { name: 'Jordan A.', role: 'member', since: 'Feb 2024', color: '#fbbf24' },
+    { name: 'Robin S.', role: 'member', since: 'Mar 2024', color: '#4ade80' },
+    { name: 'Alex M.', role: 'member', since: 'Mar 2024', color: '#f472b6' },
+    { name: 'Sam P.', role: 'member', since: 'Apr 2024', color: '#2dd4bf' },
+    { name: 'Dana L.', role: 'member', since: 'May 2024', color: '#818cf8' },
+    { name: 'Chris B.', role: 'member', since: 'Jun 2024', color: '#fb923c' },
+  ].map(m => `
+    <div class="member-row">
+      <div class="avatar" style="background:${m.color}">${m.name[0]}</div>
+      <div class="member-info">
+        <span class="member-name">${m.name}</span>
+        <span class="member-since">Joined ${m.since}</span>
       </div>
-      <div class="card-grid">
-        ${['Tess C.','Marcus W.','Jordan A.','Robin S.','Alex M.','Sam P.','Dana L.','Chris B.'].map((n,i) => `
-          <div class="card clickable" onclick="navigate('/profile')">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <div style="width:36px;height:36px;border-radius:50%;background:var(--cta);color:white;display:flex;align-items:center;justify-content:center;font-family:'Inter Tight',sans-serif;font-size:.85rem;font-weight:800;flex-shrink:0;">${n[0]}</div>
-              <div>
-                <div class="card-title" style="margin:0;font-size:.875rem;">${n} ${i===0?'<span class="pill-admin">Admin</span>':''}</div>
-                <div style="font-size:.73rem;color:var(--text-muted);">Member since 2024</div>
-              </div>
-            </div>
-          </div>`).join('')}
-      </div>
-    </div>`,
+      ${m.role === 'admin' ? '<span class="pill-admin">Admin</span>' : ''}
+    </div>
+  `).join('')}
+</div>
+`,
 
-  '/groups/early-bird-zoom/documents': () => `
-    <div class="page-shell">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <div class="section-head" style="margin:0;">Documents</div>
-        <button class="btn dark sm">+ Upload</button>
+  // ───────────────────────────────────────────────────────────────────────────
+  // GROUP HUB: MEETINGS TAB — matches meetings-tab.component.html
+  // ───────────────────────────────────────────────────────────────────────────
+  '/groups/early-bird-zoom/meetings': () => `
+<div class="tab-header">
+  <h3 class="tab-title">Meetings <span class="count-badge sky">5</span></h3>
+  <!-- Admin only --> <button class="btn primary sm" onclick="alert('Add Meeting modal')">+ Add Meeting</button>
+</div>
+<div class="meetings-list">
+  ${['Monday','Tuesday','Wednesday','Thursday','Friday'].map((day, i) => `
+    <div class="meeting-card">
+      <div class="meeting-day">${day}</div>
+      <div class="meeting-info">
+        <span class="meeting-time">7:00 AM</span>
+        <span class="meeting-details">60 min · Speaker · Zoom</span>
       </div>
-      <div class="card-grid">
-        ${['Group Guidelines.pdf','Zoom Link & Password.txt','7th Tradition Info.pdf','Contact Sheet.pdf'].map(f => `
-          <div class="card clickable">
-            <div class="card-icon" style="background:var(--t-amber)">📄</div>
-            <div class="card-title">${f}</div>
-            <div class="card-desc">Shared by group admin · Jun 2024</div>
-          </div>`).join('')}
+      <div class="meeting-actions">
+        ${i === 0 ? '<span class="pill-live">Live Now</span>' : ''}
+        <button class="btn ghost sm">Join</button>
+        <!-- Admin only --> <button class="btn ghost sm">Edit</button>
       </div>
-    </div>`,
+    </div>
+  `).join('')}
+</div>
+`,
 
-  '/groups/early-bird-zoom/phone-list': () => `
-    <div class="page-shell">
-      <div class="card" style="max-width:560px;margin-bottom:16px;background:var(--t-amber);border-color:rgba(217,119,6,.2);">
-        <div style="font-family:'Inter Tight',sans-serif;font-weight:700;font-size:.875rem;margin-bottom:4px;">🔒 Members-only</div>
-        <div style="font-size:.8rem;color:var(--text-mid);">This list is only visible to group members. Members opt in to share their number.</div>
-      </div>
-      <div class="card-grid">
-        ${['Tess C.','Marcus W.','Jordan A.','Robin S.'].map(n => `
-          <div class="card">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <div style="width:36px;height:36px;border-radius:50%;background:var(--cta);color:white;display:flex;align-items:center;justify-content:center;font-family:'Inter Tight',sans-serif;font-size:.85rem;font-weight:800;flex-shrink:0;">${n[0]}</div>
-              <div>
-                <div class="card-title" style="margin:0;font-size:.875rem;">${n}</div>
-                <div style="font-size:.73rem;color:var(--text-muted);">(555) 000-0000</div>
-              </div>
-            </div>
-          </div>`).join('')}
-      </div>
-    </div>`,
+  // ───────────────────────────────────────────────────────────────────────────
+  // GROUP HUB: REQUESTS TAB — Admin Only
+  // ───────────────────────────────────────────────────────────────────────────
+  '/groups/early-bird-zoom/requests': () => `
+<div class="tab-header">
+  <h3 class="tab-title">Join Requests <span class="count-badge green">2</span></h3>
+</div>
+<div class="info-banner">
+  <span class="info-icon">🔒</span>
+  <span class="info-text">Review requests from people who want to join your group.</span>
+</div>
+<div class="requests-list">
+  <div class="request-row">
+    <div class="avatar" style="background:#a855f7">J</div>
+    <div class="request-info">
+      <span class="request-name">Jamie R.</span>
+      <span class="request-date">Requested Jun 10, 2024</span>
+    </div>
+    <div class="request-actions">
+      <button class="btn primary sm">Approve</button>
+      <button class="btn ghost sm">Decline</button>
+    </div>
+  </div>
+  <div class="request-row">
+    <div class="avatar" style="background:#06b6d4">P</div>
+    <div class="request-info">
+      <span class="request-name">Pat M.</span>
+      <span class="request-date">Requested Jun 9, 2024</span>
+    </div>
+    <div class="request-actions">
+      <button class="btn primary sm">Approve</button>
+      <button class="btn ghost sm">Decline</button>
+    </div>
+  </div>
+</div>
+`,
 
+  // ───────────────────────────────────────────────────────────────────────────
+  // GROUP HUB: SETTINGS TAB — Admin Only
+  // ───────────────────────────────────────────────────────────────────────────
   '/groups/early-bird-zoom/settings': () => `
-    <div class="page-shell">
-      <div class="card" style="max-width:540px;margin-bottom:24px;">
-        <div class="section-head">Group settings</div>
-        <div style="display:flex;flex-direction:column;gap:14px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);">
-            <div><div style="font-size:.875rem;font-weight:600;">Group name</div><div style="font-size:.78rem;color:var(--text-muted);">Early Bird Zoom</div></div>
-            <button class="btn outline sm">Edit</button>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);">
-            <div><div style="font-size:.875rem;font-weight:600;">Public listing</div><div style="font-size:.78rem;color:var(--text-muted);">Visible in the meeting finder</div></div>
-            <div style="width:36px;height:20px;background:var(--green);border-radius:100px;position:relative;cursor:pointer;"><div style="position:absolute;right:2px;top:2px;width:16px;height:16px;border-radius:50%;background:white;"></div></div>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;">
-            <div><div style="font-size:.875rem;font-weight:600;">Transfer admin</div><div style="font-size:.78rem;color:var(--text-muted);">Pass the trusted servant role</div></div>
-            <button class="btn outline sm">Transfer</button>
-          </div>
-        </div>
-      </div>
-    </div>`,
+<div class="tab-header">
+  <h3 class="tab-title">Group Settings</h3>
+</div>
+<div class="settings-form">
+  <div class="settings-row">
+    <div class="settings-info">
+      <span class="settings-label">Group Name</span>
+      <span class="settings-value">Early Bird Zoom</span>
+    </div>
+    <button class="btn ghost sm">Edit</button>
+  </div>
+  <div class="settings-row">
+    <div class="settings-info">
+      <span class="settings-label">Description</span>
+      <span class="settings-value truncate">Early morning Zoom meeting for people in recovery…</span>
+    </div>
+    <button class="btn ghost sm">Edit</button>
+  </div>
+  <div class="settings-row">
+    <div class="settings-info">
+      <span class="settings-label">Public Listing</span>
+      <span class="settings-hint">Show in meeting finder</span>
+    </div>
+    <div class="toggle-switch on"><div class="toggle-knob"></div></div>
+  </div>
+  <div class="settings-row">
+    <div class="settings-info">
+      <span class="settings-label">Require Approval</span>
+      <span class="settings-hint">Review join requests</span>
+    </div>
+    <div class="toggle-switch on"><div class="toggle-knob"></div></div>
+  </div>
+  <div class="settings-divider"></div>
+  <div class="settings-row danger">
+    <div class="settings-info">
+      <span class="settings-label">Transfer Admin</span>
+      <span class="settings-hint">Pass trusted servant role to another member</span>
+    </div>
+    <button class="btn ghost sm">Transfer</button>
+  </div>
+  <div class="settings-row danger">
+    <div class="settings-info">
+      <span class="settings-label">Delete Group</span>
+      <span class="settings-hint">Permanently remove this group</span>
+    </div>
+    <button class="btn ghost sm danger">Delete</button>
+  </div>
+</div>
+`,
 
+  // ───────────────────────────────────────────────────────────────────────────
+  // MEETING FINDER — Public page
+  // ───────────────────────────────────────────────────────────────────────────
   '/meetings': () => `
-    <div class="page-shell">
-      <div class="card" style="max-width:560px;margin-bottom:24px;">
-        <div class="section-head">Search</div>
-        <div style="display:flex;gap:8px;margin-bottom:12px;">
-          <input type="text" placeholder="City, state or ZIP code" style="flex:1;">
-          <button class="btn dark sm">Search</button>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          ${['Online','In-Person','Morning','Evening','Open','Closed','Spanish'].map(f =>
-            `<span style="padding:5px 12px;border-radius:100px;border:1px solid rgba(17,17,16,.15);font-size:.75rem;font-family:'Inter Tight',sans-serif;font-weight:600;cursor:pointer;">${f}</span>`).join('')}
-        </div>
+<div class="finder-layout">
+  <div class="finder-sidebar">
+    <div class="search-box">
+      <input type="text" class="search-input" placeholder="Enter city, zip, or address…">
+      <button class="btn primary sm" style="width:100%;margin-top:10px;">Search</button>
+    </div>
+    <div class="filter-section">
+      <div class="filter-title">Day</div>
+      <div class="day-chips">
+        ${['S','M','T','W','T','F','S'].map((d,i) => 
+          `<button class="day-chip ${i===1?'active':''}">${d}</button>`).join('')}
       </div>
-      <div class="placeholder-block" style="height:200px;margin-bottom:24px;">🗺️ &nbsp; Leaflet map renders here</div>
-      <div class="section-head">Nearby meetings</div>
-      <div class="card-grid">
-        ${[
-          {name:'Early Bird Zoom',    time:'Mon–Fri · 7:00 AM',    type:'Online'},
-          {name:'Downtown Thu Night', time:'Thu · 7:30 PM',        type:'In-Person'},
-          {name:'Serenity Morning',   time:'Mon/Wed/Fri · 8:00 AM',type:'Hybrid'},
-        ].map(m => `
-          <div class="card">
-            <div class="card-title">${m.name}</div>
-            <div class="card-desc" style="margin-bottom:10px;">${m.time}</div>
-            <span class="meta-badge">${m.type}</span>
-          </div>`).join('')}
+    </div>
+    <div class="filter-section">
+      <div class="filter-title">Time</div>
+      <div class="filter-chips">
+        <button class="filter-chip active">🌅 Morning</button>
+        <button class="filter-chip">☀️ Afternoon</button>
+        <button class="filter-chip">🌙 Evening</button>
+        <button class="filter-chip">🌃 Night</button>
       </div>
-    </div>`,
-
-  '/profile': () => `
-    <div class="page-shell">
-      <div class="card" style="max-width:500px;margin-bottom:24px;">
-        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
-          <div style="width:56px;height:56px;border-radius:50%;background:var(--cta);color:white;display:flex;align-items:center;justify-content:center;font-family:'Inter Tight',sans-serif;font-size:1.25rem;font-weight:800;">T</div>
-          <div style="flex:1;">
-            <div style="font-family:'Inter Tight',sans-serif;font-weight:800;font-size:1.1rem;">Tess C.</div>
-            <div style="font-size:.8rem;color:var(--text-muted);">Member since Jan 2024</div>
+    </div>
+    <div class="filter-section">
+      <div class="filter-title">Format</div>
+      <div class="filter-chips">
+        <button class="filter-chip">🎤 Speaker</button>
+        <button class="filter-chip">💬 Discussion</button>
+        <button class="filter-chip">📖 Big Book</button>
+        <button class="filter-chip">📚 Step Study</button>
+      </div>
+    </div>
+  </div>
+  <div class="finder-main">
+    <div class="map-placeholder">
+      <span>🗺️</span>
+      <span>Leaflet map renders here</span>
+    </div>
+    <div class="results-header">
+      <h3>3 meetings found</h3>
+    </div>
+    <div class="results-list">
+      ${[
+        { name: 'Early Bird Zoom', time: 'Mon–Fri · 7:00 AM', type: 'Online', dist: '' },
+        { name: 'Downtown Thursday Night', time: 'Thu · 7:30 PM', type: 'In-Person', dist: '0.4 mi' },
+        { name: 'Serenity Morning', time: 'Mon/Wed/Fri · 8:00 AM', type: 'Hybrid', dist: '1.2 mi' },
+      ].map(m => `
+        <div class="result-card">
+          <div class="result-info">
+            <span class="result-name">${m.name}</span>
+            <span class="result-time">${m.time}</span>
           </div>
-          <button class="btn outline sm">Edit</button>
+          <div class="result-meta">
+            <span class="result-type ${m.type.toLowerCase()}">${m.type}</span>
+            ${m.dist ? `<span class="result-dist">${m.dist}</span>` : ''}
+          </div>
         </div>
-        <div class="section-head">Display name</div>
-        <div style="font-size:.875rem;color:var(--text-mid);margin-bottom:16px;">Tess C. &nbsp;<span style="font-size:.75rem;color:var(--text-muted);">(first name + last initial — default)</span></div>
-        <div class="section-head">Sobriety date</div>
-        <div style="font-size:.875rem;color:var(--text-muted);font-style:italic;margin-bottom:16px;">Not set — opt-in</div>
-        <div class="section-head">Phone number</div>
-        <div style="font-size:.875rem;color:var(--text-muted);font-style:italic;">Not shared — opt-in</div>
+      `).join('')}
+    </div>
+  </div>
+</div>
+`,
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // PROFILE PAGE
+  // ───────────────────────────────────────────────────────────────────────────
+  '/profile': () => `
+<div class="profile-page">
+  <div class="profile-header">
+    <div class="avatar large" style="background:#e879f9">T</div>
+    <div class="profile-info">
+      <h2 class="profile-name">Tess C.</h2>
+      <span class="profile-since">Member since Jan 2024</span>
+    </div>
+    <button class="btn ghost sm" onclick="alert('Edit Profile modal')">Edit Profile</button>
+  </div>
+
+  <div class="profile-section">
+    <h3 class="section-title">Personal Info</h3>
+    <div class="info-rows">
+      <div class="info-row">
+        <span class="info-label">Display Name</span>
+        <span class="info-value">Tess C. <span class="info-hint">(First + last initial)</span></span>
       </div>
-    </div>`,
+      <div class="info-row">
+        <span class="info-label">Email</span>
+        <span class="info-value">tess.c@example.com</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Phone</span>
+        <span class="info-value muted">Not shared <span class="info-hint">(opt-in)</span></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Sobriety Date</span>
+        <span class="info-value muted">Not set <span class="info-hint">(opt-in)</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="profile-section">
+    <h3 class="section-title">My Groups</h3>
+    <div class="groups-mini">
+      <div class="group-mini" onclick="navigate('/groups/early-bird-zoom')">
+        <div class="group-icon" style="background:var(--t-sky)">🌅</div>
+        <span class="group-name">Early Bird Zoom</span>
+        <span class="pill-admin">Admin</span>
+      </div>
+      <div class="group-mini" onclick="navigate('/groups/early-bird-zoom')">
+        <div class="group-icon" style="background:var(--t-rose)">🏡</div>
+        <span class="group-name">Downtown Thursday Night</span>
+      </div>
+    </div>
+  </div>
+</div>
+`,
 };
 
 // ── renderNav ──────────────────────────────────────────────────────────────
+// Matches navbar.component.html dropdown pattern (NOT mat-menu)
 function renderNav() {
   const center  = document.getElementById('nav-center');
   const actions = document.getElementById('nav-actions');
   const isGroupRoute = currentRoute.startsWith('/groups') || currentRoute === '/dashboard' || currentRoute === '/profile';
 
   if (authState === 'guest') {
+    // Guest: Landing page section pills
     center.innerHTML = `
       <div class="nav-pill">
-        <a class="nlink ${currentRoute==='/'?'active':''}" onclick="navigate('/')">About</a>
+        <a class="nlink ${currentRoute==='/'?'active':''}" onclick="scrollToSection('about')">About</a>
+        <a class="nlink" onclick="scrollToSection('features')">Features</a>
+        <a class="nlink" onclick="scrollToSection('traditions')">12 Traditions</a>
         <a class="nlink ${currentRoute==='/meetings'?'active':''}" onclick="navigate('/meetings')">Find a Meeting</a>
-        <a class="nlink" href="#">Features</a>
-        <a class="nlink" href="#">12 Traditions</a>
       </div>`;
     actions.innerHTML = `
-      <a class="nlink" onclick="signIn()" style="border:1.5px solid rgba(17,17,16,.12);padding:7px 14px;">Sign In</a>
+      <button class="btn ghost sm" onclick="signIn()">Sign In</button>
       <button class="nav-cta" onclick="signIn()">Create Account
         <span class="arrow-circle"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M1 11L11 1M11 1H4.5M11 1V7.5"/></svg></span>
       </button>`;
   } else {
+    // Member: Find a Meeting, My Groups dropdown, user pill
     center.innerHTML = `
       <div class="nav-pill">
         <a class="nlink ${currentRoute==='/meetings'?'active':''}" onclick="navigate('/meetings')">Find a Meeting</a>
-        <button class="nlink ${isGroupRoute?'active':''}" id="community-btn" onclick="toggleMega(event)"
-          style="${isGroupRoute?'background:var(--cta);color:white;':''}">
-          Community
-          <svg class="caret-svg" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3.5L5 6.5L8 3.5"/></svg>
-        </button>
-        <a class="nlink" href="#">Readings <span class="pill-cs" style="font-size:.58rem;">Soon</span></a>
+        <div class="dropdown-wrap">
+          <button class="nlink dropdown-trigger ${isGroupRoute?'active':''}" onclick="toggleGroupsDrop(event)">
+            My Groups
+            <svg class="caret-svg" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3.5L5 6.5L8 3.5"/></svg>
+          </button>
+          <div class="groups-dropdown" id="groups-dropdown">
+            <div class="dd-section-title">My Groups</div>
+            <a class="dd-group-item" onclick="navigate('/groups/early-bird-zoom');closeGroupsDrop()">
+              <div class="dd-group-icon" style="background:var(--t-sky)">🌅</div>
+              <div class="dd-group-info">
+                <span class="dd-group-name">Early Bird Zoom</span>
+                <span class="dd-group-meta">Online · 7:00 AM</span>
+              </div>
+              <span class="pill-admin sm">Admin</span>
+            </a>
+            <a class="dd-group-item" onclick="navigate('/groups/early-bird-zoom');closeGroupsDrop()">
+              <div class="dd-group-icon" style="background:var(--t-rose)">🏡</div>
+              <div class="dd-group-info">
+                <span class="dd-group-name">Downtown Thu Night</span>
+                <span class="dd-group-meta">In-Person · 7:30 PM</span>
+              </div>
+            </a>
+            <div class="dd-divider"></div>
+            <a class="dd-item" onclick="navigate('/dashboard');closeGroupsDrop()"><span class="dd-icon">📋</span> All My Groups</a>
+            <a class="dd-item" onclick="alert('Create Group');closeGroupsDrop()"><span class="dd-icon">➕</span> Create Group</a>
+          </div>
+        </div>
       </div>`;
     actions.innerHTML = `
       <div class="user-wrap">
         <button class="user-pill" onclick="toggleUserDrop(event)">
-          Tess C. <span class="user-initial">T</span>
+          <span class="user-name">Tess C.</span>
+          <span class="user-initial">T</span>
         </button>
         <div class="user-dropdown" id="user-dropdown">
-          <div class="dd-header"><span class="dd-name">Tess C.</span><span class="dd-role">Member</span></div>
+          <div class="dd-header">
+            <div class="dd-avatar" style="background:#e879f9">T</div>
+            <div class="dd-user-info">
+              <span class="dd-name">Tess C.</span>
+              <span class="dd-email">tess.c@example.com</span>
+            </div>
+          </div>
           <div class="dd-divider"></div>
           <a class="dd-item" onclick="navigate('/profile');closeUserDrop()"><span class="dd-icon">👤</span> My Profile</a>
-          <a class="dd-item" href="#"><span class="dd-icon">⚙️</span> Account Settings</a>
+          <a class="dd-item" onclick="navigate('/dashboard');closeUserDrop()"><span class="dd-icon">🏠</span> Dashboard</a>
           <div class="dd-divider"></div>
           <a class="dd-item warn" onclick="signOut()"><span class="dd-icon">↩</span> Sign Out</a>
         </div>
@@ -799,42 +1678,79 @@ function renderNav() {
 }
 
 // ── renderHero ─────────────────────────────────────────────────────────────
-// Mirrors <app-hero [config]="heroConfig"> with <app-breadcrumbs> as ng-content
+// Renders different hero layouts based on route type:
+// - Landing page: no hero (sections have their own headers)
+// - Simple pages: basic page header (dashboard, meetings finder, profile)
+// - Group hub: full group hero with serif accent title and 5-tab rail
 function renderHero(config) {
-  const crumbs = config.breadcrumbs.map(b =>
-    `<a class="bc-item" onclick="navigate('${b.route}')">${b.label}</a><span class="bc-sep">›</span>`
-  ).join('') + `<span class="bc-item current">${config.title.replace(/<[^>]*>/g,'')}</span>`;
-
-  const tabsHtml = config.tabs ? `
-    <div class="tab-rail">
-      ${config.tabs.map(t => {
-        const active = currentRoute === t.route;
-        return `<button class="tab-btn ${active?'active':''}" onclick="navigate('${t.route}')">${t.icon} ${t.label}</button>`;
-      }).join('')}
-    </div>` : '';
-
-  const metaBadges = config.tabs ? `
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:0;">
-      <span class="meta-badge">🌐 Online</span>
-      <span class="meta-badge">👥 24 members</span>
-      <span class="meta-badge" style="color:var(--green);">✅ Public listing</span>
-    </div>` : '';
-
-  return `
-    <!-- ════ <app-hero> ════════════════════════════════════════════════ -->
-    <div class="app-hero">
-      <div class="hero-inner">
-        <!-- ════ <app-breadcrumbs> — projected via ng-content ════════ -->
-        <div class="app-breadcrumbs">${crumbs}</div>
-        <!-- ════════════════════════════════════════════════════════════ -->
-        ${config.eyebrow ? `<div class="hero-eyebrow">${config.eyebrow}</div>` : ''}
-        <h1 class="hero-title">${config.title}</h1>
-        <p class="hero-subtitle">${config.subtitle}</p>
-        ${metaBadges}
-        ${tabsHtml}
+  // Landing page has no hero
+  if (currentRoute === '/') return '';
+  
+  // Check if this is a group hub route
+  const isGroupHub = currentRoute.startsWith('/groups/');
+  
+  if (isGroupHub) {
+    // Group Hub Hero with serif accent and tab rail
+    const GROUP_TABS = [
+      { key: 'overview', label: 'Overview', icon: '📋', route: '/groups/early-bird-zoom' },
+      { key: 'members', label: 'Members', icon: '👥', badge: '24', badgeColor: 'violet', route: '/groups/early-bird-zoom/members' },
+      { key: 'meetings', label: 'Meetings', icon: '🗓️', badge: '5', badgeColor: 'sky', route: '/groups/early-bird-zoom/meetings' },
+      { key: 'requests', label: 'Requests', icon: '📥', badge: 'Admin', badgeColor: 'green', admin: true, route: '/groups/early-bird-zoom/requests' },
+      { key: 'settings', label: 'Settings', icon: '⚙️', badge: 'Admin', badgeColor: 'amber', admin: true, route: '/groups/early-bird-zoom/settings' },
+    ];
+    
+    const tabsHtml = GROUP_TABS.map(t => {
+      const active = currentRoute === t.route;
+      const badgeHtml = t.badge ? `<span class="tab-badge ${t.badgeColor}">${t.badge}</span>` : '';
+      const adminClass = t.admin ? 'admin-tab' : '';
+      return `<button class="tab-btn ${active?'active':''} ${adminClass}" onclick="navigate('${t.route}')">${t.label} ${badgeHtml}</button>`;
+    }).join('');
+    
+    return `
+    <!-- ════ GROUP HERO (group-hero.component pattern) ════════════════════ -->
+    <div class="group-hero">
+      <div class="hero-gradient"></div>
+      <div class="hero-content">
+        <div class="hero-left">
+          <h1 class="group-title">
+            Early Bird<br>
+            <span class="serif-accent">Zoom Meeting</span>
+          </h1>
+          <p class="group-subtitle">Online · Mon–Fri 7:00 AM EST</p>
+        </div>
+        <div class="hero-right">
+          <div class="tags-card">
+            <div class="tag-row"><span class="tag-label">Format</span><span class="tag-value">🎤 Speaker</span></div>
+            <div class="tag-row"><span class="tag-label">Type</span><span class="tag-value">🌐 Online</span></div>
+            <div class="tag-row"><span class="tag-label">Access</span><span class="tag-value">🔒 Closed</span></div>
+            <div class="tag-row"><span class="tag-label">Members</span><span class="tag-value">👥 24</span></div>
+          </div>
+        </div>
       </div>
     </div>
-    <!-- ════ </app-hero> ═══════════════════════════════════════════════ -->`;
+    <!-- ════ TAB RAIL (inside group-hub page card) ════════════════════════ -->
+    <div class="page-card">
+      <div class="tab-rail">${tabsHtml}</div>
+      <div class="tab-content">
+    `;
+  }
+  
+  // Simple page header for dashboard, meetings, profile
+  const breadcrumbs = config.breadcrumbs || [];
+  const crumbsHtml = breadcrumbs.length ? `
+    <div class="breadcrumbs">
+      ${breadcrumbs.map(b => `<a class="bc-item" onclick="navigate('${b.route}')">${b.label}</a><span class="bc-sep">›</span>`).join('')}
+      <span class="bc-item current">${config.title.replace(/<[^>]*>/g,'')}</span>
+    </div>` : '';
+  
+  return `
+    <div class="page-header">
+      ${crumbsHtml}
+      <h1 class="page-title">${config.title}</h1>
+      ${config.subtitle ? `<p class="page-subtitle">${config.subtitle}</p>` : ''}
+    </div>
+    <div class="page-card simple">
+  `;
 }
 
 // ── navigate ───────────────────────────────────────────────────────────────
@@ -848,19 +1764,24 @@ function navigate(route) {
   }
 
   currentRoute = route;
-  closeMega();
+  closeGroupsDrop();
   closeUserDrop();
   renderNav();
 
   document.getElementById('route-display').textContent = route;
 
   const main = document.getElementById('app-main');
-  const content = PAGES[route] ? PAGES[route]() : `<div class="page-shell"><div class="placeholder-block">This page is coming soon.</div></div>`;
+  const content = PAGES[route] ? PAGES[route]() : `<div class="placeholder-block">This page is coming soon.</div>`;
 
   if (config.layout === 'landing') {
+    // Landing page: no hero, raw sections
     main.innerHTML = content;
+  } else if (currentRoute.startsWith('/groups/')) {
+    // Group hub: hero + page-card with tab rail and content
+    main.innerHTML = renderHero(config) + content + `</div></div><!-- close tab-content + page-card -->`;
   } else {
-    main.innerHTML = renderHero(config) + content;
+    // Simple pages: header + page-card
+    main.innerHTML = renderHero(config) + content + `</div><!-- close page-card -->`;
   }
 
   window.scrollTo(0, 0);
@@ -870,16 +1791,28 @@ function navigate(route) {
 function signIn()  { authState = 'member'; navigate('/dashboard'); }
 function signOut() { authState = 'guest';  navigate('/'); }
 
-// ── Mega menu ─────────────────────────────────────────────────────────────
-function toggleMega(e) {
-  e.stopPropagation();
-  megaOpen = !megaOpen;
-  document.getElementById('mega-menu').classList.toggle('open', megaOpen);
+// ── Scroll to section (landing page) ──────────────────────────────────────
+function scrollToSection(sectionId) {
+  if (currentRoute !== '/') navigate('/');
+  setTimeout(() => {
+    const el = document.getElementById(sectionId);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  }, 100);
 }
-function closeMega() {
-  megaOpen = false;
-  const m = document.getElementById('mega-menu');
-  if (m) m.classList.remove('open');
+
+// ── Groups dropdown ───────────────────────────────────────────────────────
+function toggleGroupsDrop(e) {
+  e.stopPropagation();
+  groupsDropOpen = !groupsDropOpen;
+  const d = document.getElementById('groups-dropdown');
+  if (d) d.classList.toggle('open', groupsDropOpen);
+  // Close user dropdown if open
+  if (groupsDropOpen) closeUserDrop();
+}
+function closeGroupsDrop() {
+  groupsDropOpen = false;
+  const d = document.getElementById('groups-dropdown');
+  if (d) d.classList.remove('open');
 }
 
 // ── User dropdown ─────────────────────────────────────────────────────────
@@ -888,6 +1821,8 @@ function toggleUserDrop(e) {
   userDropOpen = !userDropOpen;
   const d = document.getElementById('user-dropdown');
   if (d) d.classList.toggle('open', userDropOpen);
+  // Close groups dropdown if open
+  if (userDropOpen) closeGroupsDrop();
 }
 function closeUserDrop() {
   userDropOpen = false;
@@ -895,7 +1830,8 @@ function closeUserDrop() {
   if (d) d.classList.remove('open');
 }
 
-document.addEventListener('click', () => { closeMega(); closeUserDrop(); });
+// Close all dropdowns when clicking outside
+document.addEventListener('click', () => { closeGroupsDrop(); closeUserDrop(); });
 
 // Boot
 navigate('/');

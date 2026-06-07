@@ -33,16 +33,19 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
                 m.DeletedAt == null, ct);
         if (!isMember) return (null, "You are not a member of this group.");
 
-        var baseQuery = db.Meetings
+        // Get total count from fresh query
+        var totalCount = await db.Meetings
+            .AsNoTracking()
+            .Where(m => m.GroupId == group.Id && m.DeletedAt == null && m.IsActive)
+            .CountAsync(ct);
+
+        // Get paginated data from separate fresh query
+        var meetings = await db.Meetings
             .AsNoTracking()
             .Where(m => m.GroupId == group.Id && m.DeletedAt == null && m.IsActive)
             .OrderBy(m => m.IsRecurring ? 0 : 1)
             .ThenBy(m => m.DaysOfWeek == null || m.DaysOfWeek.Length == 0 ? int.MaxValue : m.DaysOfWeek[0])
-            .ThenBy(m => m.Time);
-
-        var totalCount = await baseQuery.CountAsync(ct);
-
-        var meetings = await baseQuery
+            .ThenBy(m => m.Time)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(ct);
@@ -76,16 +79,19 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
                 m.DeletedAt == null, ct);
         if (!isAdmin) return (null, "You do not have permission to view admin meetings.");
 
-        var baseQuery = db.Meetings
+        // Get total count from fresh query
+        var totalCount = await db.Meetings
+            .AsNoTracking()
+            .Where(m => m.GroupId == group.Id && m.DeletedAt == null)
+            .CountAsync(ct);
+
+        // Get paginated data from separate fresh query
+        var meetings = await db.Meetings
             .AsNoTracking()
             .Where(m => m.GroupId == group.Id && m.DeletedAt == null)
             .OrderBy(m => m.IsRecurring ? 0 : 1)
             .ThenBy(m => m.DaysOfWeek == null || m.DaysOfWeek.Length == 0 ? int.MaxValue : m.DaysOfWeek[0])
-            .ThenBy(m => m.Time);
-
-        var totalCount = await baseQuery.CountAsync(ct);
-
-        var meetings = await baseQuery
+            .ThenBy(m => m.Time)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(ct);

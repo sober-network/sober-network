@@ -95,7 +95,8 @@ public class GroupService(
 
     public async Task<(PagedResponse<GroupResponse>? Groups, string? Error)> GetUserGroupsAsync(Guid userId, int page = 1, int pageSize = 25, CancellationToken ct = default)
     {
-        var baseQuery = db.GroupMemberships
+        // Build filter separately so we can reuse it without consuming the IQueryable
+        var filterQuery = db.GroupMemberships
             .AsNoTracking()
             .Include(m => m.Group)
                 .ThenInclude(g => g!.Meetings)
@@ -106,9 +107,20 @@ public class GroupService(
                 m.Group != null &&
                 m.Group.DeletedAt == null);
 
-        var totalCount = await baseQuery.CountAsync(ct);
+        // Get total count from fresh query (can't reuse after CountAsync)
+        var totalCount = await filterQuery.CountAsync(ct);
 
-        var memberships = await baseQuery
+        // Get paginated data from separate fresh query
+        var memberships = await db.GroupMemberships
+            .AsNoTracking()
+            .Include(m => m.Group)
+                .ThenInclude(g => g!.Meetings)
+            .Where(m =>
+                m.UserId == userId &&
+                (m.Status == MemberStatus.Active || m.Status == MemberStatus.PendingApproval) &&
+                m.DeletedAt == null &&
+                m.Group != null &&
+                m.Group.DeletedAt == null)
             .OrderBy(m => m.Group!.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
@@ -138,14 +150,17 @@ public class GroupService(
 
     public async Task<(PagedResponse<GroupSummaryResponse>? Groups, string? Error)> GetAllGroupsAsync(int page = 1, int pageSize = 25, CancellationToken ct = default)
     {
-        var baseQuery = db.Groups
+        // Get total count from fresh query (can't reuse after CountAsync)
+        var totalCount = await db.Groups
+            .AsNoTracking()
+            .Where(g => g.DeletedAt == null)
+            .CountAsync(ct);
+
+        // Get paginated data from separate fresh query
+        var groups = await db.Groups
             .AsNoTracking()
             .Include(g => g.Meetings)
-            .Where(g => g.DeletedAt == null);
-
-        var totalCount = await baseQuery.CountAsync(ct);
-
-        var groups = await baseQuery
+            .Where(g => g.DeletedAt == null)
             .OrderBy(g => g.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)

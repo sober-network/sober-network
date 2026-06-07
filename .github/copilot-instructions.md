@@ -473,6 +473,42 @@ Commands and Queries live in `/src/SoberNetwork.Core/Handlers/{Feature}/`:
 - All validation via **FluentValidation** at the API boundary (not in handlers)
 - Mapping: Handlers map domain models to DTOs before returning via `Result<T>`
 
+### Validation Auto-Response Pattern
+
+**All request DTOs are automatically validated.** FluentValidation auto-discovery and ASP.NET auto-validation middleware handle it:
+
+1. **Create DTO:** `{Action}{Entity}Request` in `SoberNetwork.Core/DTOs/{Feature}/`
+2. **Create Validator:** `{Action}{Entity}RequestValidator : AbstractValidator<{DTO}>` in `SoberNetwork.Core/Validators/{Feature}/`
+3. **Define rules:** In validator constructor, use `RuleFor(x => x.Property).NotEmpty()...`
+4. **Controller:** Just accept the DTO — validation runs automatically before your method is called
+5. **Invalid requests:** Return **400 Bad Request** with validation errors (automatic, no code needed)
+
+**Example:**
+```csharp
+// DTO
+public record LoginRequest(string Email, string Password);
+
+// Validator (auto-discovered by Program.cs)
+public class LoginRequestValidator : AbstractValidator<LoginRequest>
+{
+    public LoginRequestValidator()
+    {
+        RuleFor(x => x.Email).NotEmpty().EmailAddress();
+        RuleFor(x => x.Password).NotEmpty();
+    }
+}
+
+// Controller (validation happens BEFORE this method is called)
+[HttpPost("login")]
+public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
+{
+    // If we're here, request is GUARANTEED valid
+    // No if (!ModelState.IsValid) checks needed
+}
+```
+
+See `docs/validation-auto-response.md` for detailed guide, testing examples, and troubleshooting.
+
 ### Multi-Tenancy (Group Isolation)
 
 Every query for member-scoped data **must** filter by `group_id`:

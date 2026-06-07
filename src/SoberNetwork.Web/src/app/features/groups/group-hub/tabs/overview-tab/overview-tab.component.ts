@@ -25,6 +25,7 @@ import { AuthService } from '@app/core/services/auth.service';
 import { GroupService } from '@app/core/services/group.service';
 import { MemberService } from '@app/core/services/member.service';
 import { ConfirmDialogComponent } from '@app/shared/components/confirm-dialog/confirm-dialog.component';
+import { MiniMapComponent } from '@app/shared/components/mini-map/mini-map.component';
 
 @Component({
   selector: 'app-overview-tab',
@@ -34,6 +35,7 @@ import { ConfirmDialogComponent } from '@app/shared/components/confirm-dialog/co
     CommonModule,
     RouterModule,
     MatProgressSpinnerModule,
+    MiniMapComponent,
   ],
   templateUrl: './overview-tab.component.html',
   styleUrl: './overview-tab.component.scss',

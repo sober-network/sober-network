@@ -68,6 +68,40 @@
             <span class="detail-icon">📆</span>
             <span class="detail-text">Group since <strong>{{ createdDate() }}</strong></span>
           </div>
+          <div style="height:1px;background:rgba(17,17,16,.06);margin:8px 0;"></div>
+          <div class="detail-row" *ngIf="group.districtName">
+            <span class="detail-icon">📍</span>
+            <span class="detail-text">
+              <strong>{{ group.districtName }}</strong>
+              <ng-container *ngIf="group.areaName || group.state">
+                · <a *ngIf="group.areaWebsiteUrl" [href]="group.areaWebsiteUrl" target="_blank" rel="noreferrer" style="color:#0ea5e9;font-weight:700;">{{ group.state }}<ng-container *ngIf="group.areaName"> ({{ group.areaName }})</ng-container></a>
+                <ng-container *ngIf="!group.areaWebsiteUrl">{{ group.state }}<ng-container *ngIf="group.areaName"> ({{ group.areaName }})</ng-container></ng-container>
+              </ng-container>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- District map -->
+      <div class="card" style="padding:14px;overflow:hidden;">
+        <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--sn-text-muted,#7a7a75);margin-bottom:10px;">
+          Service area
+          <ng-container *ngIf="group.districtName || group.state">
+            — {{ group.districtName }}<ng-container *ngIf="group.state">, {{ group.state }}</ng-container>
+          </ng-container>
+        </div>
+        <div style="border-radius:12px;overflow:hidden;border:1px solid rgba(17,17,16,.08);margin-bottom:10px;">
+          <app-mini-map 
+            [latitude]="group.districtLatitude ?? 34.9256" 
+            [longitude]="group.districtLongitude ?? -81.0287" 
+            [label]="group.districtName || group.name" 
+            [zoomLevel]="10"
+            height="170px">
+          </app-mini-map>
+        </div>
+        <div style="margin-top:8px;font-size:.8rem;color:var(--sn-text-muted,#7a7a75);display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
+          <a *ngIf="group.districtWebsiteUrl" [href]="group.districtWebsiteUrl" target="_blank" rel="noreferrer" style="color:#0ea5e9;font-weight:700;font-size:.78rem;text-decoration:none;">District website</a>
+          <a *ngIf="group.areaWebsiteUrl" [href]="group.areaWebsiteUrl" target="_blank" rel="noreferrer" style="color:#0ea5e9;font-weight:700;font-size:.78rem;text-decoration:none;">Area website</a>
         </div>
       </div>
 

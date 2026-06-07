@@ -65,41 +65,96 @@
           <span class="chip chip-violet" *ngFor="let format of meeting.formats">{{ formatMeetingLabel(format) }}</span>
         </div>
 
-        <div class="info-panels" *ngIf="hasPhysicalLocation(meeting) || hasZoomDetails(meeting)">
-          <div class="info-panel info-panel-amber" *ngIf="hasPhysicalLocation(meeting)">
-            <div class="info-panel-heading">Location</div>
-            <div class="info-text">
-              <div *ngIf="meeting.location && !meeting.venueName && !meeting.street"><strong>{{ meeting.location }}</strong></div>
-              <div *ngIf="meeting.venueName"><strong>{{ meeting.venueName }}</strong></div>
-              <div *ngIf="meeting.street">{{ meeting.street }}</div>
-              <div *ngIf="addressLine(meeting)">{{ addressLine(meeting) }}</div>
-              <div *ngIf="meeting.country">{{ meeting.country }}</div>
-              <a [href]="directionsUrl(meeting)" target="_blank" rel="noreferrer">Get directions</a>
-            </div>
-          </div>
+        <!-- ── Info panels: location / zoom / map ─────────────────────────── -->
+        <ng-container *ngIf="hasPhysicalLocation(meeting) || hasZoomDetails(meeting)">
 
-          <div class="info-panel info-panel-sky" *ngIf="hasZoomDetails(meeting)">
-            <div class="info-panel-heading">Zoom</div>
-            <div class="zoom-grid">
-              <div *ngIf="meeting.publicJoinUrl">
-                <span class="zoom-label">Public link</span>
-                <div class="info-text"><a [href]="meeting.publicJoinUrl" target="_blank" rel="noreferrer">Join meeting</a></div>
+          <!-- In-Person: amber location card + map side by side (matches mock) -->
+          <ng-container *ngIf="meeting.meetingType === 0">
+            <div class="location-map-grid">
+              <div class="info-panel info-panel-amber">
+                <div class="info-panel-heading">Location</div>
+                <div class="info-text">
+                  <div *ngIf="meeting.location && !meeting.venueName && !meeting.street"><strong>{{ meeting.location }}</strong></div>
+                  <div *ngIf="meeting.venueName"><strong>{{ meeting.venueName }}</strong></div>
+                  <div *ngIf="meeting.street">{{ meeting.street }}</div>
+                  <div *ngIf="addressLine(meeting)">{{ addressLine(meeting) }}</div>
+                  <div *ngIf="meeting.country">{{ meeting.country }}</div>
+                  <a [href]="directionsUrl(meeting)" target="_blank" rel="noreferrer">Get directions →</a>
+                </div>
               </div>
-              <div *ngIf="meeting.zoomMeetingId">
-                <span class="zoom-label">Meeting ID</span>
-                <div class="info-text">{{ meeting.zoomMeetingId }}</div>
-              </div>
-              <div *ngIf="meeting.zoomPasscode">
-                <span class="zoom-label">Passcode</span>
-                <div class="info-text">{{ meeting.zoomPasscode }}</div>
-              </div>
-              <div *ngIf="meeting.zoomLink">
-                <span class="zoom-label">Members link</span>
-                <div class="info-text">{{ meeting.zoomLink }}</div>
+              <div class="meeting-map-cell" *ngIf="hasPhysicalLocation(meeting)">
+                <app-mini-map [latitude]="meeting.latitude" [longitude]="meeting.longitude" [address]="meetingAddress(meeting)" [label]="meeting.venueName || 'Meeting location'" [zoomLevel]="15" height="160px"></app-mini-map>
               </div>
             </div>
-          </div>
-        </div>
+          </ng-container>
+
+          <!-- Hybrid: location + zoom side by side, then map below -->
+          <ng-container *ngIf="meeting.meetingType === 2">
+            <div class="info-panels-2col" style="margin-bottom:10px;">
+              <div class="info-panel info-panel-teal">
+                <div class="info-panel-heading teal-heading">Location</div>
+                <div class="info-text">
+                  <div *ngIf="meeting.location && !meeting.venueName && !meeting.street"><strong>{{ meeting.location }}</strong></div>
+                  <div *ngIf="meeting.venueName"><strong>{{ meeting.venueName }}</strong></div>
+                  <div *ngIf="meeting.street">{{ meeting.street }}</div>
+                  <div *ngIf="addressLine(meeting)">{{ addressLine(meeting) }}</div>
+                  <div *ngIf="meeting.country">{{ meeting.country }}</div>
+                  <a [href]="directionsUrl(meeting)" target="_blank" rel="noreferrer">Get directions →</a>
+                </div>
+              </div>
+              <div class="info-panel info-panel-teal" *ngIf="hasZoomDetails(meeting)">
+                <div class="info-panel-heading teal-heading">Zoom</div>
+                <div class="zoom-grid">
+                  <div *ngIf="meeting.publicJoinUrl">
+                    <span class="zoom-label">Public link</span>
+                    <div class="info-text"><a [href]="meeting.publicJoinUrl" target="_blank" rel="noreferrer">Join meeting →</a></div>
+                  </div>
+                  <div *ngIf="meeting.zoomMeetingId">
+                    <span class="zoom-label">Meeting ID</span>
+                    <div class="info-text">{{ meeting.zoomMeetingId }}</div>
+                  </div>
+                  <div *ngIf="meeting.zoomPasscode">
+                    <span class="zoom-label">Passcode</span>
+                    <div class="info-text">{{ meeting.zoomPasscode }}</div>
+                  </div>
+                  <div *ngIf="meeting.zoomLink">
+                    <span class="zoom-label">Members link</span>
+                    <div class="info-text">{{ meeting.zoomLink }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="meeting-map-cell" *ngIf="hasPhysicalLocation(meeting)">
+              <app-mini-map [latitude]="meeting.latitude" [longitude]="meeting.longitude" [address]="meetingAddress(meeting)" [label]="meeting.venueName || 'Meeting location'" [zoomLevel]="15" height="160px"></app-mini-map>
+            </div>
+          </ng-container>
+
+          <!-- Online: zoom only -->
+          <ng-container *ngIf="meeting.meetingType === 1">
+            <div class="info-panel info-panel-sky" *ngIf="hasZoomDetails(meeting)">
+              <div class="info-panel-heading">Zoom details</div>
+              <div class="zoom-grid">
+                <div *ngIf="meeting.publicJoinUrl">
+                  <span class="zoom-label">Public link</span>
+                  <div class="info-text"><a [href]="meeting.publicJoinUrl" target="_blank" rel="noreferrer">Join meeting →</a></div>
+                </div>
+                <div *ngIf="meeting.zoomMeetingId">
+                  <span class="zoom-label">Meeting ID</span>
+                  <div class="info-text">{{ meeting.zoomMeetingId }}</div>
+                </div>
+                <div *ngIf="meeting.zoomPasscode">
+                  <span class="zoom-label">Passcode</span>
+                  <div class="info-text">{{ meeting.zoomPasscode }}</div>
+                </div>
+                <div *ngIf="meeting.zoomLink">
+                  <span class="zoom-label">Members link</span>
+                  <div class="info-text">{{ meeting.zoomLink }}</div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+        </ng-container>
       </div>
     </div>
   </div>

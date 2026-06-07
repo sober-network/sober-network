@@ -20,7 +20,7 @@ public class CrossGroupAccessTests
         var factory = new TestWebApplicationFactory();
 
         factory.GroupService
-            .Setup(service => service.GetMembersAsync(GroupSlug, OutsiderUserId, It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .Setup(service => service.GetMembersAsync(GroupSlug, OutsiderUserId, It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<MemberSortBy>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(((PagedResponse<MemberResponse>?)null, "You are not a member of this group."));
 
         factory.GroupService

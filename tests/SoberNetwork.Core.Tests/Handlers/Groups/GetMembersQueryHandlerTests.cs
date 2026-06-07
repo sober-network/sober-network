@@ -21,7 +21,7 @@ public class GetMembersQueryHandlerTests
         // Arrange
         var query = new GetMembersQuery("group-slug", Guid.Parse("00000000-0000-0000-0000-000000000001"), 1, 25);
         var response = new PagedResponse<MemberResponse>(
-            [new MemberResponse(Guid.Parse("00000000-0000-0000-0000-000000000003"), "John D.", "Member", "Active", false, DateTime.UtcNow, null)],
+            [new MemberResponse(Guid.Parse("00000000-0000-0000-0000-000000000003"), "John D.", "Member", "Active", false, DateTime.UtcNow, null, null, null, null)],
             1,
             25,
             1);

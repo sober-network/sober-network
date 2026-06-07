@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Net.Http.Json;
 using SoberNetwork.Core.DTOs;
 using SoberNetwork.Core.DTOs.Groups;
 using SoberNetwork.Core.Interfaces;
@@ -13,7 +14,7 @@ namespace SoberNetwork.Infrastructure.Services;
 /// Meeting management service. All operations are scoped to a single group (T4 isolation).
 /// Read operations require active membership. Write operations require GroupAdmin role.
 /// </summary>
-public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logger) : IMeetingService
+public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logger, IHttpClientFactory httpClientFactory) : IMeetingService
 {
     /// <inheritdoc/>
     public async Task<(PagedResponse<MeetingResponse>? Meetings, string? Error)> GetGroupMeetingsAsync(
@@ -187,6 +188,10 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
             UpdatedAt = DateTime.UtcNow
         };
 
+        // Auto-geocode when address is provided and coordinates were not supplied explicitly.
+        if (meeting.Latitude == null && meeting.Longitude == null)
+            await GeocodeAsync(meeting, ct);
+
         try
         {
             db.Meetings.Add(meeting);
@@ -251,6 +256,13 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
         if (request.ZoomPasscode != null) meeting.ZoomPasscode = NullIfWhiteSpace(request.ZoomPasscode);
         if (request.PublicJoinUrl != null) meeting.PublicJoinUrl = NullIfWhiteSpace(request.PublicJoinUrl);
         if (request.IsActive != null) meeting.IsActive = request.IsActive.Value;
+
+        // Re-geocode when any address field changed and the caller didn't supply explicit coordinates.
+        bool addressChanged = request.Street != null || request.City != null || request.State != null
+            || request.PostalCode != null || request.Country != null;
+        if (addressChanged && request.Latitude == null && request.Longitude == null)
+            await GeocodeAsync(meeting, ct);
+
         meeting.UpdatedAt = DateTime.UtcNow;
 
         await db.SaveChangesAsync(ct);
@@ -297,6 +309,57 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
 
     private static string? NullIfWhiteSpace(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    /// <summary>
+    /// Best-effort geocoding via Nominatim. Builds a query from the meeting's address fields
+    /// and populates Latitude/Longitude. Silently no-ops if the address is empty or the request fails.
+    /// </summary>
+    private async Task GeocodeAsync(Meeting meeting, CancellationToken ct)
+    {
+        var parts = new[] { meeting.Street, meeting.City, meeting.State, meeting.PostalCode, meeting.Country };
+        var query = string.Join(", ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
+        if (string.IsNullOrWhiteSpace(query)) return;
+
+        meeting.Latitude = null;
+        meeting.Longitude = null;
+
+        try
+        {
+            var http = httpClientFactory.CreateClient("Nominatim");
+            var url = $"https://nominatim.openstreetmap.org/search?q={Uri.EscapeDataString(query)}&format=json&limit=1";
+            var results = await http.GetFromJsonAsync<NominatimResult[]>(url, ct);
+            if (results is { Length: > 0 })
+            {
+                meeting.Latitude  = results[0].Lat;
+                meeting.Longitude = results[0].Lon;
+                return;
+            }
+
+            // Street-level lookup failed — retry with city/state only for a coarser pin.
+            var fallbackParts = new[] { meeting.City, meeting.State, meeting.PostalCode };
+            var fallback = string.Join(", ", fallbackParts.Where(p => !string.IsNullOrWhiteSpace(p)));
+            if (!string.IsNullOrWhiteSpace(fallback))
+            {
+                var fallbackUrl = $"https://nominatim.openstreetmap.org/search?q={Uri.EscapeDataString(fallback)}&format=json&limit=1";
+                var fallbackResults = await http.GetFromJsonAsync<NominatimResult[]>(fallbackUrl, ct);
+                if (fallbackResults is { Length: > 0 })
+                {
+                    meeting.Latitude  = fallbackResults[0].Lat;
+                    meeting.Longitude = fallbackResults[0].Lon;
+                }
+            }
+        }
+        catch
+        {
+            // Geocoding is best-effort — a failure must not block the meeting save.
+        }
+    }
+
+    private sealed class NominatimResult
+    {
+        public double Lat { get; init; }
+        public double Lon { get; init; }
+    }
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<PublicMeetingSearchResponse>> SearchPublicMeetingsAsync(

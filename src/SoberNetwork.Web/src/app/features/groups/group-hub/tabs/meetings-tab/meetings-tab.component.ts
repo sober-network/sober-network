@@ -28,6 +28,7 @@ import {
 } from '@app/core/models';
 import { GroupService } from '@app/core/services/group.service';
 import { MeetingFormModalComponent } from '../../../meeting-form-modal/meeting-form-modal.component';
+import { MiniMapComponent } from '@app/shared/components/mini-map/mini-map.component';
 
 type HubMeeting = AdminMeetingResponse | MeetingResponse;
 
@@ -35,7 +36,7 @@ type HubMeeting = AdminMeetingResponse | MeetingResponse;
   selector: 'app-meetings-tab',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [CommonModule, FormsModule, MatIconModule, MatProgressSpinnerModule, MiniMapComponent],
   templateUrl: './meetings-tab.component.html',
   styleUrl: './meetings-tab.component.scss',
 })
@@ -227,6 +228,13 @@ export class MeetingsTabComponent implements OnInit, OnChanges {
 
   addressLine(meeting: HubMeeting): string {
     return [meeting.city, meeting.state, meeting.postalCode].filter(Boolean).join(' ');
+  }
+
+  /** Full address string passed to MiniMapComponent for geocoding when lat/lng are absent. */
+  meetingAddress(meeting: HubMeeting): string {
+    return [meeting.street, meeting.city, meeting.state, meeting.postalCode, meeting.country, meeting.location]
+      .filter(Boolean)
+      .join(', ');
   }
 
   directionsUrl(meeting: HubMeeting): string {

@@ -303,7 +303,7 @@ export class MeetingFinderComponent implements OnInit, OnDestroy, AfterViewInit 
     }
 
     const inPersonPin = L.icon({
-      iconUrl: 'assets/marker-icon.png', shadowUrl: 'assets/marker-shadow.png',
+      iconUrl: 'marker-icon.png', shadowUrl: 'marker-shadow.png',
       iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34],
     });
 

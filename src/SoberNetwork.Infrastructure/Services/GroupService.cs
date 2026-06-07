@@ -73,7 +73,9 @@ public class GroupService(
         g.Id, g.Name, g.Slug, g.Description, g.TimeZone,
         g.IsActive, g.IsPublic, g.RequiresApproval,
         memberCount, userRole, userMembershipStatus, g.CreatedAt, ActiveMeetings(g),
-        ComputeNextMeeting(g.Meetings), userIsPhoneShared, userIsEmailShared);
+        ComputeNextMeeting(g.Meetings), userIsPhoneShared, userIsEmailShared,
+        g.DistrictName, g.AreaName, g.State, g.DistrictWebsiteUrl, g.AreaWebsiteUrl,
+        g.DistrictLatitude, g.DistrictLongitude);
 
     private static GroupSummaryResponse ToGroupSummaryResponse(Group group) => new(
         group.Name, group.Slug, group.Description, group.TimeZone,

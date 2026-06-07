@@ -4,6 +4,7 @@ using Moq;
 using SoberNetwork.Api.Tests.Infrastructure;
 using SoberNetwork.Core.DTOs;
 using SoberNetwork.Core.DTOs.Groups;
+using SoberNetwork.Domain.Enums;
 
 namespace SoberNetwork.Api.Tests.Security;
 
@@ -43,12 +44,12 @@ public class MeetingSecurityTests : IClassFixture<TestWebApplicationFactory>
 
         // Member view: a non-member is rejected ("not a member" -> Forbidden).
         _factory.MeetingService
-            .Setup(s => s.GetGroupMeetingsAsync(GroupSlug, It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .Setup(s => s.GetGroupMeetingsAsync(GroupSlug, It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<MeetingSortBy>(), It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(((PagedResponse<MeetingResponse>?)null, (string?)"You are not a member of this group.")));
 
         // Admin-only endpoints: a non-admin caller lacks permission ("permission" -> Forbidden).
         _factory.MeetingService
-            .Setup(s => s.GetAdminMeetingsAsync(GroupSlug, It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .Setup(s => s.GetAdminMeetingsAsync(GroupSlug, It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<MeetingSortBy>(), It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(((PagedResponse<AdminMeetingResponse>?)null, (string?)"You do not have permission to view admin meetings.")));
 
         _factory.MeetingService

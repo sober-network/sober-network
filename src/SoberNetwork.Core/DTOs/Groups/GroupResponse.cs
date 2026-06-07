@@ -33,5 +33,19 @@ public record GroupResponse(
     /// <summary>Whether the current caller is sharing their phone number with this group.</summary>
     bool UserIsPhoneShared,
     /// <summary>Whether the current caller is sharing their email address with this group.</summary>
-    bool UserIsEmailShared
+    bool UserIsEmailShared,
+    /// <summary>Optional district name (e.g. "District 5").</summary>
+    string? DistrictName = null,
+    /// <summary>Optional area name (e.g. "Area 11").</summary>
+    string? AreaName = null,
+    /// <summary>Optional state (e.g. "Connecticut").</summary>
+    string? State = null,
+    /// <summary>Optional district website URL.</summary>
+    string? DistrictWebsiteUrl = null,
+    /// <summary>Optional area website URL.</summary>
+    string? AreaWebsiteUrl = null,
+    /// <summary>Optional latitude for district map center.</summary>
+    double? DistrictLatitude = null,
+    /// <summary>Optional longitude for district map center.</summary>
+    double? DistrictLongitude = null
 );

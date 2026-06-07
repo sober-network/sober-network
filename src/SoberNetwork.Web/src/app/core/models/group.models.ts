@@ -280,6 +280,14 @@ export interface GroupResponse {
   nextMeeting: NextMeetingDto | null;
   userIsPhoneShared: boolean;
   userIsEmailShared: boolean;
+  // District/Area information
+  districtName?: string | null;
+  areaName?: string | null;
+  state?: string | null;
+  districtWebsiteUrl?: string | null;
+  areaWebsiteUrl?: string | null;
+  districtLatitude?: number | null;
+  districtLongitude?: number | null;
 }
 
 export interface GroupAdminContactResponse {

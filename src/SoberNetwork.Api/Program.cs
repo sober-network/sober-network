@@ -353,6 +353,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("ApiCors");
 
+// Serve SPA static assets (JS/CSS/images) before auth runs so unauthenticated
+// users can load the Angular bundle. AllowAnonymous on MapFallbackToFile covers
+// Angular client-side routes that don't map to real files (e.g. /dashboard, /auth/login).
+app.UseDefaultFiles();
+
+app.UseStaticFiles();
+
 app.UseRateLimiter();
 
 app.UseSerilogRequestLogging();
@@ -367,15 +374,9 @@ app.MapGet("/health", () => Results.Ok(new { status = "healthy" }))
 
    .AllowAnonymous();
 
-
-
-app.UseDefaultFiles();
-
-app.UseStaticFiles();
-
 app.MapControllers();
 
-app.MapFallbackToFile("index.html");
+app.MapFallbackToFile("index.html").AllowAnonymous();
 
 
 

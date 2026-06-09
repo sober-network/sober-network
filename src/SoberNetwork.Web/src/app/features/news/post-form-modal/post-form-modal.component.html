@@ -78,21 +78,55 @@
       class="pf-optional-toggle"
       (click)="showOptional = !showOptional"
     >
-      <span>{{ showOptional ? '▾ Hide' : '▸ Add' }} image &amp; link</span>
+      <span>{{ showOptional ? '▾ Hide' : '▸ Add' }} media &amp; link</span>
     </button>
 
     <div class="pf-optional-fields" *ngIf="showOptional">
 
-      <!-- Image URL -->
+      <!-- Media Upload -->
       <div class="pf-field">
-        <label class="pf-label" for="pf-image">Image URL <span class="pf-hint">(optional)</span></label>
-        <input
-          id="pf-image"
-          type="url"
-          formControlName="imageUrl"
-          class="pf-input"
-          placeholder="https://example.com/image.jpg"
-        />
+        <label class="pf-label">Media upload <span class="pf-hint">(optional, JPEG/PNG up to 5MB or MP4 up to 50MB)</span></label>
+        
+        <!-- Upload zone -->
+        <div 
+          class="pf-media-zone"
+          [class.pf-media-zone--drag]="isDragOver"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave()"
+          (drop)="onDrop($event)"
+        >
+          <input
+            #fileInput
+            type="file"
+            class="pf-file-input"
+            accept="image/jpeg,image/png,video/mp4"
+            (change)="onFileSelected($event)"
+          />
+
+          <div class="pf-media-zone-content">
+            <span class="pf-media-zone-icon">📁</span>
+            <p class="pf-media-zone-text">
+              <strong>Drag files here</strong> or <button type="button" class="pf-link-btn" (click)="fileInput.click()">browse</button>
+            </p>
+            <p class="pf-media-zone-hint">Supported: JPEG, PNG (images), MP4 (videos)</p>
+          </div>
+
+          <!-- Progress bar during upload -->
+          <mat-progress-bar
+            *ngIf="uploading"
+            mode="indeterminate"
+            class="pf-upload-progress"
+          ></mat-progress-bar>
+        </div>
+
+        <!-- Media preview -->
+        <div class="pf-media-preview" *ngIf="previewUrl">
+          <div class="pf-preview-item">
+            <img *ngIf="mediaType === 'image'" [src]="previewUrl" alt="Preview" class="pf-preview-img" />
+            <video *ngIf="mediaType === 'video'" [src]="previewUrl" class="pf-preview-video" controls></video>
+            <button type="button" class="pf-preview-remove" (click)="clearMedia()" title="Remove media">✕</button>
+          </div>
+        </div>
       </div>
 
       <!-- Link URL -->

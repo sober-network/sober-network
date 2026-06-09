@@ -237,15 +237,16 @@ $palette: (
   word-break: break-word;
 }
 
-// ── Image ──────────────────────────────────────────────────────────────────
-.post-image-wrap {
+// ── Media ──────────────────────────────────────────────────────────────────
+.post-media-wrap {
   margin-bottom: 16px;
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid rgba(17,17,16,.06);
 }
 
-.post-image {
+.post-image,
+.post-video {
   width: 100%;
   max-height: 400px;
   object-fit: cover;

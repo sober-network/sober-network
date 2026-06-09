@@ -1,6 +1,6 @@
 namespace SoberNetwork.Core.DTOs.News;
 
-/// <summary>A comment on a news post, optionally nested under a parent comment (one level of threading).</summary>
+/// <summary>A comment on a news post, optionally nested under a parent comment (unlimited depth).</summary>
 public record CommentResponse(
     Guid Id,
     Guid PostId,
@@ -8,7 +8,6 @@ public record CommentResponse(
     Guid AuthorId,
     string AuthorDisplayName,
     string Body,
-    string? ImageUrl,
     string? LinkUrl,
     string? LinkTitle,
     DateTime CreatedAt,

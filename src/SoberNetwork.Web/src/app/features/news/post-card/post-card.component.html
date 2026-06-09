@@ -49,15 +49,24 @@
   <!-- Body -->
   <p class="post-body">{{ post.body }}</p>
 
-  <!-- Image (optional) -->
-  <div class="post-image-wrap" *ngIf="post.imageUrl && !imageError">
+  <!-- Media (image or video, optional) -->
+  <div class="post-media-wrap" *ngIf="post.mediaUrl && !mediaError">
     <img
+      *ngIf="post.mediaType === 'image'"
       class="post-image"
-      [src]="post.imageUrl"
+      [src]="post.mediaUrl"
       [alt]="post.subject"
-      (error)="onImageError()"
+      (error)="onMediaError()"
       loading="lazy"
     />
+    <video
+      *ngIf="post.mediaType === 'video'"
+      class="post-video"
+      controls
+      (error)="onMediaError()"
+    >
+      <source [src]="post.mediaUrl" type="video/mp4" />
+    </video>
   </div>
 
   <!-- Link preview (optional) -->

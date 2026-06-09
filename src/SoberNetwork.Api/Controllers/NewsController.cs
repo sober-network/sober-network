@@ -2,10 +2,13 @@ using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SoberNetwork.Core.Commands.News;
 using SoberNetwork.Core.DTOs.News;
 using SoberNetwork.Core.Queries.News;
 using SoberNetwork.Core.Results;
+using SoberNetwork.Infrastructure.Data;
+
 namespace SoberNetwork.Api.Controllers;
 
 /// <summary>Platform-wide news and announcements feed.</summary>
@@ -92,6 +95,62 @@ public class NewsController(IMediator mediator) : ControllerBase
             ResultCode.NotFound => NotFound(new { message = result.Error }),
             _ => Problem(result.Error, statusCode: 400)
         };
+    }
+
+    // ── Media uploads ────────────────────────────────────────────────────────────
+
+    /// <summary>Uploads media (image or video) for a post. Returns media ID and preview URL.</summary>
+    [HttpPost("upload")]
+    [RequestSizeLimit(52428800)]  // 50 MB limit for video uploads
+    public async Task<IActionResult> UploadMedia(
+        [FromQuery] string groupSlug,
+        CancellationToken cancellationToken = default)
+    {
+        // Verify file is uploaded
+        var file = Request.Form.Files.FirstOrDefault();
+        if (file == null || file.Length == 0)
+            return BadRequest(new { message = "No file uploaded." });
+
+        try
+        {
+            // Upload via MediatR command (which will validate group access)
+            // Get app db context to fetch group ID
+            var db = HttpContext.RequestServices.GetRequiredService<SoberNetwork.Infrastructure.Data.AppDbContext>();
+            var group = await db.Groups
+                .AsNoTracking()
+                .FirstOrDefaultAsync(g => g.Slug == groupSlug && g.DeletedAt == null, cancellationToken);
+
+            if (group == null)
+                return NotFound(new { message = "Group not found." });
+
+            using var stream = file.OpenReadStream();
+            var command = new UploadPostMediaCommand(
+                group.Id,
+                stream,
+                file.FileName,
+                file.ContentType);
+
+            var result = await mediator.Send(command, cancellationToken);
+
+            return Ok(new
+            {
+                mediaId = result.MediaId,
+                mediaUrl = result.MediaUrl,
+                thumbnailUrl = result.ThumbnailUrl,
+                mediaType = result.MediaType,
+                imageWidth = result.ImageWidth,
+                imageHeight = result.ImageHeight,
+                videoDurationSeconds = result.VideoDurationSeconds
+            });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return Problem(ex.Message, statusCode: 500);
+        }
     }
 
     // ── Comments ─────────────────────────────────────────────────────────────────

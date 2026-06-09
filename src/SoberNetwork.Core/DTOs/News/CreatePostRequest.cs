@@ -5,7 +5,7 @@ public record CreatePostRequest(
     string GroupSlug,
     string Subject,
     string Body,
-    string? ImageUrl = null,
+    Guid? MediaId = null,  // Reference to uploaded image (replaces external URL)
     string? LinkUrl = null,
     string? LinkTitle = null
 );

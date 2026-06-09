@@ -47,10 +47,9 @@
           </app-emoji-picker>
 
           <button class="cs-optional-toggle" type="button" (click)="newMedia.showOptional = !newMedia.showOptional">
-            {{ newMedia.showOptional ? "▾ Hide" : "▸ Add" }} image &amp; link
+            {{ newMedia.showOptional ? "▾ Hide" : "▸ Add" }} link
           </button>
           <div class="cs-optional-fields" *ngIf="newMedia.showOptional">
-            <input class="cs-input-sm" type="url" [(ngModel)]="newMedia.imageUrl" placeholder="Image URL (optional)" />
             <input class="cs-input-sm" type="url" [(ngModel)]="newMedia.linkUrl" placeholder="Link URL (optional)" />
             <input class="cs-input-sm" type="text" [(ngModel)]="newMedia.linkTitle" placeholder="Link title (optional)" />
           </div>
@@ -86,10 +85,9 @@
             (emojiSelected)="insertEditEmoji($event)" (closed)="showEditEmoji = false">
           </app-emoji-picker>
           <button class="cs-optional-toggle" type="button" (click)="editMedia.showOptional = !editMedia.showOptional">
-            {{ editMedia.showOptional ? "▾ Hide" : "▸ Add" }} image &amp; link
+            {{ editMedia.showOptional ? "▾ Hide" : "▸ Add" }} link
           </button>
           <div class="cs-optional-fields" *ngIf="editMedia.showOptional">
-            <input class="cs-input-sm" type="url" [(ngModel)]="editMedia.imageUrl" placeholder="Image URL (optional)" />
             <input class="cs-input-sm" type="url" [(ngModel)]="editMedia.linkUrl" placeholder="Link URL (optional)" />
             <input class="cs-input-sm" type="text" [(ngModel)]="editMedia.linkTitle" placeholder="Link title (optional)" />
           </div>
@@ -111,11 +109,6 @@
           <div class="cs-bubble">
             <span class="cs-author">{{ node.authorDisplayName }}</span>
             <span class="cs-text">{{ node.body }}</span>
-          </div>
-
-          <!-- Image (optional) -->
-          <div class="cs-comment-image" *ngIf="node.imageUrl">
-            <img [src]="node.imageUrl" [alt]="node.body" loading="lazy" />
           </div>
 
           <!-- Link card (optional) -->
@@ -166,10 +159,9 @@
           (emojiSelected)="insertReplyEmoji($event)" (closed)="showReplyEmoji = false">
         </app-emoji-picker>
         <button class="cs-optional-toggle" type="button" (click)="replyMedia.showOptional = !replyMedia.showOptional">
-          {{ replyMedia.showOptional ? "▾ Hide" : "▸ Add" }} image &amp; link
+          {{ replyMedia.showOptional ? "▾ Hide" : "▸ Add" }} link
         </button>
         <div class="cs-optional-fields" *ngIf="replyMedia.showOptional">
-          <input class="cs-input-sm" type="url" [(ngModel)]="replyMedia.imageUrl" placeholder="Image URL (optional)" />
           <input class="cs-input-sm" type="url" [(ngModel)]="replyMedia.linkUrl" placeholder="Link URL (optional)" />
           <input class="cs-input-sm" type="text" [(ngModel)]="replyMedia.linkTitle" placeholder="Link title (optional)" />
         </div>

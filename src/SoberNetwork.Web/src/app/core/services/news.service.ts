@@ -7,6 +7,16 @@ import {
   CommentResponse, CreateCommentRequest, UpdateCommentRequest,
 } from '../models/news.models';
 
+export interface UploadMediaResponse {
+  mediaId: string;
+  mediaUrl: string;
+  thumbnailUrl?: string;
+  mediaType: 'image' | 'video';
+  imageWidth?: number;
+  imageHeight?: number;
+  videoDurationSeconds?: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class NewsService {
   private readonly http = inject(HttpClient);
@@ -33,6 +43,14 @@ export class NewsService {
 
   approvePost(postId: string): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/api/news/${postId}/approve`, {});
+  }
+
+  uploadMedia(formData: FormData, groupSlug?: string): Observable<UploadMediaResponse> {
+    let params = new HttpParams();
+    if (groupSlug) {
+      params = params.set('groupSlug', groupSlug);
+    }
+    return this.http.post<UploadMediaResponse>(`${this.baseUrl}/api/news/upload`, formData, { params });
   }
 
   // ── Comments ───────────────────────────────────────────────────────────────

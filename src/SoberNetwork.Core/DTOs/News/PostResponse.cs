@@ -10,7 +10,17 @@ public record PostResponse(
     string AuthorDisplayName,
     string Subject,
     string Body,
-    string? ImageUrl,
+    /// <summary>URL to the uploaded media (image or video).</summary>
+    string? MediaUrl,
+    /// <summary>Thumbnail URL (videos only).</summary>
+    string? ThumbnailUrl,
+    /// <summary>Media type: "image" or "video".</summary>
+    string? MediaType,
+    /// <summary>Dimensions of the uploaded media.</summary>
+    int? ImageWidth,
+    int? ImageHeight,
+    /// <summary>Video duration in seconds (videos only).</summary>
+    int? VideoDurationSeconds,
     string? LinkUrl,
     string? LinkTitle,
     bool IsApproved,

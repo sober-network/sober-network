@@ -13,7 +13,6 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
 
         builder.Property(p => p.Subject).IsRequired().HasMaxLength(200);
         builder.Property(p => p.Body).IsRequired().HasMaxLength(5000);
-        builder.Property(p => p.ImageUrl).HasMaxLength(500);
         builder.Property(p => p.LinkUrl).HasMaxLength(500);
         builder.Property(p => p.LinkTitle).HasMaxLength(200);
         builder.Property(p => p.CreatedAt).HasDefaultValueSql("now()");
@@ -22,6 +21,11 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
         builder.HasOne(p => p.Group)
             .WithMany(g => g.Posts)
             .HasForeignKey(p => p.GroupId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(p => p.Media)
+            .WithOne(m => m.Post)
+            .HasForeignKey<PostMedia>(m => m.PostId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasIndex(p => new { p.GroupId, p.DeletedAt, p.IsApproved });

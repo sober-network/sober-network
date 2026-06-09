@@ -43,6 +43,7 @@ public sealed class NewsService(AppDbContext db) : INewsService
 
         var query = db.Posts
             .AsNoTracking()
+            .Include(p => p.Media)
             .Where(p =>
                 memberGroupIds.Contains(p.GroupId) &&
                 p.DeletedAt == null &&
@@ -102,7 +103,7 @@ public sealed class NewsService(AppDbContext db) : INewsService
             AuthorId = userId,
             Subject = request.Subject.Trim(),
             Body = request.Body.Trim(),
-            ImageUrl = string.IsNullOrWhiteSpace(request.ImageUrl) ? null : request.ImageUrl.Trim(),
+            MediaId = request.MediaId,  // Reference uploaded media
             LinkUrl = string.IsNullOrWhiteSpace(request.LinkUrl) ? null : request.LinkUrl.Trim(),
             LinkTitle = string.IsNullOrWhiteSpace(request.LinkTitle) ? null : request.LinkTitle.Trim(),
             IsApproved = !group.RequiresPostApproval,
@@ -123,6 +124,7 @@ public sealed class NewsService(AppDbContext db) : INewsService
     {
         var post = await db.Posts
             .Include(p => p.Group)
+            .Include(p => p.Media)
             .FirstOrDefaultAsync(p => p.Id == postId && p.DeletedAt == null, ct);
         if (post == null) return (null, "Post not found.");
 
@@ -131,7 +133,6 @@ public sealed class NewsService(AppDbContext db) : INewsService
 
         if (request.Subject != null) post.Subject = request.Subject.Trim();
         if (request.Body != null) post.Body = request.Body.Trim();
-        post.ImageUrl = request.ImageUrl is null ? post.ImageUrl : (string.IsNullOrWhiteSpace(request.ImageUrl) ? null : request.ImageUrl.Trim());
         post.LinkUrl = request.LinkUrl is null ? post.LinkUrl : (string.IsNullOrWhiteSpace(request.LinkUrl) ? null : request.LinkUrl.Trim());
         post.LinkTitle = request.LinkTitle is null ? post.LinkTitle : (string.IsNullOrWhiteSpace(request.LinkTitle) ? null : request.LinkTitle.Trim());
         post.UpdatedAt = DateTime.UtcNow;
@@ -201,7 +202,12 @@ public sealed class NewsService(AppDbContext db) : INewsService
             authorDisplayName,
             post.Subject,
             post.Body,
-            post.ImageUrl,
+            post.Media?.StoragePath,  // MediaUrl
+            post.Media?.ThumbnailPath,  // ThumbnailUrl
+            post.Media?.MediaType,  // MediaType
+            post.Media?.ImageWidth,
+            post.Media?.ImageHeight,
+            post.Media?.VideoDurationSeconds,
             post.LinkUrl,
             post.LinkTitle,
             post.IsApproved,
@@ -263,7 +269,6 @@ public sealed class NewsService(AppDbContext db) : INewsService
             AuthorId = authorId,
             ParentCommentId = request.ParentCommentId,
             Body = request.Body.Trim(),
-            ImageUrl = string.IsNullOrWhiteSpace(request.ImageUrl) ? null : request.ImageUrl.Trim(),
             LinkUrl = string.IsNullOrWhiteSpace(request.LinkUrl) ? null : request.LinkUrl.Trim(),
             LinkTitle = string.IsNullOrWhiteSpace(request.LinkTitle) ? null : request.LinkTitle.Trim(),
         };
@@ -290,7 +295,6 @@ public sealed class NewsService(AppDbContext db) : INewsService
             return (null, "Only the author may edit this comment.");
 
         comment.Body = request.Body.Trim();
-        comment.ImageUrl = request.ImageUrl is null ? comment.ImageUrl : (string.IsNullOrWhiteSpace(request.ImageUrl) ? null : request.ImageUrl.Trim());
         comment.LinkUrl = request.LinkUrl is null ? comment.LinkUrl : (string.IsNullOrWhiteSpace(request.LinkUrl) ? null : request.LinkUrl.Trim());
         comment.LinkTitle = request.LinkTitle is null ? comment.LinkTitle : (string.IsNullOrWhiteSpace(request.LinkTitle) ? null : request.LinkTitle.Trim());
         comment.UpdatedAt = DateTime.UtcNow;
@@ -329,5 +333,5 @@ public sealed class NewsService(AppDbContext db) : INewsService
     private static CommentResponse MapCommentToResponse(PostComment c, Dictionary<Guid, string> authors) =>
         new(c.Id, c.PostId, c.ParentCommentId,
             c.AuthorId, authors.GetValueOrDefault(c.AuthorId, "Unknown"),
-            c.Body, c.ImageUrl, c.LinkUrl, c.LinkTitle, c.CreatedAt, c.UpdatedAt);
+            c.Body, c.LinkUrl, c.LinkTitle, c.CreatedAt, c.UpdatedAt);
 }

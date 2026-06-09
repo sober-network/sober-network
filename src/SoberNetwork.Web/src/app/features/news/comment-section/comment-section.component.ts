@@ -11,16 +11,15 @@ import { NewsService } from '@app/core/services/news.service';
 import { CommentResponse, CommentNode } from '@app/core/models/news.models';
 import { EmojiPickerComponent } from '@app/shared/components/emoji-picker/emoji-picker.component';
 
-/** Per-input media state (new comment, reply, edit). */
+/** Per-input link metadata (new comment, reply, edit). */
 interface MediaFields {
-  imageUrl: string;
   linkUrl: string;
   linkTitle: string;
   showOptional: boolean;
 }
 
 function emptyMedia(): MediaFields {
-  return { imageUrl: '', linkUrl: '', linkTitle: '', showOptional: false };
+  return { linkUrl: '', linkTitle: '', showOptional: false };
 }
 
 @Component({
@@ -124,7 +123,6 @@ export class CommentSectionComponent implements OnDestroy {
 
     this.newsService.createComment(this.postId, {
       body,
-      imageUrl: this.newMedia.imageUrl.trim() || null,
       linkUrl: this.newMedia.linkUrl.trim() || null,
       linkTitle: this.newMedia.linkTitle.trim() || null,
     }).pipe(takeUntil(this.destroy$)).subscribe({
@@ -171,7 +169,6 @@ export class CommentSectionComponent implements OnDestroy {
     this.newsService.createComment(this.postId, {
       body,
       parentCommentId: parentId,
-      imageUrl: this.replyMedia.imageUrl.trim() || null,
       linkUrl: this.replyMedia.linkUrl.trim() || null,
       linkTitle: this.replyMedia.linkTitle.trim() || null,
     }).pipe(takeUntil(this.destroy$)).subscribe({
@@ -198,10 +195,9 @@ export class CommentSectionComponent implements OnDestroy {
     this.editingCommentId = comment.id;
     this.editBody = comment.body;
     this.editMedia = {
-      imageUrl: comment.imageUrl ?? '',
       linkUrl: comment.linkUrl ?? '',
       linkTitle: comment.linkTitle ?? '',
-      showOptional: !!(comment.imageUrl || comment.linkUrl),
+      showOptional: !!comment.linkUrl,
     };
     this.replyingToId = null;
     this.openMenuId = null;
@@ -221,7 +217,6 @@ export class CommentSectionComponent implements OnDestroy {
 
     this.newsService.updateComment(this.postId, comment.id, {
       body,
-      imageUrl: this.editMedia.imageUrl.trim() || null,
       linkUrl: this.editMedia.linkUrl.trim() || null,
       linkTitle: this.editMedia.linkTitle.trim() || null,
     }).pipe(takeUntil(this.destroy$)).subscribe({

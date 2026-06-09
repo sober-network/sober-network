@@ -28,7 +28,7 @@ export class PostCardComponent implements OnInit {
   private readonly elRef = inject(ElementRef);
 
   menuOpen = false;
-  imageError = false;
+  mediaError = false;
 
   get canEdit(): boolean {
     return this.post.authorId === this.currentUserId;
@@ -89,7 +89,7 @@ export class PostCardComponent implements OnInit {
     this.approve.emit(this.post);
   }
 
-  onImageError(): void {
-    this.imageError = true;
+  onMediaError(): void {
+    this.mediaError = true;
   }
 }

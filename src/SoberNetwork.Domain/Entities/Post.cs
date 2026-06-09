@@ -8,7 +8,11 @@ public class Post
     public Guid AuthorId { get; set; }
     public string Subject { get; set; } = string.Empty;
     public string Body { get; set; } = string.Empty;
-    public string? ImageUrl { get; set; }
+    
+    /// <summary>Reference to uploaded media (replaces external ImageUrl).</summary>
+    public Guid? MediaId { get; set; }
+    public PostMedia? Media { get; set; }
+    
     public string? LinkUrl { get; set; }
     public string? LinkTitle { get; set; }
     public bool IsApproved { get; set; } = false;

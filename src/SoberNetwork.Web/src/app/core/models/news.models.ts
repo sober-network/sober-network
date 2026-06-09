@@ -9,7 +9,13 @@ export interface PostResponse {
   authorDisplayName: string;
   subject: string;
   body: string;
-  imageUrl?: string | null;
+  mediaId?: string | null;
+  mediaUrl?: string | null;
+  thumbnailUrl?: string | null;
+  mediaType?: 'image' | 'video' | null;
+  imageWidth?: number | null;
+  imageHeight?: number | null;
+  videoDurationSeconds?: number | null;
   linkUrl?: string | null;
   linkTitle?: string | null;
   isApproved: boolean;
@@ -23,7 +29,7 @@ export interface CreatePostRequest {
   groupSlug: string;
   subject: string;
   body: string;
-  imageUrl?: string | null;
+  mediaId?: string | null;
   linkUrl?: string | null;
   linkTitle?: string | null;
 }
@@ -31,7 +37,6 @@ export interface CreatePostRequest {
 export interface UpdatePostRequest {
   subject?: string | null;
   body?: string | null;
-  imageUrl?: string | null;
   linkUrl?: string | null;
   linkTitle?: string | null;
 }
@@ -52,7 +57,6 @@ export interface CommentResponse {
   authorId: string;
   authorDisplayName: string;
   body: string;
-  imageUrl?: string | null;
   linkUrl?: string | null;
   linkTitle?: string | null;
   createdAt: string;
@@ -62,14 +66,12 @@ export interface CommentResponse {
 export interface CreateCommentRequest {
   body: string;
   parentCommentId?: string | null;
-  imageUrl?: string | null;
   linkUrl?: string | null;
   linkTitle?: string | null;
 }
 
 export interface UpdateCommentRequest {
   body: string;
-  imageUrl?: string | null;
   linkUrl?: string | null;
   linkTitle?: string | null;
 }

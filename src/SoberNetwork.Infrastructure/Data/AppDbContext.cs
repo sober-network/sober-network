@@ -14,6 +14,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Meeting> Meetings => Set<Meeting>();
     public DbSet<Post> Posts => Set<Post>();
     public DbSet<PostComment> PostComments => Set<PostComment>();
+    public DbSet<PostMedia> PostMedia => Set<PostMedia>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<SecurityEvent> SecurityEvents => Set<SecurityEvent>();
 

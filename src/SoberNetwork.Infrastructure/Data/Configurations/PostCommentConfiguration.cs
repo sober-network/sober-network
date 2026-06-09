@@ -12,7 +12,6 @@ public class PostCommentConfiguration : IEntityTypeConfiguration<PostComment>
         builder.HasKey(c => c.Id);
 
         builder.Property(c => c.Body).IsRequired().HasMaxLength(2000);
-        builder.Property(c => c.ImageUrl).HasMaxLength(500);
         builder.Property(c => c.LinkUrl).HasMaxLength(500);
         builder.Property(c => c.LinkTitle).HasMaxLength(200);
 

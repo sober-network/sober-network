@@ -53,20 +53,20 @@
   gap: 10px;
 }
 
-// ── Comment + reply ──────────────────────────────────────────────────────────
-.cs-comment {
+// ── Recursive depth nodes ────────────────────────────────────────────────────
+.cs-node {
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
 
-.cs-replies {
-  margin-left: 42px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  border-left: 2px solid rgba(17,17,16,.06);
-  padding-left: 12px;
+  // Depth indentation with accent stripe
+  @for $d from 1 through 4 {
+    &--d#{$d} {
+      margin-left: #{$d * 20}px;
+      padding-left: 10px;
+      border-left: 2px solid rgba(17,17,16,.07);
+    }
+  }
 }
 
 // ── Comment row ──────────────────────────────────────────────────────────────
@@ -94,7 +94,7 @@
   user-select: none;
 }
 
-.cs-avatar--small {
+.cs-avatar--sm {
   width: 26px;
   height: 26px;
   font-size: 0.65rem;
@@ -136,6 +136,73 @@
   color: #3d3d3a;
   line-height: 1.5;
   white-space: pre-wrap;
+}
+
+// ── Comment media ─────────────────────────────────────────────────────────────
+.cs-comment-image {
+  margin-top: 8px;
+  border-radius: 10px;
+  overflow: hidden;
+  max-height: 300px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.cs-comment-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 10px 14px;
+  background: rgba(248,246,241,.9);
+  border: 1px solid rgba(17,17,16,.08);
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s, box-shadow 0.15s;
+
+  &:hover { background: rgba(248,246,241,1); box-shadow: 0 2px 8px rgba(17,17,16,.08); }
+
+  mat-icon { color: #8a4fa3; font-size: 18px; width: 18px; height: 18px; flex-shrink: 0; }
+}
+
+.cs-link-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cs-link-title {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #111110;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cs-link-url {
+  font-size: 0.72rem;
+  color: #7a7a75;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cs-link-arrow {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: #b0afa9;
+  flex-shrink: 0;
 }
 
 .cs-meta {
@@ -307,6 +374,41 @@
   bottom: calc(100% + 6px);
   right: 0;
   z-index: 200;
+}
+
+// ── Optional fields (image/link) ──────────────────────────────────────────────
+.cs-optional-toggle {
+  border: none;
+  background: transparent;
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #8a4fa3;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  transition: color 0.12s;
+  &:hover { color: #6b3a80; }
+}
+
+.cs-optional-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cs-input-sm {
+  padding: 6px 12px;
+  border: 1.5px solid rgba(17,17,16,.1);
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  color: #111110;
+  background: rgba(255,255,255,.85);
+  outline: none;
+  transition: border-color 0.15s;
+  &::placeholder { color: #b0afa9; }
+  &:focus { border-color: #8a4fa3; box-shadow: 0 0 0 3px rgba(138,79,163,.08); }
 }
 
 .cs-input-actions {

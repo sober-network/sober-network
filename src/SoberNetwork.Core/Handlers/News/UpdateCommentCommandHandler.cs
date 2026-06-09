@@ -10,7 +10,7 @@ public class UpdateCommentCommandHandler(INewsService newsService) : IRequestHan
 {
     public async Task<DataResult<CommentResponse>> Handle(UpdateCommentCommand request, CancellationToken cancellationToken)
     {
-        var (comment, error) = await newsService.UpdateCommentAsync(request.CommentId, request.RequestingUserId, request.Request.Body, cancellationToken);
+        var (comment, error) = await newsService.UpdateCommentAsync(request.CommentId, request.RequestingUserId, request.Request, cancellationToken);
         if (error is not null || comment is null)
         {
             var code = error!.Contains("author") || error.Contains("permission") ? ResultCode.Forbidden

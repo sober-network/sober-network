@@ -8,6 +8,9 @@ public record CommentResponse(
     Guid AuthorId,
     string AuthorDisplayName,
     string Body,
+    string? ImageUrl,
+    string? LinkUrl,
+    string? LinkTitle,
     DateTime CreatedAt,
     DateTime? UpdatedAt
 );

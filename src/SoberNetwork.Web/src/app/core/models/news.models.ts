@@ -52,6 +52,9 @@ export interface CommentResponse {
   authorId: string;
   authorDisplayName: string;
   body: string;
+  imageUrl?: string | null;
+  linkUrl?: string | null;
+  linkTitle?: string | null;
   createdAt: string;
   updatedAt?: string | null;
 }
@@ -59,10 +62,16 @@ export interface CommentResponse {
 export interface CreateCommentRequest {
   body: string;
   parentCommentId?: string | null;
+  imageUrl?: string | null;
+  linkUrl?: string | null;
+  linkTitle?: string | null;
 }
 
 export interface UpdateCommentRequest {
   body: string;
+  imageUrl?: string | null;
+  linkUrl?: string | null;
+  linkTitle?: string | null;
 }
 
 /** Client-side comment node for threaded rendering. */

@@ -263,6 +263,9 @@ public sealed class NewsService(AppDbContext db) : INewsService
             AuthorId = authorId,
             ParentCommentId = request.ParentCommentId,
             Body = request.Body.Trim(),
+            ImageUrl = string.IsNullOrWhiteSpace(request.ImageUrl) ? null : request.ImageUrl.Trim(),
+            LinkUrl = string.IsNullOrWhiteSpace(request.LinkUrl) ? null : request.LinkUrl.Trim(),
+            LinkTitle = string.IsNullOrWhiteSpace(request.LinkTitle) ? null : request.LinkTitle.Trim(),
         };
 
         db.PostComments.Add(comment);
@@ -277,7 +280,7 @@ public sealed class NewsService(AppDbContext db) : INewsService
 
     /// <inheritdoc/>
     public async Task<(CommentResponse? Comment, string? Error)> UpdateCommentAsync(
-        Guid commentId, Guid requestingUserId, string body, CancellationToken ct = default)
+        Guid commentId, Guid requestingUserId, UpdateCommentRequest request, CancellationToken ct = default)
     {
         var comment = await db.PostComments
             .FirstOrDefaultAsync(c => c.Id == commentId && c.DeletedAt == null, ct);
@@ -286,7 +289,10 @@ public sealed class NewsService(AppDbContext db) : INewsService
         if (comment.AuthorId != requestingUserId)
             return (null, "Only the author may edit this comment.");
 
-        comment.Body = body.Trim();
+        comment.Body = request.Body.Trim();
+        comment.ImageUrl = request.ImageUrl is null ? comment.ImageUrl : (string.IsNullOrWhiteSpace(request.ImageUrl) ? null : request.ImageUrl.Trim());
+        comment.LinkUrl = request.LinkUrl is null ? comment.LinkUrl : (string.IsNullOrWhiteSpace(request.LinkUrl) ? null : request.LinkUrl.Trim());
+        comment.LinkTitle = request.LinkTitle is null ? comment.LinkTitle : (string.IsNullOrWhiteSpace(request.LinkTitle) ? null : request.LinkTitle.Trim());
         comment.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
 
@@ -323,5 +329,5 @@ public sealed class NewsService(AppDbContext db) : INewsService
     private static CommentResponse MapCommentToResponse(PostComment c, Dictionary<Guid, string> authors) =>
         new(c.Id, c.PostId, c.ParentCommentId,
             c.AuthorId, authors.GetValueOrDefault(c.AuthorId, "Unknown"),
-            c.Body, c.CreatedAt, c.UpdatedAt);
+            c.Body, c.ImageUrl, c.LinkUrl, c.LinkTitle, c.CreatedAt, c.UpdatedAt);
 }

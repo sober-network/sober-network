@@ -36,9 +36,9 @@ public interface INewsService
     Task<(CommentResponse? Comment, string? Error)> CreateCommentAsync(
         Guid postId, Guid authorId, CreateCommentRequest request, CancellationToken ct = default);
 
-    /// <summary>Updates a comment body. Caller must be the author.</summary>
+    /// <summary>Updates a comment body and optional media. Caller must be the author.</summary>
     Task<(CommentResponse? Comment, string? Error)> UpdateCommentAsync(
-        Guid commentId, Guid requestingUserId, string body, CancellationToken ct = default);
+        Guid commentId, Guid requestingUserId, UpdateCommentRequest request, CancellationToken ct = default);
 
     /// <summary>Soft-deletes a comment. Caller must be the author or an admin of the post's group.</summary>
     Task<(bool Success, string? Error)> DeleteCommentAsync(

@@ -327,6 +327,13 @@ export interface CreateGroupRequest {
   timeZone?: string;
   isPublic: boolean;
   requiresApproval: boolean;
+  districtName: string;
+  districtWebsiteUrl?: string | null;
+  areaName: string;
+  areaWebsiteUrl?: string | null;
+  state: string;
+  districtLatitude: number;
+  districtLongitude: number;
 }
 
 export interface UpdateGroupRequest {
@@ -335,6 +342,13 @@ export interface UpdateGroupRequest {
   timeZone?: string;
   isPublic?: boolean;
   requiresApproval?: boolean;
+  districtName?: string | null;
+  districtWebsiteUrl?: string | null;
+  areaName?: string | null;
+  areaWebsiteUrl?: string | null;
+  state?: string | null;
+  districtLatitude?: number | null;
+  districtLongitude?: number | null;
 }
 
 export interface JoinGroupRequest {

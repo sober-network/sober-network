@@ -225,6 +225,7 @@ builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IMeetingService, MeetingService>();
 builder.Services.AddScoped<IMemberService, MemberService>();
+builder.Services.AddScoped<INewsService, NewsService>();
 builder.Services.AddScoped<IGroupServiceRoleService, GroupServiceRoleService>();
 builder.Services.AddScoped<IStatsService, StatsService>();
 

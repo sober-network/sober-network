@@ -71,7 +71,7 @@ public class GroupService(
         Group g, string userRole, string userMembershipStatus, int memberCount,
         bool userIsPhoneShared = false, bool userIsEmailShared = false) => new(
         g.Id, g.Name, g.Slug, g.Description, g.TimeZone,
-        g.IsActive, g.IsPublic, g.RequiresApproval,
+        g.IsActive, g.IsPublic, g.RequiresApproval, g.RequiresPostApproval,
         memberCount, userRole, userMembershipStatus, g.CreatedAt, ActiveMeetings(g),
         ComputeNextMeeting(g.Meetings), userIsPhoneShared, userIsEmailShared,
         g.DistrictName, g.AreaName, g.State, g.DistrictWebsiteUrl, g.AreaWebsiteUrl,
@@ -291,6 +291,13 @@ public class GroupService(
             TimeZone = NullIfWhiteSpace(request.TimeZone),
             IsPublic = request.IsPublic,
             RequiresApproval = request.RequiresApproval,
+            DistrictName = NullIfWhiteSpace(request.DistrictName),
+            DistrictWebsiteUrl = NullIfWhiteSpace(request.DistrictWebsiteUrl),
+            AreaName = NullIfWhiteSpace(request.AreaName),
+            AreaWebsiteUrl = NullIfWhiteSpace(request.AreaWebsiteUrl),
+            State = NullIfWhiteSpace(request.State),
+            DistrictLatitude = request.DistrictLatitude,
+            DistrictLongitude = request.DistrictLongitude,
             IsActive = true,
             Meetings = [],
             CreatedAt = DateTime.UtcNow,
@@ -339,6 +346,14 @@ public class GroupService(
         if (request.TimeZone != null) group.TimeZone = NullIfWhiteSpace(request.TimeZone);
         if (request.IsPublic != null) group.IsPublic = request.IsPublic.Value;
         if (request.RequiresApproval != null) group.RequiresApproval = request.RequiresApproval.Value;
+        if (request.RequiresPostApproval != null) group.RequiresPostApproval = request.RequiresPostApproval.Value;
+        if (request.DistrictName != null) group.DistrictName = NullIfWhiteSpace(request.DistrictName);
+        if (request.DistrictWebsiteUrl != null) group.DistrictWebsiteUrl = NullIfWhiteSpace(request.DistrictWebsiteUrl);
+        if (request.AreaName != null) group.AreaName = NullIfWhiteSpace(request.AreaName);
+        if (request.AreaWebsiteUrl != null) group.AreaWebsiteUrl = NullIfWhiteSpace(request.AreaWebsiteUrl);
+        if (request.State != null) group.State = NullIfWhiteSpace(request.State);
+        if (request.DistrictLatitude != null) group.DistrictLatitude = request.DistrictLatitude;
+        if (request.DistrictLongitude != null) group.DistrictLongitude = request.DistrictLongitude;
         group.UpdatedAt = DateTime.UtcNow;
 
         await db.SaveChangesAsync(ct);

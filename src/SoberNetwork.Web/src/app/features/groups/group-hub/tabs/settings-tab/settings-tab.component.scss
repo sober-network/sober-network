@@ -6,6 +6,15 @@
   gap: 14px;
 }
 
+// Keep core settings cards aligned at the same full width.
+.form-card,
+.side-card {
+  grid-column: 1 / -1;
+}
+.full-span-card,
+.actions-row,
+.danger-card { grid-column: 1 / -1; }
+
 .card {
   background: white;
   border: 1px solid rgba(17,17,16,.09);
@@ -129,6 +138,53 @@
   height: auto;
   padding: 12px 14px;
   resize: vertical;
+}
+
+.select-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%237a7a75' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: .8rem;
+    font-weight: 700;
+    color: #3d3d3a;
+  }
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.field.full-span { grid-column: 1 / -1; }
+
+.service-area-note {
+  font-size: .83rem;
+  color: var(--sn-text-muted, #7a7a75);
+  line-height: 1.55;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  background: rgba(14,165,233,.06);
+  border-left: 3px solid rgba(14,165,233,.35);
+  border-radius: 0 8px 8px 0;
+}
+
+.coords-hint {
+  font-size: .78rem;
+  color: var(--sn-text-muted, #7a7a75);
+  margin: 8px 0 0;
+  a { color: #0ea5e9; }
 }
 
 .field-error {

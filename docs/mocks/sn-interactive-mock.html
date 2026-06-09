@@ -248,6 +248,10 @@
     .btn.dark { background: var(--cta); color: white; }
     .btn.outline { background: transparent; border: 1.5px solid rgba(17,17,16,.18); color: var(--text); }
     .btn.outline:hover { border-color: rgba(17,17,16,.32); }
+    /* Alias classes used by live dashboard component */
+    .btn-dark { background: var(--cta); color: white; }
+    .btn-outline { background: transparent; border: 1.5px solid rgba(17,17,16,.18); color: var(--text); }
+    .btn-outline:hover { border-color: rgba(17,17,16,.32); }
     .btn.ghost { background: rgba(255,255,255,.8); backdrop-filter: blur(6px); color: var(--text); border: 1px solid rgba(17,17,16,.08); }
     .btn.light { background: white; color: var(--text); }
     .btn.sm { padding: 8px 16px; font-size: .84rem; }
@@ -913,22 +917,211 @@
     .page-subtitle { font-size: .95rem; color: var(--text-mid); }
     .breadcrumbs { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
 
-    /* Dashboard page */
-    .dashboard-page { padding: 8px; }
-    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .section-header .section-title { font-family: 'Inter Tight', sans-serif; font-size: 1.25rem; font-weight: 900; margin: 0; }
-    .groups-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
-    .group-card { background: white; border: 1px solid rgba(17,17,16,.09); border-radius: 18px; padding: 18px; cursor: pointer; transition: box-shadow .15s, transform .12s; }
-    .group-card:hover { box-shadow: 0 8px 28px rgba(17,17,16,.08); transform: translateY(-2px); }
-    .group-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-    .group-icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-size: 1.25rem; flex-shrink: 0; }
-    .group-info { flex: 1; }
-    .group-name { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: .95rem; }
-    .group-meta { font-size: .78rem; color: var(--text-muted); margin-top: 2px; }
-    .group-stats { display: flex; gap: 16px; font-size: .82rem; color: var(--text-muted); }
-    .group-card.add-card { border-style: dashed; display: flex; align-items: center; justify-content: center; gap: 12px; color: var(--text-muted); }
-    .add-icon { font-size: 1.5rem; }
-    .add-text { font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: .875rem; }
+    /* Dashboard page — rebased from live groups-dashboard hero + groups section */
+    #app-main { --page-section-gap: 64px; }
+    .dashboard-page { padding: 0; }
+    .dashboard-page .hero-section {
+      background: linear-gradient(135deg,
+        rgba(212, 232, 245, 0.88) 0%,
+        rgba(232, 240, 248, 0.85) 20%,
+        rgba(247, 245, 240, 0.82) 55%,
+        rgba(245, 232, 216, 0.85) 80%,
+        rgba(240, 223, 200, 0.88) 100%),
+      url('https://static.vecteezy.com/system/resources/previews/011/930/314/non_2x/young-friends-staying-together-outdoor-in-the-park-free-photo.jpg');
+      background-size: cover;
+      background-position: center top;
+      padding: 80px 32px;
+      min-height: 0;
+    }
+    .dashboard-page .hero-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+      gap: 24px;
+      align-items: center;
+    }
+    .dashboard-page .hero-main { text-align: left; }
+    .dashboard-page .hero-breadcrumbs {
+      display: flex; align-items: center; gap: 6px; margin-bottom: 16px;
+    }
+    .dashboard-page .hero-breadcrumbs .bc-item {
+      font-family: 'Inter Tight', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: rgba(17,17,16,.55);
+      text-decoration: none;
+    }
+    .dashboard-page .hero-breadcrumbs .bc-item:hover { color: var(--text); }
+    .dashboard-page .hero-breadcrumbs .bc-item.current { color: var(--text-mid); cursor: default; }
+    .dashboard-page .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text-mid);
+      background: rgba(255, 255, 255, 0.65);
+      border: 1px solid rgba(17, 17, 16, 0.1);
+      border-radius: 100px; padding: 5px 14px; margin-bottom: 20px;
+      font-family: 'Inter Tight', sans-serif;
+    }
+    .dashboard-page .hero-eyebrow::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%; background: #38b86a;
+    }
+    .dashboard-page .hero-title {
+      font-family: 'Inter Tight', sans-serif;
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      font-weight: 900; letter-spacing: -0.04em; line-height: 1.12;
+      margin-bottom: 14px;
+    }
+    .dashboard-page .hero-title .serif-accent {
+      display: inline;
+      text-align: inherit;
+      transform: none;
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-weight: 700;
+    }
+    .dashboard-page .hero-subtitle {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-size: 1.24rem;
+      color: var(--text-mid);
+      max-width: 580px; margin: 0 0 8px; line-height: 1.65;
+    }
+    .dashboard-page .hero-feature-card {
+      background: rgba(255,255,255,.84);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(17,17,16,.08);
+      border-radius: 18px;
+      padding: 16px;
+      align-self: center;
+      box-shadow: 0 10px 30px rgba(17,17,16,.08);
+    }
+    .dashboard-page .hero-feature-eyebrow {
+      font-family: 'Inter Tight', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    .dashboard-page .hero-feature-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .dashboard-page .hero-feature-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,17,16,.08);
+      background: rgba(255,255,255,.9);
+      font-family: 'Inter Tight', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-mid);
+    }
+    .dashboard-page .hero-feature-pill.news {
+      background: var(--t-violet);
+      color: var(--violet);
+      border-color: rgba(138,79,163,.22);
+    }
+    .dashboard-page .hero-feature-pill.events {
+      background: var(--t-sky);
+      color: var(--sky);
+      border-color: rgba(14,165,233,.24);
+    }
+    .dashboard-page .hero-feature-pill.board {
+      background: var(--t-green);
+      color: var(--green);
+      border-color: rgba(42,148,89,.24);
+    }
+
+    .dashboard-page .groups-section { background: white; }
+    .dashboard-page .section-wrap {
+      max-width: 1200px; margin: 0 auto; padding: var(--page-section-gap) 32px 96px; position: relative;
+    }
+    .dashboard-page .groups-header {
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 24px;
+      margin-bottom: 32px; flex-wrap: wrap;
+    }
+    .dashboard-page .groups-header-actions { display: flex; align-items: center; gap: 10px; }
+    .dashboard-page .groups-header-text h2 {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 800; font-size: 2.2rem; letter-spacing: -0.03em;
+      margin-bottom: 8px; color: var(--text);
+    }
+    .dashboard-page .groups-header-text p {
+      color: var(--text-mid); max-width: 500px; font-size: 0.95rem; line-height: 1.6;
+    }
+    .dashboard-page .groups-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-top: 48px;
+    }
+    .dashboard-page .group-card {
+      background: linear-gradient(135deg, rgba(248,246,241,.92), rgba(240,237,232,.96));
+      border: 1px solid rgba(17,17,16,.08);
+      border-radius: 20px;
+      padding: 28px;
+      display: flex; flex-direction: column; gap: 16px;
+      text-decoration: none; color: inherit; cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .2s, box-shadow .2s, transform .2s;
+    }
+    .dashboard-page .group-card:nth-child(6n + 1) { --group-accent: var(--violet); }
+    .dashboard-page .group-card:nth-child(6n + 2) { --group-accent: var(--sky); }
+    .dashboard-page .group-card:nth-child(6n + 3) { --group-accent: var(--green); }
+    .dashboard-page .group-card:nth-child(6n + 4) { --group-accent: var(--rose); }
+    .dashboard-page .group-card:nth-child(6n + 5) { --group-accent: var(--amber); }
+    .dashboard-page .group-card:nth-child(6n + 6) { --group-accent: var(--teal); }
+    .dashboard-page .group-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--group-accent, var(--violet));
+      opacity: 0;
+      transition: opacity .2s;
+    }
+    .dashboard-page .group-card:hover {
+      border-color: rgba(17,17,16,.2);
+      box-shadow: 0 8px 24px rgba(17,17,16,.1);
+      transform: translateY(-4px);
+    }
+    .dashboard-page .group-card:hover::before { opacity: 1; }
+    .dashboard-page .group-card-header { display: flex; align-items: center; gap: 14px; }
+    .dashboard-page .group-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Inter Tight', sans-serif; font-weight: 900; font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .dashboard-page .group-info h3 {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 700; font-size: 1.05rem; letter-spacing: -0.02em;
+      margin: 0; color: var(--text);
+    }
+    .dashboard-page .group-meta {
+      font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; font-family: 'Inter', sans-serif;
+    }
+    .dashboard-page .approval-badge { color: var(--amber); font-weight: 600; }
+    .dashboard-page .group-desc {
+      font-size: 0.875rem; color: var(--text-mid); line-height: 1.6;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden; min-height: 2.8em; margin: 0;
+    }
+    .dashboard-page .group-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 12px; border-top: 1px solid rgba(17,17,16,.08); margin-top: auto;
+    }
+    .dashboard-page .group-stats {
+      font-size: 0.8rem; color: var(--text-muted); font-family: 'Inter Tight', sans-serif; font-weight: 600;
+    }
+    .dashboard-page .group-arrow { color: var(--text-muted); font-size: 1.2rem; }
 
     /* Overview tab components */
     .next-meeting-banner { display: flex; align-items: center; gap: 16px; background: linear-gradient(120deg, rgba(14,165,233,.1) 0%, rgba(42,148,89,.1) 100%); border: 1px solid rgba(14,165,233,.18); border-radius: 20px; padding: 18px 22px; margin-bottom: 24px; flex-wrap: wrap; }
@@ -1085,6 +1278,13 @@
       .nav-inner { padding: 0 16px; }
       .hub-shell { padding: 0 12px 48px; }
       .panel-inner { padding: 18px; }
+      .dashboard-page .hero-inner { grid-template-columns: 1fr; }
+      .dashboard-page .hero-main { text-align: center; }
+      .dashboard-page .hero-breadcrumbs { justify-content: center; }
+      .dashboard-page .hero-feature-card { width: 100%; }
+      .dashboard-page .groups-header { align-items: stretch; }
+      .dashboard-page .groups-header-actions { width: 100%; }
+      .dashboard-page .groups-header-actions .btn { width: 100%; justify-content: center; }
     }
   </style>
 </head>
@@ -1428,46 +1628,83 @@ const PAGES = {
   // ───────────────────────────────────────────────────────────────────────────
   '/dashboard': () => `
 <div class="dashboard-page">
-  <div class="section-header">
-    <h2 class="section-title">My Groups</h2>
-    <button class="btn primary sm" onclick="alert('Create Group modal')">+ Create Group</button>
-  </div>
-  <div class="groups-grid">
-    <!-- Group card: Early Bird Zoom (admin) -->
-    <div class="group-card" onclick="navigate('/groups/early-bird-zoom')">
-      <div class="group-header">
-        <div class="group-icon" style="background:var(--t-sky)">🌅</div>
-        <div class="group-info">
-          <div class="group-name">Early Bird Zoom</div>
-          <div class="group-meta">Online · Mon–Fri 7:00 AM</div>
+  <section class="hero-section">
+    <div class="hero-inner">
+      <div class="hero-main">
+        <div class="hero-breadcrumbs">
+          <a class="bc-item" href="#" onclick="navigate('/');return false;">Home</a>
+          <span class="bc-sep">›</span>
+          <span class="bc-item current">Dashboard</span>
         </div>
-        <span class="pill-admin">Admin</span>
+        <div class="hero-eyebrow">My Dashboard</div>
+        <h1 class="hero-title">
+          Stay <span class="serif-accent">close</span> to your <span class="serif-accent">people</span>.
+        </h1>
+        <p class="hero-subtitle">
+          A place to check in, stay connected, and walk together.
+        </p>
       </div>
-      <div class="group-stats">
-        <span>👥 24 members</span>
-        <span>🗓️ 5 meetings</span>
-      </div>
-    </div>
-    <!-- Group card: Downtown Thursday Night -->
-    <div class="group-card" onclick="navigate('/groups/early-bird-zoom')">
-      <div class="group-header">
-        <div class="group-icon" style="background:var(--t-rose)">🏡</div>
-        <div class="group-info">
-          <div class="group-name">Downtown Thursday Night</div>
-          <div class="group-meta">In-Person · Thu 7:30 PM</div>
+
+      <div class="hero-feature-card">
+        <div class="hero-feature-eyebrow">Features</div>
+        <div class="hero-feature-pills">
+          <span class="hero-feature-pill news">News &amp; Announcements <span class="pill-cs">Soon</span></span>
+          <span class="hero-feature-pill events">Event Calendar <span class="pill-cs">Soon</span></span>
+          <span class="hero-feature-pill board">Bulletin Board <span class="pill-cs">Soon</span></span>
         </div>
       </div>
-      <div class="group-stats">
-        <span>👥 31 members</span>
-        <span>🗓️ 1 meeting</span>
+    </div>
+  </section>
+
+  <section class="groups-section">
+    <div class="section-wrap">
+      <div class="groups-header">
+        <div class="groups-header-text">
+          <h2>My Groups</h2>
+          <p>Access all your home groups in one place. Each group has its own space for meetings, phone lists, and connection.</p>
+        </div>
+        <div class="groups-header-actions">
+          <button class="btn btn-dark" type="button" onclick="alert('Create Group modal')">+ Create a Group</button>
+        </div>
+      </div>
+
+      <div class="groups-grid">
+        <a class="group-card" onclick="navigate('/groups/early-bird-zoom')">
+          <div class="group-card-header">
+            <div class="group-icon" style="background:var(--t-sky);color:var(--sky)">E</div>
+            <div class="group-info">
+              <h3>Early Bird Zoom</h3>
+              <div class="group-meta">
+                24 members
+                <span class="approval-badge">· Pending approval</span>
+              </div>
+            </div>
+          </div>
+          <p class="group-desc">A welcoming place to stay connected between meetings.</p>
+          <div class="group-footer">
+            <div class="group-stats">Mon, Tue, Wed · 7:00 AM • 60 min +4 more</div>
+            <div class="group-arrow">→</div>
+          </div>
+        </a>
+
+        <a class="group-card" onclick="navigate('/groups/early-bird-zoom')">
+          <div class="group-card-header">
+            <div class="group-icon" style="background:var(--t-rose);color:var(--rose)">D</div>
+            <div class="group-info">
+              <h3>Downtown Thursday Night</h3>
+              <div class="group-meta">31 members</div>
+            </div>
+          </div>
+          <p class="group-desc">In-person speaker meeting with newcomer-friendly format and strong fellowship.</p>
+          <div class="group-footer">
+            <div class="group-stats">Thu · 7:30 PM • 75 min</div>
+            <div class="group-arrow">→</div>
+          </div>
+        </a>
+
       </div>
     </div>
-    <!-- Add/Join card -->
-    <div class="group-card add-card" onclick="alert('Join or Create Group modal')">
-      <span class="add-icon">➕</span>
-      <span class="add-text">Join or Create a Group</span>
-    </div>
-  </div>
+  </section>
 </div>
 `,
 
@@ -1919,7 +2156,7 @@ function renderNav() {
 // - Group hub: full group hero with serif accent title and 5-tab rail
 function renderHero(config) {
   // Landing page has no hero
-  if (currentRoute === '/') return '';
+  if (currentRoute === '/' || currentRoute === '/dashboard') return '';
   
   // Check if this is a group hub route
   const isGroupHub = currentRoute.startsWith('/groups/');
@@ -2010,6 +2247,9 @@ function navigate(route) {
 
   if (config.layout === 'landing') {
     // Landing page: no hero, raw sections
+    main.innerHTML = content;
+  } else if (currentRoute === '/dashboard') {
+    // Dashboard uses in-page hero + sections (matches live groups-dashboard layout)
     main.innerHTML = content;
   } else if (currentRoute.startsWith('/groups/')) {
     // Group hub: hero + page-card with tab rail and content

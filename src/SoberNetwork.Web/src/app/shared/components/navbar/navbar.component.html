@@ -51,8 +51,9 @@
         <a routerLink="/meetings"  routerLinkActive="active" class="nav-link">Find a Meeting</a>
 
         <!-- My Groups dropdown (in-DOM, anchored to its trigger) -->
-        <div class="menu-anchor" *ngIf="myGroups.length > 0">
-          <button type="button" class="nav-link nav-link-btn"
+        <div class="menu-anchor dropdown-wrap" *ngIf="myGroups.length > 0">
+          <button type="button" class="nav-link nav-link-btn dropdown-trigger"
+                  [class.active]="isGroupRouteActive()"
                   [class.open]="groupsMenuOpen"
                   (click)="toggleGroupsMenu($event)"
                   aria-haspopup="true" [attr.aria-expanded]="groupsMenuOpen">
@@ -64,9 +65,27 @@
 
           <div class="sn-dropdown groups-dropdown" *ngIf="groupsMenuOpen"
                (click)="$event.stopPropagation()" role="menu">
-            <button type="button" class="sn-dropdown-item" *ngFor="let g of myGroups"
+            <div class="dd-section-title">My Groups</div>
+
+            <button type="button" class="dd-group-item" *ngFor="let g of myGroups; trackBy: trackBySlug; let i = index"
                     (click)="navigateToGroup(g.slug)" role="menuitem">
-              {{ g.name }}
+              <div class="dd-group-icon" [ngClass]="getGroupIconColor(i)">
+                {{ g.name.charAt(0).toUpperCase() }}
+              </div>
+              <div class="dd-group-info">
+                <span class="dd-group-name">{{ g.name }}</span>
+                <span class="dd-group-meta">{{ groupMeta(g) }}</span>
+              </div>
+              <span class="pill-admin sm" *ngIf="g.userRole === 'GroupAdmin'">Admin</span>
+            </button>
+
+            <div class="dropdown-divider"></div>
+
+            <a class="sn-dropdown-item" routerLink="/dashboard" (click)="closeMenus()" role="menuitem">
+              <span class="dd-icon">📋</span><span>All My Groups</span>
+            </a>
+            <button type="button" class="sn-dropdown-item" (click)="openCreateGroupDialog()" role="menuitem">
+              <span class="dd-icon">➕</span><span>Create Group</span>
             </button>
           </div>
         </div>
@@ -89,17 +108,25 @@
 
           <div class="sn-dropdown user-dropdown" *ngIf="userMenuOpen"
                (click)="$event.stopPropagation()" role="menu">
-            <div class="dropdown-header">
-              <span class="dd-name">{{ user.displayName }}</span>
-              <span class="dd-email">{{ user.email }}</span>
+            <div class="dd-header">
+              <div class="dd-avatar" [style.background]="getUserAvatarBackground(user.displayName)">
+               {{ user.displayName[0]?.toUpperCase() }}
+              </div>
+              <div class="dd-user-info">
+               <span class="dd-name">{{ user.displayName }}</span>
+               <span class="dd-email">{{ user.email }}</span>
+              </div>
             </div>
             <div class="dropdown-divider"></div>
-            <a class="sn-dropdown-item" routerLink="/profile" (click)="closeMenus()" role="menuitem">
-              <mat-icon>person</mat-icon><span>My Profile</span>
+            <a class="sn-dropdown-item dd-item" routerLink="/profile" (click)="closeMenus()" role="menuitem">
+              <span class="dd-icon">👤</span><span>My Profile</span>
+            </a>
+            <a class="sn-dropdown-item dd-item" routerLink="/dashboard" (click)="closeMenus()" role="menuitem">
+              <span class="dd-icon">🏠</span><span>Dashboard</span>
             </a>
             <div class="dropdown-divider"></div>
-            <button type="button" class="sn-dropdown-item" (click)="logout()" role="menuitem">
-              <mat-icon>logout</mat-icon><span>Sign Out</span>
+            <button type="button" class="sn-dropdown-item dd-item warn" (click)="logout()" role="menuitem">
+              <span class="dd-icon">↩</span><span>Sign Out</span>
             </button>
           </div>
         </div>

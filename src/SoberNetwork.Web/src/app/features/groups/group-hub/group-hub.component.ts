@@ -8,6 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { COUNTRIES, GroupResponse, LANGUAGES, MeetingType, US_STATES } from '@app/core/models';
 import { ClientLogService } from '@app/core/services/client-log.service';
 import { GroupService } from '@app/core/services/group.service';
+import { BreadcrumbItem } from '@app/shared/components/breadcrumbs/breadcrumbs.component';
 import { GroupHeroComponent, HeroTag } from '../group-hero/group-hero.component';
 import { MeetingFormModalComponent } from '../meeting-form-modal/meeting-form-modal.component';
 import { MeetingsTabComponent } from './tabs/meetings-tab/meetings-tab.component';
@@ -80,6 +81,16 @@ export class GroupHubComponent implements OnInit, OnDestroy {
     }
 
     return tags;
+  }
+
+  get heroBreadcrumbs(): BreadcrumbItem[] {
+    if (!this.group) return [];
+
+    return [
+      { label: 'Home', route: '/' },
+      { label: 'My Groups', route: ['/dashboard'] },
+      { label: `${this.group.name} ${this.heroTabLabel()}` },
+    ];
   }
 
   ngOnInit(): void {
@@ -208,5 +219,20 @@ export class GroupHubComponent implements OnInit, OnDestroy {
         this.group = null;
       },
     });
+  }
+
+  private heroTabLabel(): string {
+    switch (this.activeTab) {
+      case 'members':
+        return 'Members';
+      case 'meetings':
+        return 'Meetings';
+      case 'requests':
+        return 'Requests';
+      case 'settings':
+        return 'Settings';
+      default:
+        return 'Hub';
+    }
   }
 }

@@ -56,6 +56,13 @@ export class GroupFormModalComponent implements OnInit {
     timeZone: ['', [Validators.maxLength(100)]],
     isPublic: [true, { nonNullable: true }],
     requiresApproval: [true, { nonNullable: true }],
+    districtName: ['', [Validators.maxLength(100)]],
+    districtWebsiteUrl: ['', [Validators.maxLength(500)]],
+    areaName: ['', [Validators.maxLength(100)]],
+    areaWebsiteUrl: ['', [Validators.maxLength(500)]],
+    state: ['', [Validators.maxLength(50)]],
+    districtLatitude: [null as number | null],
+    districtLongitude: [null as number | null],
   });
 
   ngOnInit(): void {
@@ -76,6 +83,13 @@ export class GroupFormModalComponent implements OnInit {
             timeZone: group.timeZone,
             isPublic: group.isPublic,
             requiresApproval: group.requiresApproval,
+            districtName: group.districtName ?? '',
+            districtWebsiteUrl: group.districtWebsiteUrl ?? '',
+            areaName: group.areaName ?? '',
+            areaWebsiteUrl: group.areaWebsiteUrl ?? '',
+            state: group.state ?? '',
+            districtLatitude: group.districtLatitude ?? null,
+            districtLongitude: group.districtLongitude ?? null,
           });
         },
         error: (err) => {
@@ -96,6 +110,13 @@ export class GroupFormModalComponent implements OnInit {
       timeZone: formValue.timeZone,
       isPublic: formValue.isPublic,
       requiresApproval: formValue.requiresApproval,
+      districtName: formValue.districtName || null,
+      districtWebsiteUrl: formValue.districtWebsiteUrl || null,
+      areaName: formValue.areaName || null,
+      areaWebsiteUrl: formValue.areaWebsiteUrl || null,
+      state: formValue.state || null,
+      districtLatitude: formValue.districtLatitude,
+      districtLongitude: formValue.districtLongitude,
     };
 
     this.groupService

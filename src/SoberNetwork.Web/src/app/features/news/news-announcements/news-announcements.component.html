@@ -1,0 +1,77 @@
+<!-- ══ HERO ════════════════════════════════════════════════════════════════ -->
+<app-group-hero
+  title="Stay"
+  titleSuffix="informed."
+  description="Stay connected to what matters."
+  eyebrowText="Community Feed"
+  eyebrowIcon="campaign"
+  [breadcrumbs]="breadcrumbs"
+  [showPlusButton]="true"
+  plusButtonText="New Post"
+  (plusClick)="openNewPost()"
+></app-group-hero>
+
+<!-- ══ FEED SECTION ══════════════════════════════════════════════════════ -->
+<section class="feed-section">
+  <div class="section-wrap">
+
+    <div class="section-header fade-up">
+      <h2 class="section-title">My News &amp; Announcements</h2>
+      <button class="new-post-btn" type="button" (click)="openNewPost()">
+        <span class="new-post-icon">+</span> New Post
+      </button>
+    </div>
+
+    <!-- Error -->
+    <div class="state-error fade-up" *ngIf="error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error }}</p>
+      <button class="retry-btn" type="button" (click)="loadFeed()">Try again</button>
+    </div>
+
+    <!-- Initial loading -->
+    <div class="state-loading" *ngIf="loading">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading your feed…</p>
+    </div>
+
+    <!-- Empty state -->
+    <div class="state-empty fade-up" *ngIf="!loading && !error && posts.length === 0">
+      <div class="empty-icon">📣</div>
+      <h3>Nothing here yet</h3>
+      <p>Be the first to share news or an announcement with your groups.</p>
+      <button class="new-post-btn" type="button" (click)="openNewPost()">
+        Share an Update
+      </button>
+    </div>
+
+    <!-- Post feed -->
+    <div class="post-feed" *ngIf="!loading && posts.length > 0">
+      <app-post-card
+        *ngFor="let post of posts; let i = index; trackBy: trackById"
+        [post]="post"
+        [currentUserId]="currentUserId"
+        [cardIndex]="i"
+        [isGroupAdmin]="isAdminForPost(post)"
+        (edit)="openEditPost($event)"
+        (delete)="deletePost($event)"
+        (approve)="approvePost($event)"
+      ></app-post-card>
+    </div>
+
+    <!-- Load-more spinner -->
+    <div class="load-more-spinner" *ngIf="loadingMore">
+      <mat-spinner diameter="32"></mat-spinner>
+    </div>
+
+    <!-- Infinite scroll sentinel -->
+    <div id="feed-sentinel" class="feed-sentinel"></div>
+
+    <!-- End of feed -->
+    <div class="end-of-feed fade-up" *ngIf="!loading && !loadingMore && !hasMore && posts.length > 0">
+      <mat-icon>check_circle_outline</mat-icon>
+      <span>You're all caught up!</span>
+    </div>
+
+  </div>
+</section>

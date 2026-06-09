@@ -7,7 +7,8 @@ import { BehaviorSubject, of } from 'rxjs';
 import { NavbarComponent } from './navbar.component';
 import { AuthService } from '@app/core/services/auth.service';
 import { GroupService } from '@app/core/services/group.service';
-import { CurrentUser } from '@app/core/models';
+import { CreateGroupModalComponent } from '@app/features/groups/create-group-modal/create-group-modal.component';
+import { CurrentUser, GroupResponse } from '@app/core/models';
 
 function makeUser(userId = 'u1'): CurrentUser {
   return {
@@ -21,11 +22,48 @@ function makeUser(userId = 'u1'): CurrentUser {
   };
 }
 
+function makeGroup(overrides: Partial<GroupResponse> = {}): GroupResponse {
+  return {
+    id: 'g1',
+    name: 'Early Bird Zoom',
+    slug: 'early-bird-zoom',
+    description: 'A welcoming place to stay connected between meetings.',
+    timeZone: 'America/New_York',
+    isActive: true,
+    isPublic: true,
+    requiresApproval: true,
+    memberCount: 24,
+    userRole: 'GroupAdmin',
+    userMembershipStatus: 'Active',
+    createdAt: new Date().toISOString(),
+    meetings: [],
+    nextMeeting: {
+      id: 'm1',
+      name: 'Morning Meeting',
+      nextOccurrence: '2026-06-08T19:00:00Z',
+      durationMinutes: 60,
+      meetingType: 'Online',
+    },
+    userIsPhoneShared: false,
+    userIsEmailShared: false,
+    districtName: null,
+    areaName: null,
+    state: null,
+    districtWebsiteUrl: null,
+    areaWebsiteUrl: null,
+    districtLatitude: null,
+    districtLongitude: null,
+    ...overrides,
+  };
+}
+
 describe('NavbarComponent — account dropdown', () => {
   let fixture: ComponentFixture<NavbarComponent>;
   let component: NavbarComponent;
   let currentUser$: BehaviorSubject<CurrentUser | null>;
   let logoutSpy: ReturnType<typeof vi.fn>;
+  let getMyGroupsSpy: ReturnType<typeof vi.fn>;
+  let dialogOpenSpy: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     // jsdom lacks IntersectionObserver, which the scroll-spy uses.
@@ -38,14 +76,16 @@ describe('NavbarComponent — account dropdown', () => {
 
     currentUser$ = new BehaviorSubject<CurrentUser | null>(null);
     logoutSpy = vi.fn();
+    getMyGroupsSpy = vi.fn(() => of([makeGroup()]));
+    dialogOpenSpy = vi.fn(() => ({ afterClosed: () => of(true) }));
 
     await TestBed.configureTestingModule({
       imports: [NavbarComponent],
       providers: [
         provideRouter([]),
         { provide: AuthService, useValue: { currentUser$: currentUser$.asObservable(), logout: logoutSpy } },
-        { provide: GroupService, useValue: { getMyGroups: () => of([]) } },
-        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: GroupService, useValue: { getMyGroups: getMyGroupsSpy } },
+        { provide: MatDialog, useValue: { open: dialogOpenSpy } },
       ],
     }).compileComponents();
 
@@ -78,8 +118,11 @@ describe('NavbarComponent — account dropdown', () => {
     expect(component.userMenuOpen).toBe(true);
     const dropdown = el('.user-dropdown');
     expect(dropdown).toBeTruthy();
+    expect(el('.dd-avatar')?.textContent?.trim()).toBe('J');
+    expect(el('.dd-avatar')?.getAttribute('style')).toContain('--sn-tint-');
     expect(el('.dd-name')?.textContent).toContain('Jane Doe');
     expect(el('.dd-email')?.textContent).toContain('jane@example.com');
+    expect(dropdown?.textContent).toContain('Dashboard');
   });
 
   it('closes the dropdown on an outside (document) click', () => {
@@ -114,6 +157,42 @@ describe('NavbarComponent — account dropdown', () => {
     component.toggleUserMenu(new MouseEvent('click'));
     fixture.detectChanges();
     expect(el('.user-dropdown')).toBeTruthy();
+  });
+
+  it('renders the richer My Groups dropdown when groups exist', () => {
+    component.user = makeUser();
+    component.myGroups = [makeGroup()];
+    fixture.detectChanges();
+
+    expect(el('.dropdown-trigger')).toBeTruthy();
+
+    component.toggleGroupsMenu(new MouseEvent('click'));
+    fixture.detectChanges();
+
+    expect(el('.groups-dropdown')).toBeTruthy();
+    expect(el('.dd-section-title')?.textContent).toContain('My Groups');
+    expect(el('.dd-group-name')?.textContent).toContain('Early Bird Zoom');
+    expect(el('.dd-group-meta')?.textContent).toContain('24 members');
+    expect(el('.pill-admin.sm')?.textContent).toContain('Admin');
+    expect(fixture.nativeElement.textContent).toContain('All My Groups');
+    expect(fixture.nativeElement.textContent).toContain('Create Group');
+  });
+
+  it('opens the create group dialog from the dropdown action and refreshes groups on success', () => {
+    component.user = makeUser();
+    fixture.detectChanges();
+
+    component.openCreateGroupDialog();
+
+    expect(dialogOpenSpy).toHaveBeenCalledWith(
+      CreateGroupModalComponent,
+      expect.objectContaining({
+        panelClass: ['sn-modal-panel', 'sn-create-group-panel'],
+        maxWidth: '100vw',
+        autoFocus: 'first-tabbable',
+      }),
+    );
+    expect(getMyGroupsSpy).toHaveBeenCalledTimes(1);
   });
 
   it('closes any open dropdown and logs out when Sign Out is used', () => {

@@ -1,0 +1,78 @@
+<!-- ══ POST CARD ═══════════════════════════════════════════════════════════ -->
+<article class="post-card fade-up" [style.animation-delay]="(cardIndex * 0.07) + 's'">
+
+  <!-- Pending approval banner (admin-only) -->
+  <div class="approval-banner" *ngIf="post.needsApproval">
+    <mat-icon class="approval-icon">hourglass_empty</mat-icon>
+    <span>Pending approval</span>
+  </div>
+
+  <!-- Card header: avatar + meta + menu -->
+  <div class="card-header">
+    <div class="author-avatar" [attr.data-initial]="authorInitial">
+      {{ authorInitial }}
+    </div>
+
+    <div class="card-meta">
+      <span class="author-name">{{ post.authorDisplayName }}</span>
+      <div class="meta-row">
+        <a class="group-link" [routerLink]="['/groups', post.groupSlug]">
+          {{ post.groupName }}
+        </a>
+        <span class="meta-sep">·</span>
+        <span class="post-time">{{ relativeTime }}</span>
+      </div>
+    </div>
+
+    <!-- Ellipsis menu -->
+    <div class="menu-wrap" *ngIf="showMenu">
+      <button class="menu-trigger" (click)="toggleMenu($event)" aria-label="Post options" type="button">
+        <mat-icon>more_horiz</mat-icon>
+      </button>
+      <div class="dropdown-menu" *ngIf="menuOpen">
+        <button class="menu-item" *ngIf="canEdit" (click)="onEdit()" type="button">
+          <mat-icon>edit</mat-icon> Edit
+        </button>
+        <button class="menu-item menu-item--approve" *ngIf="post.needsApproval" (click)="onApprove()" type="button">
+          <mat-icon>check_circle</mat-icon> Approve
+        </button>
+        <button class="menu-item menu-item--danger" *ngIf="canDelete" (click)="onDelete()" type="button">
+          <mat-icon>delete_outline</mat-icon> Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subject -->
+  <h3 class="post-subject">{{ post.subject }}</h3>
+
+  <!-- Body -->
+  <p class="post-body">{{ post.body }}</p>
+
+  <!-- Image (optional) -->
+  <div class="post-image-wrap" *ngIf="post.imageUrl && !imageError">
+    <img
+      class="post-image"
+      [src]="post.imageUrl"
+      [alt]="post.subject"
+      (error)="onImageError()"
+      loading="lazy"
+    />
+  </div>
+
+  <!-- Link preview (optional) -->
+  <a class="post-link-card" *ngIf="post.linkUrl" [href]="post.linkUrl" target="_blank" rel="noopener noreferrer">
+    <mat-icon class="link-icon">link</mat-icon>
+    <div class="link-text">
+      <span class="link-title">{{ post.linkTitle || post.linkUrl }}</span>
+      <span class="link-url">{{ post.linkUrl }}</span>
+    </div>
+    <mat-icon class="link-arrow">open_in_new</mat-icon>
+  </a>
+
+  <!-- Edited indicator -->
+  <div class="post-edited" *ngIf="post.updatedAt !== post.createdAt">
+    <mat-icon>edit</mat-icon> Edited
+  </div>
+
+</article>

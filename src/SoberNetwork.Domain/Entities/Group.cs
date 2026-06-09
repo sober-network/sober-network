@@ -13,6 +13,7 @@ public class Group
     public DateTime? DeletedAt { get; set; }           // soft delete — groups are never permanently removed (T4)
     public bool IsPublic { get; set; } = true;
     public bool RequiresApproval { get; set; } = true;
+    public bool RequiresPostApproval { get; set; } = false;
 
     // District/Area information for service area display
     public string? DistrictName { get; set; }         // e.g. "District 5"
@@ -26,4 +27,5 @@ public class Group
     public ICollection<GroupMembership> Memberships { get; set; } = [];
     public ICollection<Meeting> Meetings { get; set; } = [];
     public ICollection<GroupServiceRole> ServiceRoles { get; set; } = [];
+    public ICollection<Post> Posts { get; set; } = [];
 }

@@ -34,12 +34,69 @@
           <div class="label-row">
             <label for="group-timezone">Time zone</label>
           </div>
-          <input id="group-timezone" class="text-input" type="text" formControlName="timeZone" list="settings-timezones" maxlength="100" placeholder="e.g. America/New_York" />
-          <datalist id="settings-timezones">
-            <option *ngFor="let zone of timeZones" [value]="zone"></option>
-          </datalist>
+          <select id="group-timezone" class="text-input select-input" formControlName="timeZone">
+            <option value="">— Select time zone —</option>
+            <option *ngFor="let zone of timeZones" [value]="zone">{{ zone }}</option>
+          </select>
         </div>
       </div>
+    </section>
+
+    <!-- Service Area -->
+    <section class="card full-span-card">
+      <div class="card-heading">
+        <div>
+          <div class="eyebrow">Service area</div>
+          <h2>District &amp; area</h2>
+        </div>
+      </div>
+      <p class="service-area-note">
+        District and area information helps members find your group in the meeting finder.
+        Online meetings without a physical address use district coordinates as a location fallback —
+        <strong>online meetings won't appear in location searches without them.</strong>
+      </p>
+
+      <div class="field-grid">
+        <div class="field full-span">
+          <label for="group-state">State / Region</label>
+          <select id="group-state" class="text-input select-input" formControlName="state">
+            <option value="">— Select state / region —</option>
+            <option *ngFor="let state of stateOptions" [value]="state">{{ state }}</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>District Name</label>
+          <input class="text-input" type="text" formControlName="districtName" maxlength="100" placeholder="e.g. District 5" />
+        </div>
+        <div class="field">
+          <label>District Website</label>
+          <input class="text-input" type="url" formControlName="districtWebsiteUrl" maxlength="500" placeholder="https://…" />
+        </div>
+
+        <div class="field">
+          <label>Area Name</label>
+          <input class="text-input" type="text" formControlName="areaName" maxlength="100" placeholder="e.g. Area 11" />
+        </div>
+        <div class="field">
+          <label>Area Website</label>
+          <input class="text-input" type="url" formControlName="areaWebsiteUrl" maxlength="500" placeholder="https://…" />
+        </div>
+
+        <div class="field">
+          <label>District Latitude</label>
+          <input class="text-input" type="number" formControlName="districtLatitude" step="0.0001" placeholder="e.g. 40.7128" />
+        </div>
+        <div class="field">
+          <label>District Longitude</label>
+          <input class="text-input" type="number" formControlName="districtLongitude" step="0.0001" placeholder="e.g. -74.0060" />
+        </div>
+      </div>
+      <p class="coords-hint">
+        💡 Find coordinates: search your district on
+        <a href="https://www.openstreetmap.org" target="_blank" rel="noreferrer">openstreetmap.org</a>,
+        right-click the map and select "Show address".
+      </p>
     </section>
 
     <section class="card side-card">

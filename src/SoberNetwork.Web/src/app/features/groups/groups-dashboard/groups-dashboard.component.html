@@ -1,20 +1,38 @@
 <!-- ══ HERO SECTION ══════════════════════════════════════════════════════ -->
 <section class="hero-section">
   <div class="hero-inner">
-    <div class="hero-eyebrow">My Communities</div>
-    <h1 class="hero-title fade-up">
-      Stay <span class="serif-accent">close</span> to your people
-    </h1>
-    <p class="hero-subtitle fade-up delay-1">
-      Every group here is a place to check in, stay connected, and keep walking together.
-    </p>
-    <div class="hero-ctas fade-up delay-2">
-      <button class="btn btn-dark" type="button" (click)="openCreateGroupDialog()">
-        + Create a Group
-      </button>
-      <a routerLink="/meetings" class="btn btn-outline">
-        Find a Meeting
-      </a>
+    <div class="hero-left">
+      <nav class="hero-breadcrumb">
+        <a routerLink="/" class="breadcrumb-link">Home</a>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-current">Dashboard</span>
+      </nav>
+      <div class="hero-eyebrow">My Dashboard</div>
+      <h1 class="hero-title fade-up">
+        Stay <span class="serif-accent">close</span> to your <span class="serif-accent">people</span>.
+      </h1>
+      <p class="hero-subtitle fade-up delay-1">
+        A place to check in, stay connected, and walk together.
+      </p>
+    </div>
+    <div class="hero-right fade-up delay-2">
+      <div class="hero-feature-card">
+        <div class="feature-card-eyebrow">Features</div>
+        <div class="feature-pills">
+          <a class="feature-pill pill-teal" routerLink="/dashboard">
+            My Groups <span class="pill-new">NEW</span>
+          </a>
+          <a class="feature-pill pill-violet" routerLink="/news-and-announcements">
+            News &amp; Announcements <span class="pill-new">NEW</span>
+          </a>
+          <span class="feature-pill pill-sky">
+            Event Calendar <span class="pill-soon">Soon</span>
+          </span>
+          <span class="feature-pill pill-green">
+            Bulletin Board <span class="pill-soon">Soon</span>
+          </span>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -49,8 +67,12 @@
       <ng-container *ngIf="groups.length > 0">
         <div class="groups-header fade-up">
           <div class="groups-header-text">
-            <h2>Your Groups</h2>
-            <p>Access all your home groups in one place. Each group has its own space for meetings, phone lists, and connection.</p>
+            <h2>My Groups</h2>
+          </div>
+          <div class="groups-header-actions">
+            <button class="btn btn-dark" type="button" (click)="openCreateGroupDialog()">
+              + Create a Group
+            </button>
           </div>
         </div>
 
@@ -94,68 +116,3 @@
     </ng-container>
   </div>
 </section>
-
-<ng-template #createGroupDialog let-dialogRef="dialogRef">
-  <h2 mat-dialog-title>Create a new group</h2>
-
-  <mat-dialog-content>
-    <p class="dialog-copy">Start a welcoming home for your people. You can adjust these details anytime.</p>
-
-    <form [formGroup]="createForm" class="dialog-form" novalidate>
-      <section>
-        <h3>Basics</h3>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Name</mat-label>
-          <input matInput formControlName="name" maxlength="100" />
-          <mat-hint align="end">{{ createForm.controls.name.value?.length ?? 0 }}/100</mat-hint>
-          <mat-error *ngIf="createForm.controls.name.hasError('required')">Name is required.</mat-error>
-          <mat-error *ngIf="createForm.controls.name.hasError('minlength')">Name must be at least 2 characters.</mat-error>
-          <mat-error *ngIf="createForm.controls.name.hasError('maxlength')">Name must be 100 characters or less.</mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Slug</mat-label>
-          <input matInput formControlName="slug" maxlength="50" (input)="markSlugEdited()" />
-          <mat-hint>Lowercase letters, numbers, and hyphens only.</mat-hint>
-          <mat-error *ngIf="createForm.controls.slug.hasError('required')">Slug is required.</mat-error>
-          <mat-error *ngIf="createForm.controls.slug.hasError('pattern')">Use lowercase letters, numbers, and hyphens only.</mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Description</mat-label>
-          <textarea matInput formControlName="description" rows="4" maxlength="500"></textarea>
-          <mat-hint align="end">{{ createForm.controls.description.value?.length ?? 0 }}/500</mat-hint>
-        </mat-form-field>
-      </section>
-
-      <section>
-        <h3>Time zone &amp; access</h3>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Time zone</mat-label>
-          <input matInput formControlName="timeZone" list="dashboard-timezones" maxlength="100" placeholder="e.g. America/New_York" />
-        </mat-form-field>
-        <datalist id="dashboard-timezones">
-          <option *ngFor="let zone of timeZones" [value]="zone"></option>
-        </datalist>
-
-        <div class="toggle-list">
-          <mat-slide-toggle formControlName="isPublic">Public group page</mat-slide-toggle>
-          <mat-slide-toggle formControlName="requiresApproval">Approve new members before they join</mat-slide-toggle>
-        </div>
-      </section>
-
-      <p class="form-error" *ngIf="createError">{{ createError }}</p>
-    </form>
-  </mat-dialog-content>
-
-  <mat-dialog-actions align="end">
-    <button mat-button type="button" (click)="dialogRef.close()">Cancel</button>
-    <button mat-raised-button color="primary" type="button" [disabled]="creating" (click)="submitCreate(dialogRef)">
-      <mat-icon *ngIf="!creating">group_add</mat-icon>
-      <mat-spinner *ngIf="creating" diameter="20"></mat-spinner>
-      <span>{{ creating ? 'Creating…' : 'Create Group' }}</span>
-    </button>
-  </mat-dialog-actions>
-</ng-template>

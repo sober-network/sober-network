@@ -1,4 +1,5 @@
 .sn-footer {
+  background: #1a1a18;
   padding: 24px 16px 16px;
   text-align: center;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
@@ -14,6 +15,7 @@
   }
 
   .footer-brand {
+    color: lightgray;
     font-weight: 600;
     font-size: 0.9rem;
   }
@@ -24,12 +26,14 @@
   }
 
   .footer-link {
+    color: lightgray;
     font-size: 0.85rem;
     min-width: unset;
     padding: 0 4px;
   }
 
   .footer-disclaimer {
+    color: darkgray;
     font-size: 0.72rem;
     opacity: 0.5;
     max-width: 560px;

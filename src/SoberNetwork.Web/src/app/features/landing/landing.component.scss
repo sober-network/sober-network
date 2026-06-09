@@ -627,16 +627,42 @@
   background: white;
   border: 1px solid var(--sn-border);
   border-radius: 20px;
-  padding: 24px;
+  padding: 28px 22px 24px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   text-decoration: none;
   color: inherit;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow .18s, transform .12s, border-color 0.2s;
   cursor: pointer;
 
-  &:hover { border-color: rgba(17,17,16,0.2); box-shadow: 0 4px 16px rgba(17,17,16,0.07); }
+  &:nth-child(6n + 1) { --group-accent: var(--sn-icon-amber); }
+  &:nth-child(6n + 2) { --group-accent: var(--sn-icon-rose); }
+  &:nth-child(6n + 3) { --group-accent: var(--sn-icon-teal); }
+  &:nth-child(6n + 4) { --group-accent: var(--sn-icon-indigo); }
+  &:nth-child(6n + 5) { --group-accent: var(--sn-icon-coral); }
+  &:nth-child(6n + 6) { --group-accent: var(--sn-icon-violet); }
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--group-accent, var(--sn-icon-violet));
+    opacity: 0;
+    transition: opacity .2s;
+  }
+
+  &:hover {
+    border-color: rgba(17,17,16,0.2);
+    box-shadow: 0 16px 48px rgba(17,17,16,.09), 0 2px 8px rgba(17,17,16,.03);
+    transform: translateY(-4px);
+
+    &::before { opacity: 1; }
+  }
 }
 
 .group-card-header {
@@ -645,58 +671,86 @@
   gap: 14px;
 }
 
-.group-initial {
-  width: 44px; height: 44px;
-  border-radius: 12px;
-  background: var(--sn-tint-violet);
-  color: var(--sn-icon-violet);
+.group-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: 'Inter Tight', sans-serif;
   font-weight: 900;
   font-size: 1.2rem;
-  display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
+  color: white;
+
+  &.violet { background: var(--sn-tint-violet, hsla(260, 70%, 65%, 0.12)); color: var(--sn-icon-violet, #8a4fa3); }
+  &.rose { background: var(--sn-tint-rose, hsla(345, 75%, 65%, 0.12)); color: var(--sn-icon-rose, #d9359a); }
+  &.sky { background: var(--sn-tint-sky, hsla(205, 85%, 60%, 0.12)); color: var(--sn-icon-sky, #0ea5e9); }
+  &.amber { background: var(--sn-tint-amber, hsla(38, 90%, 58%, 0.12)); color: var(--sn-icon-amber, #d97706); }
+  &.green { background: var(--sn-tint-green, hsla(148, 58%, 52%, 0.12)); color: var(--sn-icon-green, #2a9459); }
+  &.teal { background: var(--sn-tint-teal, hsla(183, 62%, 52%, 0.12)); color: var(--sn-icon-teal, #0f766e); }
+  &.indigo { background: var(--sn-tint-indigo, hsla(230, 70%, 62%, 0.12)); color: var(--sn-icon-indigo, #4f46e5); }
+  &.coral { background: var(--sn-tint-coral, hsla(18, 82%, 62%, 0.12)); color: var(--sn-icon-coral, #ea5e3d); }
 }
 
-.group-name {
+.group-info h3 {
   font-family: 'Inter Tight', sans-serif;
   font-weight: 700;
-  font-size: 1rem;
-  color: var(--sn-text);
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--sn-text, #111110);
 }
 
 .group-meta {
   font-size: 0.8rem;
-  color: var(--sn-text-muted);
-  margin-top: 2px;
+  color: var(--sn-text-muted, #7a7a75);
+  margin-top: 4px;
+  font-family: 'Inter', sans-serif;
 }
 
-.group-approval {
-  margin-left: auto;
-  font-size: 0.72rem;
+.approval-badge {
+  color: var(--sn-icon-amber, #d97706);
   font-weight: 600;
-  color: var(--sn-icon-amber);
-  background: var(--sn-tint-amber);
-  padding: 3px 10px;
-  border-radius: 100px;
-  white-space: nowrap;
-  font-family: 'Inter Tight', sans-serif;
 }
 
 .group-desc {
   font-size: 0.875rem;
-  color: var(--sn-text-mid);
-  line-height: 1.5;
+  color: var(--sn-text-mid, #3d3d3a);
+  line-height: 1.6;
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  min-height: 2.8em;
+}
+
+.group-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--sn-border, rgba(17, 17, 16, 0.08));
+  margin-top: auto;
+}
+
+.group-stats {
+  font-size: 0.8rem;
+  color: var(--sn-text-muted, #7a7a75);
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 600;
 }
 
 .group-arrow {
-  margin-top: auto;
-  font-size: 1.1rem;
-  color: var(--sn-text-muted);
+  color: var(--sn-text-muted, #7a7a75);
+  font-size: 1.2rem;
+  transition: transform 0.2s;
+
+  .group-card:hover & {
+    transform: translateX(4px);
+  }
 }
 
 // ── NEWCOMER CTA ───────────────────────────────────────────────────────────

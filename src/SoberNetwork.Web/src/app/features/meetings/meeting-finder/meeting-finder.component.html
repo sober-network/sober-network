@@ -1,200 +1,182 @@
-<section class="meeting-finder">
-  <!-- ── Header ──────────────────────────────────────────────────────────── -->
-  <div class="finder-header">
-    <h1>Find a Meeting</h1>
-    <p class="lead">AA meetings are listed by our member groups. No sign-up required.</p>
+<div class="meeting-finder">
+
+  <!-- ── Page header ──────────────────────────────────────────────────────── -->
+  <div class="finder-page-header">
+    <p class="finder-eyebrow">Public</p>
+    <h1 class="finder-title">Find a Meeting</h1>
+    <p class="finder-lead">A.A. meetings listed by member groups. No sign-up required.</p>
   </div>
 
-  <!-- ── Location bar ────────────────────────────────────────────────────── -->
-  <div class="location-bar card mb-3">
-    <div class="card-body d-flex flex-wrap gap-2 align-items-center">
-      <button class="btn btn-outline-primary btn-sm" (click)="useMyLocation()" type="button">
-        📍 Use My Location
-      </button>
-      <div class="input-group input-group-sm" style="max-width: 340px">
+  <!-- ── Two-column layout ────────────────────────────────────────────────── -->
+  <div class="finder-layout">
+
+    <!-- ── Sidebar ───────────────────────────────────────────────────────── -->
+    <aside class="finder-sidebar">
+
+      <!-- Location search -->
+      <div class="search-box">
         <input
           type="text"
-          class="form-control"
-          placeholder="Enter address or zip code…"
+          class="search-input"
+          placeholder="City, zip, or address…"
           [(ngModel)]="addressInput"
           (keyup.enter)="geocodeAddress()"
           aria-label="Address or zip code"
         />
-        <button class="btn btn-outline-secondary" (click)="geocodeAddress()" type="button">Search</button>
+        <button class="search-btn" (click)="geocodeAddress()" type="button">Search</button>
+        <button class="location-btn" (click)="useMyLocation()" type="button">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+            <circle cx="7" cy="7" r="2.5"/><path d="M7 1V4M7 10V13M1 7H4M10 7H13"/>
+          </svg>
+          Use my location
+        </button>
+        @if (locationLabel()) {
+          <div class="location-active">
+            <span class="location-label">📍 {{ locationLabel() }}</span>
+            <div class="radius-row">
+              <span class="radius-label">Radius</span>
+              <input type="number" class="radius-input" [(ngModel)]="radiusMiles"
+                     (change)="onRadiusChange()" min="1" max="200" aria-label="Radius in miles"/>
+              <span class="radius-unit">mi</span>
+              <button class="clear-location-btn" (click)="clearLocation()" type="button" aria-label="Clear location">✕</button>
+            </div>
+          </div>
+        }
+        @if (geoError()) {
+          <p class="geo-error">{{ geoError() }}</p>
+        }
       </div>
-      @if (locationLabel()) {
-        <span class="badge bg-info text-dark">
-          📍 {{ locationLabel() }}
-          <button class="btn-close btn-close-sm ms-1" (click)="clearLocation()" aria-label="Clear location"></button>
-        </span>
-        <div class="d-flex align-items-center gap-1">
-          <label class="form-label mb-0 text-nowrap small">Radius:</label>
-          <input
-            type="number"
-            class="form-control form-control-sm"
-            style="width: 70px"
-            [(ngModel)]="radiusMiles"
-            (change)="onRadiusChange()"
-            min="1"
-            max="200"
-            aria-label="Radius in miles"
-          />
-          <span class="small">mi</span>
-        </div>
-      }
-      @if (geoError()) {
-        <span class="text-danger small">{{ geoError() }}</span>
-      }
-    </div>
-  </div>
 
-  <!-- ── Filters ─────────────────────────────────────────────────────────── -->
-  <div class="filters card mb-3">
-    <div class="card-body">
-      <!-- Day chips -->
-      <div class="filter-row mb-2">
-        <label class="filter-label">Day</label>
-        <div class="chips">
+      <!-- Day -->
+      <div class="filter-section">
+        <div class="filter-title">Day</div>
+        <div class="day-chips">
           @for (day of DAYS; track $index) {
-            <button
-              class="chip"
-              [class.active]="selectedDays().includes($index)"
-              (click)="toggleDay($index)"
-              type="button"
-            >{{ day }}</button>
+            <button class="day-chip" [class.active]="selectedDays().includes($index)"
+                    (click)="toggleDay($index)" type="button">{{ day }}</button>
           }
         </div>
       </div>
 
-      <!-- Time block -->
-      <div class="filter-row mb-2">
-        <label class="filter-label">Time</label>
-        <div class="chips">
-          @for (label of ['Morning', 'Afternoon', 'Evening', 'Night']; track $index) {
-            <button
-              class="chip"
-              [class.active]="selectedTimeBlock() === $index"
-              (click)="setTimeBlock($index)"
-              type="button"
-            >{{ label }}</button>
+      <!-- Time -->
+      <div class="filter-section">
+        <div class="filter-title">Time</div>
+        <div class="filter-chips">
+          @for (label of ['Morning','Afternoon','Evening','Night']; track $index) {
+            <button class="filter-chip" [class.active]="selectedTimeBlock() === $index"
+                    (click)="setTimeBlock($index)" type="button">{{ label }}</button>
           }
         </div>
       </div>
 
-      <!-- Format chips -->
-      <div class="filter-row mb-2">
-        <label class="filter-label">Format</label>
-        <div class="chips">
+      <!-- Format -->
+      <div class="filter-section">
+        <div class="filter-title">Format</div>
+        <div class="filter-chips">
           @for (fmt of FORMATS; track fmt) {
-            <button
-              class="chip"
-              [class.active]="selectedFormats().includes(fmt)"
-              (click)="toggleFormat(fmt)"
-              type="button"
-            >{{ formatMeetingLabel(fmt) }}</button>
+            <button class="filter-chip" [class.active]="selectedFormats().includes(fmt)"
+                    (click)="toggleFormat(fmt)" type="button">{{ formatMeetingLabel(fmt) }}</button>
           }
         </div>
       </div>
 
-      <!-- Meeting type + Open/Closed -->
-      <div class="filter-row d-flex flex-wrap gap-3">
-        <div>
-          <label class="filter-label">Type</label>
-          <div class="chips">
-            <button class="chip" [class.active]="selectedMeetingType() === MeetingType.InPerson"  (click)="setMeetingType(MeetingType.InPerson)"  type="button">In-Person</button>
-            <button class="chip" [class.active]="selectedMeetingType() === MeetingType.Online"    (click)="setMeetingType(MeetingType.Online)"    type="button">Online</button>
-            <button class="chip" [class.active]="selectedMeetingType() === MeetingType.Hybrid"    (click)="setMeetingType(MeetingType.Hybrid)"    type="button">Hybrid</button>
-          </div>
-        </div>
-        <div>
-          <label class="filter-label">Attendance</label>
-          <div class="chips">
-            <button class="chip" [class.active]="isOpen() === true"  (click)="setOpenFilter(true)"  type="button">Open</button>
-            <button class="chip" [class.active]="isOpen() === false" (click)="setOpenFilter(false)" type="button">Closed</button>
-          </div>
-        </div>
-        <div class="ms-auto align-self-end">
-          <button class="btn btn-link btn-sm p-0 text-muted" (click)="clearFilters()" type="button">Clear all filters</button>
+      <!-- Type -->
+      <div class="filter-section">
+        <div class="filter-title">Type</div>
+        <div class="filter-chips">
+          <button class="filter-chip" [class.active]="selectedMeetingType() === MeetingType.InPerson"
+                  (click)="setMeetingType(MeetingType.InPerson)" type="button">In-Person</button>
+          <button class="filter-chip" [class.active]="selectedMeetingType() === MeetingType.Online"
+                  (click)="setMeetingType(MeetingType.Online)" type="button">Online</button>
+          <button class="filter-chip" [class.active]="selectedMeetingType() === MeetingType.Hybrid"
+                  (click)="setMeetingType(MeetingType.Hybrid)" type="button">Hybrid</button>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- ── View toggle + result count ──────────────────────────────────────── -->
-  <div class="d-flex justify-content-between align-items-center mb-2">
-    @if (!loading()) {
-      <span class="text-muted small">{{ results().length }} meeting{{ results().length !== 1 ? 's' : '' }} found</span>
-    }
-    <div class="btn-group btn-group-sm ms-auto">
-      <button class="btn btn-outline-secondary" [class.active]="view() === 'list'" (click)="switchView('list')" type="button">List</button>
-      <button class="btn btn-outline-secondary" [class.active]="view() === 'map'"  (click)="switchView('map')"  type="button">Map</button>
-    </div>
-  </div>
+      <button class="clear-filters-btn" (click)="clearFilters()" type="button">Clear all filters</button>
 
-  <!-- ── Loading / error ─────────────────────────────────────────────────── -->
-  @if (loading()) {
-    <div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading…</span></div></div>
-  } @else if (error()) {
-    <div class="alert alert-danger">{{ error() }}</div>
-  } @else if (results().length === 0) {
-    <div class="alert alert-info">No meetings found. Try adjusting your filters or expanding the search radius.</div>
-  }
+    </aside>
 
-  <!-- ── List view ───────────────────────────────────────────────────────── -->
-  @if (!loading() && view() === 'list' && results().length > 0) {
-    @for (entry of grouped() | keyvalue; track entry.key) {
-      <h5 class="day-heading mt-3 mb-2">
-        {{ entry.key !== null ? DAYS[entry.key] : 'One-time' }}
-      </h5>
-      @for (m of entry.value; track m.id) {
-        <div class="card meeting-card mb-2">
-          <div class="card-body">
-            <div class="d-flex justify-content-between flex-wrap gap-1">
-              <div>
-                <h6 class="mb-0">{{ m.name }}</h6>
-                <small class="text-muted">{{ dayLabel(m) }} · {{ m.time }} ({{ m.durationMinutes }}min) · <a [routerLink]="['/groups', m.groupSlug]">{{ m.groupName }}</a></small>
-              </div>
-              <div class="d-flex gap-1 flex-wrap align-items-start">
-                <span class="badge" [class.bg-success]="m.isOpen" [class.bg-secondary]="!m.isOpen">{{ m.isOpen ? 'Open' : 'Closed' }}</span>
-                <span class="badge bg-light text-dark border">{{ meetingTypeLabel(m.meetingType) }}</span>
-                @for (fmt of m.formats; track fmt) {
-                  <span class="badge bg-light text-dark border">{{ formatMeetingLabel(fmt) }}</span>
-                }
-              </div>
-            </div>
+    <!-- ── Main ──────────────────────────────────────────────────────────── -->
+    <div class="finder-main">
 
-            @if (m.venueName || m.street) {
-              <div class="mt-1 small">
-                @if (m.venueName) { <span>{{ m.venueName }}</span> }
-                @if (m.street) { <span class="text-muted ms-1">{{ m.street }}, {{ m.city }}, {{ m.state }} {{ m.postalCode }}</span> }
-              </div>
-            }
+      <!-- Map — always in DOM so Leaflet is never re-created.
+           map-loading fades it during searches but keeps it measurable. -->
+      <div #mapContainer class="map-container" [class.map-loading]="loading()"></div>
+      <p class="osm-credit">Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</p>
 
-            @if (m.distanceMiles !== null) {
-              <div class="small text-muted">{{ m.distanceMiles | number:'1.1-1' }} miles away</div>
-            }
-
-            <div class="mt-2 d-flex gap-2 flex-wrap">
-              @if ((m.meetingType === MeetingType.InPerson || m.meetingType === MeetingType.Hybrid) && m.street) {
-                <a [href]="directionsUrl(m)" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">Get Directions</a>
-              }
-              @if ((m.meetingType === MeetingType.Online || m.meetingType === MeetingType.Hybrid) && m.publicJoinUrl) {
-                <a [href]="m.publicJoinUrl" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success">Join Online</a>
-              }
-              <a [routerLink]="['/groups', m.groupSlug]" class="btn btn-sm btn-link">Group Info</a>
-            </div>
-          </div>
+      <!-- Loading -->
+      @if (loading()) {
+        <div class="finder-loading">
+          <div class="loading-dots"><span></span><span></span><span></span></div>
         </div>
       }
-    }
-  }
 
-  <!-- ── Map view ────────────────────────────────────────────────────────── -->
-  <!-- Container is always in the DOM so Leaflet is never re-created from scratch.
-       d-none hides it while loading or in list view; invalidateSize() is called
-       each time it becomes visible so Leaflet remeasures the 520px height. -->
-  <div #mapContainer class="map-container"
-       [class.d-none]="loading() || view() !== 'map'"
-       style="height: 520px; border-radius: 8px; overflow: hidden;"></div>
-  <p class="small text-muted mt-1" [class.d-none]="loading() || view() !== 'map'">Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</p>
-</section>
+      <!-- Error -->
+      @if (!loading() && error()) {
+        <div class="finder-error">{{ error() }}</div>
+      }
+
+      <!-- Results header -->
+      @if (!loading() && !error()) {
+        <div class="results-header">
+          <h3>{{ results().length }} meeting{{ results().length !== 1 ? 's' : '' }} found</h3>
+        </div>
+      }
+
+      <!-- Empty state -->
+      @if (!loading() && !error() && results().length === 0) {
+        <div class="finder-empty">No meetings found. Try adjusting your filters or expanding the search radius.</div>
+      }
+
+      <!-- Results list -->
+      @if (!loading() && results().length > 0) {
+        <div class="results-list">
+          @for (entry of grouped() | keyvalue; track entry.key) {
+            <div class="day-heading">{{ entry.key !== null ? DAYS[entry.key] : 'One-time' }}</div>
+            @for (m of entry.value; track m.id) {
+              <div class="result-card">
+                <div class="result-info">
+                  <span class="result-name">{{ m.name }}</span>
+                  <span class="result-time">
+                    {{ dayLabel(m) }} · {{ m.time }}
+                    · <a [routerLink]="['/groups', m.groupSlug]" class="result-group-link">{{ m.groupName }}</a>
+                  </span>
+                  @if (m.venueName || m.street) {
+                    <span class="result-addr">
+                      @if (m.venueName) { {{ m.venueName }} · }
+                      @if (m.city) { {{ m.city }}{{ m.state ? ', ' + m.state : '' }} }
+                    </span>
+                  }
+                </div>
+                <div class="result-right">
+                  <div class="result-meta">
+                    <span class="result-type"
+                          [class.online]="m.meetingType === MeetingType.Online"
+                          [class.in-person]="m.meetingType === MeetingType.InPerson"
+                          [class.hybrid]="m.meetingType === MeetingType.Hybrid"
+                    >{{ meetingTypeLabel(m.meetingType) }}</span>
+                    @if (m.distanceMiles !== null) {
+                      <span class="result-dist">{{ m.distanceMiles | number:'1.1-1' }} mi</span>
+                    }
+                  </div>
+                  <div class="result-actions">
+                    @if ((m.meetingType === MeetingType.InPerson || m.meetingType === MeetingType.Hybrid) && m.street) {
+                      <a [href]="directionsUrl(m)" target="_blank" rel="noopener" class="result-link">Directions</a>
+                    }
+                    @if ((m.meetingType === MeetingType.Online || m.meetingType === MeetingType.Hybrid) && m.publicJoinUrl) {
+                      <a [href]="m.publicJoinUrl" target="_blank" rel="noopener" class="result-link primary">Join Online</a>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          }
+        </div>
+      }
+
+    </div><!-- /.finder-main -->
+
+  </div><!-- /.finder-layout -->
+
+</div><!-- /.meeting-finder -->

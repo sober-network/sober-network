@@ -20,7 +20,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { finalize } from 'rxjs';
-import { GroupResponse } from '@app/core/models';
+import { GroupResponse, US_STATES } from '@app/core/models';
 import { GroupService } from '@app/core/services/group.service';
 import { ConfirmDialogComponent } from '@app/shared/components/confirm-dialog/confirm-dialog.component';
 
@@ -75,6 +75,7 @@ export class SettingsTabComponent implements OnChanges {
   private readonly cdr = inject(ChangeDetectorRef);
 
   readonly timeZones = COMMON_TIME_ZONES;
+  readonly stateOptions = US_STATES;
 
   @Input({ required: true }) slug!: string;
   @Input() group: GroupResponse | null = null;
@@ -92,6 +93,13 @@ export class SettingsTabComponent implements OnChanges {
     timeZone: ['', [Validators.maxLength(100)]],
     isPublic: [true, { nonNullable: true }],
     requiresApproval: [true, { nonNullable: true }],
+    districtName: ['', [Validators.maxLength(100)]],
+    districtWebsiteUrl: ['', [Validators.maxLength(500)]],
+    areaName: ['', [Validators.maxLength(100)]],
+    areaWebsiteUrl: ['', [Validators.maxLength(500)]],
+    state: ['', [Validators.maxLength(50)]],
+    districtLatitude: [null as number | null],
+    districtLongitude: [null as number | null],
   });
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -119,6 +127,13 @@ export class SettingsTabComponent implements OnChanges {
       timeZone: this.normalizeOptionalText(value.timeZone),
       isPublic: value.isPublic === true,
       requiresApproval: value.requiresApproval === true,
+      districtName: this.normalizeOptionalText(value.districtName),
+      districtWebsiteUrl: this.normalizeOptionalText(value.districtWebsiteUrl),
+      areaName: this.normalizeOptionalText(value.areaName),
+      areaWebsiteUrl: this.normalizeOptionalText(value.areaWebsiteUrl),
+      state: this.normalizeOptionalText(value.state),
+      districtLatitude: value.districtLatitude ?? undefined,
+      districtLongitude: value.districtLongitude ?? undefined,
     }).pipe(
       finalize(() => {
         this.saving = false;
@@ -167,6 +182,13 @@ export class SettingsTabComponent implements OnChanges {
       timeZone: group.timeZone ?? '',
       isPublic: group.isPublic,
       requiresApproval: group.requiresApproval,
+      districtName: group.districtName ?? '',
+      districtWebsiteUrl: group.districtWebsiteUrl ?? '',
+      areaName: group.areaName ?? '',
+      areaWebsiteUrl: group.areaWebsiteUrl ?? '',
+      state: group.state ?? '',
+      districtLatitude: group.districtLatitude ?? null,
+      districtLongitude: group.districtLongitude ?? null,
     });
   }
 

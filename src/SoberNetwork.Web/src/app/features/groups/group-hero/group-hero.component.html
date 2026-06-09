@@ -25,6 +25,7 @@
 
 <div class="section-wrap">
   <div class="hero-inner">
+    <app-breadcrumbs *ngIf="breadcrumbs.length" [items]="breadcrumbs"></app-breadcrumbs>
     <div *ngIf="eyebrowText" class="hero-eyebrow">
       <span class="eyebrow-dot"></span>
       {{ eyebrowText }}

@@ -409,7 +409,9 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
         if (isOpen.HasValue)
             query = query.Where(m => m.IsOpen == isOpen.Value);
 
-        // Apply location radius filter when lat/lon provided and meeting has coordinates
+        // Apply location radius filter when lat/lon provided.
+        // Meetings with coordinates use their own; online meetings with no coordinates fall back
+        // to the group's district lat/lon so they still appear in location-based searches.
         if (latitude.HasValue && longitude.HasValue)
         {
             var lat = latitude.Value;
@@ -419,22 +421,33 @@ public sealed class MeetingService(AppDbContext db, ILogger<MeetingService> logg
             var lonDelta = radius / (69.0 * Math.Cos(lat * Math.PI / 180.0));
 
             query = query.Where(m =>
-                m.Latitude != null && m.Longitude != null &&
-                m.Latitude >= lat - latDelta && m.Latitude <= lat + latDelta &&
-                m.Longitude >= lon - lonDelta && m.Longitude <= lon + lonDelta);
+                // Meeting has its own coordinates — use them
+                (m.Latitude != null && m.Longitude != null &&
+                 m.Latitude >= lat - latDelta && m.Latitude <= lat + latDelta &&
+                 m.Longitude >= lon - lonDelta && m.Longitude <= lon + lonDelta)
+                ||
+                // Meeting has no coordinates — fall back to group's district location
+                (m.Latitude == null && m.Longitude == null &&
+                 m.Group.DistrictLatitude != null && m.Group.DistrictLongitude != null &&
+                 m.Group.DistrictLatitude >= lat - latDelta && m.Group.DistrictLatitude <= lat + latDelta &&
+                 m.Group.DistrictLongitude >= lon - lonDelta && m.Group.DistrictLongitude <= lon + lonDelta));
         }
 
         var meetings = await query
-            .OrderBy(m => m.DaysOfWeek == null || m.DaysOfWeek.Length == 0 ? int.MaxValue : m.DaysOfWeek[0])
+            .OrderBy(m => m.DaysOfWeek == null || m.DaysOfWeek.Length == 0 ? int.MaxValue : m.DaysOfWeek[0])       
             .ThenBy(m => m.Time)
             .ThenBy(m => m.Name)
             .ToListAsync(ct);
 
         return meetings.Select(m =>
         {
+            // Use meeting coords if available, otherwise fall back to group district coords
+            var effectiveLat = m.Latitude ?? m.Group?.DistrictLatitude;
+            var effectiveLon = m.Longitude ?? m.Group?.DistrictLongitude;
+
             double? distanceMiles = null;
-            if (latitude.HasValue && longitude.HasValue && m.Latitude.HasValue && m.Longitude.HasValue)
-                distanceMiles = HaversineDistance(latitude.Value, longitude.Value, m.Latitude.Value, m.Longitude.Value);
+            if (latitude.HasValue && longitude.HasValue && effectiveLat.HasValue && effectiveLon.HasValue)
+                distanceMiles = HaversineDistance(latitude.Value, longitude.Value, effectiveLat.Value, effectiveLon.Value);
 
             return new PublicMeetingSearchResponse(
                 m.Id, m.Name, m.Description,

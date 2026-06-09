@@ -18,6 +18,8 @@ public record GroupResponse(
     bool IsPublic,
     /// <summary>Whether join requests require admin approval.</summary>
     bool RequiresApproval,
+    /// <summary>Whether posts require admin approval before appearing in the feed.</summary>
+    bool RequiresPostApproval,
     /// <summary>Number of active members in the group.</summary>
     int MemberCount,
     /// <summary>Role of the current caller within the group.</summary>

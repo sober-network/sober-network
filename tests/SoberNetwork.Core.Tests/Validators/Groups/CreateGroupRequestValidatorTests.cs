@@ -8,7 +8,14 @@ public class CreateGroupRequestValidatorTests
 {
     private readonly CreateGroupRequestValidator _validator = new();
 
-    private static CreateGroupRequest Valid() => new("AA Monday Night", "aa-monday-night");
+    private static CreateGroupRequest Valid() => new(
+        "AA Monday Night",
+        "aa-monday-night",
+        DistrictName: "District 5",
+        AreaName: "Area 11",
+        State: "CT",
+        DistrictLatitude: 41.6,
+        DistrictLongitude: -72.7);
 
     [Fact]
     public void valid_request_passes()
@@ -93,5 +100,31 @@ public class CreateGroupRequestValidatorTests
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Name);
+    }
+
+    [Fact]
+    public void empty_district_name_fails()
+    {
+        // Arrange
+        var request = Valid() with { DistrictName = string.Empty };
+
+        // Act
+        var result = _validator.TestValidate(request);
+
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.DistrictName);
+    }
+
+    [Fact]
+    public void null_district_latitude_fails()
+    {
+        // Arrange
+        var request = Valid() with { DistrictLatitude = null };
+
+        // Act
+        var result = _validator.TestValidate(request);
+
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.DistrictLatitude);
     }
 }

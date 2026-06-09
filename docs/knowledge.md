@@ -698,8 +698,11 @@ C:\Users\scott\.copilot\session-state\dc627e7b-f3a3-4928-8621-16da3c6acb7f\files
 ### Landing Page — Angular Implementation Notes
 
 - **Hero height**: `padding: 110px 32px 90px` with `justify-content: flex-start` — no `min-height`. Height is content-driven, matching ~70% viewport appearance of the mock.
-- **Back-to-top buttons**: Each named section (`#about`, `#features`, `#how-it-works`, `#principles`, `#traditions`) has a `.back-to-top` anchor inside `.section-wrap` (which is `position: relative`). Button is `position: absolute; top: 32px; right: 32px`.
-- **Section IDs used by scroll-spy**: `about`, `features`, `how-it-works`, `roadmap`, `traditions` (in `navbar.component.ts` `sectionIds` array).
+- **Section order (after the mock-to-live redesign)**: `#about` → `#features` → `#how-it-works` → (auth-gated `#my-groups` / `#newcomer`) → `#traditions` → dark final CTA. The old separate **Design Principles** (`#principles`) section was **removed** and folded into a single 4-card `#traditions` section ("Built around the *12 Traditions.*", cards T11/T4/T5/T7). The full 12-item `*ngFor` traditions list was also dropped from the landing page.
+- **Features grid**: 6 "SOON" cards (Daily Readings, Bulletin Board, Service Roles, Chair Schedule, Group Conscience, Documents) in a 3-column grid — the previously highlighted LIVE feature cards were removed per design.
+- **Final CTA**: dark `#1a1a18` mesh-gradient section ("Find a meeting / *or start your group.*"), white "Find a Meeting" pill (`/meetings`) + ghost "Create Account" (`openRegister()`), guarded by `*ngIf="!auth.isLoggedIn"`. `.serif-accent` must override the gradient-text clip on dark bg (becomes invisible otherwise).
+- **Back-to-top buttons**: Each named section has a `.back-to-top` anchor inside `.section-wrap` (which is `position: relative`). Button is `position: absolute; top: 80px; right: 32px`.
+- **Section IDs observed by scroll-spy**: `about`, `features`, `traditions` (the `sectionIds` array in `navbar.component.ts`). These are exactly the guest pills that have a `#anchor` target; the **Find a Meeting** pill is a `/meetings` route (not scroll-spied).
 
 ### Navbar — Angular Implementation Notes
 

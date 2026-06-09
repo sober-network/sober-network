@@ -3,7 +3,7 @@
   <div class="hero-eyebrow">Private · Secure · Tradition-aligned</div>
 
   <h1 class="hero-h1 fade-up">
-    <span class="title-line" style="margin-left:-1.8rem">A private <span class="serif-inline">home</span></span>
+    <span class="title-line" style="margin-left:-1.8rem">A private <span class="serif-inline">home&nbsp;</span></span>
     <span class="title-line" style="margin-left:2.4rem">for <span class="serif-inline">you</span> and</span>
     <span class="serif-line" style="margin-left:0.4rem">your home group.</span>
   </h1>
@@ -255,19 +255,33 @@
     </div>
 
     <div class="groups-grid" *ngIf="!loadingGroups && groups.length > 0">
-      <a class="group-card fade-up" *ngFor="let g of groups; let i = index"
-         [routerLink]="['/group', g.slug]"
-         [style.animation-delay]="(i * 0.08) + 's'">
+      <a
+        *ngFor="let group of groups; trackBy: trackBySlug"
+        [routerLink]="['/groups', group.slug]"
+        class="group-card fade-up"
+        [style.animationDelay]="(groups.indexOf(group) * 0.12) + 's'"
+      >
         <div class="group-card-header">
-          <div class="group-initial">{{ g.name.charAt(0) }}</div>
-          <div>
-            <div class="group-name">{{ g.name }}</div>
-            <div class="group-meta">{{ g.memberCount }} member{{ g.memberCount !== 1 ? 's' : '' }}</div>
+          <div class="group-icon" [ngClass]="getGroupIconColor(groups.indexOf(group))">
+            {{ group.name.charAt(0).toUpperCase() }}
           </div>
-          <span class="group-approval" *ngIf="g.requiresApproval">Approval required</span>
+          <div class="group-info">
+            <h3>{{ group.name }}</h3>
+            <div class="group-meta">
+              {{ group.memberCount }} member{{ group.memberCount === 1 ? '' : 's' }}
+              <span *ngIf="group.userMembershipStatus === 'PendingApproval'" class="approval-badge">· Pending approval</span>
+            </div>
+          </div>
         </div>
-        <p class="group-desc" *ngIf="g.description">{{ g.description }}</p>
-        <span class="group-arrow">→</span>
+
+        <p class="group-desc">{{ descriptionPreview(group) }}</p>
+
+        <div class="group-footer">
+          <div class="group-stats" *ngIf="meetingSummary(group) as summary">
+            {{ summary }}
+          </div>
+          <div class="group-arrow">→</div>
+        </div>
       </a>
     </div>
   </div>

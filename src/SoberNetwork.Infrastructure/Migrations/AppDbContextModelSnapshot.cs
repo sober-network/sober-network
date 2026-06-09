@@ -318,6 +318,9 @@ namespace SoberNetwork.Infrastructure.Migrations
                     b.Property<bool>("RequiresApproval")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("RequiresPostApproval")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -578,6 +581,73 @@ namespace SoberNetwork.Infrastructure.Migrations
                     b.ToTable("meetings", "public");
                 });
 
+            modelBuilder.Entity("SoberNetwork.Domain.Entities.Post", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ApprovedById")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(5000)
+                        .HasColumnType("character varying(5000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LinkTitle")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("LinkUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("AuthorId", "DeletedAt");
+
+                    b.HasIndex("GroupId", "DeletedAt", "IsApproved");
+
+                    b.ToTable("posts", "public");
+                });
+
             modelBuilder.Entity("SoberNetwork.Domain.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -759,6 +829,17 @@ namespace SoberNetwork.Infrastructure.Migrations
                     b.Navigation("Group");
                 });
 
+            modelBuilder.Entity("SoberNetwork.Domain.Entities.Post", b =>
+                {
+                    b.HasOne("SoberNetwork.Domain.Entities.Group", "Group")
+                        .WithMany("Posts")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+                });
+
             modelBuilder.Entity("SoberNetwork.Domain.Entities.RefreshToken", b =>
                 {
                     b.HasOne("SoberNetwork.Domain.Entities.ApplicationUser", "User")
@@ -790,6 +871,8 @@ namespace SoberNetwork.Infrastructure.Migrations
                     b.Navigation("Meetings");
 
                     b.Navigation("Memberships");
+
+                    b.Navigation("Posts");
 
                     b.Navigation("ServiceRoles");
                 });

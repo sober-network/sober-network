@@ -1,0 +1,121 @@
+<!-- ══ POST FORM MODAL ═══════════════════════════════════════════════════ -->
+<app-base-form-modal
+  [title]="title"
+  [subtitle]="subtitle"
+  icon="campaign"
+  [useRainbowRing]="true"
+>
+  <form [formGroup]="form" (ngSubmit)="save()" class="pf-form" novalidate>
+
+    <!-- Group selector (create mode only) -->
+    <div class="pf-field" *ngIf="!isEditMode && data.groups.length > 1">
+      <label class="pf-label" for="pf-group">Post to group</label>
+      <div class="pf-select-wrap">
+        <select id="pf-group" formControlName="groupSlug" class="pf-select">
+          <option *ngFor="let g of data.groups" [value]="g.slug">{{ g.name }}</option>
+        </select>
+        <span class="pf-select-arrow">▾</span>
+      </div>
+    </div>
+
+    <!-- Subject -->
+    <div class="pf-field">
+      <label class="pf-label" for="pf-subject">Subject <span class="pf-required">*</span></label>
+      <input
+        id="pf-subject"
+        type="text"
+        formControlName="subject"
+        class="pf-input"
+        placeholder="What's this about?"
+        autocomplete="off"
+        maxlength="200"
+      />
+      <div class="pf-error"
+        *ngIf="form.controls.subject.invalid && form.controls.subject.touched">
+        Subject is required (max 200 characters).
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="pf-field">
+      <label class="pf-label" for="pf-body">
+        Message <span class="pf-required">*</span>
+        <span class="pf-char-count">{{ bodyLength }}/5000</span>
+      </label>
+      <textarea
+        id="pf-body"
+        formControlName="body"
+        class="pf-textarea"
+        rows="5"
+        placeholder="Share your update, news, or announcement… Emoji welcome 🎉"
+        maxlength="5000"
+      ></textarea>
+      <div class="pf-error"
+        *ngIf="form.controls.body.invalid && form.controls.body.touched">
+        Message is required (max 5,000 characters).
+      </div>
+    </div>
+
+    <!-- Optional fields toggle -->
+    <button
+      type="button"
+      class="pf-optional-toggle"
+      (click)="showOptional = !showOptional"
+    >
+      <span>{{ showOptional ? '▾ Hide' : '▸ Add' }} image &amp; link</span>
+    </button>
+
+    <div class="pf-optional-fields" *ngIf="showOptional">
+
+      <!-- Image URL -->
+      <div class="pf-field">
+        <label class="pf-label" for="pf-image">Image URL <span class="pf-hint">(optional)</span></label>
+        <input
+          id="pf-image"
+          type="url"
+          formControlName="imageUrl"
+          class="pf-input"
+          placeholder="https://example.com/image.jpg"
+        />
+      </div>
+
+      <!-- Link URL -->
+      <div class="pf-field">
+        <label class="pf-label" for="pf-link-url">Link URL <span class="pf-hint">(optional)</span></label>
+        <input
+          id="pf-link-url"
+          type="url"
+          formControlName="linkUrl"
+          class="pf-input"
+          placeholder="https://example.com"
+        />
+      </div>
+
+      <!-- Link Title -->
+      <div class="pf-field">
+        <label class="pf-label" for="pf-link-title">Link title <span class="pf-hint">(optional)</span></label>
+        <input
+          id="pf-link-title"
+          type="text"
+          formControlName="linkTitle"
+          class="pf-input"
+          placeholder="e.g. Read more about this topic"
+        />
+      </div>
+
+    </div>
+
+    <!-- Error message -->
+    <div class="pf-server-error" *ngIf="error">{{ error }}</div>
+
+    <!-- Actions -->
+    <div class="pf-actions">
+      <button type="button" class="pf-btn pf-btn--cancel" (click)="cancel()">Cancel</button>
+      <button type="submit" class="pf-btn pf-btn--submit" [disabled]="saving">
+        <span *ngIf="!saving">{{ isEditMode ? 'Save Changes' : 'Post' }}</span>
+        <mat-spinner *ngIf="saving" diameter="18"></mat-spinner>
+      </button>
+    </div>
+
+  </form>
+</app-base-form-modal>

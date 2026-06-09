@@ -1,0 +1,125 @@
+<app-base-form-modal [title]="title" [subtitle]="subtitle" [icon]="icon">
+  <form [formGroup]="form" (ngSubmit)="create()" novalidate class="lm-form">
+    <div class="form-section">
+      <h4>Group details</h4>
+
+      <div class="lm-field">
+        <div class="lm-label-row">
+          <label class="lm-label">Group Name</label>
+          <span class="lm-label lm-counter">{{ form.get('name')?.value?.length ?? 0 }}/100</span>
+        </div>
+        <input type="text" class="lm-input" formControlName="name" maxlength="100" placeholder="Enter group name" />
+        <div class="lm-field-error" *ngIf="form.get('name')?.touched && form.get('name')?.hasError('required')">Name is required.</div>
+        <div class="lm-field-error" *ngIf="form.get('name')?.touched && form.get('name')?.hasError('minlength')">At least 2 characters.</div>
+      </div>
+
+      <div class="lm-field">
+        <label class="lm-label">Slug</label>
+        <input type="text" class="lm-input" formControlName="slug" maxlength="50" (input)="markSlugEdited()" placeholder="my-group-name" />
+        <div class="lm-help">Lowercase letters, numbers, and hyphens only.</div>
+        <div class="lm-field-error" *ngIf="form.get('slug')?.touched && form.get('slug')?.hasError('required')">Slug is required.</div>
+        <div class="lm-field-error" *ngIf="form.get('slug')?.touched && form.get('slug')?.hasError('pattern')">Use lowercase letters, numbers, and hyphens only.</div>
+      </div>
+
+      <div class="lm-field">
+        <div class="lm-label-row">
+          <label class="lm-label">Description</label>
+          <span class="lm-label lm-counter">{{ form.get('description')?.value?.length ?? 0 }}/500</span>
+        </div>
+        <textarea class="lm-input lm-textarea" formControlName="description" rows="3" maxlength="500" placeholder="Describe your group"></textarea>
+      </div>
+
+      <div class="lm-field">
+        <label class="lm-label">Time Zone</label>
+        <select class="lm-input lm-select" formControlName="timeZone">
+          <option value="">— Select time zone —</option>
+          <option *ngFor="let tz of timeZones" [value]="tz">{{ tz }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h4>Access &amp; meetings</h4>
+      <div class="access-toggle">
+        <label class="lm-label">Public group page</label>
+        <mat-slide-toggle formControlName="isPublic"></mat-slide-toggle>
+      </div>
+      <div class="access-toggle">
+        <label class="lm-label">Approve new members</label>
+        <mat-slide-toggle formControlName="requiresApproval"></mat-slide-toggle>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h4>Service Area</h4>
+      <p class="service-area-note">
+        District and area information helps members find your group in the meeting finder.
+        Online meetings without a physical address use district coordinates as a location fallback —
+        <strong>online meetings won't appear in location searches without them.</strong>
+      </p>
+
+      <div class="lm-field">
+        <label class="lm-label">State / Region</label>
+        <select class="lm-input lm-select" formControlName="state">
+          <option value="">— Select state / region —</option>
+          <option *ngFor="let state of stateOptions" [value]="state">{{ state }}</option>
+        </select>
+        <div class="lm-field-error" *ngIf="form.get('state')?.touched && form.get('state')?.hasError('required')">State/Region is required.</div>
+      </div>
+
+      <div class="lm-row">
+        <div class="lm-field">
+          <label class="lm-label">District Name</label>
+          <input type="text" class="lm-input" formControlName="districtName" maxlength="100" placeholder="e.g. District 5" />
+          <div class="lm-field-error" *ngIf="form.get('districtName')?.touched && form.get('districtName')?.hasError('required')">District name is required.</div>
+        </div>
+        <div class="lm-field">
+          <label class="lm-label">District Website</label>
+          <input type="url" class="lm-input" formControlName="districtWebsiteUrl" maxlength="500" placeholder="https://..." />
+        </div>
+      </div>
+
+      <div class="lm-row">
+        <div class="lm-field">
+          <label class="lm-label">Area Name</label>
+          <input type="text" class="lm-input" formControlName="areaName" maxlength="100" placeholder="e.g. Area 11" />
+          <div class="lm-field-error" *ngIf="form.get('areaName')?.touched && form.get('areaName')?.hasError('required')">Area name is required.</div>
+        </div>
+        <div class="lm-field">
+          <label class="lm-label">Area Website</label>
+          <input type="url" class="lm-input" formControlName="areaWebsiteUrl" maxlength="500" placeholder="https://..." />
+        </div>
+      </div>
+
+      <div class="lm-row">
+        <div class="lm-field">
+          <label class="lm-label">District Latitude</label>
+          <input type="number" class="lm-input" formControlName="districtLatitude" step="0.0001" placeholder="e.g. 40.7128" />
+          <div class="lm-field-error" *ngIf="form.get('districtLatitude')?.touched && form.get('districtLatitude')?.hasError('required')">District latitude is required.</div>
+          <div class="lm-field-error" *ngIf="form.get('districtLatitude')?.touched && (form.get('districtLatitude')?.hasError('min') || form.get('districtLatitude')?.hasError('max'))">Latitude must be between -90 and 90.</div>
+        </div>
+        <div class="lm-field">
+          <label class="lm-label">District Longitude</label>
+          <input type="number" class="lm-input" formControlName="districtLongitude" step="0.0001" placeholder="e.g. -74.0060" />
+          <div class="lm-field-error" *ngIf="form.get('districtLongitude')?.touched && form.get('districtLongitude')?.hasError('required')">District longitude is required.</div>
+          <div class="lm-field-error" *ngIf="form.get('districtLongitude')?.touched && (form.get('districtLongitude')?.hasError('min') || form.get('districtLongitude')?.hasError('max'))">Longitude must be between -180 and 180.</div>
+        </div>
+      </div>
+      <p class="coords-hint">
+        💡 Find coordinates: search your district on
+        <a href="https://www.openstreetmap.org" target="_blank" rel="noreferrer">openstreetmap.org</a>,
+        right-click the map and select "Show address".
+      </p>
+    </div>
+
+    <div class="error-message" *ngIf="error">{{ error }}</div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="cancel()" [disabled]="creating">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="creating || form.invalid">
+        <mat-spinner *ngIf="creating" diameter="18"></mat-spinner>
+        <span *ngIf="!creating">Create Group</span>
+      </button>
+    </div>
+  </form>
+</app-base-form-modal>

@@ -1,7 +1,6 @@
 import { Component, inject, AfterViewInit, OnDestroy, NgZone, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { NavigationEnd } from '@angular/router';
 import { LoginModalComponent } from '../login-modal/login-modal.component';
@@ -10,6 +9,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '@app/core/services/auth.service';
 import { GroupService } from '@app/core/services/group.service';
 import { CurrentUser, GroupResponse } from '@app/core/models';
+import { CreateGroupModalComponent } from '@app/features/groups/create-group-modal/create-group-modal.component';
 
 @Component({
   selector: 'app-navbar',
@@ -17,7 +17,6 @@ import { CurrentUser, GroupResponse } from '@app/core/models';
   imports: [
     CommonModule,
     RouterModule,
-    MatIconModule,
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
@@ -41,7 +40,10 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
   groupsMenuOpen = false;
 
   private sectionObserver: IntersectionObserver | null = null;
-  private readonly sectionIds = ['about', 'features', 'how-it-works', 'principles', 'traditions'];
+  // Guest landing sections that have a matching nav pill (scroll-spy targets).
+  // 'how-it-works' still exists as a section but has no pill, so it is intentionally
+  // not observed — 'features' stays highlighted contiguously until 'traditions'.
+  private readonly sectionIds = ['about', 'features', 'traditions'];
 
   constructor() {
     // Identity-stable: only re-assign `user` when the signed-in identity actually changes,
@@ -96,6 +98,23 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
     this.router.navigate(['/groups', slug]);
   }
 
+  openCreateGroupDialog(): void {
+    this.closeMenus();
+    this.dialog.open(CreateGroupModalComponent, {
+      panelClass: ['sn-modal-panel', 'sn-create-group-panel'],
+      maxWidth: '100vw',
+      autoFocus: 'first-tabbable',
+    }).afterClosed().subscribe({
+      next: created => {
+        if (created) {
+          this.groupService.getMyGroups().pipe(catchError(() => of([]))).subscribe(groups => {
+            this.myGroups = groups;
+          });
+        }
+      },
+    });
+  }
+
   logout(): void {
     this.closeMenus();
     this.auth.logout();
@@ -117,6 +136,40 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
   closeMenus(): void {
     this.userMenuOpen = false;
     this.groupsMenuOpen = false;
+  }
+
+  isGroupRouteActive(): boolean {
+    return this.router.url.startsWith('/groups')
+      || this.router.url.startsWith('/dashboard')
+      || this.router.url.startsWith('/profile');
+  }
+
+  trackBySlug(_: number, group: GroupResponse): string {
+    return group.slug;
+  }
+
+  getGroupIconColor(index: number): string {
+    const colors = ['violet', 'rose', 'sky', 'amber', 'green', 'teal', 'indigo', 'coral'];
+    return colors[index % colors.length];
+  }
+
+  getUserAvatarBackground(displayName: string): string {
+    const colors = [
+      'var(--sn-tint-violet, hsla(260,70%,65%,0.12))',
+      'var(--sn-tint-rose, hsla(345,75%,65%,0.12))',
+      'var(--sn-tint-sky, hsla(205,85%,60%,0.12))',
+      'var(--sn-tint-amber, hsla(38,90%,58%,0.12))',
+      'var(--sn-tint-green, hsla(148,58%,52%,0.12))',
+      'var(--sn-tint-teal, hsla(183,62%,52%,0.12))',
+      'var(--sn-tint-indigo, hsla(230,70%,62%,0.12))',
+      'var(--sn-tint-coral, hsla(18,82%,62%,0.12))',
+    ];
+    const seed = displayName.trim().charCodeAt(0) || 0;
+    return colors[seed % colors.length];
+  }
+
+  groupMeta(group: GroupResponse): string {
+    return `${group.memberCount} member${group.memberCount === 1 ? '' : 's'}`;
   }
 
   /** Any click that bubbles to the document (i.e. outside an open dropdown) closes the menus. */

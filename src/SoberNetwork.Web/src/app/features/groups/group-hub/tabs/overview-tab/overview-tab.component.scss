@@ -355,7 +355,7 @@
   gap: 14px;
   padding: 14px;
   border-radius: 14px;
-  background: var(--sn-bg-soft, #f0ede8);
+  background: linear-gradient(135deg, rgba(248,246,241,.9), rgba(240,237,232,.95));
   border: 1px solid rgba(17,17,16,.06);
   margin-bottom: 10px;
   &:last-child { margin-bottom: 0; }

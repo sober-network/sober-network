@@ -13,5 +13,19 @@ public record CreateGroupRequest(
     /// <summary>Whether the group is listed in public discovery views.</summary>
     bool IsPublic = true,
     /// <summary>Whether join requests require approval from a group admin.</summary>
-    bool RequiresApproval = true
+    bool RequiresApproval = true,
+    /// <summary>District name (e.g. "District 5"). Required.</summary>
+    string? DistrictName = null,
+    /// <summary>District website URL (optional).</summary>
+    string? DistrictWebsiteUrl = null,
+    /// <summary>Area name (e.g. "Area 11"). Required.</summary>
+    string? AreaName = null,
+    /// <summary>Area website URL (optional).</summary>
+    string? AreaWebsiteUrl = null,
+    /// <summary>State or region abbreviation/name. Required.</summary>
+    string? State = null,
+    /// <summary>Latitude for district map center. Required.</summary>
+    double? DistrictLatitude = null,
+    /// <summary>Longitude for district map center. Required.</summary>
+    double? DistrictLongitude = null
 );

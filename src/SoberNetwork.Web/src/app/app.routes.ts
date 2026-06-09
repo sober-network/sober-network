@@ -30,6 +30,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./features/groups/groups-dashboard/groups-dashboard.component').then(m => m.GroupsDashboardComponent)
   },
+  {
+    path: 'news-and-announcements',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/news/news-announcements/news-announcements.component').then(m => m.NewsAnnouncementsComponent)
+  },
   // Legacy sub-routes → hub (guards run on the destination groups/:slug route)
   { path: 'groups/:slug/members',       redirectTo: 'groups/:slug', pathMatch: 'full' },
   { path: 'groups/:slug/phone-list',    redirectTo: 'groups/:slug', pathMatch: 'full' },

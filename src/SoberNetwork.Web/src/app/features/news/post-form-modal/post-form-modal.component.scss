@@ -1,0 +1,184 @@
+.pf-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+// ── Field container ────────────────────────────────────────────────────────
+.pf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+// ── Labels ─────────────────────────────────────────────────────────────────
+.pf-label {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #3d3d3a;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pf-required { color: #e11d48; font-size: 0.85rem; }
+.pf-hint { font-weight: 500; text-transform: none; color: #7a7a75; font-size: 0.75rem; }
+
+.pf-char-count {
+  margin-left: auto;
+  font-weight: 500;
+  text-transform: none;
+  color: #7a7a75;
+  font-size: 0.72rem;
+}
+
+// ── Inputs ─────────────────────────────────────────────────────────────────
+%input-base {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border: 1.5px solid rgba(17,17,16,.12);
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  color: #111110;
+  background: rgba(255,255,255,.85);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+
+  &::placeholder { color: #b0afa9; }
+
+  &:focus {
+    border-color: #8a4fa3;
+    box-shadow: 0 0 0 3px rgba(138,79,163,.12);
+  }
+
+  &.ng-invalid.ng-touched {
+    border-color: #e11d48;
+    box-shadow: 0 0 0 3px rgba(225,29,72,.08);
+  }
+}
+
+.pf-input { @extend %input-base; }
+
+.pf-textarea {
+  @extend %input-base;
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+}
+
+// ── Select ─────────────────────────────────────────────────────────────────
+.pf-select-wrap {
+  position: relative;
+}
+
+.pf-select {
+  @extend %input-base;
+  appearance: none;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+.pf-select-arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #7a7a75;
+  font-size: 0.8rem;
+}
+
+// ── Optional toggle ────────────────────────────────────────────────────────
+.pf-optional-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #7c3aed;
+  letter-spacing: 0.02em;
+  align-self: flex-start;
+  transition: color 0.15s;
+
+  &:hover { color: #5b21b6; }
+}
+
+.pf-optional-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  background: rgba(17,17,16,.03);
+  border-radius: 12px;
+  border: 1px solid rgba(17,17,16,.06);
+  animation: optIn 0.2s ease;
+}
+
+@keyframes optIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ── Error ──────────────────────────────────────────────────────────────────
+.pf-error {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  color: #e11d48;
+  font-weight: 500;
+}
+
+.pf-server-error {
+  background: rgba(225,29,72,.08);
+  border: 1px solid rgba(225,29,72,.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  color: #be123c;
+}
+
+// ── Actions ────────────────────────────────────────────────────────────────
+.pf-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.pf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 50px;
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  min-width: 80px;
+  min-height: 40px;
+
+  &--cancel {
+    background: rgba(17,17,16,.07);
+    color: #3d3d3a;
+    &:hover { background: rgba(17,17,16,.12); }
+  }
+
+  &--submit {
+    background: linear-gradient(120deg, #8a4fa3 0%, #e11d48 90%);
+    color: white;
+    box-shadow: 0 4px 14px rgba(138,79,163,.3);
+    &:hover { box-shadow: 0 6px 20px rgba(138,79,163,.4); transform: translateY(-1px); }
+    &:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  }
+}

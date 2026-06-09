@@ -1,11 +1,11 @@
-import { Component, OnInit, AfterViewInit, inject } from '@angular/core';
+import { Component, OnInit, AfterViewInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '@app/core/services/auth.service';
 import { GroupService } from '@app/core/services/group.service';
 import { StatsService, PlatformStats } from '@app/core/services/stats.service';
-import { GroupResponse } from '@app/core/models';
+import { DAYS_OF_WEEK, GroupResponse } from '@app/core/models';
 
 @Component({
   selector: 'app-landing',
@@ -19,10 +19,12 @@ export class LandingComponent implements OnInit, AfterViewInit {
   private readonly groupService = inject(GroupService);
   private readonly statsService = inject(StatsService);
   private readonly dialog = inject(MatDialog);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   groups: GroupResponse[] = [];
   loadingGroups = true;
   stats: PlatformStats = { memberCount: 0, groupCount: 0, meetingCount: 0 };
+  readonly daysOfWeek = DAYS_OF_WEEK;
 
   readonly traditions = [
     { num: 1,  text: 'Our common welfare should come first; personal recovery depends upon A.A. unity.' },
@@ -50,12 +52,27 @@ export class LandingComponent implements OnInit, AfterViewInit {
       return;
     }
     this.groupService.getMyGroups().subscribe({
-      next: groups => { this.groups = groups; this.loadingGroups = false; },
-      error: () => { this.loadingGroups = false; },
+      next: groups => {
+        console.log('Landing: getMyGroups returned', groups);
+        this.groups = groups;
+        this.loadingGroups = false;
+        this.cdr.detectChanges();  // Ensure template updates before observer runs
+        this.setupFadeUpObserver();  // Set up observer AFTER data loads and view updates
+      },
+      error: (err) => {
+        console.error('Landing: getMyGroups error', err);
+        this.loadingGroups = false;
+      },
     });
   }
 
   ngAfterViewInit(): void {
+    // Set up observer for other fade-up elements that don't depend on data
+    // (The groups fade-up elements are handled in the subscription callback)
+    this.setupFadeUpObserver();
+  }
+
+  private setupFadeUpObserver(): void {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(e => {
         if (e.isIntersecting) {
@@ -74,5 +91,45 @@ export class LandingComponent implements OnInit, AfterViewInit {
       maxWidth:   '100vw',
       autoFocus:  'first-tabbable',
     });
+  }
+
+  trackBySlug(_: number, group: GroupResponse): string {
+    return group.slug;
+  }
+
+  descriptionPreview(group: GroupResponse): string {
+    return group.description || 'A welcoming place to stay connected between meetings.';
+  }
+
+  meetingSummary(group: GroupResponse): string | null {
+    if (!group.meetings || group.meetings.length === 0) {
+      return null;
+    }
+
+    const m = group.meetings[0];
+    const parts: string[] = [];
+
+    if (m.isRecurring && m.daysOfWeek && m.daysOfWeek.length > 0) {
+      const dayNames = m.daysOfWeek.map(d => this.daysOfWeek[d] ?? 'Unknown').join(', ');
+      parts.push(dayNames);
+    } else if (!m.isRecurring && m.occursOn) {
+      parts.push(new Date(m.occursOn).toLocaleDateString());
+    }
+
+    if (m.time) {
+      parts.push(m.time);
+    }
+
+    if (m.durationMinutes > 0) {
+      parts.push(`${m.durationMinutes} min`);
+    }
+
+    const suffix = group.meetings.length > 1 ? ` +${group.meetings.length - 1} more` : '';
+    return parts.length > 0 ? parts.join(' • ') + suffix : null;
+  }
+
+  getGroupIconColor(index: number): string {
+    const colors = ['violet', 'rose', 'sky', 'amber', 'green', 'teal', 'indigo', 'coral'];
+    return colors[index % colors.length];
   }
 }

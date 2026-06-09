@@ -14,7 +14,7 @@
 }
 
 .section-wrap {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 64px 32px 96px;
 }
@@ -23,10 +23,9 @@
 .section-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   margin-bottom: 40px;
   gap: 16px;
-  flex-wrap: wrap;
 }
 
 .section-title {
@@ -64,6 +63,42 @@
 .new-post-icon {
   font-size: 1.1rem;
   line-height: 1;
+}
+
+// ── Sticky button ─────────────────────────────────────────────────────────
+.sticky-new-post-btn {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: #1a1a19;
+  color: white;
+  font-size: 28px;
+  font-weight: 300;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(26,26,25,.4);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
+
+  &:hover {
+    background: #0f0f0e;
+    box-shadow: 0 6px 28px rgba(26,26,25,.5);
+    transform: scale(1.1);
+  }
+
+  &:active { transform: scale(0.95); }
+}
+
+.sticky-post-icon {
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 300;
 }
 
 // ── Post feed ─────────────────────────────────────────────────────────────
@@ -146,4 +181,5 @@
   .section-wrap { padding: 40px 16px 64px; }
   .section-title { font-size: 1.5rem; }
   .section-header { flex-direction: column; align-items: flex-start; }
+  .sticky-new-post-btn { bottom: 24px; right: 24px; width: 50px; height: 50px; }
 }

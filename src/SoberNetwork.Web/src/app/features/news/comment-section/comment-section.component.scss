@@ -59,11 +59,10 @@
   flex-direction: column;
   gap: 6px;
 
-  // Depth indentation with accent stripe
+  // Depth indentation with accent stripe — use padding instead of margin to prevent shrinking
   @for $d from 1 through 4 {
     &--d#{$d} {
-      margin-left: #{$d * 20}px;
-      padding-left: 10px;
+      padding-left: #{$d * 18}px;
       border-left: 2px solid rgba(17,17,16,.07);
     }
   }

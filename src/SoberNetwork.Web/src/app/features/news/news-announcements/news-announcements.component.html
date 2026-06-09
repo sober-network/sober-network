@@ -6,9 +6,7 @@
   eyebrowText="Community Feed"
   eyebrowIcon="campaign"
   [breadcrumbs]="breadcrumbs"
-  [showPlusButton]="true"
-  plusButtonText="New Post"
-  (plusClick)="openNewPost()"
+  [showPlusButton]="false"
 ></app-group-hero>
 
 <!-- ══ FEED SECTION ══════════════════════════════════════════════════════ -->
@@ -17,9 +15,6 @@
 
     <div class="section-header fade-up">
       <h2 class="section-title">My News &amp; Announcements</h2>
-      <button class="new-post-btn" type="button" (click)="openNewPost()">
-        <span class="new-post-icon">+</span> New Post
-      </button>
     </div>
 
     <!-- Error -->
@@ -75,3 +70,8 @@
 
   </div>
 </section>
+
+<!-- ══ Sticky New Post Button ════════════════════════════════════════════ -->
+<button class="sticky-new-post-btn" type="button" (click)="openNewPost()" *ngIf="!loading && posts.length > 0">
+  <span class="sticky-post-icon">+</span>
+</button>

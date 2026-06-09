@@ -53,14 +53,15 @@
           maxlength="5000"
         ></textarea>
         <button
+          #emojiBtn
           type="button"
           class="pf-emoji-btn"
-          (click)="showEmojiPicker = !showEmojiPicker; $event.stopPropagation()"
+          (click)="openEmojiPicker(emojiBtn, $event)"
           title="Add emoji"
         >😊</button>
         <app-emoji-picker
           *ngIf="showEmojiPicker"
-          placement="above"
+          [ngStyle]="emojiPickerStyle"
           class="pf-emoji-picker"
           (emojiSelected)="insertEmoji($event)"
           (closed)="showEmojiPicker = false"

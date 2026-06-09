@@ -1,25 +1,30 @@
 import {
-  Component, Input, OnDestroy, inject,
+  Component, Input, OnInit, OnDestroy, inject,
   ElementRef, ViewChild, HostListener,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Subject, takeUntil } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { Subject, takeUntil, finalize } from 'rxjs';
 import { NewsService } from '@app/core/services/news.service';
-import { CommentResponse, CommentNode } from '@app/core/models/news.models';
+import { CommentResponse, CommentNode, PostResponse } from '@app/core/models/news.models';
 import { EmojiPickerComponent } from '@app/shared/components/emoji-picker/emoji-picker.component';
+import { environment } from '../../../../environments/environment';
 
-/** Per-input link metadata (new comment, reply, edit). */
+/** Per-input link/media metadata (new comment, reply, edit). */
 interface MediaFields {
   linkUrl: string;
   linkTitle: string;
   showOptional: boolean;
+  mediaId: string | null;
+  previewUrl: string | null;
+  uploading: boolean;
 }
 
 function emptyMedia(): MediaFields {
-  return { linkUrl: '', linkTitle: '', showOptional: false };
+  return { linkUrl: '', linkTitle: '', showOptional: false, mediaId: null, previewUrl: null, uploading: false };
 }
 
 @Component({
@@ -29,16 +34,20 @@ function emptyMedia(): MediaFields {
   templateUrl: './comment-section.component.html',
   styleUrl: './comment-section.component.scss',
 })
-export class CommentSectionComponent implements OnDestroy {
+export class CommentSectionComponent implements OnInit, OnDestroy {
   @Input({ required: true }) postId!: string;
+  @Input() groupSlug = '';
   @Input() currentUserId = '';
   @Input() isGroupAdmin = false;
   @Input() initialCommentCount = 0;
+  @Input() autoExpand = false;
+  @Input() post?: PostResponse;
 
   @ViewChild('newCommentInput') newCommentInputRef?: ElementRef<HTMLTextAreaElement>;
   @ViewChild('replyInputEl') replyInputRef?: ElementRef<HTMLTextAreaElement>;
 
   private readonly newsService = inject(NewsService);
+  private readonly dialog = inject(MatDialog);
   private readonly destroy$ = new Subject<void>();
 
   // Feed state
@@ -69,6 +78,13 @@ export class CommentSectionComponent implements OnDestroy {
 
   // Open menus
   openMenuId: string | null = null;
+
+  ngOnInit(): void {
+    if (this.autoExpand && !this.loading) {
+      this.expanded = true;
+      this.load();
+    }
+  }
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -123,6 +139,7 @@ export class CommentSectionComponent implements OnDestroy {
 
     this.newsService.createComment(this.postId, {
       body,
+      mediaId: this.newMedia.mediaId,
       linkUrl: this.newMedia.linkUrl.trim() || null,
       linkTitle: this.newMedia.linkTitle.trim() || null,
     }).pipe(takeUntil(this.destroy$)).subscribe({
@@ -169,6 +186,7 @@ export class CommentSectionComponent implements OnDestroy {
     this.newsService.createComment(this.postId, {
       body,
       parentCommentId: parentId,
+      mediaId: this.replyMedia.mediaId,
       linkUrl: this.replyMedia.linkUrl.trim() || null,
       linkTitle: this.replyMedia.linkTitle.trim() || null,
     }).pipe(takeUntil(this.destroy$)).subscribe({
@@ -198,6 +216,9 @@ export class CommentSectionComponent implements OnDestroy {
       linkUrl: comment.linkUrl ?? '',
       linkTitle: comment.linkTitle ?? '',
       showOptional: !!comment.linkUrl,
+      mediaId: comment.mediaId ?? null,
+      previewUrl: comment.mediaUrl ? environment.apiUrl + comment.mediaUrl : null,
+      uploading: false,
     };
     this.replyingToId = null;
     this.openMenuId = null;
@@ -217,6 +238,7 @@ export class CommentSectionComponent implements OnDestroy {
 
     this.newsService.updateComment(this.postId, comment.id, {
       body,
+      mediaId: this.editMedia.mediaId,
       linkUrl: this.editMedia.linkUrl.trim() || null,
       linkTitle: this.editMedia.linkTitle.trim() || null,
     }).pipe(takeUntil(this.destroy$)).subscribe({
@@ -234,6 +256,65 @@ export class CommentSectionComponent implements OnDestroy {
   insertEditEmoji(emoji: string): void {
     this.editBody = this.editBody + emoji;
     this.showEditEmoji = false;
+  }
+
+  // ── Image upload ──────────────────────────────────────────────────────────
+
+  uploadImage(event: Event, target: MediaFields): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    if (!['image/jpeg', 'image/png'].includes(file.type)) {
+      alert('Only JPEG and PNG images are supported.');
+      input.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image must be under 5 MB.');
+      input.value = '';
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    target.uploading = true;
+
+    this.newsService.uploadMedia(formData, this.groupSlug)
+      .pipe(takeUntil(this.destroy$), finalize(() => { target.uploading = false; input.value = ''; }))
+      .subscribe({
+        next: result => {
+          target.mediaId = result.mediaId;
+          target.previewUrl = environment.apiUrl + result.mediaUrl;
+        },
+        error: () => alert('Image upload failed. Please try again.'),
+      });
+  }
+
+  clearImage(target: MediaFields): void {
+    target.mediaId = null;
+    target.previewUrl = null;
+  }
+
+  commentMediaUrl(comment: CommentResponse): string | null {
+    return comment.mediaUrl ? environment.apiUrl + comment.mediaUrl : null;
+  }
+
+  openCommentImageViewer(imageUrl: string): void {
+    if (!this.post) return;
+    const post = this.post;
+    const currentUserId = this.currentUserId;
+    const isGroupAdmin = this.isGroupAdmin;
+    import('../image-viewer-modal/image-viewer-modal.component').then(({ ImageViewerModalComponent }) => {
+      this.dialog.open(ImageViewerModalComponent, {
+        data: { imageUrl, post, currentUserId, isGroupAdmin },
+        width: '90vw',
+        maxWidth: '1100px',
+        height: '85vh',
+        maxHeight: '90vh',
+        panelClass: 'sn-image-viewer-panel',
+      });
+    });
   }
 
   // ── Delete ────────────────────────────────────────────────────────────────

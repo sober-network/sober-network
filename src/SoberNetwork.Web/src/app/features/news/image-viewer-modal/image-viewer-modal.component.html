@@ -1,0 +1,46 @@
+<!-- ══ IMAGE VIEWER MODAL ════════════════════════════════════════════════════ -->
+<div class="iv-root">
+
+  <!-- Close button -->
+  <button class="iv-close" (click)="close()" title="Close">
+    <mat-icon>close</mat-icon>
+  </button>
+
+  <!-- ── Left: image ─────────────────────────────────────────────────────── -->
+  <div class="iv-image-panel">
+    <img [src]="data.imageUrl" [alt]="data.post.subject" />
+  </div>
+
+  <!-- ── Right: post info + comments ────────────────────────────────────── -->
+  <div class="iv-content-panel">
+
+    <!-- Post header (author + group) -->
+    <div class="iv-post-header">
+      <div class="iv-avatar">{{ authorInitial }}</div>
+      <div class="iv-post-meta">
+        <div class="iv-author">{{ data.post.authorDisplayName }}</div>
+        <div class="iv-group">{{ data.post.groupName }}</div>
+      </div>
+    </div>
+
+    <!-- Post subject + body -->
+    <div class="iv-post-content">
+      <h3 class="iv-subject">{{ data.post.subject }}</h3>
+      <p class="iv-body">{{ data.post.body }}</p>
+    </div>
+
+    <!-- Auto-expanded comment thread -->
+    <div class="iv-comments-wrap">
+      <app-comment-section
+        [postId]="data.post.id"
+        [groupSlug]="data.post.groupSlug"
+        [currentUserId]="data.currentUserId"
+        [isGroupAdmin]="data.isGroupAdmin"
+        [initialCommentCount]="data.post.commentCount"
+        [post]="data.post"
+        [autoExpand]="true"
+      ></app-comment-section>
+    </div>
+
+  </div>
+</div>

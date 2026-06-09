@@ -13,6 +13,10 @@ public class PostMedia
     public Guid? PostId { get; set; }
     public Post? Post { get; set; }
     
+    /// <summary>The comment this media is attached to (null for post media).</summary>
+    public Guid? CommentId { get; set; }
+    public PostComment? Comment { get; set; }
+    
     /// <summary>Media type: "image" or "video".</summary>
     public string MediaType { get; set; } = string.Empty;  // "image" or "video"
     

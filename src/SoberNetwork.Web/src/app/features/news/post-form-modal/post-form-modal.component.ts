@@ -9,6 +9,7 @@ import { BaseFormModalComponent } from '@app/shared/components/base-form-modal/b
 import { EmojiPickerComponent } from '@app/shared/components/emoji-picker/emoji-picker.component';
 import { NewsService } from '@app/core/services/news.service';
 import { PostResponse } from '@app/core/models/news.models';
+import { environment } from '../../../../environments/environment';
 
 export interface PostFormModalData {
   /** When provided, the modal is in edit mode. */
@@ -51,10 +52,27 @@ export class PostFormModalComponent {
   error = '';
   showOptional = false;
   showEmojiPicker = false;
+  emojiPickerStyle: Record<string, string> = {};
+
+  openEmojiPicker(btn: HTMLButtonElement, event: MouseEvent): void {
+    event.stopPropagation();
+    this.showEmojiPicker = !this.showEmojiPicker;
+    if (this.showEmojiPicker) {
+      const rect = btn.getBoundingClientRect();
+      this.emojiPickerStyle = {
+        position: 'fixed',
+        top: `${rect.bottom + 6}px`,
+        right: `${window.innerWidth - rect.right}px`,
+        'z-index': '9999',
+      };
+    }
+  }
 
   selectedFile: File | null = null;
-  previewUrl: string | null = null;
-  mediaType: 'image' | 'video' | null = null;
+  previewUrl: string | null = this.data.post?.mediaUrl
+    ? environment.apiUrl + this.data.post.mediaUrl
+    : null;
+  mediaType: 'image' | 'video' | null = (this.data.post?.mediaType as 'image' | 'video') ?? null;
   isDragOver = false;
 
   readonly form = this.fb.group({
@@ -146,7 +164,7 @@ export class PostFormModalComponent {
       .subscribe({
         next: result => {
           this.form.controls.mediaId.setValue(result.mediaId);
-          this.previewUrl = result.mediaUrl;
+          this.previewUrl = environment.apiUrl + result.mediaUrl;
           this.mediaType = result.mediaType as 'image' | 'video';
           this.selectedFile = null;
         },

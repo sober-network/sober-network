@@ -50,13 +50,14 @@
   <p class="post-body">{{ post.body }}</p>
 
   <!-- Media (image or video, optional) -->
-  <div class="post-media-wrap" *ngIf="post.mediaUrl && !mediaError">
+  <div class="post-media-wrap" *ngIf="mediaFullUrl && !mediaError">
     <img
       *ngIf="post.mediaType === 'image'"
-      class="post-image"
-      [src]="post.mediaUrl"
+      class="post-image post-image--clickable"
+      [src]="mediaFullUrl"
       [alt]="post.subject"
       (error)="onMediaError()"
+      (click)="openImageViewer(mediaFullUrl!)"
       loading="lazy"
     />
     <video
@@ -65,7 +66,7 @@
       controls
       (error)="onMediaError()"
     >
-      <source [src]="post.mediaUrl" type="video/mp4" />
+      <source [src]="mediaFullUrl" type="video/mp4" />
     </video>
   </div>
 
@@ -87,9 +88,11 @@
   <!-- Comment section -->
   <app-comment-section
     [postId]="post.id"
+    [groupSlug]="post.groupSlug"
     [currentUserId]="currentUserId"
     [isGroupAdmin]="isGroupAdmin"
     [initialCommentCount]="post.commentCount"
+    [post]="post"
   ></app-comment-section>
 
 </article>

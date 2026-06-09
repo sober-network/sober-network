@@ -86,6 +86,17 @@ body {
 .sn-meeting-panel  { width: 720px; }
 .sn-create-group-panel { width: 720px; }
 
+// ── Image viewer — full-size image + comment thread (Instagram-style) ─────────
+.sn-image-viewer-panel {
+  .mat-mdc-dialog-surface {
+    border-radius: 12px !important;
+    box-shadow: 0 32px 80px rgba(17,17,16,.35) !important;
+    background: transparent !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+}
+
 :root {
   --sn-bg:           #f7f5f2;
   --sn-bg-soft:      #f0ede8;

@@ -49,5 +49,13 @@ public class PostMediaConfiguration : IEntityTypeConfiguration<PostMedia>
             .HasForeignKey<PostMedia>(p => p.PostId)
             .OnDelete(DeleteBehavior.Cascade)
             .IsRequired(false);  // PostId is optional during upload
+
+        builder.HasIndex(p => p.CommentId);
+
+        builder.HasOne(p => p.Comment)
+            .WithOne(c => c.Media)
+            .HasForeignKey<PostMedia>(p => p.CommentId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired(false);  // CommentId is optional (post media has null CommentId)
     }
 }

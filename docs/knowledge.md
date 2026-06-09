@@ -206,7 +206,7 @@ Anonymity and member responsibility are both honored.
 - Supports accountability without public shaming
 
 ### Must-Have (MVP)
-- [ ] Group news / announcements
+- [x] Group news / announcements (complete with media + image viewer)
 - [ ] Events calendar
 - [ ] Document library (group conscience notes, formats, etc.)
 - [ ] Phone list (authenticated members only)
@@ -968,4 +968,122 @@ This creates a visual "stagger" where the bold group name anchors left and the i
 
 ---
 
-*Last updated: 2026-06-07*
+## News & Announcements Feature
+
+**Status:** Complete ✅ (posts, comments, replies, media upload, image viewer modal)
+
+### Overview
+
+Facebook-style post feed inside each group hub's "News & Announcements" tab. Members can post text, images, and links. Comments and replies are threaded to unlimited depth. Admins can moderate (edit/delete any post or comment). New members go through a pre-moderation queue.
+
+### Entities (Domain)
+
+- `Post` — `Id`, `GroupId`, `AuthorId`, `Subject`, `Body`, `MediaId?`, `LinkUrl?`, `LinkTitle?`, `IsApproved`, `NeedsApproval`, `DeletedAt?`, `CreatedAt`, `UpdatedAt`
+- `PostComment` — `Id`, `PostId`, `ParentCommentId?`, `AuthorId`, `Body`, `MediaId?`, `LinkUrl?`, `LinkTitle?`, `DeletedAt?`, `CreatedAt`, `UpdatedAt`
+- `PostMedia` — `Id`, `PostId?` (nullable), `CommentId?` (nullable), `StoragePath`, `MediaType` (image/video), `OriginalFileName`, `FileSizeBytes`, `ImageWidth?`, `ImageHeight?`, `VideoDurationSeconds?`, `CreatedAt`
+  - `PostId` and `CommentId` are **mutually exclusive** — a media entity belongs to either a post or a comment, never both
+  - Media is uploaded **before** the post/comment is created (orphaned), then linked on save
+
+### Backend
+
+- **`IMediaService` / `MediaService`** (Infrastructure) — validates file type/size, strips EXIF, resizes/compresses, saves to `{ContentRootPath}/uploads/media/{guid}/filename`. Returns `storagePath` (relative, backslashes on Windows).
+- **`UploadPostMediaCommand` / `UploadPostMediaCommandHandler`** — lives in **Infrastructure** (not Core). Must be included in `AddMediatR()` scan.
+- **`INewsService` / `NewsService`** (Infrastructure) — full CRUD for posts and comments; links media on create/update; `MapToResponse` and `MapCommentToResponse` construct `/uploads/{path.Replace("\\","/")}` URLs.
+- **`NewsController`** — `GET/POST/PUT/DELETE /api/news/{groupSlug}/posts`, `POST /api/news/{groupSlug}/posts/media`, comments at `.../posts/{postId}/comments`.
+- **Static files** — `UseStaticFiles()` middleware serves `/uploads/...` from `ContentRootPath`. Must be placed **before** `UseAuthentication()` so files are accessible.
+- **MediatR scanning** — must scan both `Core` and `Infrastructure` assemblies:
+  ```csharp
+  .AddMediatR(cfg => {
+      cfg.RegisterServicesFromAssemblyContaining<CreatePostCommandHandler>(); // Core
+      cfg.RegisterServicesFromAssemblyContaining<TokenService>();             // Infrastructure
+  })
+  ```
+
+### Media URL Construction
+
+`MediaService.ProcessAndSaveMediaAsync` returns `storagePath` like `media\guid\file.jpg` (backslashes on Windows).
+
+```csharp
+// Correct URL construction in MapToResponse / MapCommentToResponse:
+$"/uploads/{path.Replace("\\", "/")}"
+// → /uploads/media/guid/file.jpg
+```
+
+In Angular dev (`ng serve` on :4200, API on :5067), **prepend `environment.apiUrl`** to all media URLs:
+```typescript
+environment.apiUrl + post.mediaUrl   // "http://localhost:5067/uploads/media/..."
+```
+In production, `apiUrl` is `''` so relative paths work.
+
+### Angular Components
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `NewsAnnouncementsComponent` | `features/news/news-announcements/` | Full page: hero, breadcrumbs, post feed, FAB |
+| `PostCardComponent` | `features/news/post-card/` | Single post card with edit/delete/approve menu, clickable image |
+| `PostFormModalComponent` | `features/news/post-form-modal/` | Create/edit post modal; image upload; emoji picker with `position:fixed` to escape modal overflow |
+| `CommentSectionComponent` | `features/news/comment-section/` | Threaded comments to unlimited depth; image upload per comment/reply; `autoExpand` input for image viewer |
+| `ImageViewerModalComponent` | `features/news/image-viewer-modal/` | Instagram-style split modal: image left (58%), post + comments right (42%) |
+| `EmojiPickerComponent` | `shared/components/emoji-picker/` | Shared emoji picker |
+
+### Image Viewer Modal
+
+Clicking any post image or comment image opens `ImageViewerModalComponent` via `MatDialog`.
+
+```typescript
+// Panel class in styles.scss:
+.sn-image-viewer-panel { .mat-mdc-dialog-surface { border-radius:12px; padding:0; overflow:hidden; } }
+
+// Open config:
+this.dialog.open(ImageViewerModalComponent, {
+  data: { imageUrl, post, currentUserId, isGroupAdmin },
+  width: '90vw', maxWidth: '1100px', height: '85vh',
+  panelClass: 'sn-image-viewer-panel',
+});
+```
+
+**Interface:**
+```typescript
+export interface ImageViewerModalData {
+  imageUrl: string;
+  post: PostResponse;
+  currentUserId: string;
+  isGroupAdmin: boolean;
+}
+```
+
+**Circular dependency avoidance:** `ImageViewerModalComponent` statically imports `CommentSectionComponent`. `CommentSectionComponent` and `PostCardComponent` use dynamic `import()` to open `ImageViewerModalComponent`, preventing a cycle.
+
+```typescript
+import('../image-viewer-modal/image-viewer-modal.component')
+  .then(({ ImageViewerModalComponent }) => this.dialog.open(...));
+```
+
+### CommentSectionComponent Inputs
+
+| Input | Default | Purpose |
+|-------|---------|---------|
+| `postId` | required | Post to load comments for |
+| `groupSlug` | `''` | Used for media upload endpoint |
+| `currentUserId` | `''` | Own-comment edit/delete gating |
+| `isGroupAdmin` | `false` | Admin delete gating |
+| `initialCommentCount` | `0` | Shown before expand |
+| `autoExpand` | `false` | Auto-loads + hides toggle bar (used in image viewer) |
+| `post` | `undefined` | Full post; required to enable image click → viewer from comments |
+
+### Emoji Picker — Overflow Fix
+
+The emoji picker inside `.lm-body { overflow-y: auto }` would be clipped. Fix: on button click, compute button position with `getBoundingClientRect()` and bind `[ngStyle]` with `position: fixed` + viewport coordinates. The picker renders in DOM but positioned in viewport space.
+
+### Image Upload Constraints
+
+- Max size: **5 MB**
+- Accepted types: `image/jpeg`, `image/png`
+- EXIF stripped server-side
+- Stored at `{ContentRootPath}/uploads/media/{guid}/filename`
+- `PostMedia.PostId` is nullable (media uploaded before post exists, linked on post save)
+- `PostMedia.CommentId` is nullable (same orphan-then-link pattern for comments)
+
+---
+
+*Last updated: 2026-06-09*

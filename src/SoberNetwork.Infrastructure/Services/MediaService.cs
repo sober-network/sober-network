@@ -4,6 +4,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SoberNetwork.Core.Interfaces;
@@ -18,9 +19,9 @@ namespace SoberNetwork.Infrastructure.Services;
 /// Videos: Requires external FFmpeg transcoding (stubbed for now).
 /// Storage: Local files initially; extend with Supabase Storage backend.
 /// </summary>
-public sealed class MediaService(AppDbContext db, ILogger<MediaService> logger) : IMediaService
+public sealed class MediaService(AppDbContext db, ILogger<MediaService> logger, IWebHostEnvironment environment) : IMediaService
 {
-    private readonly string _uploadDir = Path.Combine(Directory.GetCurrentDirectory(), "uploads", "media");
+    private readonly string _uploadDir = Path.Combine(environment.ContentRootPath, "uploads", "media");
 
     /// <inheritdoc/>
     public async Task<Result<UploadMediaResult>> UploadMediaAsync(
@@ -65,9 +66,12 @@ public sealed class MediaService(AppDbContext db, ILogger<MediaService> logger) 
             db.PostMedia.Add(media);
             await db.SaveChangesAsync(cancellationToken);
 
-            // Return public URLs (these would be Supabase signed URLs in production)
-            var mediaUrl = $"/uploads/media/{media.Id}/{fileName}";
-            var thumbUrl = thumbnailPath != null ? $"/uploads/media/{media.Id}/thumb-{fileName}" : null;
+            // Return public URLs using the actual storage paths
+            var mediaUrl = $"/uploads/{storagePath.Replace("\\", "/")}";
+            var thumbUrl = thumbnailPath != null ? $"/uploads/{thumbnailPath.Replace("\\", "/")}" : null;
+
+            logger.LogInformation("Media uploaded: mediaId={MediaId}, storagePath={StoragePath}, mediaUrl={MediaUrl}, filePath={FilePath}", 
+                media.Id, storagePath, mediaUrl, Path.Combine(_uploadDir, storagePath));
 
             var result = new UploadMediaResult(
                 MediaId: media.Id,

@@ -229,8 +229,12 @@ public sealed class NewsService(AppDbContext db) : INewsService
             authorDisplayName,
             post.Subject,
             post.Body,
-            post.Media?.StoragePath,  // MediaUrl
-            post.Media?.ThumbnailPath,  // ThumbnailUrl
+        post.Media?.StoragePath != null
+            ? $"/uploads/{post.Media.StoragePath.Replace("\\", "/")}"
+            : null,  // MediaUrl
+        post.Media?.ThumbnailPath != null
+            ? $"/uploads/{post.Media.ThumbnailPath.Replace("\\", "/")}"
+            : null,  // ThumbnailUrl
             post.Media?.MediaType,  // MediaType
             post.Media?.ImageWidth,
             post.Media?.ImageHeight,
@@ -255,6 +259,7 @@ public sealed class NewsService(AppDbContext db) : INewsService
         if (post == null) return (null, "Post not found.");
 
         var comments = await db.PostComments.AsNoTracking()
+            .Include(c => c.Media)
             .Where(c => c.PostId == postId && c.DeletedAt == null)
             .OrderBy(c => c.CreatedAt)
             .ToListAsync(ct);
@@ -295,6 +300,7 @@ public sealed class NewsService(AppDbContext db) : INewsService
             PostId = postId,
             AuthorId = authorId,
             ParentCommentId = request.ParentCommentId,
+            MediaId = request.MediaId,
             Body = request.Body.Trim(),
             LinkUrl = string.IsNullOrWhiteSpace(request.LinkUrl) ? null : request.LinkUrl.Trim(),
             LinkTitle = string.IsNullOrWhiteSpace(request.LinkTitle) ? null : request.LinkTitle.Trim(),
@@ -302,6 +308,20 @@ public sealed class NewsService(AppDbContext db) : INewsService
 
         db.PostComments.Add(comment);
         await db.SaveChangesAsync(ct);
+
+        // Link uploaded media to comment if present
+        PostMedia? media = null;
+        if (request.MediaId.HasValue)
+        {
+            media = await db.PostMedia
+                .FirstOrDefaultAsync(m => m.Id == request.MediaId.Value && m.PostId == null && m.CommentId == null, ct);
+            if (media != null)
+            {
+                media.CommentId = comment.Id;
+                await db.SaveChangesAsync(ct);
+                comment.Media = media;
+            }
+        }
 
         var author = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == authorId, ct);
         return (MapCommentToResponse(comment, new Dictionary<Guid, string>
@@ -315,6 +335,7 @@ public sealed class NewsService(AppDbContext db) : INewsService
         Guid commentId, Guid requestingUserId, UpdateCommentRequest request, CancellationToken ct = default)
     {
         var comment = await db.PostComments
+            .Include(c => c.Media)
             .FirstOrDefaultAsync(c => c.Id == commentId && c.DeletedAt == null, ct);
         if (comment == null) return (null, "Comment not found.");
 
@@ -324,6 +345,20 @@ public sealed class NewsService(AppDbContext db) : INewsService
         comment.Body = request.Body.Trim();
         comment.LinkUrl = request.LinkUrl is null ? comment.LinkUrl : (string.IsNullOrWhiteSpace(request.LinkUrl) ? null : request.LinkUrl.Trim());
         comment.LinkTitle = request.LinkTitle is null ? comment.LinkTitle : (string.IsNullOrWhiteSpace(request.LinkTitle) ? null : request.LinkTitle.Trim());
+
+        // Handle media change
+        if (request.MediaId.HasValue && request.MediaId.Value != comment.MediaId)
+        {
+            comment.MediaId = request.MediaId.Value;
+            var newMedia = await db.PostMedia
+                .FirstOrDefaultAsync(m => m.Id == request.MediaId.Value && m.PostId == null && m.CommentId == null, ct);
+            if (newMedia != null)
+            {
+                newMedia.CommentId = comment.Id;
+                comment.Media = newMedia;
+            }
+        }
+
         comment.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
 
@@ -360,5 +395,9 @@ public sealed class NewsService(AppDbContext db) : INewsService
     private static CommentResponse MapCommentToResponse(PostComment c, Dictionary<Guid, string> authors) =>
         new(c.Id, c.PostId, c.ParentCommentId,
             c.AuthorId, authors.GetValueOrDefault(c.AuthorId, "Unknown"),
-            c.Body, c.LinkUrl, c.LinkTitle, c.CreatedAt, c.UpdatedAt);
+            c.Body,
+            c.Media?.StoragePath != null ? $"/uploads/{c.Media.StoragePath.Replace("\\", "/")}" : null,
+            c.Media?.MediaType,
+            c.Media?.Id,
+            c.LinkUrl, c.LinkTitle, c.CreatedAt, c.UpdatedAt);
 }

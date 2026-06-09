@@ -22,3 +22,6 @@ Thumbs.db
 
 # Serilog local log files
 logs/
+
+# Uploaded media (local dev uploads — never commit user content)
+src/SoberNetwork.Api/uploads/

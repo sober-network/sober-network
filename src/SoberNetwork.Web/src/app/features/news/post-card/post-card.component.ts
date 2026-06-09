@@ -5,8 +5,10 @@ import {
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
 import { PostResponse } from '@app/core/models/news.models';
 import { CommentSectionComponent } from '../comment-section/comment-section.component';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-post-card',
@@ -26,6 +28,7 @@ export class PostCardComponent implements OnInit {
   @Output() approve = new EventEmitter<PostResponse>();
 
   private readonly elRef = inject(ElementRef);
+  private readonly dialog = inject(MatDialog);
 
   menuOpen = false;
   mediaError = false;
@@ -36,6 +39,23 @@ export class PostCardComponent implements OnInit {
 
   get canDelete(): boolean {
     return this.post.authorId === this.currentUserId || this.isGroupAdmin;
+  }
+
+  get mediaFullUrl(): string | null {
+    return this.post.mediaUrl ? environment.apiUrl + this.post.mediaUrl : null;
+  }
+
+  openImageViewer(imageUrl: string): void {
+    import('../image-viewer-modal/image-viewer-modal.component').then(({ ImageViewerModalComponent }) => {
+      this.dialog.open(ImageViewerModalComponent, {
+        data: { imageUrl, post: this.post, currentUserId: this.currentUserId, isGroupAdmin: this.isGroupAdmin },
+        width: '90vw',
+        maxWidth: '1100px',
+        height: '85vh',
+        maxHeight: '90vh',
+        panelClass: 'sn-image-viewer-panel',
+      });
+    });
   }
 
   get showMenu(): boolean {

@@ -256,6 +256,10 @@ $palette: (
   &:hover { transform: scale(1.01); }
 }
 
+.post-image--clickable {
+  cursor: pointer;
+}
+
 // ── Link preview ───────────────────────────────────────────────────────────
 .post-link-card {
   display: flex;

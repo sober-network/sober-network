@@ -9,9 +9,9 @@ public class PostMedia
     public Guid GroupId { get; set; }
     public Group Group { get; set; } = null!;
     
-    /// <summary>The post this media is attached to.</summary>
-    public Guid PostId { get; set; }
-    public Post Post { get; set; } = null!;
+    /// <summary>The post this media is attached to (null until post is created).</summary>
+    public Guid? PostId { get; set; }
+    public Post? Post { get; set; }
     
     /// <summary>Media type: "image" or "video".</summary>
     public string MediaType { get; set; } = string.Empty;  // "image" or "video"

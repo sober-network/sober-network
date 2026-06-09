@@ -118,7 +118,7 @@ public sealed class NewsService(AppDbContext db) : INewsService
         if (request.MediaId.HasValue)
         {
             var media = await db.PostMedia
-                .FirstOrDefaultAsync(m => m.Id == request.MediaId.Value && m.PostId == Guid.Empty, ct);
+                .FirstOrDefaultAsync(m => m.Id == request.MediaId.Value && m.PostId == null, ct);
             if (media != null)
             {
                 media.PostId = post.Id;
@@ -155,7 +155,7 @@ public sealed class NewsService(AppDbContext db) : INewsService
             
             // Link the new media to this post
             var newMedia = await db.PostMedia
-                .FirstOrDefaultAsync(m => m.Id == request.MediaId.Value && m.PostId == Guid.Empty, ct);
+                .FirstOrDefaultAsync(m => m.Id == request.MediaId.Value && m.PostId == null, ct);
             if (newMedia != null)
             {
                 newMedia.PostId = post.Id;

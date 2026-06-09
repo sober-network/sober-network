@@ -49,7 +49,7 @@ public sealed class MediaService(AppDbContext db, ILogger<MediaService> logger) 
             {
                 Id = Guid.NewGuid(),
                 GroupId = groupId,
-                PostId = postId,
+                PostId = null,  // Will be linked when post is created
                 MediaType = mediaType,
                 FileName = fileName,
                 StoragePath = storagePath,

@@ -10,7 +10,7 @@ public class MembersQueryParamsValidator : AbstractValidator<MembersQueryParams>
     public MembersQueryParamsValidator()
     {
         RuleFor(x => x.Page).GreaterThanOrEqualTo(1);
-        RuleFor(x => x.PageSize).GreaterThan(0).LessThanOrEqualTo(500);
+        RuleFor(x => x.PageSize).GreaterThan(0).LessThanOrEqualTo(100);
         RuleFor(x => x.Search).MaximumLength(100).When(x => x.Search != null);
     }
 }

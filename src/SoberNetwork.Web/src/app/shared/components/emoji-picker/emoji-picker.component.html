@@ -1,0 +1,44 @@
+<!-- ══ EMOJI PICKER ══════════════════════════════════════════════════════ -->
+<div class="ep-panel" [class.ep-above]="placement === 'above'" [class.ep-below]="placement === 'below'">
+
+  <!-- Search -->
+  <div class="ep-search">
+    <span class="ep-search-icon">🔍</span>
+    <input
+      class="ep-search-input"
+      type="text"
+      [(ngModel)]="searchTerm"
+      placeholder="Search emojis…"
+      autocomplete="off"
+    />
+  </div>
+
+  <!-- Category tabs -->
+  <div class="ep-tabs" *ngIf="!searchTerm">
+    <button
+      *ngFor="let cat of categories"
+      class="ep-tab"
+      [class.ep-tab--active]="cat.id === activeCategory.id"
+      (click)="selectCategory(cat)"
+      [title]="cat.title"
+      type="button"
+    >{{ cat.label }}</button>
+  </div>
+
+  <!-- Category title -->
+  <div class="ep-cat-title" *ngIf="!searchTerm">{{ activeCategory.title }}</div>
+
+  <!-- Emoji grid -->
+  <div class="ep-grid">
+    <button
+      *ngFor="let emoji of filteredEmojis"
+      class="ep-emoji-btn"
+      (click)="select(emoji)"
+      type="button"
+    >{{ emoji }}</button>
+    <div class="ep-empty" *ngIf="searchTerm && filteredEmojis.length === 0">
+      No results
+    </div>
+  </div>
+
+</div>

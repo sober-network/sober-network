@@ -6,11 +6,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { PostResponse } from '@app/core/models/news.models';
+import { CommentSectionComponent } from '../comment-section/comment-section.component';
 
 @Component({
   selector: 'app-post-card',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatIconModule],
+  imports: [CommonModule, RouterModule, MatIconModule, CommentSectionComponent],
   templateUrl: './post-card.component.html',
   styleUrl: './post-card.component.scss',
 })

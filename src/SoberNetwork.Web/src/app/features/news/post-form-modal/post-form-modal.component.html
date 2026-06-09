@@ -42,14 +42,30 @@
         Message <span class="pf-required">*</span>
         <span class="pf-char-count">{{ bodyLength }}/5000</span>
       </label>
-      <textarea
-        id="pf-body"
-        formControlName="body"
-        class="pf-textarea"
-        rows="5"
-        placeholder="Share your update, news, or announcement… Emoji welcome 🎉"
-        maxlength="5000"
-      ></textarea>
+      <div class="pf-textarea-wrap">
+        <textarea
+          #bodyTextarea
+          id="pf-body"
+          formControlName="body"
+          class="pf-textarea"
+          rows="5"
+          placeholder="Share your update, news, or announcement…"
+          maxlength="5000"
+        ></textarea>
+        <button
+          type="button"
+          class="pf-emoji-btn"
+          (click)="showEmojiPicker = !showEmojiPicker; $event.stopPropagation()"
+          title="Add emoji"
+        >😊</button>
+        <app-emoji-picker
+          *ngIf="showEmojiPicker"
+          placement="above"
+          class="pf-emoji-picker"
+          (emojiSelected)="insertEmoji($event)"
+          (closed)="showEmojiPicker = false"
+        ></app-emoji-picker>
+      </div>
       <div class="pf-error"
         *ngIf="form.controls.body.invalid && form.controls.body.touched">
         Message is required (max 5,000 characters).

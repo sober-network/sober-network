@@ -6,7 +6,6 @@ using SoberNetwork.Core.Commands.News;
 using SoberNetwork.Core.DTOs.News;
 using SoberNetwork.Core.Queries.News;
 using SoberNetwork.Core.Results;
-
 namespace SoberNetwork.Api.Controllers;
 
 /// <summary>Platform-wide news and announcements feed.</summary>
@@ -89,6 +88,70 @@ public class NewsController(IMediator mediator) : ControllerBase
         return result.Code switch
         {
             ResultCode.Ok => Ok(new { message = "Post approved." }),
+            ResultCode.Forbidden => Forbid(),
+            ResultCode.NotFound => NotFound(new { message = result.Error }),
+            _ => Problem(result.Error, statusCode: 400)
+        };
+    }
+
+    // ── Comments ─────────────────────────────────────────────────────────────────
+
+    /// <summary>Returns all comments for a post (flat list — client builds the thread tree).</summary>
+    [HttpGet("{postId:guid}/comments")]
+    public async Task<IActionResult> GetComments(
+        Guid postId, CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(new GetCommentsQuery(postId, UserId), cancellationToken);
+        return result.Code switch
+        {
+            ResultCode.Ok => Ok(result.Data),
+            ResultCode.NotFound => NotFound(new { message = result.Error }),
+            _ => Problem(result.Error, statusCode: 400)
+        };
+    }
+
+    /// <summary>Adds a comment to a post. Caller must be an active member of the post's group.</summary>
+    [HttpPost("{postId:guid}/comments")]
+    public async Task<IActionResult> CreateComment(
+        Guid postId, [FromBody] CreateCommentRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(new CreateCommentCommand(postId, UserId, request), cancellationToken);
+        return result.Code switch
+        {
+            ResultCode.Ok => Ok(result.Data),
+            ResultCode.Forbidden => Forbid(),
+            ResultCode.NotFound => NotFound(new { message = result.Error }),
+            _ => Problem(result.Error, statusCode: 400)
+        };
+    }
+
+    /// <summary>Updates a comment. Caller must be the comment author.</summary>
+    [HttpPut("{postId:guid}/comments/{commentId:guid}")]
+    public async Task<IActionResult> UpdateComment(
+        Guid postId, Guid commentId, [FromBody] UpdateCommentRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(new UpdateCommentCommand(commentId, UserId, request), cancellationToken);
+        return result.Code switch
+        {
+            ResultCode.Ok => Ok(result.Data),
+            ResultCode.Forbidden => Forbid(),
+            ResultCode.NotFound => NotFound(new { message = result.Error }),
+            _ => Problem(result.Error, statusCode: 400)
+        };
+    }
+
+    /// <summary>Deletes a comment. Caller must be the author or a group admin.</summary>
+    [HttpDelete("{postId:guid}/comments/{commentId:guid}")]
+    public async Task<IActionResult> DeleteComment(
+        Guid postId, Guid commentId,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(new DeleteCommentCommand(commentId, UserId), cancellationToken);
+        return result.Code switch
+        {
+            ResultCode.Ok => Ok(new { message = "Comment deleted." }),
             ResultCode.Forbidden => Forbid(),
             ResultCode.NotFound => NotFound(new { message = result.Error }),
             _ => Problem(result.Error, statusCode: 400)

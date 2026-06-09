@@ -16,6 +16,7 @@ export interface PostResponse {
   needsApproval: boolean;
   createdAt: string;
   updatedAt: string;
+  commentCount: number;
 }
 
 export interface CreatePostRequest {
@@ -40,4 +41,31 @@ export interface PostsFeedResponse {
   page: number;
   pageSize: number;
   totalCount: number;
+}
+
+// ── Comments ──────────────────────────────────────────────────────────────────
+
+export interface CommentResponse {
+  id: string;
+  postId: string;
+  parentCommentId?: string | null;
+  authorId: string;
+  authorDisplayName: string;
+  body: string;
+  createdAt: string;
+  updatedAt?: string | null;
+}
+
+export interface CreateCommentRequest {
+  body: string;
+  parentCommentId?: string | null;
+}
+
+export interface UpdateCommentRequest {
+  body: string;
+}
+
+/** Client-side comment node for threaded rendering. */
+export interface CommentNode extends CommentResponse {
+  replies: CommentNode[];
 }

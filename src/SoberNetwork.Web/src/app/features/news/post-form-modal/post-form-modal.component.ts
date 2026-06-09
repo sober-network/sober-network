@@ -1,10 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs';
 import { BaseFormModalComponent } from '@app/shared/components/base-form-modal/base-form-modal.component';
+import { EmojiPickerComponent } from '@app/shared/components/emoji-picker/emoji-picker.component';
 import { NewsService } from '@app/core/services/news.service';
 import { PostResponse } from '@app/core/models/news.models';
 
@@ -22,7 +23,7 @@ export interface PostFormModalResult {
 @Component({
   selector: 'app-post-form-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatProgressSpinnerModule, BaseFormModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, MatProgressSpinnerModule, BaseFormModalComponent, EmojiPickerComponent],
   templateUrl: './post-form-modal.component.html',
   styleUrl: './post-form-modal.component.scss',
 })
@@ -40,9 +41,12 @@ export class PostFormModalComponent {
       : 'Share news or announcements with your group.';
   }
 
+  @ViewChild('bodyTextarea') bodyTextareaRef?: ElementRef<HTMLTextAreaElement>;
+
   saving = false;
   error = '';
   showOptional = false;
+  showEmojiPicker = false;
 
   readonly form = this.fb.group({
     groupSlug: [
@@ -97,6 +101,25 @@ export class PostFormModalComponent {
         (this.error =
           (err as { error?: { message?: string } })?.error?.message ??
           'Could not save post. Please try again.'),
+    });
+  }
+
+  insertEmoji(emoji: string): void {
+    this.showEmojiPicker = false;
+    const el = this.bodyTextareaRef?.nativeElement;
+    const current = this.form.controls.body.value ?? '';
+    if (!el) {
+      this.form.controls.body.setValue(current + emoji);
+      return;
+    }
+    const start = el.selectionStart ?? current.length;
+    const end = el.selectionEnd ?? current.length;
+    const updated = current.slice(0, start) + emoji + current.slice(end);
+    this.form.controls.body.setValue(updated);
+    setTimeout(() => {
+      el.selectionStart = start + emoji.length;
+      el.selectionEnd = start + emoji.length;
+      el.focus();
     });
   }
 

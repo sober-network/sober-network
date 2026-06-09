@@ -1,0 +1,182 @@
+<!-- ══ COMMENT SECTION ══════════════════════════════════════════════════ -->
+<div class="cs-root">
+
+  <!-- Toggle bar -->
+  <div class="cs-toggle-bar">
+    <button class="cs-toggle-btn" (click)="toggle()" type="button">
+      <mat-icon class="cs-icon">chat_bubble_outline</mat-icon>
+      <span>{{ (expanded ? 'Hide' : 'View') }} {{ initialCommentCount || localCount }} comment{{ (initialCommentCount || localCount) === 1 ? '' : 's' }}</span>
+      <mat-icon class="cs-chevron" [class.cs-chevron--open]="expanded">expand_more</mat-icon>
+    </button>
+  </div>
+
+  <!-- Expanded content -->
+  <ng-container *ngIf="expanded">
+
+    <!-- Loading -->
+    <div class="cs-loading" *ngIf="loading">
+      <mat-spinner diameter="24"></mat-spinner>
+    </div>
+
+    <!-- Comment tree -->
+    <div class="cs-thread" *ngIf="!loading">
+
+      <!-- Top-level comments -->
+      <ng-container *ngFor="let comment of commentTree">
+        <div class="cs-comment">
+
+          <!-- Comment row -->
+          <ng-container *ngTemplateOutlet="commentRowTpl; context: { $implicit: comment, depth: 0 }"></ng-container>
+
+          <!-- Replies -->
+          <div class="cs-replies" *ngIf="comment.replies.length > 0">
+            <ng-container *ngFor="let reply of comment.replies">
+              <div class="cs-comment cs-comment--reply">
+                <ng-container *ngTemplateOutlet="commentRowTpl; context: { $implicit: reply, depth: 1 }"></ng-container>
+              </div>
+            </ng-container>
+          </div>
+
+          <!-- Reply input -->
+          <div class="cs-reply-input" *ngIf="replyingToId === comment.id">
+            <div class="cs-mini-avatar">{{ authorInitial('You') }}</div>
+            <div class="cs-input-wrap">
+              <div class="cs-textarea-row">
+                <textarea
+                  #replyInputRef
+                  class="cs-textarea"
+                  [(ngModel)]="replyBody"
+                  placeholder="Write a reply…"
+                  rows="2"
+                    (keydown)="onEnterReply($event)"
+                ></textarea>
+                <button class="cs-emoji-btn" type="button" (click)="showReplyEmojiPicker = !showReplyEmojiPicker; $event.stopPropagation()">😊</button>
+              </div>
+              <app-emoji-picker
+                *ngIf="showReplyEmojiPicker"
+                placement="above"
+                class="cs-emoji-picker"
+                (emojiSelected)="insertReplyEmoji($event)"
+                (closed)="showReplyEmojiPicker = false"
+              ></app-emoji-picker>
+              <div class="cs-input-actions">
+                <button class="cs-action-btn cs-action-btn--cancel" type="button" (click)="cancelReply()">Cancel</button>
+                <button class="cs-action-btn cs-action-btn--post" type="button" (click)="submitReply()" [disabled]="replySubmitting || !replyBody.trim()">
+                  {{ replySubmitting ? '…' : 'Reply' }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </ng-container>
+
+      <!-- Empty state -->
+      <div class="cs-empty" *ngIf="!loading && commentTree.length === 0">
+        Be the first to comment.
+      </div>
+
+      <!-- New comment input -->
+      <div class="cs-new-comment">
+        <div class="cs-mini-avatar">{{ authorInitial('You') }}</div>
+        <div class="cs-input-wrap">
+          <div class="cs-textarea-row">
+            <textarea
+              #newCommentInput
+              class="cs-textarea"
+              [(ngModel)]="newCommentBody"
+              placeholder="Add a comment…"
+              rows="2"
+              (keydown)="onEnterComment($event)"
+            ></textarea>
+            <button class="cs-emoji-btn" type="button" (click)="showEmojiPicker = !showEmojiPicker; $event.stopPropagation()">😊</button>
+          </div>
+          <app-emoji-picker
+            *ngIf="showEmojiPicker"
+            placement="above"
+            class="cs-emoji-picker"
+            (emojiSelected)="insertEmoji($event)"
+            (closed)="showEmojiPicker = false"
+          ></app-emoji-picker>
+          <div class="cs-input-actions" *ngIf="newCommentBody.trim()">
+            <button class="cs-action-btn cs-action-btn--post" type="button" (click)="submitComment()" [disabled]="submitting">
+              {{ submitting ? '…' : 'Post' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </ng-container>
+
+</div>
+
+<!-- ══ Comment row template ══════════════════════════════════════════════ -->
+<ng-template #commentRowTpl let-comment let-depth="depth">
+
+  <!-- Edit mode -->
+  <ng-container *ngIf="editingCommentId === comment.id; else viewMode">
+    <div class="cs-edit-row">
+      <div class="cs-mini-avatar">{{ authorInitial(comment.authorDisplayName) }}</div>
+      <div class="cs-input-wrap">
+        <div class="cs-textarea-row">
+          <textarea
+            class="cs-textarea"
+            [(ngModel)]="editBody"
+            rows="2"
+            autofocus
+          ></textarea>
+          <button class="cs-emoji-btn" type="button" (click)="showEditEmojiPicker = !showEditEmojiPicker; $event.stopPropagation()">😊</button>
+        </div>
+        <app-emoji-picker
+          *ngIf="showEditEmojiPicker"
+          placement="above"
+          class="cs-emoji-picker"
+          (emojiSelected)="editBody = editBody + $event; showEditEmojiPicker = false"
+          (closed)="showEditEmojiPicker = false"
+        ></app-emoji-picker>
+        <div class="cs-input-actions">
+          <button class="cs-action-btn cs-action-btn--cancel" type="button" (click)="cancelEdit()">Cancel</button>
+          <button class="cs-action-btn cs-action-btn--post" type="button" (click)="submitEdit(comment)" [disabled]="editSubmitting || !editBody.trim()">
+            {{ editSubmitting ? '…' : 'Save' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- View mode -->
+  <ng-template #viewMode>
+    <div class="cs-comment-row">
+      <div class="cs-avatar" [class.cs-avatar--small]="depth > 0">
+        {{ authorInitial(comment.authorDisplayName) }}
+      </div>
+      <div class="cs-comment-body">
+        <div class="cs-bubble">
+          <span class="cs-author">{{ comment.authorDisplayName }}</span>
+          <span class="cs-text">{{ comment.body }}</span>
+        </div>
+        <div class="cs-meta">
+          <span class="cs-time">{{ relativeTime(comment.createdAt) }}</span>
+          <span class="cs-edited" *ngIf="comment.updatedAt && comment.updatedAt !== comment.createdAt"> · Edited</span>
+          <button class="cs-reply-btn" *ngIf="depth === 0" type="button" (click)="startReply(comment.id)">Reply</button>
+        </div>
+      </div>
+      <!-- Ellipsis menu -->
+      <div class="cs-comment-menu" *ngIf="canEdit(comment) || canDelete(comment)">
+        <button class="cs-menu-trigger" type="button" (click)="toggleMenu(comment.id, $event)">
+          <mat-icon>more_horiz</mat-icon>
+        </button>
+        <div class="cs-dropdown" *ngIf="openMenuId === comment.id">
+          <button class="cs-menu-item" *ngIf="canEdit(comment)" type="button" (click)="startEdit(comment)">
+            <mat-icon>edit</mat-icon> Edit
+          </button>
+          <button class="cs-menu-item cs-menu-item--danger" *ngIf="canDelete(comment)" type="button" (click)="deleteComment(comment)">
+            <mat-icon>delete_outline</mat-icon> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+</ng-template>

@@ -17,5 +17,6 @@ public record PostResponse(
     /// <summary>True when the post is pending admin review (shown to admins only).</summary>
     bool NeedsApproval,
     DateTime CreatedAt,
-    DateTime UpdatedAt
+    DateTime UpdatedAt,
+    int CommentCount
 );

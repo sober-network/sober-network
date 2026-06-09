@@ -13,6 +13,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<GroupServiceRole> GroupServiceRoles => Set<GroupServiceRole>();
     public DbSet<Meeting> Meetings => Set<Meeting>();
     public DbSet<Post> Posts => Set<Post>();
+    public DbSet<PostComment> PostComments => Set<PostComment>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<SecurityEvent> SecurityEvents => Set<SecurityEvent>();
 

@@ -25,4 +25,22 @@ public interface INewsService
     /// <summary>Approves a pending post. Caller must be a GroupAdmin or SuperAdmin.</summary>
     Task<(bool Success, string? Error)> ApprovePostAsync(
         Guid userId, Guid postId, CancellationToken ct = default);
+
+    // ── Comments ────────────────────────────────────────────────────────────────
+
+    /// <summary>Returns all non-deleted comments for a post (flat; client builds the tree).</summary>
+    Task<(IEnumerable<CommentResponse>? Comments, string? Error)> GetCommentsAsync(
+        Guid postId, Guid requestingUserId, CancellationToken ct = default);
+
+    /// <summary>Creates a comment on a post. Author must be an active member of the post's group.</summary>
+    Task<(CommentResponse? Comment, string? Error)> CreateCommentAsync(
+        Guid postId, Guid authorId, CreateCommentRequest request, CancellationToken ct = default);
+
+    /// <summary>Updates a comment body. Caller must be the author.</summary>
+    Task<(CommentResponse? Comment, string? Error)> UpdateCommentAsync(
+        Guid commentId, Guid requestingUserId, string body, CancellationToken ct = default);
+
+    /// <summary>Soft-deletes a comment. Caller must be the author or an admin of the post's group.</summary>
+    Task<(bool Success, string? Error)> DeleteCommentAsync(
+        Guid commentId, Guid requestingUserId, CancellationToken ct = default);
 }

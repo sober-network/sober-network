@@ -75,4 +75,12 @@
     <mat-icon>edit</mat-icon> Edited
   </div>
 
+  <!-- Comment section -->
+  <app-comment-section
+    [postId]="post.id"
+    [currentUserId]="currentUserId"
+    [isGroupAdmin]="isGroupAdmin"
+    [initialCommentCount]="post.commentCount"
+  ></app-comment-section>
+
 </article>

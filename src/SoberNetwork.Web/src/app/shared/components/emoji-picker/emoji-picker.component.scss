@@ -1,0 +1,121 @@
+:host { display: block; position: relative; }
+
+// ── Panel ──────────────────────────────────────────────────────────────────
+.ep-panel {
+  width: 320px;
+  background: white;
+  border: 1px solid rgba(17,17,16,.1);
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(17,17,16,.15);
+  overflow: hidden;
+  animation: epIn 0.14s ease;
+  z-index: 200;
+}
+
+@keyframes epIn {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+// ── Search ─────────────────────────────────────────────────────────────────
+.ep-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(17,17,16,.07);
+}
+
+.ep-search-icon { font-size: 14px; flex-shrink: 0; }
+
+.ep-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  color: #111110;
+  background: transparent;
+  &::placeholder { color: #b0afa9; }
+}
+
+// ── Category tabs ──────────────────────────────────────────────────────────
+.ep-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 6px 8px 0;
+  border-bottom: 1px solid rgba(17,17,16,.07);
+  overflow-x: auto;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+.ep-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.12s;
+  flex-shrink: 0;
+
+  &:hover { background: rgba(17,17,16,.06); }
+  &--active { background: rgba(138,79,163,.14); }
+}
+
+// ── Category title ─────────────────────────────────────────────────────────
+.ep-cat-title {
+  padding: 6px 12px 4px;
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #b0afa9;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+// ── Emoji grid ─────────────────────────────────────────────────────────────
+.ep-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+  padding: 6px 8px 10px;
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(17,17,16,.1) transparent;
+}
+
+.ep-emoji-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+  transition: background 0.1s, transform 0.1s;
+  line-height: 1;
+
+  &:hover {
+    background: rgba(17,17,16,.07);
+    transform: scale(1.15);
+  }
+}
+
+.ep-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 24px;
+  color: #b0afa9;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+}

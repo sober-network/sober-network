@@ -207,10 +207,11 @@ builder.Services.AddHsts(options =>
 
 
 
-// MediatR — scans SoberNetwork.Core for all command/query handlers
+// MediatR — scans SoberNetwork.Core and SoberNetwork.Infrastructure for all command/query handlers
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssemblyContaining<SoberNetwork.Core.Commands.Auth.LoginCommand>();
+    cfg.RegisterServicesFromAssemblyContaining<SoberNetwork.Infrastructure.Services.TokenService>();
     cfg.AddBehavior(typeof(MediatR.IPipelineBehavior<,>), typeof(SoberNetwork.Core.Behaviors.LoggingBehavior<,>));
 });
 

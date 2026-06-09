@@ -1,0 +1,122 @@
+# EditorConfig for Sober Network (full-stack .NET 10 + Angular 21)
+# Enforces consistent code style across backend and frontend
+# https://editorconfig.org/
+
+# Root config
+root = true
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Default settings for all files
+# ─────────────────────────────────────────────────────────────────────────────
+
+[*]
+charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
+end_of_line = lf
+
+# ─────────────────────────────────────────────────────────────────────────────
+# C# / .NET Backend (SoberNetwork.Api, .Core, .Domain, .Infrastructure)
+# ─────────────────────────────────────────────────────────────────────────────
+
+[*.cs]
+indent_size = 4
+indent_style = space
+max_line_length = 120
+
+# Naming conventions
+dotnet_naming_style.pascal_case_style.required_prefix =
+dotnet_naming_style.pascal_case_style.required_suffix =
+dotnet_naming_style.pascal_case_style.word_separator =
+dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+
+dotnet_naming_style.camel_case_style.required_prefix =
+dotnet_naming_style.camel_case_style.required_suffix =
+dotnet_naming_style.camel_case_style.word_separator =
+dotnet_naming_style.camel_case_style.capitalization = camel_case
+
+dotnet_naming_style.upper_case_style.required_prefix =
+dotnet_naming_style.upper_case_style.required_suffix =
+dotnet_naming_style.upper_case_style.word_separator = _
+dotnet_naming_style.upper_case_style.capitalization = all_upper
+
+# Type declarations (PascalCase)
+dotnet_naming_symbols.type_symbols.applicable_kinds = class, struct, interface, enum, delegate
+dotnet_naming_rule.types_should_be_pascal_case.symbols = type_symbols
+dotnet_naming_rule.types_should_be_pascal_case.style = pascal_case_style
+dotnet_naming_rule.types_should_be_pascal_case.severity = suggestion
+
+# Method declarations (PascalCase)
+dotnet_naming_symbols.method_symbols.applicable_kinds = method, property, event
+dotnet_naming_rule.methods_should_be_pascal_case.symbols = method_symbols
+dotnet_naming_rule.methods_should_be_pascal_case.style = pascal_case_style
+dotnet_naming_rule.methods_should_be_pascal_case.severity = suggestion
+
+# Parameters (camelCase)
+dotnet_naming_symbols.parameter_symbols.applicable_kinds = parameter, local
+dotnet_naming_rule.parameters_should_be_camel_case.symbols = parameter_symbols
+dotnet_naming_rule.parameters_should_be_camel_case.style = camel_case_style
+dotnet_naming_rule.parameters_should_be_camel_case.severity = suggestion
+
+# Constants (UPPER_CASE)
+dotnet_naming_symbols.constant_symbols.applicable_kinds = field, local
+dotnet_naming_symbols.constant_symbols.required_modifiers = const
+dotnet_naming_rule.constants_should_be_upper_case.symbols = constant_symbols
+dotnet_naming_rule.constants_should_be_upper_case.style = upper_case_style
+dotnet_naming_rule.constants_should_be_upper_case.severity = suggestion
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TypeScript / Angular Frontend (src/SoberNetwork.Web)
+# ─────────────────────────────────────────────────────────────────────────────
+
+[*.ts]
+indent_size = 2
+indent_style = space
+max_line_length = 120
+quote_type = single
+
+[*.html]
+indent_size = 2
+indent_style = space
+max_line_length = 120
+
+[*.scss]
+indent_size = 2
+indent_style = space
+max_line_length = 120
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Build / Package / Config Files
+# ─────────────────────────────────────────────────────────────────────────────
+
+[*.json]
+indent_size = 2
+indent_style = space
+
+[*.yaml]
+[*.yml]
+indent_size = 2
+indent_style = space
+
+[*.xml]
+[*.csproj]
+[*.props]
+indent_size = 2
+indent_style = space
+
+[Dockerfile]
+indent_size = 2
+indent_style = space
+
+[*.md]
+max_line_length = off
+trim_trailing_whitespace = false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PostgreSQL Migrations (preserve as-is)
+# ─────────────────────────────────────────────────────────────────────────────
+
+[*/Migrations/*.cs]
+indent_size = 4
+indent_style = space
+# Generated code, minimal enforcement

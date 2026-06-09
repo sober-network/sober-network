@@ -143,6 +143,20 @@ npx prettier --write "src/**/*.{ts,html,scss}"
 - Use `CreateAuthenticatedClient(...)` and `CreateSuperAdminClient(...)` instead of hand-rolled auth setup.
 - Use `JwtTestHelper.GenerateToken(...)` for test JWT creation when direct token generation is needed.
 
+### Building new features
+
+- When adding a feature, start with database entities (Domain), then create handlers/DTOs/validators (Core), implement services (Infrastructure), wire the controller (Api), and finally add Angular components (Web).
+- Example reference: **News & Announcements** — A Facebook-style post feed with recursive replies (unlimited depth). See:
+  - Entities: `SoberNetwork.Domain/Entities/Post.cs`, `PostComment.cs`
+  - Backend: `src/SoberNetwork.Core/Handlers/News/` (9 CQRS handlers)
+  - Controller: `src/SoberNetwork.Api/Controllers/NewsController.cs`
+  - Frontend: `src/SoberNetwork.Web/src/app/features/news/` (recursive `CommentSectionComponent`, media support, emoji picker)
+- For recursive/nested entities (comments within comments, replies to replies):
+  - Store parent reference as a nullable `Guid` (e.g., `ParentCommentId`) — do not use composite tree structures
+  - Return the full tree in a single query when possible (EF projections handle recursion well)
+  - In Angular, use recursive components (`*ngIf="item.children?.length"`) to render unbounded nesting
+  - Lazy-load deeply nested replies if performance becomes an issue
+
 ### Local development setup
 
 - `docker compose up -d` starts the local PostgreSQL container.

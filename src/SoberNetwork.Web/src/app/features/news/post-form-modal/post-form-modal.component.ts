@@ -178,6 +178,7 @@ export class PostFormModalComponent {
       ? this.newsService.updatePost(this.data.post!.id, {
           subject: v.subject?.trim(),
           body: v.body?.trim(),
+          mediaId: v.mediaId || null,
           linkUrl: v.linkUrl?.trim() || null,
           linkTitle: v.linkTitle?.trim() || null,
         })

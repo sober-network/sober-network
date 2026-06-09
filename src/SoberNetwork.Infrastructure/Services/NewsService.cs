@@ -114,6 +114,18 @@ public sealed class NewsService(AppDbContext db) : INewsService
         db.Posts.Add(post);
         await db.SaveChangesAsync(ct);
 
+        // Link uploaded media to post if present
+        if (request.MediaId.HasValue)
+        {
+            var media = await db.PostMedia
+                .FirstOrDefaultAsync(m => m.Id == request.MediaId.Value && m.PostId == Guid.Empty, ct);
+            if (media != null)
+            {
+                media.PostId = post.Id;
+                await db.SaveChangesAsync(ct);
+            }
+        }
+
         post.Group = group;
         return (MapToResponse(post, group.Name, group.Slug, author?.DisplayName ?? "Unknown", [], isSuperAdmin: false, 0), null);
     }
@@ -135,6 +147,21 @@ public sealed class NewsService(AppDbContext db) : INewsService
         if (request.Body != null) post.Body = request.Body.Trim();
         post.LinkUrl = request.LinkUrl is null ? post.LinkUrl : (string.IsNullOrWhiteSpace(request.LinkUrl) ? null : request.LinkUrl.Trim());
         post.LinkTitle = request.LinkTitle is null ? post.LinkTitle : (string.IsNullOrWhiteSpace(request.LinkTitle) ? null : request.LinkTitle.Trim());
+        
+        // Handle media change
+        if (request.MediaId.HasValue && request.MediaId.Value != post.MediaId)
+        {
+            post.MediaId = request.MediaId.Value;
+            
+            // Link the new media to this post
+            var newMedia = await db.PostMedia
+                .FirstOrDefaultAsync(m => m.Id == request.MediaId.Value && m.PostId == Guid.Empty, ct);
+            if (newMedia != null)
+            {
+                newMedia.PostId = post.Id;
+            }
+        }
+        
         post.UpdatedAt = DateTime.UtcNow;
 
         await db.SaveChangesAsync(ct);

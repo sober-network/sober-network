@@ -4,7 +4,7 @@ namespace SoberNetwork.Core.DTOs.News;
 public record UpdatePostRequest(
     string? Subject,
     string? Body,
-    string? ImageUrl,
+    Guid? MediaId,
     string? LinkUrl,
     string? LinkTitle
 );

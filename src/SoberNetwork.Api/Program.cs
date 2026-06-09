@@ -228,6 +228,7 @@ builder.Services.AddScoped<IMemberService, MemberService>();
 builder.Services.AddScoped<INewsService, NewsService>();
 builder.Services.AddScoped<IGroupServiceRoleService, GroupServiceRoleService>();
 builder.Services.AddScoped<IStatsService, StatsService>();
+builder.Services.AddScoped<IMediaService, MediaService>();
 
 // Auth service
 builder.Services.AddScoped<SoberNetwork.Core.Interfaces.IAuthService, SoberNetwork.Infrastructure.Services.AuthService>();
@@ -360,6 +361,24 @@ app.UseCors("ApiCors");
 app.UseDefaultFiles();
 
 app.UseStaticFiles();
+
+// Serve uploaded media files from /uploads/media (configurable path)
+var uploadsPath = Path.Combine(app.Environment.ContentRootPath, "uploads");
+if (!Directory.Exists(uploadsPath))
+{
+    Directory.CreateDirectory(uploadsPath);
+}
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(uploadsPath),
+    RequestPath = "/uploads",
+    OnPrepareResponse = ctx =>
+    {
+        // Cache media files for 30 days (they're immutable by ID)
+        ctx.Context.Response.Headers.CacheControl = "public, max-age=2592000";
+    }
+});
 
 app.UseRateLimiter();
 

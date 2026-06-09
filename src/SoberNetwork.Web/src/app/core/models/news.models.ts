@@ -37,6 +37,7 @@ export interface CreatePostRequest {
 export interface UpdatePostRequest {
   subject?: string | null;
   body?: string | null;
+  mediaId?: string | null;
   linkUrl?: string | null;
   linkTitle?: string | null;
 }

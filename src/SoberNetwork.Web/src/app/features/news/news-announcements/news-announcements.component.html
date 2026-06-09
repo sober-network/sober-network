@@ -11,14 +11,21 @@
   (plusClick)="openNewPost()"
 ></app-group-hero>
 
+<!-- ══ PAGE TITLE (Below Hero) ════════════════════════════════════════════ -->
+<div class="page-title-section">
+  <div class="page-title-wrap">
+    <h2 class="page-title">
+      My
+      <span class="rainbow-bg">News</span>
+      &amp;
+      <span class="rainbow-bg">Announcements</span>
+    </h2>
+  </div>
+</div>
+
 <!-- ══ FEED SECTION ══════════════════════════════════════════════════════ -->
 <section class="feed-section">
   <div class="section-wrap">
-
-    <!-- Page title -->
-    <div class="page-header fade-up">
-      <h2 class="page-title">My News &amp; Announcements</h2>
-    </div>
 
     <!-- Error -->
     <div class="state-error fade-up" *ngIf="error">

@@ -6,15 +6,18 @@
   eyebrowText="Community Feed"
   eyebrowIcon="campaign"
   [breadcrumbs]="breadcrumbs"
-  [showPlusButton]="false"
+  [showPlusButton]="true"
+  plusButtonText="New Post"
+  (plusClick)="openNewPost()"
 ></app-group-hero>
 
 <!-- ══ FEED SECTION ══════════════════════════════════════════════════════ -->
 <section class="feed-section">
   <div class="section-wrap">
 
-    <div class="section-header fade-up">
-      <h2 class="section-title">My News &amp; Announcements</h2>
+    <!-- Page title -->
+    <div class="page-header fade-up">
+      <h2 class="page-title">My News &amp; Announcements</h2>
     </div>
 
     <!-- Error -->

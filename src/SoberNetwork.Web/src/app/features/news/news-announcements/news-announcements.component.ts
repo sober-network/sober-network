@@ -47,6 +47,7 @@ export class NewsAnnouncementsComponent implements OnInit, AfterViewInit, OnDest
   // Hero
   readonly breadcrumbs: BreadcrumbItem[] = [
     { label: 'Home', route: '/' },
+    { label: 'My Dashboard', route: '/dashboard' },
     { label: 'News & Announcements' },
   ];
 

@@ -53,7 +53,7 @@ public sealed class NotificationService(
     {
         var notifications = await db.Notifications
             .AsNoTracking()
-            .Where(n => n.RecipientId == userId)
+            .Where(n => n.RecipientId == userId && !n.IsRead)
             .OrderByDescending(n => n.CreatedAt)
             .Take(50)
             .Select(n => new

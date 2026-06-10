@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using SoberNetwork.Core.Commands.Notifications;
 using SoberNetwork.Core.Queries.News;
 using SoberNetwork.Core.Queries.Notifications;
-
 namespace SoberNetwork.Api.Controllers;
 
 [ApiController]
@@ -34,6 +33,14 @@ public class NotificationsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> MarkAllRead(CancellationToken cancellationToken = default)
     {
         await mediator.Send(new MarkNotificationsReadCommand(UserId), cancellationToken);
+        return NoContent();
+    }
+
+    /// <summary>Marks a single notification as read.</summary>
+    [HttpPost("{notificationId:guid}/mark-read")]
+    public async Task<IActionResult> MarkOneRead(Guid notificationId, CancellationToken cancellationToken = default)
+    {
+        await mediator.Send(new MarkOneNotificationReadCommand(notificationId, UserId), cancellationToken);
         return NoContent();
     }
 

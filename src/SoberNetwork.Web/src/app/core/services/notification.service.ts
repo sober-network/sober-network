@@ -66,6 +66,11 @@ export class NotificationService implements OnDestroy {
     this._unreadCount$.next(0);
   }
 
+  decrementUnreadCount(): void {
+    const current = this._unreadCount$.value;
+    if (current > 0) this._unreadCount$.next(current - 1);
+  }
+
   getNotifications() {
     return this.http.get<NotificationResponse[]>(`${this.baseUrl}/api/notifications`);
   }
@@ -77,6 +82,10 @@ export class NotificationService implements OnDestroy {
 
   markAllRead() {
     return this.http.post<void>(`${this.baseUrl}/api/notifications/mark-read`, {});
+  }
+
+  markOneRead(notificationId: string) {
+    return this.http.post<void>(`${this.baseUrl}/api/notifications/${notificationId}/mark-read`, {});
   }
 
   ngOnDestroy(): void {

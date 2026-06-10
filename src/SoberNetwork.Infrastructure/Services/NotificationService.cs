@@ -94,5 +94,13 @@ public sealed class NotificationService(
             .Where(n => n.RecipientId == userId && !n.IsRead)
             .ExecuteUpdateAsync(s => s.SetProperty(n => n.IsRead, true), ct);
     }
+
+    /// <inheritdoc/>
+    public async Task MarkOneReadAsync(Guid notificationId, Guid userId, CancellationToken ct = default)
+    {
+        await db.Notifications
+            .Where(n => n.Id == notificationId && n.RecipientId == userId && !n.IsRead)
+            .ExecuteUpdateAsync(s => s.SetProperty(n => n.IsRead, true), ct);
+    }
 }
 

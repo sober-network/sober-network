@@ -27,4 +27,7 @@ public interface INotificationService
 
     /// <summary>Marks all notifications as read for the given user.</summary>
     Task MarkAllReadAsync(Guid userId, CancellationToken ct = default);
+
+    /// <summary>Marks a single notification as read.</summary>
+    Task MarkOneReadAsync(Guid notificationId, Guid userId, CancellationToken ct = default);
 }

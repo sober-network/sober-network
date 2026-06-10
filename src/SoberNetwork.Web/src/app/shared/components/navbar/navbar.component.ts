@@ -178,12 +178,14 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
       this.navigateToNotifications();
       return;
     }
+    // Remove this item from the dropdown immediately
+    this.notifications = this.notifications.filter(x => x.id !== n.id);
+    // Decrement badge optimistically if it was unread
+    if (!n.isRead) this.notificationService.decrementUnreadCount();
     this.closeMenus();
-    this.notificationService.clearUnreadCount(); // optimistic — badge goes away instantly
-    this.notificationService.markAllRead().subscribe({
-      next: () => this.notificationService.fetchUnreadCount(),
-      error: () => {},
-    });
+
+    this.notificationService.markOneRead(n.id).subscribe({ error: () => {} });
+
     import('@app/features/news/image-viewer-modal/image-viewer-modal.component')
       .then(({ ImageViewerModalComponent }) => {
         this.notificationService.getNotificationPosts().subscribe({

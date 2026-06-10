@@ -82,6 +82,8 @@ export class NewsComponent implements OnInit, AfterViewInit, OnDestroy {
         // Check for notification filter on first load
         this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
           this.isFilteredView = params['filter'] === 'notifications';
+          this.posts = [];
+          this.loading = false; // reset so loadFeed() is never blocked
           this.loadFeed();
         });
       });

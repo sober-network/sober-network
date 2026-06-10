@@ -90,6 +90,46 @@
           </div>
         </div>
 
+        <!-- News — with notification badge and dropdown -->
+        <div class="menu-anchor dropdown-wrap">
+          <button type="button" class="nav-link nav-link-btn dropdown-trigger"
+                  [class.active]="router.url.startsWith('/news')"
+                  [class.open]="notificationsMenuOpen"
+                  (click)="toggleNotificationsMenu($event)"
+                  aria-haspopup="true" [attr.aria-expanded]="notificationsMenuOpen">
+            News
+            <span class="notif-badge" *ngIf="(notificationService.unreadCount$ | async)! > 0">
+              {{ (notificationService.unreadCount$ | async) }}
+            </span>
+          </button>
+
+          <div class="sn-dropdown notifications-dropdown" *ngIf="notificationsMenuOpen"
+               (click)="$event.stopPropagation()" role="menu">
+            <div class="dd-section-title">Notifications</div>
+
+            <div class="dd-notif-loading" *ngIf="notificationsLoading">Loading…</div>
+
+            <div class="dd-notif-empty" *ngIf="!notificationsLoading && notifications.length === 0">
+              No new notifications
+            </div>
+
+            <button type="button" class="dd-notif-item" role="menuitem"
+                    *ngFor="let n of notifications"
+                    (click)="navigateToNotificationPost(n)">
+              <div class="dd-notif-avatar">{{ n.triggerUserDisplayName[0]?.toUpperCase() }}</div>
+              <div class="dd-notif-content">
+                <span class="dd-notif-label">{{ getNotificationLabel(n) }}</span>
+                <span class="dd-notif-post" *ngIf="n.postSubject">{{ n.postSubject }}</span>
+              </div>
+              <span class="dd-notif-dot" *ngIf="!n.isRead"></span>
+            </button>
+
+            <div class="dropdown-divider"></div>
+            <a class="sn-dropdown-item" routerLink="/news" (click)="closeMenus()" role="menuitem">
+              <span class="dd-icon">📰</span><span>View All News</span>
+            </a>
+          </div>
+        </div>
         <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">Dashboard</a>
         <a routerLink="/admin"     routerLinkActive="active" class="nav-link"
            *ngIf="user.isSuperAdmin">Admin</a>

@@ -1368,6 +1368,11 @@ const ROUTES = {
     eyebrow: 'My Groups',
     title: 'Dashboard',
   },
+  '/news': {
+    auth: 'member', layout: 'simple-page',
+    eyebrow: 'Community',
+    title: 'News',
+  },
   '/groups/early-bird-zoom': {
     auth: 'member', layout: 'group-hub', activeTab: 'overview',
     eyebrow: 'Home Group',
@@ -1648,7 +1653,6 @@ const PAGES = {
       <div class="hero-feature-card">
         <div class="hero-feature-eyebrow">Features</div>
         <div class="hero-feature-pills">
-          <span class="hero-feature-pill news">News &amp; Announcements <span class="pill-cs">Soon</span></span>
           <span class="hero-feature-pill events">Event Calendar <span class="pill-cs">Soon</span></span>
           <span class="hero-feature-pill board">Bulletin Board <span class="pill-cs">Soon</span></span>
         </div>
@@ -2124,7 +2128,8 @@ function renderNav() {
             <a class="dd-item" onclick="alert('Create Group');closeGroupsDrop()"><span class="dd-icon">➕</span> Create Group</a>
           </div>
         </div>
-      </div>`;
+        <a class="nlink ${currentRoute==='/news'?'active':''}" onclick="navigate('/news')">News</a>
+        <a class="nlink ${currentRoute==='/dashboard'?'active':''}" onclick="navigate('/dashboard')">Dashboard</a>
     actions.innerHTML = `
       <div class="user-wrap">
         <button class="user-pill" onclick="toggleUserDrop(event)">

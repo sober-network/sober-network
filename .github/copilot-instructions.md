@@ -26,10 +26,15 @@ dotnet test tests\SoberNetwork.Api.Tests\SoberNetwork.Api.Tests.csproj --filter 
 
 ### Frontend (Angular 21)
 
+Package scripts in `src\SoberNetwork.Web\package.json` mirror these commands (`start`, `build`, `test`, `e2e`, `e2e:ui`, `e2e:debug`, `e2e:report`).
+
 ```powershell
 cd src\SoberNetwork.Web
 npm ci
 npm start
+npm run build
+npm run test
+npm run e2e
 npx ng build --configuration=development
 npx ng build --configuration=production
 npx ng test --watch=false
@@ -74,6 +79,7 @@ npx prettier --write "src/**/*.{ts,html,scss}"
 
 ## High-level architecture
 
+- Repository shape: `src\SoberNetwork.{Domain,Core,Infrastructure,Api,Web}` with tests split into `tests\SoberNetwork.Core.Tests` and `tests\SoberNetwork.Api.Tests`.
 - Modular monolith with four projects:
   - `src\SoberNetwork.Domain` - entities and enums
   - `src\SoberNetwork.Core` - commands, queries, handlers, DTOs, validators, result types, interfaces

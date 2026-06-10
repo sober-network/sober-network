@@ -14,7 +14,7 @@ namespace SoberNetwork.Infrastructure.Services;
 /// Platform-wide news feed service. Posts are group-scoped but surfaced in a combined feed.
 /// Members may create posts; admins may approve/delete; auto-approved when RequiresPostApproval is false.
 /// </summary>
-public sealed class NewsService(AppDbContext db) : INewsService
+public sealed class NewsService(AppDbContext db, INotificationService notificationService) : INewsService
 {
     /// <inheritdoc/>
     public async Task<(PagedResponse<PostResponse>? Posts, string? Error)> GetNewsFeedAsync(
@@ -309,6 +309,9 @@ public sealed class NewsService(AppDbContext db) : INewsService
         db.PostComments.Add(comment);
         await db.SaveChangesAsync(ct);
 
+        // Resolve notification recipient — domain logic stays in the caller, not the notification service
+        await SendCommentNotificationAsync(postId, comment.Id, authorId, request.ParentCommentId, post, ct);
+
         // Link uploaded media to comment if present
         PostMedia? media = null;
         if (request.MediaId.HasValue)
@@ -400,4 +403,42 @@ public sealed class NewsService(AppDbContext db) : INewsService
             c.Media?.MediaType,
             c.Media?.Id,
             c.LinkUrl, c.LinkTitle, c.CreatedAt, c.UpdatedAt);
+
+    /// <summary>
+    /// Resolves who should be notified for a new comment and calls the generic notification service.
+    /// This keeps domain-specific recipient logic in NewsService, not in INotificationService.
+    /// </summary>
+    private async Task SendCommentNotificationAsync(
+        Guid postId, Guid commentId, Guid commentAuthorId, Guid? parentCommentId,
+        Post post, CancellationToken ct)
+    {
+        try
+        {
+            if (parentCommentId.HasValue)
+            {
+                // Reply — notify the parent comment's author
+                var parentAuthorId = await db.PostComments.AsNoTracking()
+                    .Where(c => c.Id == parentCommentId.Value && c.DeletedAt == null)
+                    .Select(c => c.AuthorId)
+                    .FirstOrDefaultAsync(ct);
+
+                if (parentAuthorId != Guid.Empty && parentAuthorId != commentAuthorId)
+                    await notificationService.CreateNotificationAsync(
+                        parentAuthorId, commentAuthorId, NotificationType.ReplyToMyComment,
+                        postId, commentId, ct);
+            }
+            else
+            {
+                // Top-level comment — notify the post author
+                if (post.AuthorId != commentAuthorId)
+                    await notificationService.CreateNotificationAsync(
+                        post.AuthorId, commentAuthorId, NotificationType.CommentOnMyPost,
+                        postId, commentId, ct);
+            }
+        }
+        catch (Exception)
+        {
+            // Notification failures must never break the comment flow
+        }
+    }
 }

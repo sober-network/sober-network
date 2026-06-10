@@ -37,6 +37,8 @@ using SoberNetwork.Infrastructure.Data;
 
 using SoberNetwork.Infrastructure.Services;
 
+using SoberNetwork.Infrastructure.Hubs;
+
 
 
 Serilog.Log.Logger = new LoggerConfiguration()
@@ -149,6 +151,18 @@ builder.Services.AddAuthentication(options =>
 
         };
 
+        // Allow token via query string for SignalR WebSocket connections (browsers can't set headers)
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = ctx =>
+            {
+                var token = ctx.Request.Query["access_token"];
+                if (!string.IsNullOrEmpty(token) && ctx.Request.Path.StartsWithSegments("/hubs"))
+                    ctx.Token = token;
+                return Task.CompletedTask;
+            }
+        };
+
     });
 
 
@@ -231,6 +245,8 @@ builder.Services.AddScoped<IGroupServiceRoleService, GroupServiceRoleService>();
 builder.Services.AddScoped<IStatsService, StatsService>();
 builder.Services.AddScoped<IMediaService, MediaService>();
 
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
 // Auth service
 builder.Services.AddScoped<SoberNetwork.Core.Interfaces.IAuthService, SoberNetwork.Infrastructure.Services.AuthService>();
 
@@ -266,6 +282,8 @@ builder.Services.Configure<AppOptions>(builder.Configuration.GetSection("App"));
 
 
 builder.Services.AddProblemDetails();
+
+builder.Services.AddSignalR();
 
 builder.Services.AddControllers();
 
@@ -396,6 +414,8 @@ app.MapGet("/health", () => Results.Ok(new { status = "healthy" }))
    .AllowAnonymous();
 
 app.MapControllers();
+
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.MapFallbackToFile("index.html").AllowAnonymous();
 

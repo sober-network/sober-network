@@ -15,8 +15,8 @@ namespace SoberNetwork.Infrastructure.Services;
 
 /// <summary>
 /// Media upload/storage service. Handles image (JPEG/PNG) and video (MP4) uploads with processing.
-/// Images: EXIF stripped, resized to max 1920px width, quality compressed.
-/// Videos: Requires external FFmpeg transcoding (stubbed for now).
+/// Images: EXIF stripped, resized to max 1200px on longest edge, quality compressed to ~2-3MB.
+/// Videos: Size capped at 25MB (pre-transcoding); full compression via FFmpeg pending integration.
 /// Storage: Local files initially; extend with Supabase Storage backend.
 /// </summary>
 public sealed class MediaService(AppDbContext db, ILogger<MediaService> logger, IWebHostEnvironment environment) : IMediaService
@@ -135,13 +135,13 @@ public sealed class MediaService(AppDbContext db, ILogger<MediaService> logger, 
     private (bool IsValid, string? Error) ValidateFile(Stream stream, string contentType, string mediaType)
     {
         const long maxImageSize = 5 * 1024 * 1024;  // 5 MB
-        const long maxVideoSize = 50 * 1024 * 1024; // 50 MB
+        const long maxVideoSize = 25 * 1024 * 1024; // 25 MB (pre-transcoding cap; will compress further with FFmpeg)
 
         // Validate size
         if (mediaType == "image" && stream.Length > maxImageSize)
             return (false, "Image size must be less than 5 MB.");
         if (mediaType == "video" && stream.Length > maxVideoSize)
-            return (false, "Video size must be less than 50 MB.");
+            return (false, "Video size must be less than 25 MB.");
 
         // Validate MIME type
         var validImageTypes = new[] { "image/jpeg", "image/png" };
@@ -178,13 +178,26 @@ public sealed class MediaService(AppDbContext db, ILogger<MediaService> logger, 
             using var g = Graphics.FromImage(newImage);
             g.DrawImageUnscaled(image, 0, 0);
 
-            // Resize if too large (max 1920px width, maintain aspect ratio)
+            // Resize if too large (max 1200px on longest edge, maintain aspect ratio)
             Bitmap resizedImage = newImage;
-            if (newImage.Width > 1920)
+            const int maxDimension = 1200;
+            if (newImage.Width > maxDimension || newImage.Height > maxDimension)
             {
-                var newHeight = (int)((newImage.Height * 1920.0) / newImage.Width);
-                resizedImage = new Bitmap(newImage, new Size(1920, newHeight));
-                metadata.Width = 1920;
+                int newWidth, newHeight;
+                if (newImage.Width > newImage.Height)
+                {
+                    // Landscape: scale by width
+                    newWidth = maxDimension;
+                    newHeight = (int)((newImage.Height * maxDimension) / (double)newImage.Width);
+                }
+                else
+                {
+                    // Portrait or square: scale by height
+                    newHeight = maxDimension;
+                    newWidth = (int)((newImage.Width * maxDimension) / (double)newImage.Height);
+                }
+                resizedImage = new Bitmap(newImage, new Size(newWidth, newHeight));
+                metadata.Width = newWidth;
                 metadata.Height = newHeight;
             }
 
@@ -213,7 +226,8 @@ public sealed class MediaService(AppDbContext db, ILogger<MediaService> logger, 
         else
         {
             // Video: save as-is (transcoding/thumbnail generation requires FFmpeg)
-            // TODO: Integrate FFmpeg.NET or call external FFmpeg binary
+            // TODO: Integrate FFmpeg.NET or call external FFmpeg binary for H.264 compression & thumbnail
+            // For now, enforce size cap; actual compression will happen when FFmpeg integration is added
             var filePath = Path.Combine(mediaDir, safeFileName);
             using var fileStream = File.Create(filePath);
             await stream.CopyToAsync(fileStream, cancellationToken);

@@ -50,6 +50,16 @@ $palette: (
   @each $n, $color in $palette {
     &:nth-child(8n+#{$n})::before { background: $color; }
   }
+
+  // Avatar tints cycling through 8 pastel colors by card index
+  &:nth-child(8n+1) .author-avatar { background: rgba(138,79,163,.22);  color: #6d3e86; }  // violet
+  &:nth-child(8n+2) .author-avatar { background: rgba(14,165,233,.18);  color: #0369a1; }  // sky
+  &:nth-child(8n+3) .author-avatar { background: rgba(42,148,89,.18);   color: #166534; }  // green
+  &:nth-child(8n+4) .author-avatar { background: rgba(217,119,6,.18);   color: #92400e; }  // amber
+  &:nth-child(8n+5) .author-avatar { background: rgba(15,118,110,.18);  color: #0f766e; }  // teal
+  &:nth-child(8n+6) .author-avatar { background: rgba(244,63,94,.16);   color: #be185d; }  // rose
+  &:nth-child(8n+7) .author-avatar { background: rgba(249,115,22,.16);  color: #92400e; }  // orange
+  &:nth-child(8n+8) .author-avatar { background: rgba(139,92,246,.20);  color: #6d28d9; }  // purple
 }
 
 // ── Approval banner ────────────────────────────────────────────────────────
@@ -84,7 +94,7 @@ $palette: (
   margin-bottom: 16px;
 }
 
-// Avatar circle — initial letter, cycles color via card index
+// Avatar circle — initial letter, cycles through 8 pastel tints by card index
 .author-avatar {
   width: 42px;
   height: 42px;
@@ -96,8 +106,6 @@ $palette: (
   font-family: 'Inter Tight', sans-serif;
   font-size: 1rem;
   font-weight: 800;
-  color: white;
-  background: linear-gradient(135deg, #8a4fa3 0%, #e11d48 100%);
   user-select: none;
 }
 
@@ -248,8 +256,8 @@ $palette: (
 .post-image,
 .post-video {
   width: 100%;
-  max-height: 400px;
-  object-fit: cover;
+  max-height: 500px;
+  object-fit: contain;
   display: block;
   transition: transform 0.3s ease;
 

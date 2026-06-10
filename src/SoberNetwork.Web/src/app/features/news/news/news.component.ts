@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ElementRef, AfterViewInit, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -8,7 +8,6 @@ import { Subject, forkJoin } from 'rxjs';
 import { takeUntil, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 
-import { GroupHeroComponent } from '@app/features/groups/group-hero/group-hero.component';
 import { PostCardComponent } from '../post-card/post-card.component';
 import {
   PostFormModalComponent,
@@ -20,36 +19,28 @@ import { GroupService } from '@app/core/services/group.service';
 import { AuthService } from '@app/core/services/auth.service';
 import { PostResponse } from '@app/core/models/news.models';
 import { GroupResponse } from '@app/core/models/group.models';
-import { BreadcrumbItem } from '@app/shared/components/breadcrumbs/breadcrumbs.component';
 
 @Component({
-  selector: 'app-news-announcements',
+  selector: 'app-news',
   standalone: true,
   imports: [
     CommonModule,
     RouterModule,
     MatProgressSpinnerModule,
     MatIconModule,
-    GroupHeroComponent,
     PostCardComponent,
   ],
-  templateUrl: './news-announcements.component.html',
-  styleUrl: './news-announcements.component.scss',
+  templateUrl: './news.component.html',
+  styleUrl: './news.component.scss',
+  encapsulation: ViewEncapsulation.None,
 })
-export class NewsAnnouncementsComponent implements OnInit, AfterViewInit, OnDestroy {
+export class NewsComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly newsService = inject(NewsService);
   private readonly groupService = inject(GroupService);
   private readonly authService = inject(AuthService);
   private readonly dialog = inject(MatDialog);
   private readonly elRef = inject(ElementRef);
   private readonly destroy$ = new Subject<void>();
-
-  // Hero
-  readonly breadcrumbs: BreadcrumbItem[] = [
-    { label: 'Home', route: '/' },
-    { label: 'My Dashboard', route: '/dashboard' },
-    { label: 'News & Announcements' },
-  ];
 
   // Feed state
   posts: PostResponse[] = [];

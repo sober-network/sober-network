@@ -8,7 +8,9 @@ import { catchError, combineLatest, debounceTime, distinctUntilChanged, filter, 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '@app/core/services/auth.service';
 import { GroupService } from '@app/core/services/group.service';
+import { NotificationService } from '@app/core/services/notification.service';
 import { CurrentUser, GroupResponse } from '@app/core/models';
+import { NotificationResponse } from '@app/core/models/notification.models';
 import { CreateGroupModalComponent } from '@app/features/groups/create-group-modal/create-group-modal.component';
 
 @Component({
@@ -24,7 +26,8 @@ import { CreateGroupModalComponent } from '@app/features/groups/create-group-mod
 export class NavbarComponent implements AfterViewInit, OnDestroy {
   private readonly auth = inject(AuthService);
   private readonly groupService = inject(GroupService);
-  private readonly router = inject(Router);
+  readonly notificationService = inject(NotificationService);
+  readonly router = inject(Router);
   private readonly zone = inject(NgZone);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly dialog = inject(MatDialog);
@@ -33,11 +36,12 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
   myGroups: GroupResponse[] = [];
   activeAnchor: string | null = null;
 
-  // Plain in-DOM dropdowns (no Angular Material mat-menu / CDK overlay). The overlay
-  // portal repeatedly detached from its trigger and flashed at the viewport origin
-  // before closing; an in-template dropdown is fully under our control and immune to it.
   userMenuOpen = false;
   groupsMenuOpen = false;
+  notificationsMenuOpen = false;
+
+  notifications: NotificationResponse[] = [];
+  notificationsLoading = false;
 
   private sectionObserver: IntersectionObserver | null = null;
   // Guest landing sections that have a matching nav pill (scroll-spy targets).
@@ -136,12 +140,46 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
   closeMenus(): void {
     this.userMenuOpen = false;
     this.groupsMenuOpen = false;
+    this.notificationsMenuOpen = false;
+  }
+
+  toggleNotificationsMenu(event: Event): void {
+    event.stopPropagation();
+    const opening = !this.notificationsMenuOpen;
+    this.userMenuOpen = false;
+    this.groupsMenuOpen = false;
+    this.notificationsMenuOpen = opening;
+
+    if (opening) {
+      this.notificationsLoading = true;
+      this.notificationService.getNotifications().subscribe({
+        next: items => {
+          this.notifications = items;
+          this.notificationsLoading = false;
+          // Mark all read and reset badge
+          this.notificationService.markAllRead().subscribe({
+            next: () => this.notificationService.fetchUnreadCount(),
+            error: () => {},
+          });
+        },
+        error: () => { this.notificationsLoading = false; },
+      });
+    }
+  }
+
+  getNotificationLabel(n: NotificationResponse): string {
+    return n.type === 'CommentOnMyPost'
+      ? `${n.triggerUserDisplayName} commented on your post`
+      : `${n.triggerUserDisplayName} replied to your comment`;
+  }
+
+  navigateToNotificationPost(n: NotificationResponse): void {
+    this.closeMenus();
+    if (n.postId) this.router.navigate(['/news']);
   }
 
   isGroupRouteActive(): boolean {
-    return this.router.url.startsWith('/groups')
-      || this.router.url.startsWith('/dashboard')
-      || this.router.url.startsWith('/profile');
+    return this.router.url.startsWith('/groups');
   }
 
   trackBySlug(_: number, group: GroupResponse): string {

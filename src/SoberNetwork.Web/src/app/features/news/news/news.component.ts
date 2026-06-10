@@ -4,10 +4,9 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { Subject, forkJoin } from 'rxjs';
+import { Subject } from 'rxjs';
 import { takeUntil, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
-
 import { PostCardComponent } from '../post-card/post-card.component';
 import {
   PostFormModalComponent,
@@ -45,6 +44,8 @@ export class NewsComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly elRef = inject(ElementRef);
   private readonly destroy$ = new Subject<void>();
+  /** Cancelled on every loadFeed() call to abort in-flight requests. */
+  private readonly cancelFeed$ = new Subject<void>();
 
   // Feed state
   posts: PostResponse[] = [];
@@ -69,24 +70,21 @@ export class NewsComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
     this.currentUserId = this.authService.currentUser?.userId ?? '';
 
-    forkJoin({
-      groups: this.groupService.getMyGroups().pipe(catchError(() => of([]))),
-    })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(({ groups }) => {
+    // Load groups independently (needed for post-create modal & admin actions, not the feed)
+    this.groupService.getMyGroups().pipe(catchError(() => of([])), takeUntil(this.destroy$))
+      .subscribe(groups => {
         this.myGroups = groups;
         this.adminGroupSlugs = new Set(
           groups.filter(g => g.userRole === 'GroupAdmin').map(g => g.slug)
         );
-
-        // Check for notification filter on first load
-        this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
-          this.isFilteredView = params['filter'] === 'notifications';
-          this.posts = [];
-          this.loading = false; // reset so loadFeed() is never blocked
-          this.loadFeed();
-        });
       });
+
+    // Feed reacts directly to query params — no dependency on groups loading
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      this.isFilteredView = params['filter'] === 'notifications';
+      this.posts = [];
+      this.loadFeed();
+    });
   }
 
   ngAfterViewInit(): void {
@@ -94,6 +92,8 @@ export class NewsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.cancelFeed$.next();
+    this.cancelFeed$.complete();
     this.destroy$.next();
     this.destroy$.complete();
     this.observer?.disconnect();
@@ -113,28 +113,31 @@ export class NewsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadFeed(): void {
-    if (this.loading) return;
+    // Cancel any prior in-flight feed request
+    this.cancelFeed$.next();
     this.loading = true;
     this.error = '';
     this.page = 1;
 
     if (this.isFilteredView) {
-      this.notificationService.getNotificationPosts().pipe(takeUntil(this.destroy$)).subscribe({
-        next: posts => {
-          this.posts = posts;
-          this.hasMore = false;
-          this.loading = false;
-        },
-        error: () => {
-          this.error = 'Could not load notification posts. Please try again.';
-          this.loading = false;
-        },
-      });
+      this.notificationService.getNotificationPosts()
+        .pipe(takeUntil(this.cancelFeed$), takeUntil(this.destroy$))
+        .subscribe({
+          next: posts => {
+            this.posts = posts;
+            this.hasMore = false;
+            this.loading = false;
+          },
+          error: () => {
+            this.error = 'Could not load notification posts. Please try again.';
+            this.loading = false;
+          },
+        });
       return;
     }
 
     this.newsService.getFeed(1, this.pageSize)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this.cancelFeed$), takeUntil(this.destroy$))
       .subscribe({
         next: result => {
           this.posts = result.items;

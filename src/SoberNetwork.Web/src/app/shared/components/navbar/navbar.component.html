@@ -132,11 +132,9 @@
             <button type="button" class="sn-dropdown-item" role="menuitem"
                     (click)="navigateToNotifications()">
               <span class="dd-icon">🔔</span>
-              <span>View all
-                <ng-container *ngIf="(notificationService.unreadCount$ | async)! > 0">
-                  {{ notificationService.unreadCount$ | async }} notifications
-                </ng-container>
-                <ng-container *ngIf="(notificationService.unreadCount$ | async) === 0">notifications</ng-container>
+              <span>View all notifications</span>
+              <span class="dd-notif-count-badge" *ngIf="(notificationService.unreadCount$ | async)! > 0">
+                {{ notificationService.unreadCount$ | async }}
               </span>
             </button>
 

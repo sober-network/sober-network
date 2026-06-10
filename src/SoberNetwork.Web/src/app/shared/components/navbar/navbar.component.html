@@ -111,24 +111,6 @@
               </span>
             </div>
 
-            <div class="dd-notif-loading" *ngIf="notificationsLoading">Loading…</div>
-
-            <div class="dd-notif-empty" *ngIf="!notificationsLoading && notifications.length === 0">
-              No new notifications
-            </div>
-
-            <button type="button" class="dd-notif-item" role="menuitem"
-                    *ngFor="let n of notifications"
-                    (click)="openNotificationPost(n)">
-              <div class="dd-notif-avatar">{{ n.triggerUserDisplayName[0]?.toUpperCase() }}</div>
-              <div class="dd-notif-content">
-                <span class="dd-notif-label">{{ getNotificationLabel(n) }}</span>
-                <span class="dd-notif-post" *ngIf="n.postSubject">{{ n.postSubject }}</span>
-              </div>
-              <span class="dd-notif-dot" *ngIf="!n.isRead"></span>
-            </button>
-
-            <div class="dropdown-divider" *ngIf="!notificationsLoading && notifications.length > 0"></div>
             <button type="button" class="sn-dropdown-item" role="menuitem"
                     (click)="navigateToNotifications()">
               <span class="dd-icon">🔔</span>

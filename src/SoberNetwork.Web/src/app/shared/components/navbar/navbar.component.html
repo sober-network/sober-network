@@ -104,7 +104,7 @@
           <div class="sn-dropdown notifications-dropdown" *ngIf="notificationsMenuOpen"
                (click)="$event.stopPropagation()" role="menu">
 
-            <div class="dd-notif-header">
+            <div class="dd-notif-header" *ngIf="(notificationService.unreadCount$ | async)! > 0">
               <span class="dd-section-title" style="padding:0">Notifications</span>
             </div>
 

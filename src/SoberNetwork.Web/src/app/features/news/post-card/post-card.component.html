@@ -88,7 +88,7 @@
   <!-- Post actions: like -->
   <div class="post-actions">
     <button type="button" class="action-btn like-btn"
-            [class.liked]="isLiked"
+            [class.liked]="likeCount > 0"
             [disabled]="likeInFlight"
             (click)="toggleLike()"
             [attr.aria-label]="isLiked ? 'Unlike post' : 'Like post'">

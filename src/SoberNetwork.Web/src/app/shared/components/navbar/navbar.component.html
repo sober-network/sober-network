@@ -108,16 +108,17 @@
               <span class="dd-section-title" style="padding:0">Notifications</span>
             </div>
 
-            <button type="button" class="sn-dropdown-item" role="menuitem"
-                    (click)="navigateToNotifications()">
-              <span class="dd-icon">🔔</span>
-              <span>View all notifications</span>
-              <span class="dd-notif-count-badge" *ngIf="(notificationService.unreadCount$ | async)! > 0">
-                {{ notificationService.unreadCount$ | async }}
-              </span>
-            </button>
-
-            <div class="dropdown-divider"></div>
+            <ng-container *ngIf="(notificationService.unreadCount$ | async)! > 0">
+              <button type="button" class="sn-dropdown-item" role="menuitem"
+                      (click)="navigateToNotifications()">
+                <span class="dd-icon">🔔</span>
+                <span>View all notifications</span>
+                <span class="dd-notif-count-badge">
+                  {{ notificationService.unreadCount$ | async }}
+                </span>
+              </button>
+              <div class="dropdown-divider"></div>
+            </ng-container>
             <a class="sn-dropdown-item" routerLink="/news" (click)="closeMenus()" role="menuitem">
               <span class="dd-icon">📰</span><span>View All News</span>
             </a>

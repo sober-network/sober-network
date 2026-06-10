@@ -55,6 +55,7 @@ export class CommentSectionComponent implements OnInit, OnDestroy {
   loading = false;
   commentTree: CommentNode[] = [];
   localCount = 0;
+  hasLoaded = false;
 
   // New top-level comment
   newBody = '';
@@ -100,7 +101,7 @@ export class CommentSectionComponent implements OnInit, OnDestroy {
   }
 
   get displayCount(): number {
-    return this.localCount || this.initialCommentCount;
+    return this.hasLoaded ? this.localCount : this.initialCommentCount;
   }
 
   clampDepth(depth: number): number {
@@ -123,6 +124,7 @@ export class CommentSectionComponent implements OnInit, OnDestroy {
         next: flat => {
           this.commentTree = buildTree(flat);
           this.localCount = flat.length;
+          this.hasLoaded = true;
           this.loading = false;
         },
         error: () => { this.loading = false; },

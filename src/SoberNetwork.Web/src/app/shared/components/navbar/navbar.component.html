@@ -106,9 +106,6 @@
 
             <div class="dd-notif-header">
               <span class="dd-section-title" style="padding:0">Notifications</span>
-              <span class="dd-notif-count-badge" *ngIf="(notificationService.unreadCount$ | async)! > 0">
-                {{ notificationService.unreadCount$ | async }}
-              </span>
             </div>
 
             <button type="button" class="sn-dropdown-item" role="menuitem"

@@ -92,7 +92,7 @@
             [disabled]="likeInFlight"
             (click)="toggleLike()"
             [attr.aria-label]="isLiked ? 'Unlike post' : 'Like post'">
-      <mat-icon>{{ isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
+      <mat-icon>{{ likeCount > 0 ? 'favorite' : 'favorite_border' }}</mat-icon>
       <span class="action-count" *ngIf="likeCount > 0">{{ likeCount }}</span>
     </button>
   </div>

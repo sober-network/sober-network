@@ -12,6 +12,7 @@ import { NotificationService } from '@app/core/services/notification.service';
 import { CurrentUser, GroupResponse } from '@app/core/models';
 import { NotificationResponse } from '@app/core/models/notification.models';
 import { CreateGroupModalComponent } from '@app/features/groups/create-group-modal/create-group-modal.component';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-navbar',
@@ -169,6 +170,44 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
       next: () => this.notificationService.fetchUnreadCount(),
       error: () => {},
     });
+  }
+
+  openNotificationPost(n: NotificationResponse): void {
+    if (!n.postId) {
+      this.navigateToNotifications();
+      return;
+    }
+    this.closeMenus();
+    this.notificationService.markAllRead().subscribe({
+      next: () => this.notificationService.fetchUnreadCount(),
+      error: () => {},
+    });
+    import('@app/features/news/image-viewer-modal/image-viewer-modal.component')
+      .then(({ ImageViewerModalComponent }) => {
+        this.notificationService.getNotificationPosts().subscribe({
+          next: posts => {
+            const post = posts.find(p => p.id === n.postId);
+            if (!post) { this.router.navigate(['/news']); return; }
+            const mediaUrl = post.mediaUrl
+              ? (environment.apiUrl + post.mediaUrl)
+              : null;
+            this.dialog.open(ImageViewerModalComponent, {
+              data: {
+                imageUrl: mediaUrl,
+                post,
+                currentUserId: this.user?.userId ?? '',
+                isGroupAdmin: false,
+              },
+              width: post.mediaUrl ? '90vw' : '600px',
+              maxWidth: post.mediaUrl ? '1100px' : '96vw',
+              height: '85vh',
+              maxHeight: '90vh',
+              panelClass: 'sn-image-viewer-panel',
+            });
+          },
+          error: () => this.router.navigate(['/news']),
+        });
+      });
   }
 
   getNotificationLabel(n: NotificationResponse): string {

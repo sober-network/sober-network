@@ -6,7 +6,7 @@ import { PostResponse } from '@app/core/models/news.models';
 import { CommentSectionComponent } from '../comment-section/comment-section.component';
 
 export interface ImageViewerModalData {
-  imageUrl: string;
+  imageUrl?: string | null;
   post: PostResponse;
   currentUserId: string;
   isGroupAdmin: boolean;

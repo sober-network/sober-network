@@ -6,8 +6,8 @@
     <mat-icon>close</mat-icon>
   </button>
 
-  <!-- ── Left: image ─────────────────────────────────────────────────────── -->
-  <div class="iv-image-panel">
+  <!-- ── Left: image (only shown when imageUrl present) ─────────────────── -->
+  <div class="iv-image-panel" *ngIf="data.imageUrl">
     <img [src]="data.imageUrl" [alt]="data.post.subject" />
   </div>
 

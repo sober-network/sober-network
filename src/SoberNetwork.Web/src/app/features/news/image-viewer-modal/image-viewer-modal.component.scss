@@ -52,12 +52,16 @@
 
 // ── Content panel (right) ─────────────────────────────────────────────────────
 .iv-content-panel {
-  flex: 0 0 42%;
+  flex: 1 1 42%;
+  min-width: 0;
   max-width: 42%;
   background: white;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+
+  // When no image panel is present (text-only post), expand to full width
+  &:first-of-type { max-width: 100%; }
 }
 
 // ── Post header ───────────────────────────────────────────────────────────────

@@ -127,6 +127,11 @@ export class NewsComponent implements OnInit, AfterViewInit, OnDestroy {
             this.posts = posts;
             this.hasMore = false;
             this.loading = false;
+            // Mark all read after posts are loaded, not before
+            this.notificationService.markAllRead().subscribe({
+              next: () => this.notificationService.fetchUnreadCount(),
+              error: () => {},
+            });
           },
           error: () => {
             this.error = 'Could not load notification posts. Please try again.';

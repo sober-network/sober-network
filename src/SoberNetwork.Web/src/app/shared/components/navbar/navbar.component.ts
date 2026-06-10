@@ -151,10 +151,6 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
     this.closeMenus();
     this.notificationService.clearUnreadCount();
     this.router.navigate(['/news'], { queryParams: { filter: 'notifications' } });
-    this.notificationService.markAllRead().subscribe({
-      next: () => this.notificationService.fetchUnreadCount(),
-      error: () => {},
-    });
   }
 
   isGroupRouteActive(): boolean {

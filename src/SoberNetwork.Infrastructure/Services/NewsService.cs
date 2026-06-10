@@ -289,7 +289,7 @@ public sealed class NewsService(AppDbContext db, INotificationService notificati
     {
         var postIds = await db.Notifications
             .AsNoTracking()
-            .Where(n => n.RecipientId == userId && n.PostId != null)
+            .Where(n => n.RecipientId == userId && n.PostId != null && !n.IsRead)
             .Select(n => n.PostId!.Value)
             .Distinct()
             .ToListAsync(ct);

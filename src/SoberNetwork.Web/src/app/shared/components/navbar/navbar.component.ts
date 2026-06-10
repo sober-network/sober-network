@@ -154,28 +154,27 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
       this.notificationsLoading = true;
       this.notificationService.getNotifications().subscribe({
         next: items => {
-          this.notifications = items;
+          this.notifications = items.slice(0, 10);
           this.notificationsLoading = false;
-          // Mark all read and reset badge
-          this.notificationService.markAllRead().subscribe({
-            next: () => this.notificationService.fetchUnreadCount(),
-            error: () => {},
-          });
         },
         error: () => { this.notificationsLoading = false; },
       });
     }
   }
 
-  getNotificationLabel(n: NotificationResponse): string {
-    return n.type === 'CommentOnMyPost'
-      ? `${n.triggerUserDisplayName} commented on your post`
-      : `${n.triggerUserDisplayName} replied to your comment`;
+  navigateToNotifications(): void {
+    this.closeMenus();
+    this.router.navigate(['/news'], { queryParams: { filter: 'notifications' } });
+    this.notificationService.markAllRead().subscribe({
+      next: () => this.notificationService.fetchUnreadCount(),
+      error: () => {},
+    });
   }
 
-  navigateToNotificationPost(n: NotificationResponse): void {
-    this.closeMenus();
-    if (n.postId) this.router.navigate(['/news']);
+  getNotificationLabel(n: NotificationResponse): string {
+    if (n.type === 'CommentOnMyPost') return `${n.triggerUserDisplayName} commented on your post`;
+    if (n.type === 'LikedMyPost') return `${n.triggerUserDisplayName} liked your post`;
+    return `${n.triggerUserDisplayName} replied to your comment`;
   }
 
   isGroupRouteActive(): boolean {

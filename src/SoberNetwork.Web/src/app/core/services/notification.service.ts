@@ -66,6 +66,11 @@ export class NotificationService implements OnDestroy {
     return this.http.get<NotificationResponse[]>(`${this.baseUrl}/api/notifications`);
   }
 
+  getNotificationPosts() {
+    return this.http.get<import('../models/news.models').PostResponse[]>(
+      `${this.baseUrl}/api/notifications/posts`);
+  }
+
   markAllRead() {
     return this.http.post<void>(`${this.baseUrl}/api/notifications/mark-read`, {});
   }

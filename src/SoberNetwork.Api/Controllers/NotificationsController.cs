@@ -2,6 +2,7 @@ using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SoberNetwork.Core.Commands.Notifications;
+using SoberNetwork.Core.Queries.News;
 using SoberNetwork.Core.Queries.Notifications;
 
 namespace SoberNetwork.Api.Controllers;
@@ -34,5 +35,13 @@ public class NotificationsController(IMediator mediator) : ControllerBase
     {
         await mediator.Send(new MarkNotificationsReadCommand(UserId), cancellationToken);
         return NoContent();
+    }
+
+    /// <summary>Returns the posts associated with the user's notifications (for the filtered feed).</summary>
+    [HttpGet("posts")]
+    public async Task<IActionResult> GetNotificationPosts(CancellationToken cancellationToken = default)
+    {
+        var posts = await mediator.Send(new GetNotificationPostsQuery(UserId), cancellationToken);
+        return Ok(posts);
     }
 }

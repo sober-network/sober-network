@@ -28,5 +28,7 @@ public record PostResponse(
     bool NeedsApproval,
     DateTime CreatedAt,
     DateTime UpdatedAt,
-    int CommentCount
+    int CommentCount,
+    int LikeCount,
+    bool IsLikedByCurrentUser
 );

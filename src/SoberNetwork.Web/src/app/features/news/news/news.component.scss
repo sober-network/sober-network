@@ -34,6 +34,46 @@
   margin: 0;
 }
 
+// ── Notification filter banner ─────────────────────────────────────────────
+.notif-filter-banner {
+  background: rgba(225,29,72,.06);
+  border-bottom: 1px solid rgba(225,29,72,.15);
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+}
+
+.notif-filter-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.notif-filter-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #9f1239;
+  flex: 1;
+}
+
+.notif-filter-clear {
+  all: unset;
+  cursor: pointer;
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #e11d48;
+  white-space: nowrap;
+  padding: 4px 10px;
+  border-radius: 100px;
+  border: 1px solid rgba(225,29,72,.3);
+  transition: background 0.12s;
+
+  &:hover { background: rgba(225,29,72,.08); }
+}
+
 // ── Feed section ───────────────────────────────────────────────────────────
 .feed-section {
   background: white;

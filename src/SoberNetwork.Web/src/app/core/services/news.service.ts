@@ -45,6 +45,11 @@ export class NewsService {
     return this.http.post<void>(`${this.baseUrl}/api/news/${postId}/approve`, {});
   }
 
+  toggleLike(postId: string): Observable<{ likeCount: number; isLiked: boolean }> {
+    return this.http.post<{ likeCount: number; isLiked: boolean }>(
+      `${this.baseUrl}/api/news/${postId}/like`, {});
+  }
+
   uploadMedia(formData: FormData, groupSlug?: string): Observable<UploadMediaResponse> {
     let params = new HttpParams();
     if (groupSlug) {

@@ -490,11 +490,12 @@ nav.sn-nav {
   background: #e11d48;
   color: white;
   font-family: 'Inter Tight', sans-serif;
-  font-size: 0.65rem;
-  font-weight: 800;
+  font-size: 0.7rem;
+  font-weight: 900;
   line-height: 1;
   margin-left: 4px;
   vertical-align: middle;
+  letter-spacing: 0;
 }
 
 /* ── Notifications dropdown ─────────────────────────────────────────────────── */
@@ -504,6 +505,29 @@ nav.sn-nav {
   max-height: 440px;
   overflow-y: auto;
   padding: 8px;
+}
+
+.dd-notif-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px 6px;
+}
+
+.dd-notif-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 100px;
+  background: #e11d48;
+  color: white;
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .dd-notif-loading,

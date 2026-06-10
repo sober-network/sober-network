@@ -341,3 +341,55 @@ $palette: (
 
   mat-icon { font-size: 13px; width: 13px; height: 13px; }
 }
+
+// ── Post actions (like) ────────────────────────────────────────────────────
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0 2px;
+  border-top: 1px solid rgba(17,17,16,.05);
+  margin-top: 12px;
+}
+
+.action-btn {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 100px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #7a7a75;
+  transition: background 0.15s, color 0.15s;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    transition: transform 0.15s, color 0.15s;
+  }
+
+  &:hover {
+    background: rgba(17,17,16,.06);
+    color: #3d3d3a;
+  }
+
+  &.liked {
+    color: #f43f5e;
+    mat-icon { transform: scale(1.15); }
+  }
+
+  &:disabled { opacity: 0.6; cursor: default; }
+}
+
+.action-count {
+  font-size: 0.8rem;
+  font-weight: 700;
+  min-width: 12px;
+  text-align: center;
+}

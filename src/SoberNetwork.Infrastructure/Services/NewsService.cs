@@ -61,7 +61,9 @@ public sealed class NewsService(AppDbContext db, INotificationService notificati
                 Post = p,
                 GroupName = p.Group!.Name,
                 GroupSlug = p.Group!.Slug,
-                CommentCount = p.Comments.Count(c => c.DeletedAt == null)
+                CommentCount = p.Comments.Count(c => c.DeletedAt == null),
+                LikeCount = p.Likes.Count,
+                IsLikedByCurrentUser = p.Likes.Any(l => l.UserId == userId),
             })
             .ToListAsync(ct);
 
@@ -73,7 +75,7 @@ public sealed class NewsService(AppDbContext db, INotificationService notificati
         var items = rawPosts.Select(r =>
             MapToResponse(r.Post, r.GroupName, r.GroupSlug,
                 authors.GetValueOrDefault(r.Post.AuthorId, "Unknown"),
-                adminGroupIds, isSuperAdmin, r.CommentCount)).ToList();
+                adminGroupIds, isSuperAdmin, r.CommentCount, r.LikeCount, r.IsLikedByCurrentUser)).ToList();
 
         return (new PagedResponse<PostResponse>(items, page, pageSize, totalCount), null);
     }
@@ -219,7 +221,8 @@ public sealed class NewsService(AppDbContext db, INotificationService notificati
 
     private static PostResponse MapToResponse(
         Post post, string groupName, string groupSlug, string authorDisplayName,
-        ICollection<Guid> adminGroupIds, bool isSuperAdmin, int commentCount) =>
+        ICollection<Guid> adminGroupIds, bool isSuperAdmin, int commentCount,
+        int likeCount = 0, bool isLikedByCurrentUser = false) =>
         new(
             post.Id,
             post.GroupId,
@@ -245,8 +248,106 @@ public sealed class NewsService(AppDbContext db, INotificationService notificati
             NeedsApproval: !post.IsApproved && (adminGroupIds.Contains(post.GroupId) || isSuperAdmin),
             post.CreatedAt,
             post.UpdatedAt,
-            CommentCount: commentCount
+            CommentCount: commentCount,
+            LikeCount: likeCount,
+            IsLikedByCurrentUser: isLikedByCurrentUser
         );
+
+    /// <inheritdoc/>
+    public async Task<(int LikeCount, bool IsLiked, string? Error)> ToggleLikeAsync(
+        Guid postId, Guid userId, CancellationToken ct = default)
+    {
+        var post = await db.Posts
+            .Include(p => p.Likes)
+            .FirstOrDefaultAsync(p => p.Id == postId && p.DeletedAt == null, ct);
+        if (post == null) return (0, false, "Post not found.");
+
+        var existing = post.Likes.FirstOrDefault(l => l.UserId == userId);
+        if (existing is not null)
+        {
+            db.PostLikes.Remove(existing);
+        }
+        else
+        {
+            db.PostLikes.Add(new PostLike { PostId = postId, UserId = userId });
+
+            // Notify post author (skip self-like)
+            if (post.AuthorId != userId)
+                await SendLikeNotificationAsync(postId, userId, post.AuthorId, ct);
+        }
+
+        await db.SaveChangesAsync(ct);
+
+        var likeCount = await db.PostLikes.CountAsync(l => l.PostId == postId, ct);
+        var isLiked = existing is null; // toggled to liked if it didn't exist before
+        return (likeCount, isLiked, null);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IEnumerable<PostResponse>> GetNotificationPostsAsync(
+        Guid userId, CancellationToken ct = default)
+    {
+        var postIds = await db.Notifications
+            .AsNoTracking()
+            .Where(n => n.RecipientId == userId && n.PostId != null)
+            .Select(n => n.PostId!.Value)
+            .Distinct()
+            .ToListAsync(ct);
+
+        if (postIds.Count == 0) return [];
+
+        var isSuperAdmin = await db.Users.AsNoTracking()
+            .Where(u => u.Id == userId)
+            .Select(u => u.IsSuperAdmin)
+            .FirstOrDefaultAsync(ct);
+
+        var adminGroupIds = await db.GroupMemberships
+            .AsNoTracking()
+            .Where(m => m.UserId == userId && m.Role == GroupRole.GroupAdmin &&
+                        m.Status == MemberStatus.Active && m.DeletedAt == null)
+            .Select(m => m.GroupId)
+            .ToHashSetAsync(ct);
+
+        var rawPosts = await db.Posts
+            .AsNoTracking()
+            .Include(p => p.Media)
+            .Where(p => postIds.Contains(p.Id) && p.DeletedAt == null)
+            .OrderByDescending(p => p.CreatedAt)
+            .Select(p => new
+            {
+                Post = p,
+                GroupName = p.Group!.Name,
+                GroupSlug = p.Group!.Slug,
+                CommentCount = p.Comments.Count(c => c.DeletedAt == null),
+                LikeCount = p.Likes.Count,
+                IsLikedByCurrentUser = p.Likes.Any(l => l.UserId == userId),
+            })
+            .ToListAsync(ct);
+
+        var authorIds = rawPosts.Select(r => r.Post.AuthorId).Distinct().ToList();
+        var authors = await db.Users.AsNoTracking()
+            .Where(u => authorIds.Contains(u.Id))
+            .ToDictionaryAsync(u => u.Id, u => u.DisplayName, ct);
+
+        return rawPosts.Select(r =>
+            MapToResponse(r.Post, r.GroupName, r.GroupSlug,
+                authors.GetValueOrDefault(r.Post.AuthorId, "Unknown"),
+                adminGroupIds, isSuperAdmin, r.CommentCount, r.LikeCount, r.IsLikedByCurrentUser));
+    }
+
+    private async Task SendLikeNotificationAsync(
+        Guid postId, Guid likerUserId, Guid postAuthorId, CancellationToken ct)
+    {
+        try
+        {
+            await notificationService.CreateNotificationAsync(
+                postAuthorId, likerUserId, NotificationType.LikedMyPost, postId, null, ct);
+        }
+        catch (Exception)
+        {
+            // Notification failures must never break the like flow
+        }
+    }
 
     // ── Comment methods ─────────────────────────────────────────────────────────
 

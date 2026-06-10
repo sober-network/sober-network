@@ -85,6 +85,18 @@
     <mat-icon>edit</mat-icon> Edited
   </div>
 
+  <!-- Post actions: like -->
+  <div class="post-actions">
+    <button type="button" class="action-btn like-btn"
+            [class.liked]="isLiked"
+            [disabled]="likeInFlight"
+            (click)="toggleLike()"
+            [attr.aria-label]="isLiked ? 'Unlike post' : 'Like post'">
+      <mat-icon>{{ isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
+      <span class="action-count" *ngIf="likeCount > 0">{{ likeCount }}</span>
+    </button>
+  </div>
+
   <!-- Comment section -->
   <app-comment-section
     [postId]="post.id"

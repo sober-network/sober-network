@@ -1,8 +1,17 @@
 <!-- ══ PAGE EYEBROW ══════════════════════════════════════════════════════ -->
 <div class="page-eyebrow-section">
   <div class="page-eyebrow-wrap">
-    <span class="page-eyebrow">My News Feed</span>
+    <span class="page-eyebrow">{{ isFilteredView ? 'My Notifications' : 'My News Feed' }}</span>
   </div>
+</div>
+
+<!-- ══ NOTIFICATION FILTER BANNER ══════════════════════════════════════ -->
+<div class="notif-filter-banner" *ngIf="isFilteredView">
+  <span class="notif-filter-icon">🔔</span>
+  <span class="notif-filter-text">Showing posts from your notifications</span>
+  <button type="button" class="notif-filter-clear" (click)="clearFilter()">
+    ← Back to all news
+  </button>
 </div>
 
 <!-- ══ FEED SECTION ══════════════════════════════════════════════════════ -->
@@ -24,10 +33,10 @@
 
     <!-- Empty state -->
     <div class="state-empty fade-up" *ngIf="!loading && !error && posts.length === 0">
-      <div class="empty-icon">📣</div>
-      <h3>Nothing here yet</h3>
-      <p>Be the first to share news or an announcement with your groups.</p>
-      <button class="new-post-btn" type="button" (click)="openNewPost()">
+      <div class="empty-icon">{{ isFilteredView ? '🔔' : '📣' }}</div>
+      <h3>{{ isFilteredView ? 'No notification posts' : 'Nothing here yet' }}</h3>
+      <p>{{ isFilteredView ? 'You have no posts with notifications yet.' : 'Be the first to share news or an announcement with your groups.' }}</p>
+      <button class="new-post-btn" type="button" (click)="openNewPost()" *ngIf="!isFilteredView">
         Share an Update
       </button>
     </div>

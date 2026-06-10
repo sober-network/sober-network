@@ -22,4 +22,5 @@ public class Post
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? DeletedAt { get; set; }
     public ICollection<PostComment> Comments { get; set; } = [];
+    public ICollection<PostLike> Likes { get; set; } = [];
 }

@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { PostResponse } from '@app/core/models/news.models';
 import { CommentSectionComponent } from '../comment-section/comment-section.component';
+import { NewsService } from '@app/core/services/news.service';
 import { environment } from '../../../../environments/environment';
 
 @Component({
@@ -29,9 +30,18 @@ export class PostCardComponent implements OnInit {
 
   private readonly elRef = inject(ElementRef);
   private readonly dialog = inject(MatDialog);
+  private readonly newsService = inject(NewsService);
 
   menuOpen = false;
   mediaError = false;
+  likeCount = 0;
+  isLiked = false;
+  likeInFlight = false;
+
+  ngOnInit(): void {
+    this.likeCount = this.post.likeCount ?? 0;
+    this.isLiked = this.post.isLikedByCurrentUser ?? false;
+  }
 
   get canEdit(): boolean {
     return this.post.authorId === this.currentUserId;
@@ -80,7 +90,27 @@ export class PostCardComponent implements OnInit {
     return (this.post.authorDisplayName?.[0] ?? '?').toUpperCase();
   }
 
-  ngOnInit(): void {}
+  toggleLike(): void {
+    if (this.likeInFlight) return;
+    // Optimistic update
+    this.isLiked = !this.isLiked;
+    this.likeCount += this.isLiked ? 1 : -1;
+    this.likeInFlight = true;
+
+    this.newsService.toggleLike(this.post.id).subscribe({
+      next: result => {
+        this.likeCount = result.likeCount;
+        this.isLiked = result.isLiked;
+        this.likeInFlight = false;
+      },
+      error: () => {
+        // Roll back optimistic update
+        this.isLiked = !this.isLiked;
+        this.likeCount += this.isLiked ? 1 : -1;
+        this.likeInFlight = false;
+      },
+    });
+  }
 
   toggleMenu(event: MouseEvent): void {
     event.stopPropagation();

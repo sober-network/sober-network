@@ -10,6 +10,14 @@ public interface INewsService
     Task<(PagedResponse<PostResponse>? Posts, string? Error)> GetNewsFeedAsync(
         Guid userId, int page, int pageSize, CancellationToken ct = default);
 
+    /// <summary>Returns posts that the user has unread notifications about, for the notification filter view.</summary>
+    Task<IEnumerable<PostResponse>> GetNotificationPostsAsync(
+        Guid userId, CancellationToken ct = default);
+
+    /// <summary>Toggles a like on a post. Returns the new like count and whether the user now likes the post.</summary>
+    Task<(int LikeCount, bool IsLiked, string? Error)> ToggleLikeAsync(
+        Guid postId, Guid userId, CancellationToken ct = default);
+
     /// <summary>Creates a post in the specified group. Auto-approves when RequiresPostApproval is false.</summary>
     Task<(PostResponse? Post, string? Error)> CreatePostAsync(
         Guid userId, CreatePostRequest request, CancellationToken ct = default);

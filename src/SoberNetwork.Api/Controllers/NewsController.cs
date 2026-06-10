@@ -97,6 +97,20 @@ public class NewsController(IMediator mediator) : ControllerBase
         };
     }
 
+    /// <summary>Toggles a like on a post. Returns updated like count and liked state.</summary>
+    [HttpPost("{postId:guid}/like")]
+    public async Task<IActionResult> ToggleLike(
+        Guid postId, CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(new ToggleLikeCommand(postId, UserId), cancellationToken);
+        return result.Code switch
+        {
+            ResultCode.Ok => Ok(new { likeCount = result.Data!.LikeCount, isLiked = result.Data.IsLiked }),
+            ResultCode.NotFound => NotFound(new { message = result.Error }),
+            _ => Problem(result.Error, statusCode: 400)
+        };
+    }
+
     // ── Media uploads ────────────────────────────────────────────────────────────
 
     /// <summary>Uploads media (image or video) for a post. Returns media ID and preview URL.</summary>

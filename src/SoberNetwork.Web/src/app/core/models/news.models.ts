@@ -23,6 +23,8 @@ export interface PostResponse {
   createdAt: string;
   updatedAt: string;
   commentCount: number;
+  likeCount: number;
+  isLikedByCurrentUser: boolean;
 }
 
 export interface CreatePostRequest {

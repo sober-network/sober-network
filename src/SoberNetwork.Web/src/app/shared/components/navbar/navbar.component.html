@@ -98,14 +98,18 @@
                   (click)="toggleNotificationsMenu($event)"
                   aria-haspopup="true" [attr.aria-expanded]="notificationsMenuOpen">
             News
-            <span class="notif-badge" *ngIf="(notificationService.unreadCount$ | async)! > 0">
-              {{ (notificationService.unreadCount$ | async) }}
-            </span>
+            <span class="notif-badge" *ngIf="(notificationService.unreadCount$ | async)! > 0">!</span>
           </button>
 
           <div class="sn-dropdown notifications-dropdown" *ngIf="notificationsMenuOpen"
                (click)="$event.stopPropagation()" role="menu">
-            <div class="dd-section-title">Notifications</div>
+
+            <div class="dd-notif-header">
+              <span class="dd-section-title" style="padding:0">Notifications</span>
+              <span class="dd-notif-count-badge" *ngIf="(notificationService.unreadCount$ | async)! > 0">
+                {{ notificationService.unreadCount$ | async }}
+              </span>
+            </div>
 
             <div class="dd-notif-loading" *ngIf="notificationsLoading">Loading…</div>
 
@@ -115,13 +119,20 @@
 
             <button type="button" class="dd-notif-item" role="menuitem"
                     *ngFor="let n of notifications"
-                    (click)="navigateToNotificationPost(n)">
+                    (click)="navigateToNotifications()">
               <div class="dd-notif-avatar">{{ n.triggerUserDisplayName[0]?.toUpperCase() }}</div>
               <div class="dd-notif-content">
                 <span class="dd-notif-label">{{ getNotificationLabel(n) }}</span>
                 <span class="dd-notif-post" *ngIf="n.postSubject">{{ n.postSubject }}</span>
               </div>
               <span class="dd-notif-dot" *ngIf="!n.isRead"></span>
+            </button>
+
+            <div class="dropdown-divider" *ngIf="!notificationsLoading && notifications.length > 0"></div>
+            <button type="button" class="sn-dropdown-item" role="menuitem"
+                    (click)="navigateToNotifications()">
+              <span class="dd-icon">🔔</span>
+              <span>View all notifications</span>
             </button>
 
             <div class="dropdown-divider"></div>

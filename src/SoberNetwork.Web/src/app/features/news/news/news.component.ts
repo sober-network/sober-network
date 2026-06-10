@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, ElementRef, AfterViewInit, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,6 +15,7 @@ import {
   PostFormModalResult,
 } from '../post-form-modal/post-form-modal.component';
 import { NewsService } from '@app/core/services/news.service';
+import { NotificationService } from '@app/core/services/notification.service';
 import { GroupService } from '@app/core/services/group.service';
 import { AuthService } from '@app/core/services/auth.service';
 import { PostResponse } from '@app/core/models/news.models';
@@ -36,8 +37,11 @@ import { GroupResponse } from '@app/core/models/group.models';
 })
 export class NewsComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly newsService = inject(NewsService);
+  private readonly notificationService = inject(NotificationService);
   private readonly groupService = inject(GroupService);
   private readonly authService = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly elRef = inject(ElementRef);
   private readonly destroy$ = new Subject<void>();
@@ -50,6 +54,9 @@ export class NewsComponent implements OnInit, AfterViewInit, OnDestroy {
   error = '';
   page = 1;
   readonly pageSize = 20;
+
+  // Filter state
+  isFilteredView = false;
 
   // User/admin state
   currentUserId = '';
@@ -71,7 +78,12 @@ export class NewsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.adminGroupSlugs = new Set(
           groups.filter(g => g.userRole === 'GroupAdmin').map(g => g.slug)
         );
-        this.loadFeed();
+
+        // Check for notification filter on first load
+        this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
+          this.isFilteredView = params['filter'] === 'notifications';
+          this.loadFeed();
+        });
       });
   }
 
@@ -104,6 +116,21 @@ export class NewsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.error = '';
     this.page = 1;
 
+    if (this.isFilteredView) {
+      this.notificationService.getNotificationPosts().pipe(takeUntil(this.destroy$)).subscribe({
+        next: posts => {
+          this.posts = posts;
+          this.hasMore = false;
+          this.loading = false;
+        },
+        error: () => {
+          this.error = 'Could not load notification posts. Please try again.';
+          this.loading = false;
+        },
+      });
+      return;
+    }
+
     this.newsService.getFeed(1, this.pageSize)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -117,6 +144,10 @@ export class NewsComponent implements OnInit, AfterViewInit, OnDestroy {
           this.loading = false;
         },
       });
+  }
+
+  clearFilter(): void {
+    this.router.navigate(['/news']);
   }
 
   loadMore(): void {

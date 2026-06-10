@@ -62,6 +62,10 @@ export class NotificationService implements OnDestroy {
       .subscribe({ next: r => this._unreadCount$.next(r.count), error: () => {} });
   }
 
+  clearUnreadCount(): void {
+    this._unreadCount$.next(0);
+  }
+
   getNotifications() {
     return this.http.get<NotificationResponse[]>(`${this.baseUrl}/api/notifications`);
   }

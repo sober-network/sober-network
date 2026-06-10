@@ -165,6 +165,7 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
 
   navigateToNotifications(): void {
     this.closeMenus();
+    this.notificationService.clearUnreadCount(); // optimistic
     this.router.navigate(['/news'], { queryParams: { filter: 'notifications' } });
     this.notificationService.markAllRead().subscribe({
       next: () => this.notificationService.fetchUnreadCount(),
@@ -178,6 +179,7 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
       return;
     }
     this.closeMenus();
+    this.notificationService.clearUnreadCount(); // optimistic — badge goes away instantly
     this.notificationService.markAllRead().subscribe({
       next: () => this.notificationService.fetchUnreadCount(),
       error: () => {},
